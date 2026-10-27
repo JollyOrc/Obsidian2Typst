@@ -292,7 +292,7 @@ and `Styles/template.typ` (containing
 `spikes/typst-wasm/m3-export` in the project folder.
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin list).
+version:** `0.9.1` (first line of the settings tab, also the plugin list).
 If it differs, stop: the wrong build is installed. Restart Obsidian once so the
 new build is loaded. (M3 is repeated on this build because the default preset
 now makes the first image of the note a cover page, see M4.)
@@ -544,7 +544,7 @@ and the vault holds:
 - An empty export folder `spikes/typst-wasm/m6-export` in the project folder.
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin list).
+version:** `0.9.1` (first line of the settings tab, also the plugin list).
 If it differs, stop: the wrong build is installed. Restart Obsidian once so the
 new build is loaded.
 
@@ -621,7 +621,7 @@ holds:
 - An empty export folder `spikes/typst-wasm/m7-export` in the project folder.
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin list).
+version:** `0.9.1` (first line of the settings tab, also the plugin list).
 If it differs, stop: the wrong build is installed. Restart Obsidian once so the
 new build is loaded.
 
@@ -695,7 +695,7 @@ holds:
 - An empty export folder `spikes/typst-wasm/m8-export` in the project folder.
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin list).
+version:** `0.9.1` (first line of the settings tab, also the plugin list).
 If it differs, stop: the wrong build is installed. Restart Obsidian once so the
 new build is loaded.
 
@@ -777,7 +777,7 @@ holds:
 - An empty export folder `spikes/typst-wasm/m9-export` in the project folder.
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin list).
+version:** `0.9.1` (first line of the settings tab, also the plugin list).
 If it differs, stop: the wrong build is installed. Restart Obsidian once so the
 new build is loaded.
 
@@ -868,7 +868,7 @@ at least 0 (line 4)`); an empty export folder `spikes/typst-wasm/m10-export`
 is in the project folder.
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin list).
+version:** `0.9.1` (first line of the settings tab, also the plugin list).
 If it differs, stop: the wrong build is installed. Restart Obsidian once so the
 new build is loaded.
 
@@ -958,7 +958,7 @@ after `schemaVersion: 1` (their earlier versions are in
 `Bleed 5`, `Callouts`, `Glossary terms`, `Minimal`, `Slug 5` have no group.
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin list).
+version:** `0.9.1` (first line of the settings tab, also the plugin list).
 If it differs, stop: the wrong build is installed. Restart Obsidian once so the
 new build is loaded.
 
@@ -1098,7 +1098,7 @@ cover:
 ```
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin list).
+version:** `0.9.1` (first line of the settings tab, also the plugin list).
 If it differs, stop: the wrong build is installed. Restart Obsidian once so the
 new build is loaded.
 
@@ -1232,7 +1232,7 @@ this check (without the `template:` line). An empty export folder `spikes/typst-
 project folder. The new names exist once in the vault (listing, 2026-10-22).
 
 **Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
-version:** `0.9.0` (first line of the settings tab, also the plugin
+version:** `0.9.1` (first line of the settings tab, also the plugin
 list). If it differs, stop: the wrong build is installed. Restart Obsidian once
 so the new build is loaded.
 
