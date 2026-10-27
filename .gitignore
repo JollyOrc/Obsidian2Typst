@@ -1,0 +1,14 @@
+node_modules/
+dist/
+main.js
+*.log
+.DS_Store
+spikes/typst-wasm/scratch-vault/
+spikes/typst-wasm/results/*.log
+vitest.config.ts.timestamp-*
+# US-024 AC-11: kept out of a publish (private, generated or local state)
+The Rules/
+tests/fixtures/compiledtext.md
+spikes/
+docs/state/
+releases/*.zip

@@ -1,0 +1,40 @@
+/* US-012: the style panel (Obsidian2Typst). */
+.o2t-panel .o2t-status {
+  margin: 8px 0;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.o2t-panel .o2t-range-message {
+  color: var(--text-error);
+  font-size: var(--font-ui-small);
+  min-height: 1em;
+}
+
+.o2t-panel .o2t-owned {
+  color: var(--text-faint);
+}
+
+.o2t-panel .o2t-preview-area {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--background-secondary);
+}
+
+.o2t-panel .o2t-preview-area.o2t-preview-greyed {
+  opacity: 0.4;
+}
+
+.o2t-panel .o2t-preview-page {
+  width: 100%;
+  margin-bottom: 8px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--background-modifier-border);
+}
+
+.o2t-panel .o2t-preview-page canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

@@ -1,0 +1,40 @@
+{
+  "name": "obsidian2typst",
+  "version": "0.9.0",
+  "private": true,
+  "type": "module",
+  "description": "Obsidian plugin that converts a single Markdown file into Typst for print-ready PDFs.",
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && node esbuild.config.mjs",
+    "install:scratch": "tsc --noEmit && node build/install-scratch.mjs",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run tests/unit tests/plugin tests/tooling",
+    "test:integration": "vitest run tests/integration",
+    "fixtures": "node tests/fixtures/generate.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@myriaddreamin/typst-ts-renderer": "0.7.0",
+    "@myriaddreamin/typst-ts-web-compiler": "0.7.0",
+    "@myriaddreamin/typst.ts": "0.7.0",
+    "@types/markdown-it": "14.2.0",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "eslint": "10.12.0",
+    "obsidian": "1.14.4",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.5"
+  },
+  "dependencies": {
+    "markdown-it": "15.0.3",
+    "markdown-it-footnote": "4.0.0",
+    "markdown-it-mark": "4.0.0",
+    "markdown-it-task-lists": "2.1.1",
+    "yaml": "2.9.1"
+  }
+}

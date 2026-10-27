@@ -1,0 +1,9 @@
+{
+  "id": "obsidian2typst",
+  "name": "Obsidian2Typst",
+  "version": "0.9.0",
+  "minAppVersion": "1.5.0",
+  "description": "Convert a Markdown note with linked images into Typst for print-ready PDFs.",
+  "author": "JollyOrc",
+  "isDesktopOnly": true
+}
