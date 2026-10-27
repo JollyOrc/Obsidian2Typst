@@ -4,6 +4,8 @@ An Obsidian plugin that converts a single Markdown file (with its linked image
 assets) into a valid [Typst](https://typst.app) file, ready to be compiled into
 a print-ready PDF.
 
+This plugin was created as an excercise to learn how to use AI agents for coding. None of the code was written by hand. I am not a developer - use this at your own discretion.
+
 ## Goal
 
 As an Obsidian user and author, I want to turn one Markdown note, including the
