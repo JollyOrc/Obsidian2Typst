@@ -40,7 +40,7 @@ describe('TICKET-026 version of a test build', () => {
     expect(tab).toContain('Obsidian2Typst ');
   });
 
-  it('SCAR-012: M2, M3, M6 to M13 name where they run and the version to expect, and M3, M6 to M13 name the current one', () => {
+  it('SCAR-012: M2, M3, M6 to M14 name where they run and the version to expect, and M3, M6 to M14 name the current one', () => {
     for (const id of [
       'M2',
       'M3',
@@ -52,6 +52,7 @@ describe('TICKET-026 version of a test build', () => {
       'M11',
       'M12',
       'M13',
+      'M14',
     ]) {
       const start = manual.indexOf(`## ${id} `);
       const next = manual.indexOf('\n## ', start + 1);
@@ -85,6 +86,9 @@ describe('TICKET-026 version of a test build', () => {
     const m13 = manual.slice(manual.indexOf('## M13 '));
     expect(manual.indexOf('## M13 ')).toBeGreaterThan(0);
     expect(m13).toContain(`\`${manifest.version}\``);
+    const m14 = manual.slice(manual.indexOf('## M14 '));
+    expect(manual.indexOf('## M14 ')).toBeGreaterThan(0);
+    expect(m14).toContain(`\`${manifest.version}\``);
   });
 
   it('SCAR-012: an npm script installs the build into the scratch vault', () => {

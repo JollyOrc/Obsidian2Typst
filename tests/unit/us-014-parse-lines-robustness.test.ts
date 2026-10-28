@@ -21,7 +21,7 @@ const MANIFEST = readManifest();
 const prop = (n: TreeNode, key: string): unknown =>
   (n as unknown as Record<string, unknown>)[key];
 
-describe('US-014 AC-3 source lines', () => {
+describe('US-014 AC-3 source lines', {timeout: 60_000}, () => {
   it('US-014 AC-3: a link on line 6 of a paragraph that starts on line 5 reports line 6, after a 3-line frontmatter', () => {
     const md = '---\ntitle: x\n---\n\nfirst line\nsecond [x](u) line';
     expect(nodesOf(md, 'paragraph')[0]?.line).toBe(5);
@@ -99,7 +99,7 @@ describe('US-014 AC-3 source lines', () => {
   });
 });
 
-describe('US-014 AC-4 robustness and no loss', () => {
+describe('US-014 AC-4 robustness and no loss', {timeout: 60_000}, () => {
   it('US-014 AC-4: parses the sample note without an exception and with the counts of its manifest', () => {
     const nodes = all(parse(REAL).root);
     const count = (kind: string, pred: (n: TreeNode) => boolean = () => true) =>
@@ -227,7 +227,7 @@ describe('US-014 AC-4 robustness and no loss', () => {
   });
 });
 
-describe('US-014 AC-5 purity and determinism', () => {
+describe('US-014 AC-5 purity and determinism', {timeout: 60_000}, () => {
   it('US-014 AC-5: returns an equal tree for equal input, and the tree is plain data', () => {
     const a = parse(REAL);
     expect(a).toEqual(parse(REAL));

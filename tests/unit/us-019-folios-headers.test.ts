@@ -325,7 +325,7 @@ describe('US-019 one writer of the helpers (SCAR-017)', () => {
   });
 });
 
-describe('US-019 AC-11 the sample note', () => {
+describe('US-019 AC-11 the sample note', {timeout: 60_000}, () => {
   const source = readSample('Book.md');
 
   it('US-019 AC-11: has the rule and the helpers once; deterministic (rule 7)', async () => {

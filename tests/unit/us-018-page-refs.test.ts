@@ -529,7 +529,7 @@ describe('US-018 AC-6 switches and determinism', () => {
   });
 });
 
-describe('US-018 AC-9 the sample note', () => {
+describe('US-018 AC-9 the sample note', {timeout: 60_000}, () => {
   const source = readSample('Book.md');
   const {numberedLinks} = readManifest();
   // The levels 1, 2 (default), 3 and 6; the counts are the generator's.

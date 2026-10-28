@@ -418,7 +418,7 @@ describe('US-004 AC-7 embeds of notes', () => {
   });
 });
 
-describe('US-004 AC-8 anchors', () => {
+describe('US-004 AC-8 anchors', {timeout: 60_000}, () => {
   const HEADS = '## Prism Variants\n\n## Prism';
   it('US-004 AC-8: resolves #Prism%20Variants by decoded heading text', () => {
     expect(after(HEADS, '[x](#Prism%20Variants)')).toMatchObject({

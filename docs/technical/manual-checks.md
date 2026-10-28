@@ -828,8 +828,8 @@ these presets and the vault's Defaults (2026-10-21).
 5. Open the style panel on `PageRefs.md`. **Without closing the panel**, open
    the preset note `PageRefs`, add the line `linkPageLevel: 3` before the
    closing `---`, save: the preview redraws within about a second and page 2
-   shows `Moss (p. 3)`. Remove the line again: `Moss` has no number again
-   (SCAR-016). The numbers in the preview are the ones of step 3.
+   shows `Moss (p. 3)`. Remove the line again and save: `Moss` has no number
+   again (SCAR-016). Step 7 needs the line removed. The numbers in the preview are the ones of step 3.
 6. Settings tab, Defaults: switch `Page numbers in links` off. The preview
    shows no numbers; export `PageRefs.md` again: no `(p.` anywhere, and the
    links are still there (`see Tessera, Moss, Prism and Gambit`). Switch it on
@@ -840,9 +840,10 @@ these presets and the vault's Defaults (2026-10-21).
    links to `#` and `##` chapters elsewhere; none in a header. The warnings
    note lists 148 entries: 144 about the note's own links (ambiguous or
    unresolved), 2 unknown callout types, 1 note embed and 1 dropped comment;
-   they are not about this check. Before the run, check that `PageRefs.md`
-   does not set `linkPageLevel` (found set to 3 on 2026-10-27; with 3 the
-   export has 420 pages and 436 numbers). Leaf
+   they are not about this check. Before the run, check that the preset `PageRefs.md`
+   does not set `linkPageLevel` (step 5 adds and removes it; a line left
+   from an earlier run was removed on 2026-10-27; with 3 the export has 420
+   pages and 436 numbers). Leaf
    through the glossary and a few spreads.
 8. Is anything missing, odd or ugly that this list did not ask about? Report it
    even if it seems unrelated (SCAR-015).
@@ -1314,3 +1315,80 @@ Append a dated line to `docs/technical/spike-typst-wasm.md`, section "Manual
 runs": date, build version and checksum, Obsidian version and operating system,
 result per step.
 
+
+## M14 — The sample vault in the exports (US-024 AC-8; US-007 AC-6, US-011, US-017 AC-13, US-018 AC-9, US-019 AC-11)
+
+**When:** after the manual checks were rewritten for the generated sample
+vault (TICKET-073), and after any change to the sample generator.
+
+**Needs:** Obsidian desktop. Prepared by the developer (SCAR-012): the test
+build is installed in the scratch vault (`npm run install:scratch`, checksum
+compared), and the same command installed the generated sample vault as
+`Sample/` (73 files, checksums equal to `tests/fixtures/sample/`). The vault
+holds the presets `A5 print`, `Glossary terms`, `Folios` and `PageRefs` in
+`Obsidian2Typst/presets` (`PageRefs` without `linkPageLevel`); the plugin data
+(`data.json`) is as handed over (Defaults: body 12 pt, headings 18 pt,
+page numbers in links on, external links as footnotes) and backed up with the
+preset notes in `spikes/typst-wasm/m14-state-backup/handover/` with
+checksums. Empty export folders `spikes/typst-wasm/m14-export/1` to `4` are in
+the project folder. `Book.md`, `Other.md` and `cover.png` exist once in the
+vault (listing, 2026-10-27).
+
+**Run in the scratch vault** (`spikes/typst-wasm/scratch-vault`). **Expected
+version:** `0.9.1` (first line of the settings tab, also the plugin
+list). If it differs, stop: the wrong build is installed. Restart Obsidian once
+so the new build is loaded.
+
+**Known limitations:** the sample note is filler text, not prose; its 148
+warnings are its own link cases on purpose (80 ambiguous, 64 unresolved), 2
+unknown callout types (`rule-box` and `mystery`; the vault's presets do not
+style `rule-box`), 1 note embed and 1 dropped comment. Task boxes print as
+`[ ]` and `[x]` text. The cover is a generated picture of 148 × 210 px (blue and
+yellow stripes); at reading size its stripes show pixel steps.
+
+The pages, numbers and warnings below were measured from `Sample/Book.md` with
+each preset and the vault's Defaults, through the plugin's own merge of preset
+and Defaults, the pipeline and the bundled compiler (2026-10-27).
+
+### Steps
+
+Choose the preset of each step in the ribbon menu (its list of presets), open
+`Sample/Book.md`, run `Obsidian2Typst: Export current note` and choose the
+step's folder. Every export takes about 30 seconds or less.
+
+1. Preset `A5 print`, folder `m14-export/1`. Expected in the folder:
+   `Book.typ`, `Book.pdf`, an `assets` folder with the images (`cover.png`
+   once) and `export-warnings.md`; no other file. The PDF has 419 pages of
+   154 × 216 mm. Page 1 is the cover picture alone (a striped picture),
+   filling the page edge to edge, without a number; page 2 starts the text
+   with the heading `1 Mollit`; the text is selectable, in a serif face
+   (Libertinus Serif), and the one code block is in a monospace face (DejaVu
+   Sans Mono). Page 3 shows text, a table and a teal callout box.
+   `export-warnings.md` lists 148 entries and no `COVER_*` line.
+2. Preset `Glossary terms`, folder `m14-export/2`. Expected: 419 pages; the
+   glossary on pages 413 to 419: every one of its 42 terms is run-in, bold,
+   followed by ` — ` and its explanation (the first is `Reprehenderit
+   Ultricies — …`); no term is a bookmark of its own; the four links to
+   `Veniam` in the `Appendix` jump to the term.
+3. Preset `Folios`, folder `m14-export/3`. Expected: 419 pages of 148 × 210
+   mm; the cover without a number; numbers 1 on page 2 to 418 on the last
+   page; chapter titles in the headers (for example `Cras
+   Ac` on pages 3 to 6); no header on the pages where a `#` chapter starts.
+4. Preset `PageRefs`, folder `m14-export/4`. First check in
+   `Obsidian2Typst/presets/PageRefs.md` that it does not set
+   `linkPageLevel`. Expected: 419 pages; 178 page numbers `(p. N)` in all,
+   many on the glossary pages (every link in an explanation) and the others
+   after links to `#` and `##` chapters; none in a header; following a
+   number's link lands on the page it names.
+5. Is anything missing, odd or ugly that this list did not ask about? Report
+   it even if it seems unrelated (SCAR-015).
+
+After the check, the developer compares the preset notes and `data.json` with
+`m14-state-backup/handover/` (checksums) and restores what differs; the export
+folders stay unless the user asks to remove them.
+
+### Record
+
+Append a dated line to `docs/technical/spike-typst-wasm.md`, section "Manual
+runs": date, build version and checksum, Obsidian version and operating system,
+result per step.

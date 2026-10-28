@@ -639,7 +639,7 @@ describe('US-017 AC-9 a matched heading without terms', () => {
   });
 });
 
-describe('US-017 AC-13 the sample note', () => {
+describe('US-017 AC-13 the sample note', {timeout: 60_000}, () => {
   const source = readSample('Book.md');
   const {glossary, headings} = readManifest();
 

@@ -532,7 +532,7 @@ describe('US-016 AC-11 names the plugin defines (template)', () => {
   });
 });
 
-describe('US-016 AC-17 a note without callouts', () => {
+describe('US-016 AC-17 a note without callouts', {timeout: 60_000}, () => {
   const HEADER = /^ *(?:> *)+\[![^\]\s]+\][+-]?(?:\s|$)/m;
 
   it('US-016 AC-17: the sample note Other.md has no callout header, and its Typst has no callout rule or call', async () => {

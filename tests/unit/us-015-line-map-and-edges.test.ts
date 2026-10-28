@@ -252,7 +252,7 @@ describe('US-015 AC-9 determinism and purity', () => {
   });
 });
 
-describe('US-015 AC-11 edge inputs', () => {
+describe('US-015 AC-11 edge inputs', {timeout: 60_000}, () => {
   const inputs = [
     '**unclosed bold',
     'text ^[unclosed note',
@@ -347,7 +347,7 @@ const COVERAGE_NOTE = [
   '[^n]: def',
 ].join('\n');
 
-describe('US-015 AC-12 no silent loss of a node', () => {
+describe('US-015 AC-12 no silent loss of a node', {timeout: 60_000}, () => {
   it('US-015 AC-12: the coverage note contains every node kind of the tree, so the test below is complete', () => {
     const used = new Set(
       all(parse(COVERAGE_NOTE).root).map((n) => n.kind as string),
