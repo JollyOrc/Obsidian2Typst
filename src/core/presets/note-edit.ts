@@ -14,11 +14,20 @@ import type {PresetFields} from './schema';
  * US-022 AC-2, AC-4: one change of a preset note. A heading rule: `rule` is
  * the value to write for the heading text, or null to remove the key. The
  * cover: a vault path makes it `mode: file` with that file; null goes back to
- * `mode: auto` without a file.
+ * `mode: auto` without a file. US-027 AC-7: the place of the contents:
+ * `heading` and `position` written (with `depth` when the contents are off),
+ * or both removed (back to the default place).
  */
 export type PresetChange =
   | {kind: 'heading-rule'; text: string; rule: HeadingRule | null}
-  | {kind: 'cover'; file: string | null};
+  | {kind: 'cover'; file: string | null}
+  | {
+      kind: 'toc';
+      heading: string;
+      position: 'before' | 'after';
+      depth?: number;
+    }
+  | {kind: 'toc'; heading: null; position: null};
 
 /** What a menu item does: its title, the change, and the question first. */
 export interface PresetChangePlan {
@@ -46,7 +55,9 @@ function keyOfForm(doc: Document, key: string): string | undefined {
  * note), every byte before and after it stays. A heading rule is written for
  * the heading text, or for a key of the same comparison form already present
  * (changed or removed in place, never doubled); a `headingRules` map that
- * becomes empty is removed. A note without frontmatter, with an unclosed one,
+ * becomes empty is removed. US-027 AC-7: the contents' `heading`, `position`
+ * (and `depth`) are set in the `toc` group in that order, or both removed; a
+ * `toc` group that becomes empty is removed. A note without frontmatter, with an unclosed one,
  * or whose frontmatter is not a YAML mapping is not changed: the result says
  * why.
  */
@@ -75,6 +86,19 @@ export function editPresetField(
       if (isMap(map) && map.items.length === 0) doc.deleteIn(['headingRules']);
     } else {
       doc.setIn(['headingRules', present ?? change.text], change.rule);
+    }
+  } else if (change.kind === 'toc') {
+    if (change.heading === null) {
+      doc.deleteIn(['toc', 'heading']);
+      doc.deleteIn(['toc', 'position']);
+      const map = doc.getIn(['toc']);
+      if (isMap(map) && map.items.length === 0) doc.deleteIn(['toc']);
+    } else {
+      doc.setIn(['toc', 'heading'], change.heading);
+      doc.setIn(['toc', 'position'], change.position);
+      if (change.depth !== undefined) {
+        doc.setIn(['toc', 'depth'], change.depth);
+      }
     }
   } else if (change.file === null) {
     doc.setIn(['cover', 'mode'], 'auto');
@@ -174,5 +198,49 @@ export function coverAction(
     title: several ? `Use "${name}" as cover` : 'Use as cover',
     change: {kind: 'cover', file: path},
     question: `Make "${path}" the cover of preset "${presetName}"?`,
+  };
+}
+
+/**
+ * US-027 | AC-7 (decisions 3, 6): The item for placing the contents on the
+ * `side` of the top-level H1 whose visible text is `text`, for the preset
+ * `presetName` with its own `fields` and the Defaults `defaults`. In use when
+ * the preset's `toc.heading` compares equal (`headingRuleKey`) and its
+ * `toc.position` is `side` (a missing position reads as `before`): the item
+ * is then `Remove table of contents placement` and goes back to the default
+ * place. Otherwise it writes `heading` and `position`; while the contents are
+ * off (the depth of the preset, else of the Defaults, else 0, is 0) it also
+ * writes `depth: 2` and its question says so.
+ */
+export function contentsAction(
+  fields: unknown,
+  defaults: unknown,
+  text: string,
+  side: 'before' | 'after',
+  presetName: string,
+): PresetChangePlan {
+  const toc = (fields as PresetFields | null)?.toc;
+  const placed =
+    toc?.heading !== undefined &&
+    headingRuleKey(toc.heading) === headingRuleKey(text) &&
+    (toc.position ?? 'before') === side;
+  if (placed) {
+    return {
+      title: 'Remove table of contents placement',
+      change: {kind: 'toc', heading: null, position: null},
+      question: `Move the table of contents of preset "${presetName}" back to the default place?`,
+    };
+  }
+  const depth =
+    toc?.depth ?? (defaults as PresetFields | null)?.toc?.depth ?? 0;
+  const place = `Place the table of contents of preset "${presetName}" ${side} "${text}"`;
+  return {
+    title: `Table of contents ${side} this heading`,
+    change:
+      depth === 0
+        ? {kind: 'toc', heading: text, position: side, depth: 2}
+        : {kind: 'toc', heading: text, position: side},
+    question:
+      depth === 0 ? `${place} and show headings down to level 2?` : `${place}?`,
   };
 }

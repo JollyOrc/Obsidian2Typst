@@ -12,6 +12,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {describe, expect, it} from 'vitest';
 import {installBuild} from '../../build/install-scratch.mjs';
+import {readCheck} from '../support/manual-checks';
 
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as {
   version: string;
@@ -20,10 +21,6 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
   version: string;
   scripts: Record<string, string>;
 };
-const manual = readFileSync('docs/technical/manual-checks.md', 'utf8').replace(
-  /\s+/g,
-  ' ',
-);
 const tab = readFileSync('src/plugin/settings/settings-tab.ts', 'utf8');
 
 describe('TICKET-026 version of a test build', () => {
@@ -40,55 +37,23 @@ describe('TICKET-026 version of a test build', () => {
     expect(tab).toContain('Obsidian2Typst ');
   });
 
-  it('SCAR-012: M2, M3, M6 to M14 name where they run and the version to expect, and M3, M6 to M14 name the current one', () => {
-    for (const id of [
+  it('SCAR-012: M2, M3, M6 to M18 name where they run and the version to expect, and M3, M6 to M18 name the current one', () => {
+    // SCAR-029: each check is a file of its own, so each is read on its own
+    // (before the split a section ran to the end of the one file).
+    const ids = [
       'M2',
       'M3',
-      'M6',
-      'M7',
-      'M8',
-      'M9',
-      'M10',
-      'M11',
-      'M12',
-      'M13',
-      'M14',
-    ]) {
-      const start = manual.indexOf(`## ${id} `);
-      const next = manual.indexOf('\n## ', start + 1);
-      const section = manual.slice(start, next === -1 ? undefined : next);
+      ...Array.from({length: 13}, (_, i) => `M${i + 6}`),
+    ];
+    expect(ids.at(-1)).toBe('M18');
+    for (const id of ids) {
+      const section = readCheck(id).replace(/\s+/g, ' ');
       expect(section, id).toContain('Expected version');
       expect(section, id).toContain('scratch vault');
+      if (id !== 'M2') {
+        expect(section, id).toContain(`\`${manifest.version}\``);
+      }
     }
-    const m3 = manual.slice(manual.indexOf('## M3 '));
-    expect(m3).toContain(`\`${manifest.version}\``);
-    const m6 = manual.slice(manual.indexOf('## M6 '));
-    expect(manual.indexOf('## M6 ')).toBeGreaterThan(0);
-    expect(m6).toContain(`\`${manifest.version}\``);
-    const m7 = manual.slice(manual.indexOf('## M7 '));
-    expect(manual.indexOf('## M7 ')).toBeGreaterThan(0);
-    expect(m7).toContain(`\`${manifest.version}\``);
-    const m8 = manual.slice(manual.indexOf('## M8 '));
-    expect(manual.indexOf('## M8 ')).toBeGreaterThan(0);
-    expect(m8).toContain(`\`${manifest.version}\``);
-    const m9 = manual.slice(manual.indexOf('## M9 '));
-    expect(manual.indexOf('## M9 ')).toBeGreaterThan(0);
-    expect(m9).toContain(`\`${manifest.version}\``);
-    const m10 = manual.slice(manual.indexOf('## M10 '));
-    expect(manual.indexOf('## M10 ')).toBeGreaterThan(0);
-    expect(m10).toContain(`\`${manifest.version}\``);
-    const m11 = manual.slice(manual.indexOf('## M11 '));
-    expect(manual.indexOf('## M11 ')).toBeGreaterThan(0);
-    expect(m11).toContain(`\`${manifest.version}\``);
-    const m12 = manual.slice(manual.indexOf('## M12 '));
-    expect(manual.indexOf('## M12 ')).toBeGreaterThan(0);
-    expect(m12).toContain(`\`${manifest.version}\``);
-    const m13 = manual.slice(manual.indexOf('## M13 '));
-    expect(manual.indexOf('## M13 ')).toBeGreaterThan(0);
-    expect(m13).toContain(`\`${manifest.version}\``);
-    const m14 = manual.slice(manual.indexOf('## M14 '));
-    expect(manual.indexOf('## M14 ')).toBeGreaterThan(0);
-    expect(m14).toContain(`\`${manifest.version}\``);
   });
 
   it('SCAR-012: an npm script installs the build into the scratch vault', () => {

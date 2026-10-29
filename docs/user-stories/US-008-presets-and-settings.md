@@ -290,7 +290,7 @@ by hand, and have them sync with the vault.
 - **AC-16 (what the user checks by hand):** The settings tab and the command
   cannot be run outside Obsidian. Manual check M2 (settings tab: list, invalid
   marker, create, duplicate, rename, delete, Defaults) and M3 (export command
-  end to end for the sample vault, US-024) are in `docs/technical/manual-checks.md`; the
+  end to end for the sample vault, US-024) are in `docs/technical/manual-checks/M02.md` and `M03.md`; the
   logic behind them is tested with fakes.
 
 ---

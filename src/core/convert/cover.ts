@@ -111,6 +111,12 @@ export function resolveCover(options: {
   ctx: EmitContext;
   /** US-019 AC-3: true when folios are on (`numbering: none` on the cover). */
   numberingNone?: boolean;
+  /**
+   * US-026 AC-3, AC-7: true when front matter (a colophon) follows: with
+   * facing pages the cover's back is always written, so the colophon is on
+   * the next right page; the counter is not reset (the first chapter does).
+   */
+  frontMatter?: boolean;
 }): string | null {
   const {target, cover, resolver, heads, page, ctx} = options;
   if (cover === undefined) return null;
@@ -175,10 +181,12 @@ export function resolveCover(options: {
       ctx.warn('COVER_CROPPED', cropMessage(percent, size, sheet), target.line);
     }
   }
+  const front = options.frontMatter === true;
   return emitCoverPages({
     path: result.path,
-    blankPageAfter: cover.blankPageAfter,
+    blankPageAfter: cover.blankPageAfter || (front && page.facingPages),
     slug: page.slug,
     numberingNone: options.numberingNone === true,
+    resetCounter: !front,
   });
 }

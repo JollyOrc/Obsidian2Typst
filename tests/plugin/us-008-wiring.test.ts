@@ -1,16 +1,18 @@
 // US-008 — the parts that only Obsidian can run are checked here as far as text
 // can show (the rest is the manual checks M2 and M3 in
-// docs/technical/manual-checks.md). Source of truth:
+// docs/technical/manual-checks/M02.md and M03.md). Source of truth:
 // docs/user-stories/US-008-presets-and-settings.md.
 import {readFileSync} from 'node:fs';
 import {describe, expect, it} from 'vitest';
+import {readCheck} from '../support/manual-checks';
 import {settingsSource} from '../support/settings-source';
 
 const main = readFileSync('src/plugin/main.ts', 'utf8');
 const port = readFileSync('src/plugin/obsidian/vault-port.ts', 'utf8');
 const tab = settingsSource();
 const dialog = readFileSync('src/plugin/settings/dialog.ts', 'utf8');
-const manual = readFileSync('docs/technical/manual-checks.md', 'utf8');
+const m2 = readCheck('M2');
+const m3 = readCheck('M3');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
   dependencies?: Record<string, string>;
 };
@@ -108,23 +110,23 @@ describe('US-008 AC-17 the dialogs use the tested rules', () => {
 
 describe('US-008 manual procedures and dependencies', () => {
   it('US-008 AC-16: M2 names the preset folder, a live edit, an invalid preset and a rename on another device', () => {
-    expect(manual).toContain('## M2');
-    expect(manual).toContain('Obsidian2Typst/presets');
-    expect(manual).toMatch(/invalid/i);
-    expect(manual).toMatch(/sync/i);
+    expect(m2).toContain('# M2 — ');
+    expect(m2).toContain('Obsidian2Typst/presets');
+    expect(m2).toMatch(/invalid/i);
+    expect(m2).toMatch(/sync/i);
   });
 
   it('US-008 AC-16: M3 runs Export current note on a real note with a template and checks the files in the folder', () => {
-    expect(manual).toContain('## M3');
-    expect(manual).toContain('Obsidian2Typst: Export current note');
-    expect(manual).toContain('template.typ');
-    expect(manual).toContain('export-warnings.md');
+    expect(m3).toContain('# M3 — ');
+    expect(m3).toContain('Obsidian2Typst: Export current note');
+    expect(m3).toContain('template.typ');
+    expect(m3).toContain('export-warnings.md');
   });
 
   it('US-008 AC-17: M2 has steps for the keyboard, Cancel and Escape', () => {
-    expect(manual).toMatch(/keyboard/i);
-    expect(manual).toMatch(/Escape/);
-    expect(manual).toContain('Cancel');
+    expect(m2).toMatch(/keyboard/i);
+    expect(m2).toMatch(/Escape/);
+    expect(m2).toContain('Cancel');
   });
 
   it('US-008 AC-4: package.json pins yaml to an exact version', () => {

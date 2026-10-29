@@ -401,7 +401,7 @@ describe('US-021 AC-6 the details table', () => {
     });
   });
 
-  it('US-021 AC-6: rows in the order of the Defaults rows, then fonts, then the three summaries', async () => {
+  it('US-021 AC-6: rows in the order of the Defaults rows, then fonts, then the summaries', async () => {
     const {detailRows} = await load<DetailsModule>(DETAILS);
     const labels = detailRows({}, {}).map((r) => r.label);
     expect(labels[0]).toBe('Highlight colour');
@@ -411,10 +411,12 @@ describe('US-021 AC-6 the details table', () => {
     expect(labels.indexOf('Link page word')).toBeLessThan(
       labels.indexOf('Font folder'),
     );
-    expect(labels.slice(-3)).toEqual([
+    // US-027 AC-8 (TICKET-087): the summary of the contents' place is last.
+    expect(labels.slice(-4)).toEqual([
       'Cover',
       'Callout styles',
       'Heading rules',
+      'Contents place',
     ]);
   });
 

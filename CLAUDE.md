@@ -68,6 +68,19 @@ Follow this order strictly — do not skip ahead:
    - When something is replaced (a fixture, a vault, a file format, a
      library), is every user of it listed with what it asserts or assumes,
      before the replacement's acceptance criteria are written? (SCAR-027)
+   - Does every test helper that reads output (a PDF, YAML or source reader)
+     have tests for the syntax rules of its format, and when it returns less
+     than the source holds, is the reader checked on a known input before the
+     input is blamed? (SCAR-028)
+   - Is every unit a human runs, answers or approves on its own (a manual
+     check, a checklist, a questionnaire, a handover note) a file of its own
+     named by its id, linked from one index that a test keeps one to one with
+     the files, and read by tests through one reader by its id? (SCAR-029)
+   - Does every test that does seconds of work itself (converting a whole
+     note, compressing, compiling, building) state its time limit, measured
+     under a full parallel run with a margin, is a timeout run alone before
+     the code is blamed, and does a raised limit reach every test doing the
+     same work? (SCAR-030)
    - Are rules for generated text checked in every position (start, middle,
      end, around line breaks) against the real consumer? (SCAR-009)
    - Where output is built by concatenating pieces, are the join hazards of
@@ -230,14 +243,14 @@ any non-obvious constraints (clamping, ordering, side effects).
    in `30_scar_checks.md`:
    - **G0** story review, before a story or an amendment is written (step 0);
    - **G1** story written or amended, before any test (SCAR-002, 007, 013 to
-     016, 017, 019, 020, 022, 024, 026, 027 against the ACs);
+     016, 017, 019, 020, 022, 024, 026, 027, 029 against the ACs);
    - **G2** tests written, before any ticket (SCAR-003, 001, 008, 011, 015,
-     019, 021, 023, 024);
+     019, 021, 023, 024, 028, 030);
    - **G3** tickets written, before any code: each ticket has a "SCAR check"
      section that goes through the Prevention list of every SCAR, item by item;
    - **G4** before a ticket is declared done and before every manual-test
-     handover (SCAR-006, 012, 015, 016, 018, 023, 025, 026; the gate and the pass
-     counts);
+     handover (SCAR-006, 012, 015, 016, 018, 023, 025, 026, 028, 029, 030; the
+     gate and the pass counts);
    - **G5** closing a story: can the root cause of anything found be
      generalised into a new SCAR?
 10. **Bootloader (`Target 0: read-init-d`).** On the first turn of every

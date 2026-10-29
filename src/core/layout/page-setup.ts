@@ -28,6 +28,98 @@ export interface PageSettingsInput {
  * page numbers (folios) and the running header with the chapter title of
  * level `runningHeaderLevel` (1 to 6). Not part of the geometry.
  */
+/**
+ * US-025 | AC-1: where a top-level heading of a level starts: as it falls
+ * (`none`), on a new page, on the next right-hand (odd) page, or on the next
+ * left-hand (even) page, which starts a new spread.
+ */
+export type BreakRule = 'none' | 'page' | 'right' | 'left';
+
+/** US-025 AC-1: the keys of `page.breakBefore`, one per heading level. */
+export const BREAK_LEVELS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
+export type BreakLevel = (typeof BREAK_LEVELS)[number];
+
+/** US-025 AC-1: the values a rule may take, in the order the rows offer them. */
+export const BREAK_RULES: readonly BreakRule[] = [
+  'none',
+  'page',
+  'right',
+  'left',
+];
+
+/** US-025 AC-1: a rule for every level (the effective settings). */
+export type BreakRules = Readonly<Record<BreakLevel, BreakRule>>;
+
+/** US-025 AC-1: no level breaks (the built-in value). */
+export const NO_BREAKS: BreakRules = Object.freeze({
+  h1: 'none',
+  h2: 'none',
+  h3: 'none',
+  h4: 'none',
+  h5: 'none',
+  h6: 'none',
+});
+
+/**
+ * US-026 | AC-2, AC-3 to AC-7, AC-9: the book settings. `signature` is the
+ * pages per signature (0 = no padding); the headings of the colophon and the
+ * back notes are `hidden` (not written, the label kept) or `printed`.
+ */
+export interface BookSettings {
+  signature: 0 | 4 | 8 | 16 | 32;
+  romanFrontMatter: boolean;
+  firstChapter: 'left' | 'right';
+  colophonHeading: 'hidden' | 'printed';
+  backNotesHeading: 'hidden' | 'printed';
+}
+
+/** US-026 AC-9: the built-in book settings (nothing changes today's output). */
+export const DEFAULT_BOOK: BookSettings = Object.freeze({
+  signature: 0,
+  romanFrontMatter: false,
+  firstChapter: 'left',
+  colophonHeading: 'hidden',
+  backNotesHeading: 'hidden',
+});
+
+/**
+ * US-027 | AC-1: the table of contents settings. `depth` 0 writes no contents;
+ * an empty `title` writes no title line. `heading` and `position` (the place
+ * picked with the menu items, AC-7) exist only when a preset note sets them.
+ */
+export interface TocSettings {
+  depth: number;
+  title: string;
+  pageNumbers: boolean;
+  dotLeaders: boolean;
+  heading?: string;
+  position?: 'before' | 'after';
+}
+
+/** US-027 AC-1: the built-in contents settings (no contents: today's output). */
+export const DEFAULT_TOC: Readonly<
+  Pick<TocSettings, 'depth' | 'title' | 'pageNumbers' | 'dotLeaders'>
+> = Object.freeze({
+  depth: 0,
+  title: 'Contents',
+  pageNumbers: true,
+  dotLeaders: true,
+});
+
+/**
+ * US-028 | AC-1: the image fit settings. `minScale` is the smallest size an
+ * image may shrink to, in percent of the size it would otherwise get (10 to
+ * 100); 100 turns the rule off (decision 1).
+ */
+export interface ImagesSettings {
+  minScale: number;
+}
+
+/** US-028 AC-1: the built-in image fit settings (100: today's output). */
+export const DEFAULT_IMAGES: Readonly<ImagesSettings> = Object.freeze({
+  minScale: 100,
+});
+
 export interface PageFurniture {
   folios: boolean;
   runningHeader: boolean;

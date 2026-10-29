@@ -100,7 +100,7 @@
   compile runs, the longest gap between two event-loop turns on Obsidian's main
   thread is at most 100 ms (approved by the user 2026-10-16; measured in spike
   S7). Obsidian cannot run in the automated tests: the check is the manual
-  procedure M1 in `docs/technical/manual-checks.md`, run with the command
+  procedure M1 in `docs/technical/manual-checks/M01.md`, run with the command
   `Obsidian2Typst: Check compiler (developer)`, which compiles a test document
   through the real worker and the embedded compiler and reports the longest gap.
 

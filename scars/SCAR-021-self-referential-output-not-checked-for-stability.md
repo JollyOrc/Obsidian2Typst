@@ -33,5 +33,13 @@ warning.
   by step, and every result is checked for being stable and correct.
 - Prefer a rule that does not read its own effect when a sweep shows an
   oscillation, and say so before the user chooses (SCAR-020).
+- A decision whose result moves the place it reads (a float placed above
+  its own probe) can settle on a second, wrong fixed point that confirms
+  itself. Check such a decision against the output with the rule off, on the
+  real composed document as well as by sweeps. Example (2026-10-29,
+  TICKET-097): `figure-10.png` fits after its text at 100, but at 70 it was
+  floated to the top of its own page, which pushed the probe down so that
+  the float looked needed; 3,216 synthetic cases did not reach it, the
+  sample's `Book.md` did.
 - Applies next to: running headers, "continued" markers, keep-together rules,
   anything that reads a page number or a position.

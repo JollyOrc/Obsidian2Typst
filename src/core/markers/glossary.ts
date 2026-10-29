@@ -39,6 +39,19 @@ export interface GlossaryWarning {
 }
 
 /** US-017: the roles of the headings of one note, and its warnings. */
+/**
+ * US-026 AC-1: one section marked `colophon` or `back-notes`: its top-level
+ * heading and every top-level block after it until the section ends.
+ */
+export interface BookPart {
+  rule: 'colophon' | 'back-notes';
+  heading: HeadingNode;
+  /** The heading's visible text, as the rules compare it (not normalised). */
+  text: string;
+  line: number;
+  blocks: readonly BlockNode[];
+}
+
 export interface GlossaryPlan {
   roles: ReadonlyMap<HeadingNode, GlossaryRole>;
   /** The paragraphs that a run-in term prints; the block loop skips them. */
@@ -57,6 +70,8 @@ export interface GlossaryPlan {
   inSection: ReadonlySet<HeadingNode>;
   /** True when the note has at least one term (AC-6). */
   hasTerms: boolean;
+  /** US-026 AC-1: the colophon and back-notes sections, in note order. */
+  parts: readonly BookPart[];
   warnings: readonly GlossaryWarning[];
 }
 
@@ -67,6 +82,7 @@ export const EMPTY_GLOSSARY_PLAN: GlossaryPlan = Object.freeze({
   explanations: new Set<BlockNode>(),
   inSection: new Set<HeadingNode>(),
   hasTerms: false,
+  parts: [],
   warnings: [],
 });
 
@@ -109,8 +125,10 @@ function startsWithImage(nodes: readonly InlineNode[]): boolean {
   return false;
 }
 
-/** An open glossary section while the top level is walked. */
+/** An open section (glossary or book part) while the top level is walked. */
 interface Section {
+  /** US-026: the part the section's blocks go to; null for a glossary. */
+  part: {rule: BookPart['rule']; blocks: BlockNode[]} | null;
   level: number;
   line: number;
   text: string;
@@ -134,7 +152,10 @@ interface Section {
  * `HEADING_RULE_NO_TERMS` at its heading's line (AC-9; a level-6 heading has
  * no sub-level and always gives it). US-018 AC-2: every non-heading block
  * after a term until the section ends is in `explanations`. US-022 AC-1:
- * every heading inside a section is in `inSection`. Empty headings (no entry in `headings`,
+ * every heading inside a section is in `inSection`. US-026 AC-1: a heading
+ * mapped to `colophon` or `back-notes` opens a section by the same rule (the
+ * one decider of sections, SCAR-017); its blocks, deeper headings included,
+ * are collected in `parts` and are no terms or explanations. Empty headings (no entry in `headings`,
  * US-002 AC-7) take no part. Assumes `headings` was built from `root`. Never
  * changes its input; the same input gives the same plan.
  */
@@ -148,11 +169,12 @@ export function findGlossary(
   const explanations = new Set<BlockNode>();
   const inSection = new Set<HeadingNode>();
   const warnings: GlossaryWarning[] = [];
+  const parts: BookPart[] = [];
   let section: Section | null = null;
   let hasTerms = false;
 
   const close = (): void => {
-    if (section !== null && section.terms === 0) {
+    if (section !== null && section.part === null && section.terms === 0) {
       warnings.push({
         code: 'HEADING_RULE_NO_TERMS',
         message: `Heading "${section.text}" has the rule glossary but no headings one level below it; nothing was changed`,
@@ -164,8 +186,13 @@ export function findGlossary(
 
   root.forEach((block, position) => {
     if (block.kind !== 'heading') {
-      // US-018 AC-2: inside a term until the section closes.
       const open = section as Section | null;
+      // US-026 AC-1: a block of a book part.
+      if (open !== null && open.part !== null) {
+        open.part.blocks.push(block);
+        return;
+      }
+      // US-018 AC-2: inside a term until the section closes.
       if (open !== null && open.term !== null) explanations.add(block);
       return;
     }
@@ -176,6 +203,11 @@ export function findGlossary(
     const current = section as Section | null;
     // US-022 AC-1: a heading inside an open section never opens a rule.
     if (current !== null) inSection.add(block);
+    // US-026 AC-1: a heading inside a part belongs to it and opens nothing.
+    if (current !== null && current.part !== null) {
+      current.part.blocks.push(block);
+      return;
+    }
     if (current !== null) {
       if (block.depth === current.level + 1) {
         const next = root[position + 1];
@@ -198,8 +230,29 @@ export function findGlossary(
       }
       return;
     }
-    if (table.get(headingRuleKey(info.text)) === 'glossary') {
+    const rule = table.get(headingRuleKey(info.text));
+    if (rule === 'colophon' || rule === 'back-notes') {
+      const part = {rule, blocks: [] as BlockNode[]};
+      parts.push({
+        rule,
+        heading: block,
+        text: info.text,
+        line: block.line,
+        blocks: part.blocks,
+      });
       section = {
+        part,
+        level: block.depth,
+        line: block.line,
+        text: info.text,
+        terms: 0,
+        term: null,
+      };
+      return;
+    }
+    if (rule === 'glossary') {
+      section = {
+        part: null,
         level: block.depth,
         line: block.line,
         text: info.text,
@@ -209,5 +262,5 @@ export function findGlossary(
     }
   });
   close();
-  return {roles, consumed, explanations, inSection, hasTerms, warnings};
+  return {roles, consumed, explanations, inSection, hasTerms, parts, warnings};
 }

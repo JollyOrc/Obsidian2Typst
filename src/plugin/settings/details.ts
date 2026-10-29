@@ -117,7 +117,8 @@ function summaryRow(
  * and `FONT_ROWS` in their order (label; the note's value; the used value
  * with its source — the preset when it owns the field, the trim size being one
  * group as in owner.ts; else the Defaults; else the built-in value), then the
- * summaries `Cover`, `Callout styles`, `Heading rules` (preset notes only).
+ * summaries `Cover`, `Callout styles`, `Heading rules` (preset notes only)
+ * and US-027 AC-8 `Contents place` (`before "Rules"`, or `default`).
  */
 export function detailRows(fields: unknown, defaults: unknown): DetailRow[] {
   const rows = [...DEFAULT_ROWS, ...FONT_ROWS].map((row) =>
@@ -137,10 +138,17 @@ export function detailRows(fields: unknown, defaults: unknown): DetailRow[] {
       .map(([key, rule]) => `${key} → ${rule}`)
       .join(', ');
   const rules = own.headingRules === undefined ? null : pairs(own.headingRules);
+  // US-027 AC-8 (decision 6): the place the preset picks; a missing position
+  // reads as before.
+  const place =
+    own.toc?.heading === undefined
+      ? null
+      : `${own.toc.position ?? 'before'} "${own.toc.heading}"`;
   rows.push(
     summaryRow('Cover', cover, DEFAULT_COVER.mode),
     summaryRow('Callout styles', callouts, '—'),
     summaryRow('Heading rules', rules, pairs(BUILTIN_HEADING_RULES)),
+    summaryRow('Contents place', place, 'default'),
   );
   return rows;
 }

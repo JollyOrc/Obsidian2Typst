@@ -66,6 +66,8 @@ export interface SampleManifest {
   /** Heading texts of `Book.md` by level `'1'` to `'6'`, in order. */
   headings: Record<string, string[]>;
   glossary: {heading: string; terms: string[]};
+  /** US-026 AC-11: the headings the sample preset maps to the book parts. */
+  bookParts: {colophon: string; backNotes: string};
   /** Five known sentences, each the first sentence after its heading. */
   sentences: {heading: string; text: string}[];
   /** The AC-2b features, counted by the generator. */

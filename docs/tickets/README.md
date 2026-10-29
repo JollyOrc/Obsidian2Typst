@@ -83,6 +83,29 @@ Update the index table below whenever a ticket is added or its status changes.
 | [TICKET-072](TICKET-072-docs-without-the-private-vault.md) | Docs describe the sample vault and quote no rules text | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | Done (2026-10-27) |
 | [TICKET-073](TICKET-073-sample-vault-for-manual-checks.md) | The sample vault in the scratch vault; manual checks rewritten | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | Done (2026-10-27) |
 | [TICKET-074](TICKET-074-publish-gate.md) | The publish gate: ignore list, state tests, clean copy, private data | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | Done (2026-10-27) |
+| [TICKET-075](TICKET-075-page-breaks-core.md) | Page breaks by heading level (core) | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | Done (2026-10-28) |
+| [TICKET-076](TICKET-076-dropdown-rows-and-break-rows.md) | The dropdown row kind and the six break rows (plugin) | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | Done (2026-10-28) |
+| [TICKET-077](TICKET-077-page-breaks-build-and-m15.md) | Test build and manual check M15 (page breaks) | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | Done (2026-10-28) |
+| [TICKET-078](TICKET-078-book-parts-core.md) | Book parts: the colophon and back-notes rules (core) | [US-026](../user-stories/US-026-book-parts-and-signatures.md) | Done (2026-10-28) |
+| [TICKET-079](TICKET-079-book-pages-core.md) | Book pages: front matter, first chapter, signature padding (core) | [US-026](../user-stories/US-026-book-parts-and-signatures.md) | Done (2026-10-28) |
+| [TICKET-080](TICKET-080-book-rows.md) | The Book rows (plugin) | [US-026](../user-stories/US-026-book-parts-and-signatures.md) | Done |
+| [TICKET-081](TICKET-081-sample-book-parts.md) | The sample vault gets a colophon and back notes | [US-026](../user-stories/US-026-book-parts-and-signatures.md) | Done |
+| [TICKET-082](TICKET-082-book-build-and-m16.md) | Test build and manual check M16 (book parts and signatures) | [US-026](../user-stories/US-026-book-parts-and-signatures.md) | Done |
+| [TICKET-083](TICKET-083-contents-fields.md) | The contents fields (core) | [US-027](../user-stories/US-027-table-of-contents.md) | Done |
+| [TICKET-084](TICKET-084-contents-lines-and-entries.md) | The contents lines and what they list (core) | [US-027](../user-stories/US-027-table-of-contents.md) | Done |
+| [TICKET-085](TICKET-085-contents-place-and-pages.md) | The place of the contents and their pages (core) | [US-027](../user-stories/US-027-table-of-contents.md) | Done |
+| [TICKET-086](TICKET-086-contents-menu-items.md) | The editor menu items that place the contents (plugin) | [US-027](../user-stories/US-027-table-of-contents.md) | Done |
+| [TICKET-087](TICKET-087-contents-rows.md) | The Contents rows, the details pop-up and the preview (plugin) | [US-027](../user-stories/US-027-table-of-contents.md) | Done |
+| [TICKET-088](TICKET-088-contents-build-and-m17.md) | Test build and manual check M17 (table of contents) | [US-027](../user-stories/US-027-table-of-contents.md) | Done |
+| [TICKET-089](TICKET-089-image-fit-field.md) | The field `images.minScale` (core) | [US-028](../user-stories/US-028-image-fit.md) | Done |
+| [TICKET-090](TICKET-090-image-fit-lines.md) | The lines written for an image and which images get them (core) | [US-028](../user-stories/US-028-image-fit.md) | Done |
+| [TICKET-091](TICKET-091-image-fit-helper.md) | The helper `fit-flow` and its decisions (core) | [US-028](../user-stories/US-028-image-fit.md) | Done |
+| [TICKET-092](TICKET-092-image-fit-decisions-read-back.md) | Reading the decisions back; the warnings in export and preview (plugin) | [US-028](../user-stories/US-028-image-fit.md) | Done |
+| [TICKET-093](TICKET-093-image-fit-row.md) | The row `Smallest image size` (plugin) | [US-028](../user-stories/US-028-image-fit.md) | Done |
+| [TICKET-095](TICKET-095-image-fit-look.md) | The look as today: the probe's space and the full-width figure (defect fix) | [US-028](../user-stories/US-028-image-fit.md) | Done |
+| [TICKET-096](TICKET-096-image-fit-floats.md) | Floats with the look as today: the full-width block only where floats are off (defect fix) | [US-028](../user-stories/US-028-image-fit.md) | Done |
+| [TICKET-097](TICKET-097-image-fit-own-page.md) | A float never on its probe's page: the room corrected by the float's own height (defect fix) | [US-028](../user-stories/US-028-image-fit.md) | Done |
+| [TICKET-094](TICKET-094-image-fit-build-and-m18.md) | Test build and manual check M18 (image fit) | [US-028](../user-stories/US-028-image-fit.md) | Done |
 | [TICKET-012](TICKET-012-inline-emitter.md) | Inline emitter `emitInline`: text, marks, breaks, HTML, comments | [US-001](../user-stories/US-001-convert-markdown-to-typst.md) | Done |
 | [TICKET-011](TICKET-011-call-separator-and-slash-rule.md) | `callSeparator` and the slash rule of `wrapEmphasis` | [US-013](../user-stories/US-013-typst-safe-output.md) | Done |
 | [TICKET-010](TICKET-010-markdown-parser-core.md) | Markdown parser in `core/parse`: tokens to a tree with lines | [US-014](../user-stories/US-014-markdown-parsing.md) | Done |

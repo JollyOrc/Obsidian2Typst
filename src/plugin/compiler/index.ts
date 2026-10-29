@@ -17,7 +17,8 @@ export interface WorkerLike {
 
 /** US-012: the outcome of a vector compile (what the page renderer reads). */
 export type VectorResult =
-  {ok: true; vector: Uint8Array} | Extract<CompileResult, {ok: false}>;
+  | {ok: true; vector: Uint8Array; fitDecisions?: unknown[]}
+  | Extract<CompileResult, {ok: false}>;
 
 /** US-012 AC-8: a running vector compile that can be ended. */
 export interface CompileJob {
@@ -125,7 +126,12 @@ export function createTypstCompiler(
             message?: string;
             pdf?: ArrayBuffer;
             vector?: ArrayBuffer;
+            fitDecisions?: unknown;
           };
+          // US-028 AC-5: the decisions only when the worker sent a list.
+          const fit = Array.isArray(message.fitDecisions)
+            ? {fitDecisions: message.fitDecisions as unknown[]}
+            : {};
           if (message.id !== id) return;
           if (message.type === 'ready') {
             current.postMessage({
@@ -139,11 +145,16 @@ export function createTypstCompiler(
               })),
             });
           } else if (message.type === 'compiled') {
-            finish({ok: true, pdf: new Uint8Array(message.pdf as ArrayBuffer)});
+            finish({
+              ok: true,
+              pdf: new Uint8Array(message.pdf as ArrayBuffer),
+              ...fit,
+            });
           } else if (message.type === 'vector-compiled') {
             finish({
               ok: true,
               vector: new Uint8Array(message.vector as ArrayBuffer),
+              ...fit,
             });
           } else if (message.type === 'compile-error') {
             finish({

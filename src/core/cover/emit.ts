@@ -24,6 +24,12 @@ export function emitCoverPages(options: {
    * before (US-011 AC-4; AC-8 of US-019).
    */
   numberingNone?: boolean;
+  /**
+   * US-026 AC-3: false before front matter: the pages count from the cover
+   * (roman `iii` on the colophon) and the first chapter resets the counter.
+   * Default true: the text is as before.
+   */
+  resetCounter?: boolean;
 }): string {
   const PAGE = page(options.slug, options.numberingNone === true);
   const lines = [
@@ -32,6 +38,6 @@ export function emitCoverPages(options: {
     ']',
   ];
   if (options.blankPageAfter) lines.push(`${PAGE}[]`);
-  lines.push('#counter(page).update(1)');
+  if (options.resetCounter !== false) lines.push('#counter(page).update(1)');
   return lines.join('\n');
 }

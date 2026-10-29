@@ -4,6 +4,7 @@
 // Later stories register their rules here with the order numbers reserved in
 // the story (text-and-fonts 40, cover 90), so no other rule moves.
 import {
+  FIT_FLOW_HELPER,
   FIT_IMAGE_HELPER,
   FOOTNOTE_RESTART_RULE,
   headingNumberingRule,
@@ -27,6 +28,8 @@ export interface PreambleContext {
   settings: ConvertSettings;
   /** True when a found image is placed with the `fit-image` helper. */
   usesFitImage: boolean;
+  /** US-028 AC-3: true when an image is written with the `fit-flow` call. */
+  usesFitFlow?: boolean;
   /** The cover pages (US-011), or null when there is no cover. */
   cover?: string | null;
   /** US-010 AC-2: the four font lines, or null without font settings. */
@@ -110,6 +113,12 @@ export const PREAMBLE_RULES: readonly PreambleRule[] = [
     id: 'fit-image',
     order: 80,
     render: ({usesFitImage}) => (usesFitImage ? FIT_IMAGE_HELPER : null),
+  },
+  {
+    // US-028 AC-3: after the image helper, once, only when an image uses it.
+    id: 'fit-flow',
+    order: 81,
+    render: ({usesFitFlow}) => (usesFitFlow === true ? FIT_FLOW_HELPER : null),
   },
   {
     // US-016 AC-11: after the image helper, before the cover; only when the

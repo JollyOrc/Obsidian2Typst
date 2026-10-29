@@ -476,12 +476,17 @@ describe('US-016 AC-11 the preamble rule callouts', () => {
 });
 
 describe('US-016 AC-11 names the plugin defines (template)', () => {
-  it('US-016 AC-11, US-017 AC-6, US-019 AC-3, US-018 AC-3: PLUGIN_NAMES are fit-image, callout, callout-styles, glossary-term, page-ref, running-text and running-title', () => {
+  it('US-016 AC-11, US-017 AC-6, US-019 AC-3, US-018 AC-3, US-025 AC-6, US-026 AC-6, US-028 AC-3: PLUGIN_NAMES are fit-flow, fit-image, callout, callout-styles, glossary-term, o2t-blank, o2t-fit, o2t-fit-decision, o2t-part, page-ref, running-text and running-title', () => {
     expect([...PLUGIN_NAMES].sort()).toEqual([
       'callout',
       'callout-styles',
+      'fit-flow',
       'fit-image',
       'glossary-term',
+      'o2t-blank',
+      'o2t-fit',
+      'o2t-fit-decision',
+      'o2t-part',
       'page-ref',
       'running-text',
       'running-title',

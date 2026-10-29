@@ -1,6 +1,13 @@
 // US-008: the fields of a preset, the schema version and the built-in values.
 // Pure core: no Obsidian, Node, or I/O imports.
 import type {CoverMode} from '../cover/types';
+import type {
+  BookSettings,
+  BreakLevel,
+  BreakRule,
+  ImagesSettings,
+  TocSettings,
+} from '../layout/page-setup';
 import type {FontsPresetFields} from '../fonts/types';
 import type {CalloutsSettings, HeadingRulesSettings} from '../markers';
 
@@ -28,6 +35,8 @@ export interface PagePresetFields {
   runningHeader?: boolean;
   /** US-019 AC-1: the heading level of the running header, 1 to 6. */
   runningHeaderLevel?: number;
+  /** US-025 AC-1: the break rule per heading level; missing keys are unset. */
+  breakBefore?: Partial<Record<BreakLevel, BreakRule>>;
 }
 
 /** US-011 AC-1: the cover settings of a preset note (never of the Defaults). */
@@ -39,6 +48,18 @@ export interface CoverPresetFields {
   /** True when `cover.back` is present and not null (AC-10). */
   back?: true;
 }
+
+/** US-026 AC-9: the book settings of a preset note or the Defaults. */
+export type BookPresetFields = Partial<BookSettings>;
+
+/**
+ * US-027 AC-1: the contents settings of a preset note or the Defaults;
+ * `heading` and `position` only in preset notes.
+ */
+export type TocPresetFields = Partial<TocSettings>;
+
+/** US-028 AC-1: the image fit settings of a preset note or the Defaults. */
+export type ImagesPresetFields = Partial<ImagesSettings>;
 
 /**
  * The settings a preset note (or the Defaults) can hold. A field is *set* when
@@ -67,6 +88,12 @@ export interface PresetFields {
   headingRules?: HeadingRulesSettings;
   /** US-021 AC-1: the group the lists show the preset in; preset notes only. */
   group?: string;
+  /** US-026 AC-9: preset notes and the Defaults. */
+  book?: BookPresetFields;
+  /** US-027 AC-1: preset notes and the Defaults (heading, position: notes only). */
+  toc?: TocPresetFields;
+  /** US-028 AC-1: preset notes and the Defaults. */
+  images?: ImagesPresetFields;
 }
 
 /** The names of the preset fields. Strict mode and the warnings folder are global. */
@@ -84,6 +111,9 @@ export const PRESET_FIELDS = [
   'callouts',
   'headingRules',
   'group',
+  'book',
+  'toc',
+  'images',
 ] as const;
 
 /** The values used when neither the preset nor the Defaults set a field. */

@@ -35,7 +35,7 @@ type CoverAction = (
   several: boolean,
 ) => Plan;
 interface LineContext {
-  heading: {text: string} | null;
+  heading: {text: string; level: number} | null;
   images: string[];
 }
 type LineContextFn = (
@@ -332,9 +332,10 @@ describe('US-022 AC-1, AC-3 which line is a heading or holds images', () => {
   };
 
   it('US-022 AC-1: a top-level heading is one, with its visible text', async () => {
-    expect((await at(0)).heading).toEqual({text: 'Glossar'});
-    expect((await at(17)).heading).toEqual({text: 'Rules'});
-    expect((await at(19)).heading).toEqual({text: 'Begriffe A–Z'});
+    // US-027 AC-7 (TICKET-086): the heading carries its level too.
+    expect((await at(0)).heading).toEqual({text: 'Glossar', level: 1});
+    expect((await at(17)).heading).toEqual({text: 'Rules', level: 1});
+    expect((await at(19)).heading).toEqual({text: 'Begriffe A–Z', level: 2});
   });
 
   it('US-022 AC-1: a paragraph, a heading in a callout and a term inside an open glossary section are not (decision 3)', async () => {
@@ -350,21 +351,26 @@ describe('US-022 AC-1, AC-3 which line is a heading or holds images', () => {
     const source = '# Glossary\n\n### Notes\n\n## Term\n\nText.\n\n# After';
     const at = (line: number) =>
       lineContext(source, line, 'Sample/Rules.md', FILES).heading;
-    expect(at(0)).toEqual({text: 'Glossary'});
+    expect(at(0)).toEqual({text: 'Glossary', level: 1});
     expect(at(2)).toBeNull();
     expect(at(4)).toBeNull();
-    expect(at(8)).toEqual({text: 'After'});
+    expect(at(8)).toEqual({text: 'After', level: 1});
   });
 
   it("US-022 AC-1: the sections follow the active preset's heading rules, under them the built-in mapping (SCAR-019)", async () => {
     // `Glossary: none` switches the built-in section off: its headings count
-    expect((await at(9, {Glossary: 'none'})).heading).toEqual({text: 'Gambit'});
+    expect((await at(9, {Glossary: 'none'})).heading).toEqual({
+      text: 'Gambit',
+      level: 2,
+    });
     expect((await at(15, {Glossary: 'none'})).heading).toEqual({
       text: 'Begriffe A–Z',
+      level: 2,
     });
     // a preset section: its opener counts, its term does not
     expect((await at(17, {Rules: 'glossary'})).heading).toEqual({
       text: 'Rules',
+      level: 1,
     });
     expect((await at(19, {Rules: 'glossary'})).heading).toBeNull();
     // the built-in rule still applies next to a preset key

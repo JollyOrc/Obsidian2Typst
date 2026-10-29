@@ -12,6 +12,15 @@ export interface PdfPage {
   height: number;
   /** The page uses an image (an XObject in its resources). */
   hasImage: boolean;
+  /**
+   * US-028 AC-6: the images drawn on the page, in the order of the stream,
+   * with their drawn size in points: the matrix of the `cm` written right
+   * before each `Do` (Typst writes `w 0 0 h x y cm` then `/xN Do`; checked on
+   * known documents, SCAR-028). A cropped image reports its drawn size.
+   * US-028 AC-13: `x` and `y` are the matrix's translation, the image's
+   * lower left corner in PDF points from the page's lower left corner.
+   */
+  images: {width: number; height: number; x: number; y: number}[];
   /** The page shows any text, also a page number. */
   hasText: boolean;
   /** The text of the page without its footer, runs joined by a space. */
@@ -168,31 +177,106 @@ function literalBytes(body: string): number[] {
 }
 
 /** The text of the `TJ` and `Tj` strings of a content stream part. */
+/** The bytes of a hex string's digits (whitespace ignored, odd digit padded). */
+function hexBytes(hex: string): number[] {
+  const digits = hex.replace(/\s+/g, '');
+  const padded = digits.length % 2 === 0 ? digits : `${digits}0`;
+  return (padded.match(/../g) ?? []).map((h) => Number.parseInt(h, 16));
+}
+
+type Token =
+  | {t: 'str'; bytes: number[]}
+  | {t: 'name' | 'op'; v: string}
+  | {t: '['}
+  | {t: ']'};
+
+/**
+ * The tokens of a content stream part. A literal string may hold balanced,
+ * unescaped parentheses (`(a(b)c)`, as Typst writes some glyph runs), so it is
+ * read by counting them, not with a pattern.
+ */
+function contentTokens(part: string): Token[] {
+  const out: Token[] = [];
+  const delimiter = /[\s()<>[\]{}/%]/;
+  let i = 0;
+  while (i < part.length) {
+    const ch = part[i] as string;
+    if (/\s/.test(ch)) {
+      i++;
+    } else if (ch === '(') {
+      let depth = 1;
+      let j = i + 1;
+      while (j < part.length && depth > 0) {
+        const c = part[j] as string;
+        if (c === '\\') j++;
+        else if (c === '(') depth++;
+        else if (c === ')') depth--;
+        j++;
+      }
+      out.push({t: 'str', bytes: literalBytes(part.slice(i + 1, j - 1))});
+      i = j;
+    } else if (ch === '<' && part[i + 1] === '<') {
+      i += 2;
+    } else if (ch === '>' && part[i + 1] === '>') {
+      i += 2;
+    } else if (ch === '<') {
+      const end = part.indexOf('>', i);
+      out.push({t: 'str', bytes: hexBytes(part.slice(i + 1, end))});
+      i = end + 1;
+    } else if (ch === '[' || ch === ']') {
+      out.push({t: ch});
+      i++;
+    } else if (ch === '/') {
+      let j = i + 1;
+      while (j < part.length && !delimiter.test(part[j] as string)) j++;
+      out.push({t: 'name', v: part.slice(i + 1, j)});
+      i = j;
+    } else if (ch === '%') {
+      while (i < part.length && part[i] !== '\n') i++;
+    } else {
+      let j = i + 1;
+      while (j < part.length && !delimiter.test(part[j] as string)) j++;
+      out.push({t: 'op', v: part.slice(i, j)});
+      i = j;
+    }
+  }
+  return out;
+}
+
 function textOf(part: string, fonts: Map<string, Map<number, string>>): string {
   const runs: string[] = [];
   let font = new Map<number, string>();
-  const tokens = part.matchAll(
-    /\/(f\d+) [\d.]+ Tf|\[((?:\((?:\\.|[^\\)])*\)|[^\]()])*)\]\s*TJ|\(((?:\\.|[^\\)])*)\)\s*Tj/g,
-  );
-  for (const token of tokens) {
-    if (token[1] !== undefined) {
-      font = fonts.get(token[1]) ?? new Map();
-      continue;
-    }
-    const strings = [
-      ...((token[2] ?? `(${token[3] ?? ''})`).matchAll(
-        /\(((?:\\.|[^\\)])*)\)/g,
-      ) as Iterable<RegExpMatchArray>),
-    ];
+  let name = '';
+  let strings: number[][] = [];
+  let array: number[][] | null = null;
+  const decode = (all: number[][]): string => {
     let run = '';
-    for (const s of strings) {
-      const bytes = literalBytes(s[1] as string);
+    for (const bytes of all) {
       for (let i = 0; i + 1 < bytes.length; i += 2) {
         const glyph = ((bytes[i] as number) << 8) | (bytes[i + 1] as number);
-        run += font.get(glyph) ?? '�';
+        run += font.get(glyph) ?? '\uFFFD';
       }
     }
-    if (run !== '') runs.push(run);
+    return run;
+  };
+  for (const token of contentTokens(part)) {
+    if (token.t === 'name') {
+      name = token.v;
+    } else if (token.t === 'str') {
+      if (array !== null) array.push(token.bytes);
+      else strings = [token.bytes];
+    } else if (token.t === '[') {
+      array = [];
+    } else if (token.t === ']') {
+      strings = array ?? [];
+      array = null;
+    } else if (token.v === 'Tf') {
+      font = fonts.get(name) ?? new Map();
+    } else if (token.v === 'TJ' || token.v === 'Tj') {
+      const run = decode(strings);
+      if (run !== '') runs.push(run);
+      strings = [];
+    }
   }
   return runs.join(' ');
 }
@@ -225,6 +309,29 @@ function firstClip(body: string, pageHeight: number): PdfPage['clip'] {
     width: Math.max(...xs) - left,
     height: Math.max(...ys) - Math.min(...ys),
   };
+}
+
+/** A number of a PDF content stream. */
+const NUM = '(-?[\\d.]+)';
+const DRAWN = new RegExp(
+  `${NUM} ${NUM} ${NUM} ${NUM} ${NUM} ${NUM} cm\\s+/[\\w.]+ Do`,
+  'g',
+);
+
+/**
+ * US-028 AC-6, AC-13: the drawn sizes and places of the images of a content
+ * stream: for each `Do` right after a `cm`, the lengths of that matrix's
+ * columns and its translation.
+ */
+function imagesOf(
+  stream: string,
+): {width: number; height: number; x: number; y: number}[] {
+  return [...stream.matchAll(DRAWN)].map((m) => {
+    const [a, b, c, d, e, f] = [m[1], m[2], m[3], m[4], m[5], m[6]].map(
+      Number,
+    ) as [number, number, number, number, number, number];
+    return {width: Math.hypot(a, b), height: Math.hypot(c, d), x: e, y: f};
+  });
 }
 
 /** The pages of `bytes` in order. Throws when the structure is not found. */
@@ -303,6 +410,7 @@ export function readPdfPages(bytes: Uint8Array): PdfPage[] {
       width: Number(box[1]),
       height: Number(box[2]),
       hasImage: dict.includes('/XObject'),
+      images: imagesOf(stream),
       hasText: text !== '' || printed !== '',
       text,
       footer: printed,

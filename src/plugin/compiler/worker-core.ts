@@ -7,6 +7,7 @@ import {
 } from '@myriaddreamin/typst.ts/dist/esm/compiler.mjs';
 import {TypstSnippet} from '@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs';
 import {loadFonts} from '@myriaddreamin/typst.ts/dist/esm/options.init.mjs';
+import {FIT_DECISION_LABEL} from '../../core/emit/fit-label';
 import type {FaceInfo} from '../../core/fonts';
 
 /** Sends a message to the plugin; `transfer` lists buffers that move. */
@@ -59,6 +60,41 @@ function diagnosticLine(d: Diagnostic): string {
 
 const text = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+
+/** The part of the typst.ts compiler `readFitDecisions` uses. */
+interface QueryCompiler {
+  runWithWorld<T>(
+    options: {mainFilePath: string},
+    cb: (world: {
+      compile(): Promise<unknown>;
+      query(options: {selector: string; field?: string}): Promise<unknown>;
+    }) => Promise<T>,
+  ): Promise<T>;
+}
+
+/**
+ * US-028 | AC-5: the values of the image fit decisions of the compiled main
+ * file, in document order, with typst.ts `runWithWorld` and `query` (options
+ * read from `compiler.d.mts`: `SnapshotOptions.mainFilePath`,
+ * `QueryOptions.selector` and `field`; measured at G1 and by the TICKET-091
+ * reader). The world compiles the document once more. A thrown query or a
+ * result that is no list gives undefined: the export never fails on it.
+ */
+export async function readFitDecisions(
+  compiler: QueryCompiler,
+  mainFilePath: string,
+): Promise<unknown[] | undefined> {
+  try {
+    const out = await compiler.runWithWorld({mainFilePath}, async (world) => {
+      await world.compile();
+      return world.query({selector: `<${FIT_DECISION_LABEL}>`, field: 'value'});
+    });
+    const values: unknown = typeof out === 'string' ? JSON.parse(out) : out;
+    return Array.isArray(values) ? values : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /** The worker logic: `handle` takes the messages of the plugin, one at a time. */
 export function createWorkerCore(post: Post): {
@@ -120,10 +156,17 @@ export function createWorkerCore(post: Post): {
       pdf.byteOffset,
       pdf.byteOffset + pdf.byteLength,
     ) as ArrayBuffer;
+    // US-028 AC-5: only a document with image fit decisions is queried.
+    const decisions = message.source.includes(FIT_DECISION_LABEL)
+      ? await readFitDecisions(compiler as unknown as QueryCompiler, main)
+      : undefined;
+    const fit = decisions === undefined ? {} : {fitDecisions: decisions};
     if (vector) {
-      post({type: 'vector-compiled', id: message.id, vector: buffer}, [buffer]);
+      post({type: 'vector-compiled', id: message.id, vector: buffer, ...fit}, [
+        buffer,
+      ]);
     } else {
-      post({type: 'compiled', id: message.id, pdf: buffer}, [buffer]);
+      post({type: 'compiled', id: message.id, pdf: buffer, ...fit}, [buffer]);
     }
   };
 

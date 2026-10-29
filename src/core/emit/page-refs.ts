@@ -13,9 +13,16 @@
  * Typst 0.14.2 (2026-10-20, 2026-10-21). Assumes `escapedWord` was written
  * through `escapeMarkup(word, {atBlockStart: false})`: the word follows ` (`
  * inside a content block, never at its start.
+ *
+ * US-026 AC-10: with `roman` (roman folios in the front matter) the number is
+ * written in the numbering of the target's page, so a reference into the
+ * colophon prints `iii` as its folio does (measured 2026-10-28, scratch probe
+ * `p079`, F3). Only written then: every page with a target has a numbering
+ * (the cover pages hold no heading). Without it the text is as before.
  */
-export function pageRefHelper(escapedWord: string): string {
-  return `#let page-ref(target) = context [ (${escapedWord}~#numbering("1", ..counter(page).at(target)))]`;
+export function pageRefHelper(escapedWord: string, roman = false): string {
+  const numbering = roman ? 'locate(target).page-numbering()' : '"1"';
+  return `#let page-ref(target) = context [ (${escapedWord}~#numbering(${numbering}, ..counter(page).at(target)))]`;
 }
 
 /**

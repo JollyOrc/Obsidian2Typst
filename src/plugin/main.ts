@@ -287,6 +287,7 @@ export default class Obsidian2TypstPlugin extends Plugin {
     return activePresetView(
       this.presets.entries(),
       this.pluginSettings.data.activePreset,
+      this.pluginSettings.data.defaults,
     );
   }
 
@@ -386,6 +387,10 @@ export default class Obsidian2TypstPlugin extends Plugin {
         pageSize: document.pageSize(1),
         document,
         release: () => document.dispose(),
+        // US-028 AC-5: the decisions reach the preview's warning count.
+        ...(vector.fitDecisions === undefined
+          ? {}
+          : {fitDecisions: vector.fitDecisions}),
       };
     })();
     return {result, cancel: () => job.cancel()};

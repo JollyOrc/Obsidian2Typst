@@ -25,6 +25,7 @@ export {
   EMPTY_GLOSSARY_PLAN,
   findGlossary,
   headingRuleTable,
+  type BookPart,
   type GlossaryPlan,
   type GlossaryRole,
   type GlossaryWarning,

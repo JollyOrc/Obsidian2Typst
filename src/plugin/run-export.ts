@@ -3,7 +3,7 @@
 // the compiler and the file reader are injected; nothing here imports Obsidian.
 import {exportNames, type CompileRequest} from '../core/compile';
 import type {AssetUse} from '../core/assets';
-import type {Warning} from '../core/emit';
+import {fitDecisionWarnings, type Warning} from '../core/emit';
 import type {TypstCompiler} from './compiler';
 import {copyAssets} from './copy-assets';
 import {
@@ -84,7 +84,9 @@ export async function runExport(
     const dir = options.exportDir.replace(/\/+$/, '');
     let status: ExportResult['status'] = 'exported';
 
-    const writeOutput = async (): Promise<void | {failed: true}> => {
+    const writeOutput = async (): Promise<
+      void | {failed: true} | {warnings: Warning[]}
+    > => {
       await host.writeExportFile(`${dir}/${names.typ}`, options.typ);
       const files: Record<string, Uint8Array> = {};
       await copyAssets(
@@ -119,6 +121,8 @@ export async function runExport(
         return {failed: true};
       }
       await host.writeExportBytes(`${dir}/${names.pdf}`, result.pdf);
+      // US-028 AC-5: the image fit warnings of this compile.
+      return {warnings: fitDecisionWarnings(result.fitDecisions ?? [])};
     };
 
     const flow = await finishExport({

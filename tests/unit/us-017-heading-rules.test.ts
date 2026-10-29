@@ -92,19 +92,19 @@ describe('US-017 AC-1 the preset field headingRules', () => {
       ],
       [
         ['headingRules:', '  Glossary: index'],
-        'headingRules.Glossary must be a rule name: glossary or none (line 4)',
+        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes or none (line 4)',
       ],
       [
         ['headingRules:', '  Glossary: 5'],
-        'headingRules.Glossary must be a rule name: glossary or none (line 4)',
+        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes or none (line 4)',
       ],
       [
         ['headingRules:', '  Glossary: {a: 1}'],
-        'headingRules.Glossary must be a rule name: glossary or none (line 4)',
+        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes or none (line 4)',
       ],
       [
         ['headingRules:', '  Glossary: Glossary'],
-        'headingRules.Glossary must be a rule name: glossary or none (line 4)',
+        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes or none (line 4)',
       ],
       [
         ['headingRules:', '  Glossary: glossary', '  glossary: none'],
@@ -146,10 +146,10 @@ describe('US-017 AC-1 the preset field headingRules', () => {
     expect(defaults.ok && defaults.fields).toEqual({highlightColor: '#a5d6a7'});
   });
 
-  it('US-017 AC-1: the built-in mapping is Glossary: glossary', () => {
+  it('US-017 AC-1: the built-in mapping holds Glossary: glossary (US-026 adds Colophon and Back notes)', () => {
     expect(
       (markers as Record<string, unknown>)['BUILTIN_HEADING_RULES'],
-    ).toEqual({Glossary: 'glossary'});
+    ).toMatchObject({Glossary: 'glossary'});
   });
 
   it('US-017 AC-1: without the field the built-in rule applies; Glossary: none switches it off', async () => {

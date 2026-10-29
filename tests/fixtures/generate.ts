@@ -31,6 +31,12 @@ const WORDS = (
   'sollicitudin aenean euismod elementum hendrerit vulputate mi bibendum'
 ).split(' ');
 
+/**
+ * US-026 AC-11: the headings of the colophon and the back notes, from the
+ * word list; the sample preset maps them to `colophon` and `back-notes`.
+ */
+const BOOK_PARTS = {colophon: 'Senectus Netus', backNotes: 'Pretium Fames'};
+
 /** Words that are never a title word, for links that resolve nowhere. */
 const ABSENT = ['zephyrum', 'quokka', 'brontes', 'kalyx', 'vortex', 'nimbus'];
 
@@ -1141,6 +1147,15 @@ export function generateSample(outDir: string): void {
       `${book.sentence()} ${book.anchor(linkedTerm, `#${linkedTerm.replace(/ /g, '%20')}`, {level: 2, inGlossary: false})} ${book.word()}.`,
     );
   }
+  // US-026 AC-11: a colophon and back notes, written after every other block
+  // so that the text above stays as it was. `presets/Sample.md` maps their
+  // headings; they are not the built-in `Colophon`, `Back notes`, so without
+  // that preset they stay two chapters at the end of the body.
+  book.heading(1, BOOK_PARTS.colophon);
+  book.paragraph(book.sentence());
+  book.paragraph(book.sentence());
+  book.heading(1, BOOK_PARTS.backNotes);
+  book.paragraph(`${book.sentence()} ${book.sentence()}`);
   const text = book.text();
   const nonAscii: Counts = {};
   for (const ch of text) if (ch.charCodeAt(0) > 127) add(nonAscii, ch);
@@ -1156,6 +1171,14 @@ export function generateSample(outDir: string): void {
   }
   const repeated = [...titleCount.values()].filter((n) => n > 1);
   void repeatedTitles;
+  // US-026 AC-11: each part heading is one heading of the note (any case:
+  // heading rules ignore case), so the preset's rule marks only that one.
+  for (const title of Object.values(BOOK_PARTS)) {
+    const same = [...titleCount.entries()]
+      .filter(([t]) => t.toLowerCase() === title.toLowerCase())
+      .reduce((sum, [, n]) => sum + n, 0);
+    if (same !== 1) throw new Error(`"${title}" is ${same} headings`);
+  }
 
   const files = new Map<string, Uint8Array | string>();
   files.set('Book.md', text);
@@ -1175,9 +1198,13 @@ export function generateSample(outDir: string): void {
       '      width: 0.75',
       '    title:',
       '      color: "#333333"',
+      'headingRules:',
+      `  ${BOOK_PARTS.colophon}: colophon`,
+      `  ${BOOK_PARTS.backNotes}: back-notes`,
       '---',
       '',
-      'The preset of the sample vault: it styles the user callout type `rule-box`.',
+      'The preset of the sample vault: it styles the user callout type `rule-box`',
+      'and marks the colophon and the back notes of `Book.md`.',
       '',
     ].join('\n'),
   );
@@ -1189,6 +1216,7 @@ export function generateSample(outDir: string): void {
     Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
   const manifest = {
     anchors: book.anchors,
+    bookParts: BOOK_PARTS,
     census: {
       aligns: sorted(book.aligns),
       bytes: Buffer.byteLength(text),

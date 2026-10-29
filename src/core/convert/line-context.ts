@@ -19,8 +19,11 @@ import {indexHeadings, parse, type BlockNode, type InlineNode} from '../parse';
 
 /** US-022 AC-1, AC-3: what the menus may act on at one line of a note. */
 export interface LineContext {
-  /** A top-level heading the rules look at, with its visible text. */
-  heading: {text: string} | null;
+  /**
+   * A top-level heading the rules look at, with its visible text and its
+   * level (US-027 AC-7: the contents items are offered on an H1).
+   */
+  heading: {text: string; level: number} | null;
   /** The vault paths of the line's images in the file list, in line order. */
   images: string[];
 }
@@ -32,7 +35,8 @@ export interface LineContext {
  * mapping applies under them). Synchronous and without file reads: the editor
  * menu calls it while it is built (AC-9).
  *
- * The heading is a top-level, non-empty heading on that line that is neither
+ * The heading is a top-level, non-empty heading on that line (with its level,
+ * US-027 AC-7) that is neither
  * a term (or a heading inside a term) nor inside an open glossary section;
  * `findGlossary` decides both (SCAR-017). A heading in a callout, quote or
  * list item is none. The images are every image and embed node on that line,
@@ -58,7 +62,7 @@ export function lineContext(
     const info = headings.byNode.get(block);
     // a term or a heading in a term is inside its section too
     if (info === undefined || plan.inSection.has(block)) continue;
-    heading = {text: info.text};
+    heading = {text: info.text, level: block.depth};
   }
 
   const resolver = createAssetResolver({

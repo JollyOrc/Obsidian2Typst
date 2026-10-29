@@ -1,6 +1,6 @@
 {
   "name": "obsidian2typst",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "private": true,
   "type": "module",
   "description": "Obsidian plugin that converts a single Markdown file into Typst for print-ready PDFs.",

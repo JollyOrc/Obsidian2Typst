@@ -21,6 +21,7 @@ export {
   type NameResult,
 } from './names';
 export {
+  contentsAction,
   coverAction,
   editPresetField,
   headingRuleAction,

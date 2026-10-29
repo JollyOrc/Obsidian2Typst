@@ -5,7 +5,9 @@
 // action reads the store when it is clicked (SCAR-016).
 import {extensionOf, SUPPORTED_IMAGE_EXTENSIONS} from '../core/assets';
 import type {LineContext} from '../core/convert';
+import {headingRuleKey, headingRuleTable} from '../core/markers';
 import {
+  contentsAction,
   coverAction,
   groupPresets,
   headingRuleAction,
@@ -147,12 +149,18 @@ export interface ActivePresetView {
   valid: boolean;
   /** The preset's own fields when it is valid, else null. */
   fields: PresetFields | null;
+  /**
+   * US-027 AC-7: the Defaults, for the effective contents depth (decision 3:
+   * the item also sets depth 2 while the contents are off). Missing: none.
+   */
+  defaults?: PresetFields | null;
 }
 
 /**
  * US-022 | AC-6, AC-9: The active preset for the editor and file explorer
  * menus, read from the store's `entries` and the stored name when a menu
  * opens (the menus are built synchronously, so this is what is in memory).
+ * US-027 AC-7: with the Defaults (`defaults`, in memory too).
  * The action reads it again at `Change preset` (SCAR-016).
  */
 export function activePresetView(
@@ -162,18 +170,22 @@ export function activePresetView(
     preset?: {fields: PresetFields};
   }[],
   stored: string,
+  defaults?: PresetFields | null,
 ): ActivePresetView {
+  // only when given: the view of a caller without Defaults is as before
+  const withDefaults = defaults === undefined ? {} : {defaults};
   const name = pickActive(
     entries.map((entry) => entry.name),
     stored,
   );
   const entry = entries.find((candidate) => candidate.name === name);
   return entry === undefined
-    ? {name: null, valid: false, fields: null}
+    ? {name: null, valid: false, fields: null, ...withDefaults}
     : {
         name: entry.name,
         valid: entry.valid,
         fields: entry.valid ? (entry.preset?.fields ?? null) : null,
+        ...withDefaults,
       };
 }
 
@@ -212,7 +224,9 @@ function presetEntry(
 /**
  * US-022 | AC-1, AC-3, AC-6: The entries of the editor menu for the line of
  * the cursor (`context` from `lineContext`, built when the menu opens): the
- * heading item (`headingRuleAction`, icon `list`) and one cover item per
+ * heading item (`headingRuleAction`, icon `list`), on a top-level H1 that is
+ * no colophon or back-notes heading the two contents items (`contentsAction`,
+ * icon `list-ordered`; US-027 AC-7), and one cover item per
  * image (`coverAction`, icon `image`; with several images, titled with the
  * file name), in that order. Nothing for a line without either. The caller
  * leaves preset notes out (`isPresetNote`).
@@ -230,6 +244,30 @@ export function presetEditEntries(
         headingRuleAction(active.fields, heading.text, active.name ?? ''),
       ),
     );
+    // US-027 AC-7: on an H1 that is no colophon or back-notes heading.
+    const rule = headingRuleTable(active.fields?.headingRules ?? {}).get(
+      headingRuleKey(heading.text),
+    );
+    if (heading.level === 1 && rule !== 'colophon' && rule !== 'back-notes') {
+      for (const side of ['before', 'after'] as const) {
+        entries.push(
+          presetEntry(
+            actions,
+            active,
+            'list-ordered',
+            `Table of contents ${side} this heading`,
+            () =>
+              contentsAction(
+                active.fields,
+                active.defaults ?? null,
+                heading.text,
+                side,
+                active.name ?? '',
+              ),
+          ),
+        );
+      }
+    }
   }
   const several = images.length > 1;
   for (const path of images) {

@@ -3,6 +3,7 @@
 // priority; it draws nothing and imports nothing from Obsidian. Timers, the
 // preparation and the compile are injected.
 import type {CompileRequest} from '../../core/compile';
+import {fitDecisionWarnings} from '../../core/emit';
 import {aspectOf} from '../../core/preview/canvas';
 import {
   RANGE_MESSAGE,
@@ -26,6 +27,8 @@ export type PreviewCompile =
       document: unknown;
       /** Frees the document (US-012 AC-8, memory). */
       release?: () => void;
+      /** US-028 AC-5: the image fit decisions of this compile, if any. */
+      fitDecisions?: unknown[];
     }
   | {ok: false; error: string};
 
@@ -216,7 +219,10 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
       error: null,
       hint: null,
       greyed: false,
-      warnings: prepared.warnings,
+      // US-028 AC-5 (decision 8): the fit warnings of this run count too.
+      warnings:
+        prepared.warnings +
+        fitDecisionWarnings(result.fitDecisions ?? []).length,
       ...applyRange(),
     });
   };

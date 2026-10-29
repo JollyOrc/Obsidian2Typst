@@ -4,7 +4,14 @@ import type {AssetUse} from '../assets';
 import type {CoverSettings} from '../cover';
 import type {FontInfo, Warning} from '../emit';
 import type {FontsSettings} from '../fonts/types';
-import type {PageFurniture, PageGeometry} from '../layout/page-setup';
+import type {
+  BookSettings,
+  BreakRules,
+  ImagesSettings,
+  PageFurniture,
+  PageGeometry,
+  TocSettings,
+} from '../layout/page-setup';
 import type {CalloutsSettings, HeadingRulesSettings} from '../markers';
 
 /**
@@ -61,6 +68,26 @@ export interface ConvertSettings {
    * (older callers and tests are unchanged).
    */
   pageFurniture?: PageFurniture;
+  /**
+   * US-025 AC-1: the break rule per heading level; missing (or a missing
+   * level) means `none` (older callers and tests are unchanged).
+   */
+  breakBefore?: Partial<BreakRules>;
+  /**
+   * US-026: the book settings; missing (or a missing field) means the
+   * built-in value of `DEFAULT_BOOK` (both part headings hidden).
+   */
+  book?: Partial<BookSettings>;
+  /**
+   * US-027: the table of contents; missing (or `depth` 0) means no contents
+   * (today's output).
+   */
+  toc?: Partial<TocSettings>;
+  /**
+   * US-028 AC-1: the image fit; missing (or `minScale` 100) means no fit
+   * (today's output).
+   */
+  images?: Partial<ImagesSettings>;
 }
 
 /** US-015 AC-1: the input of {@link convert}. */

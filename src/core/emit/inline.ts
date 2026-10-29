@@ -32,7 +32,7 @@ import type {EmitContext} from './context';
 import {wrapEmphasis} from './emphasis';
 import {escapeMarkup} from './escape-markup';
 import {footnoteCall, type NoteEnv} from './footnote';
-import {emitImage, type AnyImageNode} from './image';
+import {emitImage, type AnyImageNode, type ImageFit} from './image';
 import {pageRefCall, type PageRefEnv} from './page-refs';
 import {rawInline} from './raw';
 import {typstString} from './typst-string';
@@ -43,6 +43,11 @@ export interface LinkEnv {
   headings: HeadingIndex;
   /** US-004 AC-1c: write the address of an external link in a footnote. */
   externalLinkFootnotes: boolean;
+  /**
+   * US-026 AC-8: labels of headings that are not written (an empty book part
+   * left out); a link to one of them is unresolved. Default: none.
+   */
+  gone?: ReadonlySet<string>;
 }
 
 /** Where the inline content ends up (US-004 AC-6, AC-9). */
@@ -81,6 +86,21 @@ export interface InlineOptions {
    * selects. Without it no call is written (today's output).
    */
   pageRefs?: PageRefEnv;
+  /**
+   * US-028 AC-2, AC-3: write the images that are pieces of this paragraph
+   * itself (not inside a mark or a link) with the `fit-flow` call. Set only
+   * for the paragraphs the rule applies to. Default: none (today's output).
+   */
+  fit?: InlineFit;
+}
+
+/**
+ * US-028 | AC-3, AC-4 (decision 5): the fit of a paragraph's images.
+ * `breakAfter` is true when the next top-level block starts with a written
+ * page break: an image that is the paragraph's last piece then never floats.
+ */
+export interface InlineFit extends ImageFit {
+  breakAfter: boolean;
 }
 
 type MarkKind = 'strong' | 'emph' | 'strike' | 'highlight' | 'underline';
@@ -113,6 +133,8 @@ interface Env {
   assets: AssetResolver | undefined;
   pageRefs: PageRefEnv | undefined;
   where: Where;
+  /** US-028: set only for the pieces of the paragraph itself. */
+  fit: InlineFit | undefined;
 }
 type Token = Item | {t: 'open' | 'close'; name: 'u' | 'span'; line: number};
 
@@ -188,11 +210,47 @@ function nestedNote(ctx: EmitContext, line: number): Token[] {
   return [];
 }
 
-/** Turns one node into tokens; reports what it drops. */
-function tokensOf(node: InlineNode, ctx: EmitContext, env: Env): Token[] {
-  if (env.assets !== undefined && isImageNode(node)) {
-    return [{t: 'block', value: emitImage(node, ctx, env.assets)}];
+/**
+ * US-028 | AC-3, AC-4: true when nothing after `from` in `nodes` writes text
+ * (breaks, comments and blanks only), so the node before is the last piece.
+ */
+function restIsBlank(nodes: readonly InlineNode[], from: number): boolean {
+  return nodes
+    .slice(from)
+    .every(
+      (node) =>
+        node.kind === 'softbreak' ||
+        node.kind === 'break' ||
+        node.kind === 'comment' ||
+        (node.kind === 'text' && node.value.trim() === ''),
+    );
+}
+
+/**
+ * Turns one node into tokens; reports what it drops. US-028 AC-2: the fit
+ * reaches an image that is this node itself, never the nodes inside it
+ * (marks, links, notes get the environment without it). `last` is true when
+ * the node is the paragraph's last piece (AC-4, decision 5).
+ */
+function tokensOf(
+  node: InlineNode,
+  ctx: EmitContext,
+  outer: Env,
+  last = false,
+): Token[] {
+  if (outer.assets !== undefined && isImageNode(node)) {
+    const fit =
+      outer.fit === undefined
+        ? undefined
+        : {
+            min: outer.fit.min,
+            sides: outer.fit.sides,
+            floats: outer.fit.floats && !(last && outer.fit.breakAfter),
+            reserve: outer.fit.reserve,
+          };
+    return [{t: 'block', value: emitImage(node, ctx, outer.assets, fit)}];
   }
+  const env = outer.fit === undefined ? outer : {...outer, fit: undefined};
   if (env.notes !== undefined) {
     if (node.kind === 'footnote-ref') {
       const nested = env.where === 'footnote';
@@ -328,15 +386,19 @@ function internalLink(
 ): Token[] {
   const found = target === null ? null : resolveHeading(target, links.headings);
   const items = body();
-  const first = found?.matches[0];
-  if (found === null || first === undefined) {
+  // US-026 AC-8: a heading that is not written is no target.
+  const matches = (found?.matches ?? []).filter(
+    (match) => links.gone?.has(match.label) !== true,
+  );
+  const first = matches[0];
+  if (first === undefined) {
     ctx.warn('LINK_UNRESOLVED', `No heading matches "${original}"`, line);
     return items;
   }
-  if (found.matches.length > 1) {
+  if (matches.length > 1) {
     ctx.warn(
       'LINK_AMBIGUOUS',
-      `"${original}" matches ${found.matches.length} headings; the first is used`,
+      `"${original}" matches ${matches.length} headings; the first is used`,
       line,
     );
   }
@@ -626,7 +688,14 @@ function prepare(
 ): Item[] {
   return clean(
     pair(
-      nodes.flatMap((n) => tokensOf(n, ctx, env)),
+      nodes.flatMap((n, i) =>
+        tokensOf(
+          n,
+          ctx,
+          env,
+          env.fit !== undefined && restIsBlank(nodes, i + 1),
+        ),
+      ),
       ctx,
     ),
   );
@@ -883,6 +952,7 @@ export function emitInline(
     assets: options.assets,
     pageRefs: options.pageRefs,
     where: options.where ?? 'body',
+    fit: options.fit,
   };
   const prepared = prepare(nodes, ctx, env);
   const items =

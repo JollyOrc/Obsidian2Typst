@@ -221,6 +221,8 @@ describe('US-003 the sample note', () => {
     expect(uses.every((u) => u.from === `${root}/${u.to}`)).toBe(true);
   });
 
+  // SCAR-030: compiles the whole sample document; 1399 ms with all 2480 tests
+  // running at once (2026-10-29), so a limit with room for a loaded machine.
   it('US-003 AC-2b: the whole document compiles with stand-in images of the same names', async () => {
     const standIns = Object.fromEntries(
       resolver.uses().map((u) => [u.to, standIn(u.to)]),
@@ -230,5 +232,5 @@ describe('US-003 the sample note', () => {
       (d) => d.severity === 'error',
     );
     expect(errors.map((e) => e.message)).toEqual([]);
-  });
+  }, 120_000);
 });

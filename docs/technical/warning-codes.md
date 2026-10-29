@@ -21,6 +21,8 @@ fixed by the story that owns the code.
 | `ASSET_AMBIGUOUS` | US-003 AC-2c | several vault files have the embed's name; the first is used | active |
 | `ASSET_INVALID` | US-003 AC-5b | the file's first bytes do not match its extension, or it is empty (placeholder is emitted) | active |
 | `IMAGE_IN_HEADING` | US-003 AC-1d | an image in a heading is placed after the heading | active |
+| `IMAGE_FLOATED` | US-028 AC-4, AC-5, AC-8 | an image did not fit after its text even at `images.minScale`; it is placed at the top of the next page and the text after it fills the gap. At the tightest edge the paragraph after it may not fit in the gap either, so the gap can stay (Typst's paragraph breaking; not verified). Read after the compile; strict mode reports it but never stops | active |
+| `IMAGE_MOVED` | US-028 AC-4, AC-5, AC-6 | an image did not fit after its text even at `images.minScale` and could not float (a right page, a container, the back notes, a page break or nothing after it); it moved to the next page and the space before it stays empty. Read after the compile; strict mode reports it but never stops | active |
 | `LINK_UNRESOLVED` | US-004 AC-4, AC-8 | no heading matches the wikilink, file link, or anchor | active |
 | `LINK_AMBIGUOUS` | US-004 AC-2, AC-8 | several headings match; the first is used | active |
 | `LINK_URL_NOT_SPELLED` | US-004 AC-6 | an external link inside a heading gets no footnote | active |
@@ -47,6 +49,9 @@ fixed by the story that owns the code.
 | `TEMPLATE_NAME_TAKEN` | US-016 AC-11 | `Template line 3 defines "callout", which the plugin also defines; the plugin's definition is used` (`fit-image`, `callout`, `callout-styles`, `glossary-term` of US-017 AC-6; line 0) | active |
 | `TEMPLATE_RULE_IGNORED` | US-023 AC-5 | `Template rule at line 12 does not apply; put it inside template(doc)`: a `#set` or `#show` at the start of a template line, which never applies through the import (line 0). A rule at line start inside a content block (`#let template(doc) = [` … `]`) is reported too, although it applies (decision 1); the form `{ set …; doc }` is not | active |
 | `HEADING_RULE_NO_TERMS` | US-017 AC-9 | `Heading "Glossary" has the rule glossary but no headings one level below it; nothing was changed` (at the heading's line) | active |
+| `BOOK_PART_JOINED` | US-026 AC-8 | `The colophon section "Impressum" is joined to the colophon above` (or `The back-notes section "Notes" is joined to the back notes above`), at the joined heading's line: a second part of one kind is added after the first | active |
+| `BOOK_PART_EMPTY` | US-026 AC-8 | `The colophon section "Colophon" is empty and is left out` (or the back-notes form), at the heading's line: a part with a hidden heading and no blocks is not written; links to it are unresolved | active |
+| `TOC_HEADING_MISSING` | US-027 AC-5 | `The table of contents heading "Rules" is not in the note; the contents are at the default place` (line 0): the picked heading (`toc.heading`) is no top-level H1 of the body; the contents go before the first chapter | active |
 | `HEADING_IN_TERM` | US-017 AC-14 | `Heading "Deep" is inside the glossary term "Gambit"; it is printed without number and outline entry` (at the heading's line) | active |
 
 Not used (decided): `HEADING_DUPLICATE` (repeated titles are numbered silently,

@@ -168,6 +168,8 @@ describe('US-015 AC-2 skeleton and fixed order', () => {
       ['heading-numbering', 60],
       ['footnote-restart', 70],
       ['fit-image', 80],
+      // US-028 AC-3 (TICKET-091): the image fit helper.
+      ['fit-flow', 81],
       ['callouts', 85],
       ['glossary', 86],
       ['cover', 90],

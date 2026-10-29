@@ -48,8 +48,12 @@ export interface FinishExportOptions {
    * Writes the `.typ`, the assets and the PDF; not called on a strict abort.
    * Returns `{failed: true}` when the export did not succeed (US-007 AC-4):
    * the report files are still written, the success notice is not shown.
+   * US-028 AC-5: may return `{warnings}` found by the compile (the image fit
+   * warnings); they join the report and the notice, never the strict check.
    */
-  writeOutput: () => Promise<void | {failed: true}>;
+  writeOutput: () => Promise<
+    void | {failed: true} | {warnings: readonly Warning[]}
+  >;
 }
 
 /**
@@ -67,15 +71,21 @@ export async function finishExport(
     return {aborted: true};
   }
   const output = await options.writeOutput();
+  // US-028 AC-5 (decision 8): the compile's warnings after the strict check,
+  // merged by line (stable: the conversion's first on a tie).
+  const all =
+    output !== undefined && 'warnings' in output
+      ? [...warnings, ...output.warnings].sort((a, b) => a.line - b.line)
+      : warnings;
   const reportPath = `${options.exportDir.replace(/\/+$/, '')}/export-warnings.md`;
-  await host.writeExportFile(reportPath, buildReport(warnings));
+  await host.writeExportFile(reportPath, buildReport(all));
   await host.writeVaultFile(
     notePath,
-    buildReport(warnings, {linkFile: source.inVault ? source.path : null}),
+    buildReport(all, {linkFile: source.inVault ? source.path : null}),
   );
-  if (output !== undefined && output.failed)
+  if (output !== undefined && 'failed' in output)
     return {aborted: false, failed: true};
-  const notice = reportNotice(warnings.length, reportPath);
+  const notice = reportNotice(all.length, reportPath);
   if (notice !== null) host.notice(notice);
   return {aborted: false};
 }

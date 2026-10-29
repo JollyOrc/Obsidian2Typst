@@ -24,6 +24,7 @@ export class EmitContext {
   private comments = 0;
   private firstCommentLine = 0;
   private fitImage = false;
+  private fitFlows = 0;
 
   /** Reports one warning. */
   warn(code: string, message: string, line: number): void {
@@ -46,6 +47,20 @@ export class EmitContext {
   /** True when a placed image needs the `fit-image` helper (US-015 AC-2). */
   get fitImagePlaced(): boolean {
     return this.fitImage;
+  }
+
+  /**
+   * US-028 AC-3: the number of the next `o2t-fit-N` label (1, 2, …); one
+   * counter per export, so the labels follow the document order (rule 7).
+   */
+  nextFitLabel(): number {
+    this.fitFlows += 1;
+    return this.fitFlows;
+  }
+
+  /** US-028 AC-3: true when an image was written with the `fit-flow` call. */
+  get fitFlowPlaced(): boolean {
+    return this.fitFlows > 0;
   }
 
   /** The warnings of the export, ordered by line, with the comment summary. */

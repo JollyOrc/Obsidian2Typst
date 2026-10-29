@@ -4,10 +4,19 @@ import {DEFAULT_COVER, type CoverSettings} from '../cover/types';
 import {mergeFonts, type FontsSettings} from '../fonts/types';
 import type {CalloutsSettings, HeadingRulesSettings} from '../markers';
 import {
+  BREAK_LEVELS,
+  DEFAULT_BOOK,
+  DEFAULT_IMAGES,
+  DEFAULT_TOC,
+  NO_BREAKS,
   resolvePageSetup,
+  type BookSettings,
+  type BreakRules,
+  type ImagesSettings,
   type PageFurniture,
   type PageGeometry,
   type PageSettingsInput,
+  type TocSettings,
 } from '../layout/page-setup';
 import type {PresetError} from './parse';
 import {
@@ -29,6 +38,14 @@ export interface ResolvedFields {
   page: PageSettingsInput;
   /** US-019 AC-1: the page furniture, field by field. */
   pageFurniture: PageFurniture;
+  /** US-025 AC-1: the break rules, level by level. */
+  breakBefore: BreakRules;
+  /** US-026 AC-9: the book settings, field by field. */
+  book: BookSettings;
+  /** US-027 AC-1: the contents settings, field by field; the place from the preset. */
+  toc: TocSettings;
+  /** US-028 AC-1: the image fit settings, field by field. */
+  images: ImagesSettings;
 }
 
 /** US-019 AC-1: the furniture keys of `page`; never part of the geometry. */
@@ -36,6 +53,8 @@ const FURNITURE_KEYS = [
   'folios',
   'runningHeader',
   'runningHeaderLevel',
+  // US-025 AC-1: the break rules are no geometry either.
+  'breakBefore',
 ] as const;
 
 /** Copies the set values of `layer` over `target` (undefined is not set; null never gets here, the parser drops it). */
@@ -114,6 +133,43 @@ export function resolveFields(
       defaults.page?.runningHeaderLevel ??
       runningHeaderLevel,
   };
+  // US-025 AC-1: preset, else Defaults, else none, level by level.
+  const breakBefore = Object.fromEntries(
+    BREAK_LEVELS.map((level) => [
+      level,
+      preset.page?.breakBefore?.[level] ??
+        defaults.page?.breakBefore?.[level] ??
+        NO_BREAKS[level],
+    ]),
+  ) as unknown as BreakRules;
+  // US-026 AC-9: preset, else Defaults, else built-in, field by field.
+  const book = Object.fromEntries(
+    (Object.keys(DEFAULT_BOOK) as (keyof BookSettings)[]).map((key) => [
+      key,
+      preset.book?.[key] ?? defaults.book?.[key] ?? DEFAULT_BOOK[key],
+    ]),
+  ) as unknown as BookSettings;
+  // US-027 AC-1: preset, else Defaults, else built-in, field by field; the
+  // place (heading, position) from the preset note only.
+  const toc: TocSettings = {
+    ...(Object.fromEntries(
+      (Object.keys(DEFAULT_TOC) as (keyof typeof DEFAULT_TOC)[]).map((key) => [
+        key,
+        preset.toc?.[key] ?? defaults.toc?.[key] ?? DEFAULT_TOC[key],
+      ]),
+    ) as unknown as typeof DEFAULT_TOC),
+    ...(preset.toc?.heading === undefined ? {} : {heading: preset.toc.heading}),
+    ...(preset.toc?.position === undefined
+      ? {}
+      : {position: preset.toc.position}),
+  };
+  // US-028 AC-1: preset, else Defaults, else built-in, field by field.
+  const images = Object.fromEntries(
+    (Object.keys(DEFAULT_IMAGES) as (keyof ImagesSettings)[]).map((key) => [
+      key,
+      preset.images?.[key] ?? defaults.images?.[key] ?? DEFAULT_IMAGES[key],
+    ]),
+  ) as unknown as ImagesSettings;
   overlayPage(page, defaults.page);
   overlayPage(page, preset.page);
   return {
@@ -126,6 +182,10 @@ export function resolveFields(
     template: pick('template') as string | null,
     page,
     pageFurniture,
+    breakBefore,
+    book,
+    toc,
+    images,
   };
 }
 
@@ -150,6 +210,14 @@ export interface EffectiveSettings {
   page: PageGeometry;
   /** US-019 AC-1: preset, else Defaults, else built-in, field by field. */
   pageFurniture: PageFurniture;
+  /** US-025 AC-1: preset, else Defaults, else `none`, level by level. */
+  breakBefore: BreakRules;
+  /** US-026 AC-9: preset, else Defaults, else built-in, field by field. */
+  book: BookSettings;
+  /** US-027 AC-1: preset, else Defaults, else built-in; the place from the preset. */
+  toc: TocSettings;
+  /** US-028 AC-1: preset, else Defaults, else built-in (100: the rule off). */
+  images: ImagesSettings;
   highlightColor: string;
   headingNumbering: string;
   externalLinkFootnotes: boolean;
@@ -213,6 +281,10 @@ export function effectiveSettings(
     settings: {
       page: page.value,
       pageFurniture: resolved.pageFurniture,
+      breakBefore: resolved.breakBefore,
+      book: resolved.book,
+      toc: resolved.toc,
+      images: resolved.images,
       highlightColor: resolved.highlightColor,
       headingNumbering: resolved.headingNumbering,
       externalLinkFootnotes: resolved.externalLinkFootnotes,

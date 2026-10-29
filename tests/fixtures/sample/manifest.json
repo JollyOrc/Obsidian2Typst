@@ -6,14 +6,18 @@
     "ambiguous": 80,
     "unresolved": 62
   },
+  "bookParts": {
+    "colophon": "Senectus Netus",
+    "backNotes": "Pretium Fames"
+  },
   "census": {
     "aligns": {
       "center": 213,
       "null": 780
     },
-    "bytes": 517724,
+    "bytes": 518101,
     "depths": {
-      "h1": 9,
+      "h1": 11,
       "h2": 68,
       "h3": 100,
       "h4": 220,
@@ -48,20 +52,20 @@
       "emph": 220,
       "footnote-def": 1,
       "footnote-ref": 1,
-      "heading": 669,
+      "heading": 671,
       "html-inline": 697,
       "image": 70,
       "inline-footnote": 40,
       "item": 527,
       "link": 1035,
       "list": 151,
-      "paragraph": 2103,
+      "paragraph": 2106,
       "row": 1182,
       "strong": 260,
       "table": 273,
       "wikilink": 7
     },
-    "lines": 7234,
+    "lines": 7244,
     "lists": {
       "bullet": 137,
       "ordered": 14,
@@ -239,7 +243,9 @@
       "Minim Minim",
       "Cras",
       "Glossary",
-      "Appendix"
+      "Appendix",
+      "Senectus Netus",
+      "Pretium Fames"
     ],
     "2": [
       "Cras Ac",

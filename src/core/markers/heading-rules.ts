@@ -4,8 +4,11 @@
 // matcher of the conversion both use it). Pure: no Obsidian, Node, or I/O
 // imports.
 
-/** US-017 AC-1: the rule a heading text maps to; `none` switches it off. */
-export type HeadingRule = 'glossary' | 'none';
+/**
+ * US-017 AC-1, US-026 AC-1: the rule a heading text maps to: a glossary
+ * section, the colophon, the back notes; `none` switches it off.
+ */
+export type HeadingRule = 'glossary' | 'colophon' | 'back-notes' | 'none';
 
 /** US-017 AC-1: heading texts mapped to rules, as written in the preset. */
 export type HeadingRulesSettings = Readonly<Record<string, HeadingRule>>;
@@ -13,6 +16,8 @@ export type HeadingRulesSettings = Readonly<Record<string, HeadingRule>>;
 /** US-017 AC-1: the rule names a preset may use. */
 export const HEADING_RULE_NAMES: readonly HeadingRule[] = Object.freeze([
   'glossary',
+  'colophon',
+  'back-notes',
   'none',
 ]);
 
@@ -23,6 +28,9 @@ export const HEADING_RULE_NAMES: readonly HeadingRule[] = Object.freeze([
  */
 export const BUILTIN_HEADING_RULES: HeadingRulesSettings = Object.freeze({
   Glossary: 'glossary',
+  // US-026 AC-1 (decision 2): the book parts.
+  Colophon: 'colophon',
+  'Back notes': 'back-notes',
 });
 
 /**

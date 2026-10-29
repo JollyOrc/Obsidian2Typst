@@ -36,7 +36,9 @@ interface Entry {
   run?: () => Promise<unknown>;
 }
 interface Ctx {
-  heading: {text: string} | null;
+  // US-027 AC-7 (TICKET-086): the real line context gives the level; level 2
+  // offers no contents item, so these lists stay US-022's.
+  heading: {text: string; level: number} | null;
   images: string[];
 }
 /** The active preset as the menus see it when they open. */
@@ -90,7 +92,7 @@ describe('US-022 AC-1, AC-6 the heading item', () => {
     const {calls, actions} = recorder();
     const entries = presetEditEntries(
       actions,
-      {heading: {text: 'Glossar'}, images: []},
+      {heading: {text: 'Glossar', level: 2}, images: []},
       valid({}),
     );
     expect(entries.map((e) => [e.title, e.icon, e.disabled === true])).toEqual([
@@ -113,7 +115,7 @@ describe('US-022 AC-1, AC-6 the heading item', () => {
     expect(
       presetEditEntries(
         actions,
-        {heading: {text: 'Glossary'}, images: []},
+        {heading: {text: 'Glossary', level: 2}, images: []},
         valid({}),
       )[0]?.title,
     ).toBe('Stop using as glossary section');
@@ -122,7 +124,7 @@ describe('US-022 AC-1, AC-6 the heading item', () => {
   it('US-022 AC-6, SCAR-019: no preset and an invalid preset give disabled items with the reason', () => {
     const presetEditEntries = fn<PresetEditEntries>('presetEditEntries');
     const {actions} = recorder();
-    const ctx = {heading: {text: 'Glossar'}, images: ['a/cover.png']};
+    const ctx = {heading: {text: 'Glossar', level: 2}, images: ['a/cover.png']};
     expect(
       presetEditEntries(actions, ctx, {
         name: null,
@@ -479,7 +481,7 @@ describe('US-022 AC-9 (amended 2026-10-22) the image is read after the click, be
     await stop[0]?.run?.();
     const heading = fn<PresetEditEntries>('presetEditEntries')(
       r.actions,
-      {heading: {text: 'Glossar'}, images: []},
+      {heading: {text: 'Glossar', level: 2}, images: []},
       opened(r),
     );
     await heading[0]?.run?.();

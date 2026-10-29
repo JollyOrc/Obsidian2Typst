@@ -46,6 +46,11 @@ export interface CalloutChoice {
   known: boolean;
   /** The plain-text title when the header has none ('' = no title line). */
   defaultTitle: string;
+  /**
+   * US-028 AC-6: the pt the box takes below its body: the style's inset plus
+   * its border width (measured 2026-10-28, 2026-10-29).
+   */
+  reserve: number;
 }
 
 /** Resolves callout types for the emitter and remembers the styles it used. */
@@ -71,7 +76,12 @@ export function createCalloutRecorder(
     use(type, typed) {
       const {name, style, known} = resolveCalloutStyle(type, settings);
       styles.set(name, style);
-      return {name, known, defaultTitle: defaultCalloutTitle(typed, style)};
+      return {
+        name,
+        known,
+        defaultTitle: defaultCalloutTitle(typed, style),
+        reserve: style.inset + style.border.width,
+      };
     },
     used() {
       return new Map(

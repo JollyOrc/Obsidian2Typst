@@ -262,8 +262,9 @@ with the plugin's `parse` and `convert`, and by grep):
   `installSample({from, to})` in `build/install-scratch.mjs` that returns the
   number of files copied. Every manual check M1 to M13 names notes,
   headings, images and expected texts from the generated vault (read from the
-  manifest), never from `The Rules/` or `compiledtext`; `manual-checks.md`
-  names `Sample/Book.md`. The check of each
+  manifest), never from `The Rules/` or `compiledtext`; the manual
+  checks (`manual-checks.md` and its check files, split 2026-10-29) name
+  `Sample/Book.md`. The check of each
   rewritten M step is done at its next run, with the versioned build of that
   run (SCAR-012).
 

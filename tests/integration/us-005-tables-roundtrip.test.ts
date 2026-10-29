@@ -200,6 +200,8 @@ describe('US-005 the sample note', () => {
   const result = blocks(md);
   const {census, longRows} = readManifest();
 
+  // SCAR-030: compiles the whole sample document; 1610 ms with all 2480 tests
+  // running at once (2026-10-29), so a limit with room for a loaded machine.
   it('US-005 AC-1: converts every table of the sample note and the whole document compiles without error', async () => {
     const tables = all(parse(md).root).filter(
       (n): n is TableNode => n.kind === 'table',
@@ -212,7 +214,7 @@ describe('US-005 the sample note', () => {
       census.tables,
     );
     expect(await errors(withCalloutHarness(result.typ))).toEqual([]);
-  });
+  }, 120_000);
 
   it('US-005 AC-2b: keeps the line breaks of the cells of the sample note', () => {
     const breaks = census.html['html-inline:br'] ?? 0;

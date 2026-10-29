@@ -16,7 +16,15 @@ export interface CompileRequest {
 
 /** The outcome of a compile; `error` is the text for the notice (US-007 AC-4). */
 export type CompileResult =
-  | {ok: true; pdf: Uint8Array}
+  | {
+      ok: true;
+      pdf: Uint8Array;
+      /**
+       * US-028 AC-5: the image fit decisions read back after the compile, in
+       * document order; absent when the document has none or the query failed.
+       */
+      fitDecisions?: unknown[];
+    }
   | {ok: false; kind: 'typst' | 'worker'; error: string};
 
 /** The names of the files an export writes for one note. */

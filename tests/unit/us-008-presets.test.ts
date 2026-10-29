@@ -136,7 +136,11 @@ describe('US-008 AC-1 precedence of preset, Defaults and built-ins', () => {
   });
 
   it('US-008 AC-1: treats strict mode and the warnings note folder as global, not preset fields', () => {
+    // US-026 AC-9: the book group is a preset field (TICKET-079); US-027
+    // AC-1: the toc group too (TICKET-083); US-028 AC-1: the images group
+    // (TICKET-089).
     expect([...PRESET_FIELDS].sort()).toEqual([
+      'book',
       'callouts',
       'cover',
       'externalLinkFootnotes',
@@ -145,11 +149,13 @@ describe('US-008 AC-1 precedence of preset, Defaults and built-ins', () => {
       'headingNumbering',
       'headingRules',
       'highlightColor',
+      'images',
       'linkPageLevel',
       'linkPageNumbers',
       'linkPageWord',
       'page',
       'template',
+      'toc',
     ]);
     const preset = ok(
       note(
@@ -158,7 +164,12 @@ describe('US-008 AC-1 precedence of preset, Defaults and built-ins', () => {
     );
     expect(preset.fields).toEqual({highlightColor: '#000000'});
     const effective = effectiveSettings(preset, {}, () => false);
+    // US-025 AC-1, US-026 AC-9, US-027 AC-1, US-028 AC-1: the break rules,
+    // the book, the contents and the image fit settings are effective
+    // settings too.
     expect(effective.ok && Object.keys(effective.settings).sort()).toEqual([
+      'book',
+      'breakBefore',
       'callouts',
       'cover',
       'externalLinkFootnotes',
@@ -166,12 +177,14 @@ describe('US-008 AC-1 precedence of preset, Defaults and built-ins', () => {
       'headingNumbering',
       'headingRules',
       'highlightColor',
+      'images',
       'linkPageLevel',
       'linkPageNumbers',
       'linkPageWord',
       'page',
       'pageFurniture',
       'template',
+      'toc',
     ]);
   });
 
@@ -577,6 +590,32 @@ describe('US-008 AC-14 effective settings for the pipeline', () => {
       callouts: {},
       headingRules: {},
       pageFurniture: {folios: true, runningHeader: true, runningHeaderLevel: 2},
+      // US-025 AC-1: no level breaks by default.
+      breakBefore: {
+        h1: 'none',
+        h2: 'none',
+        h3: 'none',
+        h4: 'none',
+        h5: 'none',
+        h6: 'none',
+      },
+      // US-026 AC-9: the built-in book settings.
+      book: {
+        signature: 0,
+        romanFrontMatter: false,
+        firstChapter: 'left',
+        colophonHeading: 'hidden',
+        backNotesHeading: 'hidden',
+      },
+      // US-027 AC-1: the built-in contents settings (no contents).
+      toc: {
+        depth: 0,
+        title: 'Contents',
+        pageNumbers: true,
+        dotLeaders: true,
+      },
+      // US-028 AC-1: the built-in image fit (100: the rule off).
+      images: {minScale: 100},
       cover: {
         mode: 'auto',
         file: null,

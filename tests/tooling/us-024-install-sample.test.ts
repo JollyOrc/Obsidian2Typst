@@ -13,6 +13,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {afterAll, describe, expect, it} from 'vitest';
 import * as install from '../../build/install-scratch.mjs';
+import {readAllChecks} from '../support/manual-checks';
 import {SAMPLE_DIR, VAULT, listFiles} from '../support/sample';
 
 const VAULT_NAME = ['The', 'Rules'].join(' ');
@@ -66,7 +67,7 @@ describe('US-024 AC-8 the sample vault in the scratch vault', () => {
   });
 
   it('US-024 AC-8: the manual checks name the sample vault, never the private one', () => {
-    const checks = readFileSync('docs/technical/manual-checks.md', 'utf8');
+    const checks = readAllChecks();
     expect(checks).not.toContain(VAULT_NAME);
     expect(checks).not.toContain('compiledtext');
     expect(checks).toContain(`${VAULT}/Book.md`);

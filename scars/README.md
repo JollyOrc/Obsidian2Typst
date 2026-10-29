@@ -43,6 +43,9 @@ Each SCAR covers:
 | [SCAR-025](SCAR-025-rendered-output-inspected-too-small.md) | Rendered output is inspected too small to see its defects | Verification | Low |
 | [SCAR-026](SCAR-026-pattern-match-taken-for-instance.md) | A pattern match is taken for an instance of the class it is meant to find | Requirements / Verification | Medium |
 | [SCAR-027](SCAR-027-replacement-specified-from-the-replaced-thing.md) | A replacement is specified from the thing it replaces, not from what its users rely on | Requirements | Medium |
+| [SCAR-028](SCAR-028-test-reader-trusted-unchecked.md) | A test reader is trusted without a check of its own | Verification / Test tooling | Medium |
+| [SCAR-029](SCAR-029-human-steps-buried-in-one-file.md) | Procedures a human runs are kept as sections of one large file | Process / Documentation | Low |
+| [SCAR-030](SCAR-030-test-time-limit-left-at-default.md) | A test's time limit is left at the default for heavy work | Verification / Test tooling | Low |
 
 ## Recurring themes
 
@@ -52,7 +55,9 @@ numeric, or positional outcome needs a concrete example with exact values.
 "The heading appears at the right level" is intent; `## Foo` at depth 2
 is a requirement. Every example is run through the whole converter, with all
 stories' rules on, before it goes into a story, and the composed cases name
-inline wrappers (bold, links) as well as block containers (SCAR-002).
+inline wrappers (bold, links) as well as block containers (SCAR-002). A story
+built on another lists that story's decisions about the shared output, gives
+each a composed example, and asks what the other story leaves unstated.
 
 **Process gaps let failures accumulate** (SCAR-003, SCAR-006)
 Without a gate that enforces "all ACs ticked" before merge and "tests green"
@@ -122,7 +127,8 @@ A guard checks exactly its criterion, not less and not more: it counts the
 places it checked, matches the whole statement, uses inputs the real producer
 gives, and is proven by a mutation check; a test that one side wins also
 shows the other side was in effect; before tickets, the tests are searched
-for guards that forbid a call the ticket adds; a "same output twice" test
+for guards that forbid a call the ticket adds and, by function name, for
+tests that pin the whole result the ticket widens; a "same output twice" test
 runs from two fresh starts.
 
 **Statements about tools are measured** (SCAR-024)
@@ -143,6 +149,21 @@ reviewed keep-list.
 Before a replacement's acceptance criteria are written, every user of the
 replaced thing is listed with what it asserts or assumes; each becomes a
 criterion or a named change of that user.
+
+**Test readers are checked too** (SCAR-028)
+When a reader of output returns less than the source holds, the reader is
+checked on a known input first; a reader of a format is tested per syntax rule
+of the format.
+
+**One file per human step** (SCAR-029)
+What a human runs, answers or approves on its own is a file of its own with an
+index that links each file; a test keeps index and files one to one, and tests
+read a unit by its id, not by slicing a larger file.
+
+**Time limits are measured** (SCAR-030)
+A test that does seconds of work itself states its time limit, measured under
+a full parallel run with a margin; a timeout is first run alone before the
+code is blamed, and a raised limit goes to every test doing the same work.
 
 **Rules at non-default values** (SCAR-019)
 A rule that reads a setting gets examples and tests at the default, at both

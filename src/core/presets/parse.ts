@@ -16,9 +16,13 @@ import {
   type HeadingRule,
   type HeadingRulesSettings,
 } from '../markers';
+import {BREAK_LEVELS, BREAK_RULES} from '../layout/page-setup';
 import {isValidNumbering} from './numbering';
 import {
   SCHEMA_VERSION,
+  type BookPresetFields,
+  type ImagesPresetFields,
+  type TocPresetFields,
   type CoverPresetFields,
   type PagePresetFields,
   type PresetFields,
@@ -157,6 +161,9 @@ function readPage(value: unknown, problems: Problem[]): PagePresetFields {
         message: 'page.runningHeaderLevel must be a whole number from 1 to 6',
       });
   }
+  // US-025 AC-1: the break rule per heading level.
+  const breaks = read(value, 'breakBefore');
+  if (breaks !== undefined) out.breakBefore = readBreakBefore(breaks, problems);
   const margins = read(value, 'margins');
   if (margins !== undefined) {
     if (!isGroup(margins)) {
@@ -179,6 +186,107 @@ function readPage(value: unknown, problems: Problem[]): PagePresetFields {
       out.margins = m;
     }
   }
+  return out;
+}
+
+/**
+ * US-025 | AC-1: Checks `page.breakBefore`: a group whose keys are `h1` to
+ * `h6`, each `none`, `page`, `right` or `left` (exactly, as written). An
+ * unknown key and another value are problems at their own line; the valid
+ * keys are kept.
+ */
+function readBreakBefore(
+  value: unknown,
+  problems: Problem[],
+): NonNullable<PagePresetFields['breakBefore']> {
+  const out: NonNullable<PagePresetFields['breakBefore']> = {};
+  if (!isGroup(value)) {
+    problems.push({
+      path: 'page.breakBefore',
+      message: 'page.breakBefore must be a group of settings',
+    });
+    return out;
+  }
+  for (const key of Object.keys(value)) {
+    const level = BREAK_LEVELS.find((name) => name === key);
+    if (level === undefined) {
+      problems.push({
+        path: `page.breakBefore.${key}`,
+        message: `page.breakBefore has no key "${key}"`,
+      });
+      continue;
+    }
+    const rule = read(value, level);
+    if (rule === undefined) continue;
+    const known = BREAK_RULES.find((name) => name === rule);
+    if (known !== undefined) out[level] = known;
+    else
+      problems.push({
+        path: `page.breakBefore.${level}`,
+        message: `page.breakBefore.${level} must be none, page, right or left`,
+      });
+  }
+  return out;
+}
+
+/** US-026 AC-9: the values of `book.signature`. */
+const SIGNATURES = [0, 4, 8, 16, 32] as const;
+
+/**
+ * US-026 | AC-9: Checks the `book` group: `signature` 0, 4, 8, 16 or 32 (a
+ * number, not text), `romanFrontMatter` true or false, `firstChapter` left or
+ * right, `colophonHeading` and `backNotesHeading` hidden or printed (exactly,
+ * as written). Another value is a problem at its own line; the valid fields
+ * are kept, unknown keys ignored (as the other groups).
+ */
+function readBook(value: unknown, problems: Problem[]): BookPresetFields {
+  const out: BookPresetFields = {};
+  if (!isGroup(value)) {
+    problems.push({path: 'book', message: 'book must be a group of settings'});
+    return out;
+  }
+  const choice = <T extends string>(
+    key: keyof BookPresetFields,
+    options: readonly T[],
+    message: string,
+  ): T | undefined => {
+    const found = read(value, key);
+    if (found === undefined) return undefined;
+    const known = options.find((option) => option === found);
+    if (known === undefined) {
+      problems.push({
+        path: `book.${key}`,
+        message: `book.${key} must be ${message}`,
+      });
+    }
+    return known;
+  };
+  const signature = read(value, 'signature');
+  if (signature !== undefined) {
+    const known = SIGNATURES.find((n) => n === signature);
+    if (known !== undefined) out.signature = known;
+    else
+      problems.push({
+        path: 'book.signature',
+        message: 'book.signature must be 0, 4, 8, 16 or 32',
+      });
+  }
+  const roman = read(value, 'romanFrontMatter');
+  if (roman !== undefined) {
+    if (typeof roman === 'boolean') out.romanFrontMatter = roman;
+    else
+      problems.push({
+        path: 'book.romanFrontMatter',
+        message: 'book.romanFrontMatter must be true or false',
+      });
+  }
+  const side = choice('firstChapter', ['left', 'right'], 'left or right');
+  if (side !== undefined) out.firstChapter = side;
+  const HEADING = ['hidden', 'printed'] as const;
+  const colophon = choice('colophonHeading', HEADING, 'hidden or printed');
+  if (colophon !== undefined) out.colophonHeading = colophon;
+  const back = choice('backNotesHeading', HEADING, 'hidden or printed');
+  if (back !== undefined) out.backNotesHeading = back;
   return out;
 }
 
@@ -563,11 +671,106 @@ function readHeadingRules(
     if (name === undefined) {
       problems.push({
         path: at,
-        message: `${at} must be a rule name: glossary or none`,
+        message: `${at} must be a rule name: glossary, colophon, back-notes or none`,
       });
       continue;
     }
     out[text] = name;
+  }
+  return out;
+}
+
+/**
+ * US-027 | AC-1: Checks the `toc` group: `depth` a whole number from 0 to 6,
+ * `title` text (empty allowed: no title), `pageNumbers` and `dotLeaders`
+ * true or false; in a preset note (`fromNote`) also `heading` (text) and
+ * `position` (before or after). The Defaults drop `heading` and `position`
+ * without a problem. Another value is a problem at its own line; the valid
+ * fields are kept, unknown keys ignored (as the other groups).
+ */
+function readToc(
+  value: unknown,
+  problems: Problem[],
+  fromNote: boolean,
+): TocPresetFields {
+  const out: TocPresetFields = {};
+  if (!isGroup(value)) {
+    problems.push({path: 'toc', message: 'toc must be a group of settings'});
+    return out;
+  }
+  const problem = (key: string, message: string): void => {
+    problems.push({
+      path: `toc.${key}`,
+      message: `toc.${key} must be ${message}`,
+    });
+  };
+  const depth = read(value, 'depth');
+  if (depth !== undefined) {
+    if (
+      typeof depth === 'number' &&
+      Number.isInteger(depth) &&
+      depth >= 0 &&
+      depth <= 6
+    ) {
+      out.depth = depth;
+    } else problem('depth', 'a whole number from 0 to 6');
+  }
+  const title = read(value, 'title');
+  if (title !== undefined) {
+    if (typeof title === 'string') out.title = title;
+    else problem('title', 'text');
+  }
+  for (const key of ['pageNumbers', 'dotLeaders'] as const) {
+    const flag = read(value, key);
+    if (flag === undefined) continue;
+    if (typeof flag === 'boolean') out[key] = flag;
+    else problem(key, 'true or false');
+  }
+  if (!fromNote) return out;
+  const heading = read(value, 'heading');
+  if (heading !== undefined) {
+    if (typeof heading === 'string') out.heading = heading;
+    else problem('heading', 'text');
+  }
+  const position = read(value, 'position');
+  if (position !== undefined) {
+    if (position === 'before' || position === 'after') {
+      out.position = position;
+    } else problem('position', 'before or after');
+  }
+  return out;
+}
+
+/**
+ * US-028 | AC-1: Checks the `images` group: `minScale` a whole number from 10
+ * to 100 (percent). Another value, text such as `"70"` included, is a problem
+ * at its own line; unknown keys are ignored (as the other groups). Preset
+ * notes and the Defaults alike.
+ */
+function readImages(value: unknown, problems: Problem[]): ImagesPresetFields {
+  const out: ImagesPresetFields = {};
+  if (!isGroup(value)) {
+    problems.push({
+      path: 'images',
+      message: 'images must be a group of settings',
+    });
+    return out;
+  }
+  const minScale = read(value, 'minScale');
+  if (minScale !== undefined) {
+    if (
+      typeof minScale === 'number' &&
+      Number.isInteger(minScale) &&
+      minScale >= 10 &&
+      minScale <= 100
+    ) {
+      out.minScale = minScale;
+    } else {
+      problems.push({
+        path: 'images.minScale',
+        message: 'images.minScale must be a whole number from 10 to 100',
+      });
+    }
   }
   return out;
 }
@@ -656,6 +859,17 @@ function readFields(
   if (page !== undefined) out.page = readPage(page, problems);
   const fontsValue = read(input, 'fonts');
   if (fontsValue !== undefined) out.fonts = readFonts(fontsValue, problems);
+  // US-026 AC-9: preset notes and the Defaults, as the fonts.
+  const bookValue = read(input, 'book');
+  if (bookValue !== undefined) out.book = readBook(bookValue, problems);
+  // US-027 AC-1: preset notes and the Defaults; the place in notes only.
+  const tocValue = read(input, 'toc');
+  if (tocValue !== undefined) {
+    out.toc = readToc(tocValue, problems, fromNote);
+  }
+  // US-028 AC-1: preset notes and the Defaults, as the book settings.
+  const imagesValue = read(input, 'images');
+  if (imagesValue !== undefined) out.images = readImages(imagesValue, problems);
   const coverValue = read(input, 'cover');
   if (fromNote && coverValue !== undefined) {
     out.cover = readCover(coverValue, problems);

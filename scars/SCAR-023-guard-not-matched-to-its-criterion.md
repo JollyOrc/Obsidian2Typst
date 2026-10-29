@@ -63,5 +63,21 @@ more blocks the next correct change.
   random seed) differs between the runs. Example (2026-10-27, TICKET-069): two
   generations inside one import could not see a seed taken from the clock; a
   mutant showed it.
+- The search before tickets also lists every test that pins the whole
+  membership of a list or object the ticket grows (the keys of the effective
+  settings, the plugin's names, the rows); each is extended or narrowed in the
+  ticket. Example (2026-10-28, TICKET-075): two tests of the effective
+  settings were missed and went red with the new setting.
+- That search is run by the names of the functions whose result the ticket
+  widens (every `toEqual` over their return value), not only by the keys of
+  the data. Example (2026-10-29, TICKET-086): the search looked for the new
+  `toc` keys and missed a test that pinned the whole view `activePresetView`
+  returns; it went red when the view gained the Defaults.
+- When a criterion allows an exception at an edge, the guard checks that the
+  exception occurs only there (for example only at the last case of a run of
+  a sweep), never as an allowance granted to every case. Example (2026-10-29,
+  TICKET-096): the float check accepted "the text after it is on the next
+  page" for every float because AC-8 allows it at the tightest edge; a helper
+  under which no float ever filled its gap passed all 35 PDF tests.
 - Applies next to: text checks over source files, guards over generated
   output, wiring tests, fakes of a framework.

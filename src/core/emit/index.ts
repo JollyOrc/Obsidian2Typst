@@ -5,8 +5,14 @@ export {
   type MarkupOptions,
   type Transform,
 } from './escape-markup';
-export {emitBlocks, type BlockOptions} from './blocks';
-export {FIT_IMAGE_HELPER, imageRequest} from './image';
+export {emitBlocks, type BlockOptions, type BookLines} from './blocks';
+export {
+  FIT_DECISION_LABEL,
+  FIT_FLOW_HELPER,
+  FIT_IMAGE_HELPER,
+  fitDecisionWarnings,
+  imageRequest,
+} from './image';
 export {headingNumberingRule} from './heading';
 export {FOOTNOTE_RESTART_RULE, type NoteEnv} from './footnote';
 export {DEFAULT_BODY_FAMILY, type FontInfo} from './tasks';
@@ -37,11 +43,33 @@ export {
   GLOSSARY_HELPER,
   emitTermAlone,
   emitTermRunIn,
+  emitUnlistedHeading,
   emitUnnumberedHeading,
 } from './glossary';
+export {contentsLines} from './toc';
 export {
+  NO_BOOK_FURNITURE,
+  O2T_BLANK_HELPER,
+  O2T_PART_HELPER,
   RUNNING_TEXT_HELPER,
   RUNNING_TITLE_HELPER,
   pageFurnitureRule,
+  type BookFurniture,
 } from './furniture';
+export {
+  BREAK_AFTER_LABEL,
+  BREAK_BEFORE_LABEL,
+  PART_END_LABEL,
+  PART_START_LABEL,
+  backNotesEndLines,
+  backNotesStartLines,
+  breakLines,
+  chapterBreakLines,
+  mergeRules,
+  paddingEndLines,
+  bodyContentsLines,
+  frontContentsLines,
+  partStartLine,
+  type BreakOptions,
+} from './breaks';
 export {pageRefCall, pageRefHelper, type PageRefEnv} from './page-refs';

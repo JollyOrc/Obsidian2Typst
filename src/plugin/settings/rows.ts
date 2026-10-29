@@ -303,6 +303,21 @@ export function addDefaultRows(root: HTMLElement, env: RowsEnv): void {
     };
     if (key === 'page.trimSize') {
       addTrimDropdown(env, setting, custom);
+    } else if (row.kind === 'dropdown') {
+      // US-025 AC-7: `—` (the empty value) is "not set"; a choice is saved at
+      // once. A list of whole numbers is saved as numbers (US-026's signature).
+      const options = row.options ?? [];
+      const numeric = options.every((o) => /^\d+$/.test(o));
+      setting.addDropdown((d) => {
+        d.addOption('', '—');
+        for (const option of options) d.addOption(option, option);
+        d.setValue(current === undefined ? '' : String(current));
+        if (owner !== null) d.setDisabled(true);
+        d.onChange(async (value) => {
+          if (value === '') await save(undefined);
+          else await save(numeric ? Number(value) : value);
+        });
+      });
     } else if (row.kind === 'toggle') {
       setting.addToggle((t) => {
         t.setValue(current === true);
