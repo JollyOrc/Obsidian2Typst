@@ -2,6 +2,7 @@
 
 | Version | Release Notes | Download |
 |---------|---------------|----------|
+| v0.10.0 | [release notes](v0.10.0.md) | [⬇ GitHub release 0.10.0](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.10.0) |
 | v0.9.1 | [release notes](v0.9.1.md) | [⬇ GitHub release 0.9.1](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.9.1) |
 | v0.9.0 | [release notes](v0.9.0.md) | *(built before the repository; not published)* |
 | v0.8.0 | [release notes](v0.8.0.md) | *(built before the repository; not published)* |
