@@ -20,7 +20,12 @@ author's disk; no test reads it, and nothing ever modifies it.
 Orientation files:
 
 - `docs/user-stories/README.md` — index of all user stories; individual stories in `US-NNN-*.md` files.
-- `docs/tickets/README.md` — index of all tickets; individual tickets in `TICKET-NNN-*.md` files.
+- GitHub Issues (<https://github.com/JollyOrc/Obsidian2Typst/issues>) — the
+  source of truth for tickets, the story backlog, bug reports and feature
+  requests since 2026-10-30. Tickets carry the label `ticket` and one label
+  per story (`US-NNN`); backlog topics carry `backlog`.
+- `docs/tickets/` — read-only archive of TICKET-001 to TICKET-097 (each is
+  also the closed issue of the same number); not updated any more.
 - `docs/technical/dependencies.md` — dependencies and build requirements.
 - `docs/technical/tests.md` — quality gates and required tests.
 - `docs/state/` — the `init.d` state (rule 9): governance, the SCAR ledger, the next action. Read it first on every session and after every compaction (rule 10).
@@ -150,7 +155,9 @@ Follow this order strictly — do not skip ahead:
 
 1. **User story** — write or amend the story and acceptance criteria first.
 2. **Tests** — specify and implement tests against the acceptance criteria.
-3. **Tickets** — create the necessary work items.
+3. **Tickets** — create the necessary work items as GitHub issues with the
+   ticket issue form (`.github/ISSUE_TEMPLATE/ticket.yml`), labelled `ticket`
+   and `US-NNN`; a ticket is closed as completed when it is done.
 4. **Code** — write the implementation against the tests and tickets.
 
 ---
@@ -198,7 +205,7 @@ any non-obvious constraints (clamping, ordering, side effects).
 
 ## Agent rules
 
-1. Treat `docs/user-stories/README.md` and the individual `US-NNN-*.md` files as the source of truth for behaviour. When adding or amending a story, also update the index table in `README.md` and create or update the corresponding tickets in `docs/tickets/`.
+1. Treat `docs/user-stories/README.md` and the individual `US-NNN-*.md` files as the source of truth for behaviour. When adding or amending a story, also update the index table in `README.md` and create or update the corresponding ticket issues on GitHub (the ticket ids are the issue numbers, `#NNN`). A backlog topic or a feature request from an issue becomes a story only through steps 0 and 1; the story links the issue. `docs/tickets/` is an archive and is not changed.
 2. Never modify source or fixture files; only write to configured output paths.
    In this project that means: the converter never modifies the user's notes or
    image assets, the sample vault changes only through its generator, and
@@ -360,7 +367,7 @@ confirm that no source files were modified (compare hashes if in doubt).
 When behaviour changes, update **all of** the following that are affected:
 
 - The relevant `docs/user-stories/US-NNN-*.md` file and the index in `docs/user-stories/README.md`
-- The relevant `docs/tickets/TICKET-NNN-*.md` file and the index in `docs/tickets/README.md`
+- The relevant ticket issue on GitHub (body, labels, open or closed)
 - `docs/technical/dependencies.md`
 - `docs/technical/tests.md` (AC-to-test map)
 

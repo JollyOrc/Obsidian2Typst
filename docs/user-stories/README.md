@@ -48,28 +48,13 @@ Update the index table below whenever a story is added or its status changes.
 | [US-027](US-027-table-of-contents.md) | Table of contents | Done (M17 passed 2026-10-29) | TICKET-083 to 088 |
 | [US-028](US-028-image-fit.md) | Images that stay with their text | Done (M18 passed 2026-10-29) | TICKET-089 to 097 |
 
-### Backlog (agreed scope, stories not yet written)
+### Backlog
 
-Written after the MVP, in roughly this order. Each becomes a `US-NNN` file with
-concrete examples before work on it starts.
-
-| Topic | Summary |
-|-------|---------|
-| Marking content | Callouts are US-016; heading rules (Glossary) are US-017 (Done). Still to write: a command that wraps selected text |
-| Style preview samples | Preview mode that shows one representative page per style |
-| Page breaks and structure | Break before heading level N; manual break marker; keep-together blocks; columns and column breaks; wide tables on a page spread |
-| Image rules | Per-image directives; global rules by pattern; full-page and full-bleed images; keep image with its text |
-| Front and back matter | Table of contents; index; glossary page from marked entries; title, copyright, and colophon pages |
-| Common elements from the vault | The plugin asks which vault notes supply the colophon, index, and glossary (and similar parts) and places them in the book; they are not expected in the input file. Decides numbering of those parts. |
-| Cover extras | Back cover; title/author overlay |
-| Decoration | Heading ornaments and dividers; page backgrounds and borders; drop caps; margin icons per style |
-| Print output | Folios and running headers are US-019 (Done). Still to write: blank-page handling; crop marks (the slug area is in US-009 AC-9; the marks are still to do); PDF/A and PDF/UA (in Typst, but not selectable through typst.ts 0.7.0, spike S9); PDF/X is not available; CMYK fills are kept in the PDF, no OutputIntent |
-| Page numbers for internal links | Now US-018 (Done, 2026-10-21); decisions of 2026-10-19 and 2026-10-21 in the story. |
-| Compiler stability (proposed at US-028 G5, 2026-10-29) | Isolate the Typst panic (`unreachable`) seen after about nine whole-book compiles in one compiler instance (scratch probes of TICKET-094); each compile succeeds in a fresh process. Not verified; it may also hit a long Obsidian session that previews and exports often. |
-| Math (LaTeX subset) | Convert a defined subset of LaTeX math to Typst math; unsupported commands produce a warning |
-| Plugin UX (scoped 2026-10-21) | Refine the plugin's user experience beyond the command palette, in three stories done in order — US-020 (Done, 2026-10-21), US-021 (Done, 2026-10-21), US-022 (Done, 2026-10-22) — (decisions in `docs/state/00_governance.md`, 2026-10-21): (1) one function per action, a ribbon menu and note context menus (file explorer, editor); (2) the preset lists grouped by a new preset field `group:` (panel dropdown, settings tab, ribbon menu; scoped 2026-10-21), with a details pop-up (own fields and effective values with source; `Use`, `Open the note`); (3) heading and image context menus for existing features ("Use as glossary section", "Use as cover", and "Stop using" for each; editor menu on a heading or image line, file explorer on an image file), which write into the active preset note after a question, changing only that key (scoped 2026-10-21). The palette commands stay. SCAR-013, 014, 016 and 017 apply to every new control |
-| Plugin UX — menus for the clicked line (proposed at US-022 G5, 2026-10-22) | The US-022 items follow the line of the cursor: a right-click does not move it (measured in M12, Obsidian 1.14.4), so the author clicks into the line first. A story would offer the items for the right-clicked line: the editor's own `contextmenu` event and the position under the mouse (CodeMirror `posAtCoords`), read from the types and measured first (SCAR-008); the question keeps naming the heading or image (SCAR-014) |
-| Error mapping | Map Typst compile errors back to the Markdown source line |
+Since 2026-10-30 the backlog lives in GitHub Issues with the label
+[`backlog`](https://github.com/JollyOrc/Obsidian2Typst/issues?q=label%3Abacklog)
+(the table that stood here was migrated there). Each topic becomes a
+`US-NNN` file with concrete examples before work on it starts; the story
+links its issue.
 
 **Status values:** `Draft` · `Ready` · `In Progress` · `Done` · `Superseded`
 

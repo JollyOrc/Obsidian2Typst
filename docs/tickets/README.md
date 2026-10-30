@@ -1,5 +1,16 @@
 # Tickets
 
+> **Archive (since 2026-10-30).** Tickets now live in
+> [GitHub Issues](https://github.com/JollyOrc/Obsidian2Typst/issues), which
+> are the source of truth. TICKET-001 to TICKET-097 below were migrated as
+> closed issues #1 to #97 (label
+> [`ticket`](https://github.com/JollyOrc/Obsidian2Typst/issues?q=label%3Aticket)),
+> and the backlog topics of `docs/user-stories/README.md` as open issues
+> (label
+> [`backlog`](https://github.com/JollyOrc/Obsidian2Typst/issues?q=label%3Abacklog)).
+> The files in this folder are kept as a read-only archive and are not
+> updated. New tickets are created with the ticket issue form.
+
 Work items derived from user stories. Each ticket is a single, implementable
 unit of work — small enough to complete in one session, large enough to be
 meaningful.

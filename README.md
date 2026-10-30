@@ -53,7 +53,7 @@ CLAUDE.md          development process, code style, and agent rules
 scars/             known failure patterns; review before starting any work
 docs/
   user-stories/    user stories with acceptance criteria (source of truth)
-  tickets/         work items derived from the stories
+  tickets/         archive of TICKET-001 to 097 (tickets are GitHub issues now)
   technical/       dependencies, quality gates, AC-to-test map, warning codes,
                    manual checks
 releases/          release notes and history
@@ -83,7 +83,7 @@ Every piece of work follows the loop defined in `CLAUDE.md`:
 0. SCAR review before writing anything
 1. User story with concrete acceptance criteria
 2. Tests for every acceptance criterion
-3. Tickets
+3. Tickets, as [GitHub issues](https://github.com/JollyOrc/Obsidian2Typst/issues?q=label%3Aticket)
 4. Implementation, with a fully green test suite before release
 
 ## Status
@@ -110,10 +110,16 @@ Working today (user stories US-001 to US-028, all done):
 - Typst templates that style the whole document.
 - A warning report with clickable source lines, and an optional strict mode.
 
-Not yet done (see the backlog in
-[`docs/user-stories/README.md`](docs/user-stories/README.md)): math, crop
-marks, a back cover, decorations, an index, a command that wraps
+Not yet done (see the
+[backlog issues](https://github.com/JollyOrc/Obsidian2Typst/issues?q=label%3Abacklog)):
+math, crop marks, a back cover, decorations, an index, a command that wraps
 selected text, and mapping Typst errors back to the note's lines.
+
+## Bugs and feature requests
+
+Please use [GitHub Issues](https://github.com/JollyOrc/Obsidian2Typst/issues/new/choose)
+and pick the bug report or feature request form. A short note that shows
+the problem, and the output you expected, helps most.
 
 ## License
 
