@@ -295,14 +295,13 @@ describe('US-021 AC-4 the settings tab’s list (text checks)', () => {
       /if \(group\.heading !== null\) \{\s*new Setting\(root\)\.setName\(group\.heading\)\.setHeading\(\);\s*\}/,
     );
   });
-  it('US-021 AC-4: each row has Details right after Use, opening the pop-up of that preset', () => {
+  // US-029 AC-6 (G2): the Details button became the row's gear, which opens
+  // the same pop-up; the drawn row is tested in us-029-settings-tab.
+  it('US-021 AC-4: each row opens the pop-up of that preset after Use', () => {
     const use = tab.indexOf("isActive ? 'In use' : 'Use'");
-    const details = tab.indexOf("setButtonText('Details')");
-    const duplicate = tab.indexOf("setButtonText('Duplicate')");
+    const open = tab.indexOf('openDetails(entry.name)');
     expect(use).toBeGreaterThan(0);
-    expect(details).toBeGreaterThan(use);
-    expect(details).toBeLessThan(duplicate);
-    expect(tab).toContain('openDetails(entry.name)');
+    expect(open).toBeGreaterThan(use);
   });
 });
 
@@ -401,15 +400,16 @@ describe('US-021 AC-6 the details table', () => {
     });
   });
 
-  it('US-021 AC-6: rows in the order of the Defaults rows, then fonts, then the summaries', async () => {
+  // US-029 AC-9 (G2): the order of the rows is now the layout's (tested in
+  // us-029-layout); this test keeps what US-021 still states: every row once,
+  // the summaries last.
+  it('US-021 AC-6: every Defaults and font row once, then the summaries', async () => {
     const {detailRows} = await load<DetailsModule>(DETAILS);
     const labels = detailRows({}, {}).map((r) => r.label);
-    expect(labels[0]).toBe('Highlight colour');
-    expect(labels.indexOf('Gutter (mm)')).toBeLessThan(
-      labels.indexOf('Page numbers'),
-    );
-    expect(labels.indexOf('Link page word')).toBeLessThan(
-      labels.indexOf('Font folder'),
+    const {DEFAULT_ROWS, FONT_ROWS} =
+      await import('../../src/plugin/settings/row-data');
+    expect([...labels.slice(0, -4)].sort()).toEqual(
+      [...DEFAULT_ROWS, ...FONT_ROWS].map((r) => r.label).sort(),
     );
     // US-027 AC-8 (TICKET-087): the summary of the contents' place is last.
     expect(labels.slice(-4)).toEqual([
@@ -474,16 +474,19 @@ describe('US-021 AC-6 the details table', () => {
 });
 
 describe('US-021 AC-7 the pop-up’s buttons and keys', () => {
-  it('US-021 AC-7: Use, Open the note, Close; Close has the focus; the title names the preset', async () => {
+  // US-029 AC-6 (G2): Duplicate, Rename, Delete stand between Open the note
+  // and Close (us-029-preset-screen tests them).
+  it('US-021 AC-7: Use, Open the note first, Close last; Close has the focus; the title names the preset', async () => {
     const {deps} = await rig(GROUPED, 'A5 print');
     const {detailsView} = await load<DetailsModule>(DETAILS);
     const view = detailsView(deps, 'Book');
     expect(view.title).toBe('Preset "Book"');
-    expect(view.buttons.map((b) => [b.text, b.disabled])).toEqual([
+    const pairs = view.buttons.map((b) => [b.text, b.disabled]);
+    expect(pairs.slice(0, 2)).toEqual([
       ['Use', false],
       ['Open the note', false],
-      ['Close', false],
     ]);
+    expect(pairs.at(-1)).toEqual(['Close', false]);
     expect(view.focus).toBe('Close');
   });
 
@@ -512,11 +515,12 @@ describe('US-021 AC-7 the pop-up’s buttons and keys', () => {
       'page.bleed must be a number of at least 0 (line 5)',
     );
     expect(view.rows).toBeUndefined();
-    expect(view.buttons.map((b) => [b.text, b.disabled])).toEqual([
+    const pairs = view.buttons.map((b) => [b.text, b.disabled]);
+    expect(pairs.slice(0, 2)).toEqual([
       ['Use', true],
       ['Open the note', false],
-      ['Close', false],
     ]);
+    expect(pairs.at(-1)).toEqual(['Close', false]);
   });
 
   it('US-021 AC-7: Escape closes (the modal is an Obsidian Modal) and the focus goes to Close (text check)', () => {

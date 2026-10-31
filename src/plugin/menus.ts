@@ -32,6 +32,21 @@ export interface MenuEntry {
   run?: () => Promise<unknown>;
 }
 
+/** US-029 AC-10: marks the plugin's items in menus shared with others. */
+const PLUGIN_PREFIX = 'O2T: ';
+
+/**
+ * US-029 | AC-10: The title drawn for `entry`. In a menu shared with Obsidian
+ * and other plugins (`marked`: the file explorer and editor menus) an item's
+ * title gets the prefix `O2T: `; a label keeps its title; the ribbon menu
+ * (not marked, decision 1) keeps every title. The entries themselves keep
+ * their titles (US-020, US-022, US-027).
+ */
+export function menuItemTitle(entry: MenuEntry, marked: boolean): string {
+  const title = entry.title ?? '';
+  return marked && entry.label !== true ? `${PLUGIN_PREFIX}${title}` : title;
+}
+
 /** The presets as the ribbon menu shows them, read when the menu opens. */
 export interface PresetsView {
   /** In settings order (the store's `entries()`); `group` as US-021 reads it. */

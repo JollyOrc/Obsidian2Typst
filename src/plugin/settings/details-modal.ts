@@ -14,6 +14,10 @@ export interface DetailsModalDeps {
   settings: SettingsStore;
   usePreset(name: string): Promise<void>;
   openNote(path: string): Promise<void>;
+  /** US-029 AC-6: the preset screen's Duplicate, Rename and Delete. */
+  duplicate(name: string): Promise<void>;
+  rename(name: string): Promise<string | null>;
+  remove(name: string): Promise<boolean>;
 }
 
 /** US-021 | AC-6 to AC-9: the pop-up of the preset `name`. */
@@ -23,7 +27,7 @@ export class PresetDetailsModal extends Modal {
   constructor(
     app: App,
     private readonly deps: DetailsModalDeps,
-    private readonly name: string,
+    private name: string,
   ) {
     super(app);
   }
@@ -49,7 +53,19 @@ export class PresetDetailsModal extends Modal {
   /** Draws the view of this moment: the title, the table or the error, the buttons. */
   private draw(): void {
     const view: DetailsView = detailsView(
-      {...this.deps, close: () => this.close()},
+      {
+        ...this.deps,
+        close: () => this.close(),
+        // US-029 AC-6 (decision 6): the pop-up follows a rename.
+        rename: async (name) => {
+          const to = await this.deps.rename(name);
+          if (to !== null) {
+            this.name = to;
+            this.draw();
+          }
+          return to;
+        },
+      },
       this.name,
     );
     this.titleEl.setText(view.title);

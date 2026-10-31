@@ -47,6 +47,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-026](US-026-book-parts-and-signatures.md) | Book parts and signatures | Done (M16 passed 2026-10-29; the two contents rows green with TICKET-085; decision 8 added 2026-10-29) | TICKET-078 to 082 |
 | [US-027](US-027-table-of-contents.md) | Table of contents | Done (M17 passed 2026-10-29) | TICKET-083 to 088 |
 | [US-028](US-028-image-fit.md) | Images that stay with their text | Done (M18 passed 2026-10-29) | TICKET-089 to 097 |
+| [US-029](US-029-settings-screen-and-menu-marking.md) | A settings screen of feature rows, and marked menu items | Done (M19 passed 2026-10-31; AC-7 keyboard variance accepted) | #111 to #115 |
 
 ### Backlog
 

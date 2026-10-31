@@ -38,3 +38,39 @@
   width: 100%;
   height: 100%;
 }
+
+/* US-029 AC-1, AC-7: a collapsible section; its heading row is the summary,
+   with a chevron that turns when the section is open. */
+.o2t-section > summary {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.o2t-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.o2t-section > summary::before {
+  content: '›';
+  width: 1em;
+  flex: none;
+  transition: transform 100ms ease-in-out;
+}
+
+.o2t-section[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.o2t-section > summary > .setting-item {
+  flex: 1;
+}
+
+/* US-029 AC-2: a feature row without a gear keeps the gear's space, so the
+   toggles of a section line up (checked by eye in M19). */
+.o2t-no-gear .setting-item-control::after {
+  content: '';
+  flex: none;
+  width: calc(var(--icon-size) + 2 * var(--size-2-2));
+}

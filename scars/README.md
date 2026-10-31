@@ -46,6 +46,7 @@ Each SCAR covers:
 | [SCAR-028](SCAR-028-test-reader-trusted-unchecked.md) | A test reader is trusted without a check of its own | Verification / Test tooling | Medium |
 | [SCAR-029](SCAR-029-human-steps-buried-in-one-file.md) | Procedures a human runs are kept as sections of one large file | Process / Documentation | Low |
 | [SCAR-030](SCAR-030-test-time-limit-left-at-default.md) | A test's time limit is left at the default for heavy work | Verification / Test tooling | Low |
+| [SCAR-031](SCAR-031-decisions-left-in-the-shell-entry-point.md) | Decisions left in the plugin's entry point, where no test reaches them | Architecture / Verification | Medium |
 
 ## Recurring themes
 
@@ -164,6 +165,11 @@ read a unit by its id, not by slicing a larger file.
 A test that does seconds of work itself states its time limit, measured under
 a full parallel run with a margin; a timeout is first run alone before the
 code is blamed, and a raised limit goes to every test doing the same work.
+
+**Decisions out of the entry point** (SCAR-031)
+The plugin's entry point only builds Obsidian objects and hands them over;
+every decision lives in a function with tests. A mutant that survives there
+is moved out, and the remaining hand-over line gets a text check.
 
 **Rules at non-default values** (SCAR-019)
 A rule that reads a setting gets examples and tests at the default, at both

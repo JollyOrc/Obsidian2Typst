@@ -84,12 +84,12 @@ describe('US-008 AC-19 wiring of the settings tab (text check)', () => {
     expect(tab.match(/restoreScroll\(\)/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('US-008 AC-19: the position is put back right after the draw and again after the fonts are filled', () => {
+  // US-029 AC-1, AC-5 (#112): the tab draws its sections in one call and
+  // the font rows are filled in the Fonts modal, so no row of the tab is
+  // drawn later; the restore after the fonts left with them.
+  it('US-008 AC-19: the position is put back right after the sections are drawn', () => {
     expect(tab).toMatch(
-      /this\.showGlobals\(containerEl\);\s*this\.restoreScroll\(\);/,
-    );
-    expect(tab).toMatch(
-      /addFontRows\(holder, this\.rowsEnv\(\)\)\.finally\(\s*\(\) =>\s*this\.restoreScroll\(\),?\s*\)/,
+      /addLayoutSections\([^;]*\);\s*this\.restoreScroll\(\);/,
     );
   });
 });

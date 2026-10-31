@@ -112,5 +112,5 @@ A style of your own named like an alias (`summary`) wins over the alias.
 
 The [style panel](preview-panel.md) redraws when you save a change to the
 `callouts` of the active preset. The settings tab and the style panel have no
-rows for callout styles; edit them in the preset note. The details pop-up
+rows for callout styles; edit them in the preset note. The preset's window
 lists the names of the styles a preset sets.

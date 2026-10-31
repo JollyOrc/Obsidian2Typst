@@ -8,8 +8,8 @@ end, roman page numbers in the front matter, and a page count that fits the
 printer's sheets.
 
 All of them are off by default, so a note exports as a plain document until
-you switch them on. They are set in a preset note or in the Defaults rows of
-the settings tab (except where noted).
+you switch them on. They are set in a preset note or in the Defaults of the
+settings tab, section **Page** or **Book** (except where noted).
 
 ## Contents
 
@@ -39,7 +39,7 @@ page:
 ```
 
 In the settings tab these are the rows **Break before H1** to **Break before
-H6** (`—` means not set).
+H6**, behind the gear of **Page → Page breaks** (`—` means not set).
 
 - To reach a left or right page, a blank page may be added. It prints its
   page number (if page numbers are on) and nothing else.
@@ -166,8 +166,9 @@ toc:
   dotLeaders: true   # dots between entry and page number
 ```
 
-The settings tab rows are **Contents depth**, **Contents title**, **Contents
-page numbers** and **Contents dot leaders**.
+In the settings tab these are the rows **Contents depth**, **Contents
+title**, **Contents page numbers** and **Contents dot leaders**, behind the
+gear of **Book → Contents**.
 
 The table lists the headings of the body down to `depth`, with their numbers
 and pages; each entry is a link. It does not list glossary terms, headings
@@ -181,8 +182,8 @@ By default the contents are front matter: on the page after the colophon, or,
 without a colophon, on the next right page (page 3 after a cover).
 
 To place them at a heading, click into a top-level `#` heading in the editor,
-right-click, and choose **Table of contents before this heading** or **Table
-of contents after this heading**. After the question this writes, into the
+right-click, and choose **O2T: Table of contents before this heading** or
+**O2T: Table of contents after this heading**. After the question this writes, into the
 active preset:
 
 ```yaml
@@ -192,8 +193,8 @@ toc:
 ```
 
 If the depth is still 0, the same question also sets `depth: 2`. On the
-heading and side already chosen, the item reads **Remove table of contents
-placement**.
+heading and side already chosen, the item reads **O2T: Remove table of
+contents placement**.
 
 - `before`: right before that heading.
 - `after`: after that heading's whole section, before the next `#` heading

@@ -18,6 +18,7 @@ import {
 import {
   activePresetView,
   imageFileEntries,
+  menuItemTitle,
   noteMenuEntries,
   presetEditEntries,
   ribbonMenuEntries,
@@ -63,6 +64,8 @@ import type {ExportRequest} from './export-command';
 import {createExportLock, runExport, type ExportResult} from './run-export';
 import {createPresetStore, type PresetStore} from './presets/store';
 import {PresetDetailsModal} from './settings/details-modal';
+import {NameModal} from './settings/name-modal';
+import {presetScreenActions} from './settings/preset-actions';
 import {ConfirmModal} from './settings/rows';
 import {Obsidian2TypstSettingTab} from './settings/settings-tab';
 import {
@@ -296,6 +299,8 @@ export default class Obsidian2TypstPlugin extends Plugin {
    * only place that turns a `MenuEntry` into a menu item (SCAR-017). The note
    * menus pass `section`, so their two items stay together among Obsidian's
    * own items; the plugin's own ribbon menu needs none.
+   * US-029 AC-10: an entry drawn with a section gets the plugin's prefix
+   * (`menuItemTitle`); the ribbon menu's titles stay as they are.
    */
   private showEntries(
     menu: Menu,
@@ -308,7 +313,8 @@ export default class Obsidian2TypstPlugin extends Plugin {
         continue;
       }
       menu.addItem((item) => {
-        item.setTitle(entry.title ?? '');
+        // US-029 AC-10: the plugin's prefix in the shared menus (with a section).
+        item.setTitle(menuItemTitle(entry, section !== undefined));
         if (section !== undefined) item.setSection(section);
         if (entry.icon !== undefined) item.setIcon(entry.icon);
         if (entry.checked !== undefined) item.setChecked(entry.checked);
@@ -344,15 +350,33 @@ export default class Obsidian2TypstPlugin extends Plugin {
     }
   }
 
-  /** US-021 AC-8: opens the details pop-up of the preset `name`. */
+  /**
+   * US-021 AC-8 | US-029 AC-6, AC-8: opens the preset screen of the preset
+   * `name` (the tab's gear and the panel's `info` button). Duplicate, Rename
+   * and Delete are `presetScreenActions` with Obsidian's dialogs and notices.
+   */
   private openDetails(name: string): void {
+    const settings = this.pluginSettings;
     new PresetDetailsModal(
       this.app,
       {
         presets: this.presets,
-        settings: this.pluginSettings,
+        settings,
         usePreset: (preset) => this.actions.usePreset(preset),
         openNote: (path) => this.showNote(path),
+        ...presetScreenActions({
+          presets: this.presets,
+          settings,
+          askName: (title, initial, submit) =>
+            new Promise<void>((resolve) =>
+              new NameModal(this.app, title, initial, submit, resolve).open(),
+            ),
+          confirm: (text) =>
+            new Promise<boolean>((resolve) =>
+              new ConfirmModal(this.app, text, resolve).open(),
+            ),
+          notify: (text) => void new Notice(text),
+        }),
       },
       name,
     ).open();

@@ -79,5 +79,14 @@ more blocks the next correct change.
   TICKET-096): the float check accepted "the text after it is on the next
   page" for every float because AC-8 allows it at the tightest edge; a helper
   under which no float ever filled its gap passed all 35 PDF tests.
+- When code or rows move (into another file, a modal, a new module), the
+  search also runs by the moved text: the labels, call sequences, file paths
+  and statements that text checks pin, not only by function names; every
+  test that reads the old place is listed in the ticket with what it pins.
+  Example (2026-10-31, US-029 #112, #113): the search ran by `detailRows`,
+  `pageRows`, `setButtonText`; seven text checks went red later — the
+  `showGlobals`/`restoreScroll` sequence, `addDefaultRows(` in each screen,
+  the Bleed row of the panel (moved into a modal), the panel's order, the
+  name dialog's keys and the delete path (both moved out of the tab).
 - Applies next to: text checks over source files, guards over generated
   output, wiring tests, fakes of a framework.

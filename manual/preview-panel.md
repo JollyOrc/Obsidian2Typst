@@ -15,22 +15,24 @@ From top to bottom:
 1.  **Preset**: a dropdown with the presets; choosing one makes it active
     for exports and the preview. Invalid presets are greyed out, with their
     error as tooltip. The info icon next to it opens the
-    [details pop-up](presets.md#the-details-pop-up) of the active preset.
-2.  **Page**: the rows of the Defaults (page, numbering, breaks, book,
-    contents, images), the same rows as in the settings tab.
-3.  **Fonts**: the font rows.
-4.  **Cover**: the cover settings of the active preset, for reading only.
-5.  **Pages**: the page range to show.
-6.  **Refresh**.
-7.  A status line, then the pages.
+    [preset's window](presets.md#the-presets-window) of the active preset.
+2.  **Page**, **Text**, **Book**: the Defaults, in the same sections, feature
+    rows and gears as in the [settings tab](manual.md#the-settings-tab).
+    They start closed; click a heading to open it.
+3.  **Cover**: the cover settings of the active preset, for reading only.
+4.  **Pages**: the page range to show.
+5.  **Refresh**.
+6.  A status line, then the pages.
 
 ## Which value a row shows
 
 Each row shows the value the next export would use. A row that the active
 preset sets is disabled and reads, for example,
-`Set by preset "A5 print"; change it in the preset note`. Every other row
-edits the **Defaults**, exactly as the settings tab does; the panel never
-writes a preset note.
+`Set by preset "A5 print"; change it in the preset note`. A feature row
+whose window holds such rows names them, for example `Set by preset "A5
+print": Trim size, Trim width (mm), Trim height (mm), Bleed (mm).` Every
+other row edits the **Defaults**, exactly as the settings tab does; the
+panel never writes a preset note.
 
 ## When the preview is redrawn
 

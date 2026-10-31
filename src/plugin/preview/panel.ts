@@ -3,6 +3,8 @@
 // page range, a button, a status text and the drawn pages. It draws and
 // listens; which note is shown, when a compile starts and which result counts
 // is decided by the controller. The panel writes no preset note.
+// US-029 AC-8: the rows are the sections of `PANEL_LAYOUT` (Page, Text, Book,
+// Cover), all closed at first, kept open or closed while the view lives.
 import {ItemView, Setting, TFile, type WorkspaceLeaf} from 'obsidian';
 import {planCanvases} from '../../core/preview/canvas';
 import {ownerNote, shownValue} from '../../core/presets/owner';
@@ -11,15 +13,16 @@ import type {FontSet} from '../fonts';
 import type {PresetStore} from '../presets/store';
 import {commitOnChange} from '../settings/commit';
 import type {SettingsStore} from '../settings/data';
+import {PANEL_LAYOUT, ownedRowsNote} from '../settings/layout';
 import {
-  addDefaultRows,
-  addFontRows,
+  addLayoutSections,
   addPresetDropdown,
   addRangeInput,
   createTrimState,
   type RowsEnv,
 } from '../settings/rows';
 import {captureScroll, type ScrollNode} from '../settings/scroll';
+import {createSectionState} from '../settings/sections';
 import {makePageCanvas, inspectPage, type DrawingCanvas} from './canvas';
 import type {PreviewController, PreviewState} from './controller';
 import {
@@ -54,6 +57,8 @@ const log = (text: string): void => console.log(`[o2t preview] ${text}`);
 export class StylePanelView extends ItemView {
   private readonly stops: (() => void)[] = [];
   private readonly trim = createTrimState();
+  /** US-029 AC-7 (decision 2): every section closed at first. */
+  private readonly sections = createSectionState([]);
   private restoreScroll: () => void = () => undefined;
   private rowsEl: HTMLElement | null = null;
   private selectorEl: HTMLElement | null = null;
@@ -124,6 +129,13 @@ export class StylePanelView extends ItemView {
           ? null
           : ownerNote(active.name, active.fields, path);
       },
+      // US-029 AC-8 (decision 7): the owned rows behind a gear.
+      ownedNote: (rows) => {
+        const active = this.activeFields();
+        return active === null
+          ? null
+          : ownedRowsNote(active.name, active.fields, rows);
+      },
       shown: (path) =>
         shownValue(
           this.activeFields()?.fields ?? {},
@@ -144,10 +156,9 @@ export class StylePanelView extends ItemView {
     selector.empty();
     rows.empty();
     this.presetSelector(selector);
-    const env = this.rowsEnv();
-    this.pageRows(rows, env);
-    this.fontRows(rows, env);
-    this.coverRows(rows);
+    addLayoutSections(rows, this.rowsEnv(), PANEL_LAYOUT, this.sections, {
+      cover: (body) => this.coverRows(body),
+    });
     this.restoreScroll();
     requestAnimationFrame(() => this.restoreScroll());
   }
@@ -176,25 +187,11 @@ export class StylePanelView extends ItemView {
     );
   }
 
-  /** The Page group: the page rows of the Defaults (US-009). */
-  private pageRows(root: HTMLElement, env: RowsEnv): void {
-    new Setting(root).setName('Page').setHeading();
-    addDefaultRows(root, env);
-  }
-
-  /** The Fonts group (US-010). */
-  private fontRows(root: HTMLElement, env: RowsEnv): void {
-    new Setting(root).setName('Fonts').setHeading();
-    const holder = root.createDiv();
-    void addFontRows(holder, env).finally(() => this.restoreScroll());
-  }
-
   /**
    * The Cover group (US-011): cover settings exist in preset notes only, so the
    * rows show the effective values and are not editable here.
    */
   private coverRows(root: HTMLElement): void {
-    new Setting(root).setName('Cover').setHeading();
     const active = this.activeFields();
     const set = getField(
       (active?.fields ?? {}) as Record<string, unknown>,

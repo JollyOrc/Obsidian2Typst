@@ -16,14 +16,14 @@ can edit them by hand.
 - [Editing a preset](#editing-a-preset)
 - [Invalid presets](#invalid-presets)
 - [Groups](#groups)
-- [The details pop-up](#the-details-pop-up)
+- [The preset's window](#the-presets-window)
 - [Menu items that change the active preset](#menu-items-that-change-the-active-preset)
 - [Field reference](#field-reference)
 
 ## A preset is a note
 
 Presets live in the presets folder (default `Obsidian2Typst/presets`; change
-it in the settings tab under **Folders and warnings**). Each `.md` file there
+it in the settings tab under **Export**). Each `.md` file there
 is one preset:
 
 - the file name without `.md` is the preset name;
@@ -60,7 +60,7 @@ Preset notes are never exported, and an export or preview never changes them.
 Each setting is taken from the first of these that sets it:
 
 1.  the active preset note;
-2.  the **Defaults** section of the settings tab;
+2.  the **Defaults** (the sections Page, Text and Book of the settings tab);
 3.  the built-in value.
 
 A setting is *set* when it is present and not `null`. Groups merge field by
@@ -94,19 +94,23 @@ any of these places; they all show the same choice:
 
 - the ribbon menu (printer icon), under **Preset**;
 - the dropdown at the top of the [style panel](preview-panel.md);
-- the **Use** button in the settings tab or in the details pop-up.
+- the **Use** button in the settings tab or in the preset's window.
 
 An invalid preset cannot be chosen. If the active preset is deleted or
 renamed outside the plugin, the first preset by name becomes active.
 
 ## Creating, renaming and deleting presets
 
-In **Settings → Obsidian2Typst → Presets**:
+In **Settings → Obsidian2Typst → Presets**, **New preset** is below the
+list; the other actions are in the preset's window (the gear of its row, or
+the info icon of the style panel):
 
 - **New preset** creates a note with only `schemaVersion: 1`.
 - **Duplicate** copies the note, body and all, as `<name> copy` (or
   `<name> copy 2`, …).
 - **Rename** renames the note through Obsidian, so links to it are updated.
+  The window then shows the preset under its new name; an active preset
+  stays active.
 - **Delete** asks `Delete preset "<name>"?` and moves the note to the trash as
   set in Obsidian. **Cancel** is the default button. If you delete the active
   preset, the dialog names the preset that becomes active. The last preset
@@ -169,18 +173,19 @@ The settings tab, the ribbon menu and the panel's dropdown then list the
 presets under their group names. Presets without a group are listed together.
 `group` exists only in preset notes.
 
-## The details pop-up
+## The preset's window
 
-The **Details** button in the settings tab, and the info icon next to the
-preset dropdown in the style panel, open a pop-up titled `Preset "<name>"`.
-It lists every setting in three columns:
+The gear of a preset's row in the settings tab, and the info icon next to the
+preset dropdown in the style panel, open a window titled `Preset "<name>"`.
+It lists every setting, in the order of the settings tab's sections, in three
+columns:
 
 | Setting | In this preset | Used |
 | --- | --- | --- |
-| Highlight colour | | `#00ff00 (Defaults)` |
 | Trim size | `A5` | `A5 (preset)` |
 | Bleed (mm) | `3` | `3 (preset)` |
 | Slug (mm) | | `0 (built-in)` |
+| Highlight colour | | `#00ff00 (Defaults)` |
 
 **Used** is the value an export would use, with its source. At the end come
 summary rows for the cover, the callout styles, the heading rules and the
@@ -188,18 +193,20 @@ place of the table of contents. For an invalid preset the pop-up shows the
 error instead of the table.
 
 Buttons: **Use** (make it active), **Open the note** (opens the preset note
-and closes the pop-up), **Close**.
+and closes the window), **Duplicate**, **Rename**, **Delete** (see above;
+after a confirmed delete the window closes) and **Close** (it has the
+focus).
 
 ## Menu items that change the active preset
 
 Some settings can be set from the editor or file explorer menu without
 opening the preset note:
 
-- **Use as glossary section** on a heading: see
+- **O2T: Use as glossary section** on a heading: see
   [Glossary and heading rules](glossary-and-heading-rules.md).
-- **Table of contents before/after this heading** on a top-level heading: see
+- **O2T: Table of contents before/after this heading** on a top-level heading: see
   [Book structure](book-structure.md#table-of-contents).
-- **Use as cover** on an image: see
+- **O2T: Use as cover** on an image: see
   [Images and the cover](images-and-cover.md#the-cover).
 
 Each item asks first, in a dialog titled `Change preset "<name>"` that names

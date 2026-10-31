@@ -123,8 +123,9 @@ cover:
 ### Setting the cover from a menu
 
 - In the editor, click into a line with an image, right-click and choose
-  **Use as cover** (with several images on the line: `Use "<file>" as cover`).
-- In the file explorer, right-click an image file and choose **Use as
+  **O2T: Use as cover** (with several images on the line: `O2T: Use "<file>"
+  as cover`).
+- In the file explorer, right-click an image file and choose **O2T: Use as
   cover**.
 
 Both set `cover.mode: file` and `cover.file` in the active preset after a

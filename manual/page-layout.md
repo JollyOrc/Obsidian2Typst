@@ -17,7 +17,7 @@ table of contents are in [Book structure](book-structure.md).
 ## Page size and margins
 
 All page values are in millimetres and live under `page` in a preset note or
-in the Defaults rows of the settings tab.
+in the Defaults of the settings tab (**Page → Page setup**).
 
 ```yaml
 page:
@@ -69,8 +69,8 @@ for the binding.
 
 With `facingPages: false` every page has `inside` on the left and `outside`
 on the right, and the gutter is not used. In the settings tab the Gutter row
-can only be edited while the Facing pages switch of the Defaults is on. The
-switch shows off while it is not set, even though the built-in value is on.
+can only be edited while the Facing pages switch of the Defaults is on; the
+switch shows the value in effect, also when the Defaults do not set it.
 
 Facing pages also decide where page numbers stand and whether pages can be
 added to reach a left or right page (see [Book structure](book-structure.md)).

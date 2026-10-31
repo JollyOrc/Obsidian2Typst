@@ -13,10 +13,17 @@ import {
   type FontCatalog,
 } from '../../core/fonts';
 import {getField, type FieldPath} from '../../core/presets';
+import {builtinValue} from '../../core/presets/owner';
 import type {FontSet} from '../fonts';
 import type {PresetStore} from '../presets/store';
-import {commitOnChange} from './commit';
+import {
+  commitOnChange,
+  createPendingFields,
+  type PendingFields,
+} from './commit';
 import type {SettingsStore} from './data';
+import type {FeatureItem, LayoutSection} from './layout';
+import {addSection, type SectionState} from './sections';
 import {saveDefaultsField} from './save-field';
 import {resetDefaultField, type DeleteConfirmation} from './dialog';
 import {DEFAULT_ROWS, FONT_ROWS, type FieldRow} from './row-data';
@@ -43,6 +50,13 @@ export interface RowsEnv {
   shown(path: FieldPath): unknown;
   /** The state of the trim size rows that lives between two draws. */
   trim: TrimState;
+  /** US-029 AC-5: the text fields of a modal, saved when it closes. */
+  pending?: PendingFields;
+  /**
+   * US-029 AC-8 (decision 7): the note a feature row adds after its
+   * description for the rows behind its gear that a preset owns, or null.
+   */
+  ownedNote?(rows: readonly string[]): string | null;
 }
 
 /** US-009 AC-12: what the trim size rows keep between two draws. */
@@ -112,8 +126,20 @@ export class ConfirmModal extends Modal {
   }
 }
 
+/**
+ * A refused value: its message in the row, the warning class. US-029 AC-5
+ * (decision 3): once the modal that held the row has closed, the row is gone,
+ * so the message is shown as a notice too.
+ */
+function refuse(env: RowsEnv, setting: Setting, error: string): void {
+  setting.setDesc(error);
+  setting.descEl.addClass('mod-warning');
+  if (env.pending?.closed === true) new Notice(error);
+}
+
 /** Keeps the message of a row: a refused value shows its text, a saved one clears it. */
 function showResult(
+  env: RowsEnv,
   setting: Setting,
   hint: string,
   result: {ok: true} | {ok: false; error: string},
@@ -122,8 +148,7 @@ function showResult(
     setting.setDesc(hint);
     setting.descEl.removeClass('mod-warning');
   } else {
-    setting.setDesc(result.error);
-    setting.descEl.addClass('mod-warning');
+    refuse(env, setting, result.error);
   }
 }
 
@@ -254,8 +279,7 @@ export function addTrimSizeRow(
           Object.keys(plan.page).length === 0 ? undefined : plan.page;
         const result = await saveDefaultsField(env, ['page'], body);
         if (!result.ok) {
-          setting.setDesc(result.error);
-          setting.descEl.addClass('mod-warning');
+          refuse(env, setting, result.error);
           return;
         }
         for (const r of rows) {
@@ -264,96 +288,138 @@ export function addTrimSizeRow(
         }
         for (const notice of result.notices) new Notice(notice);
       },
+      env.pending,
     );
   });
 }
 
-/** US-008 AC-1, US-009: the rows of the Defaults (not the heading). */
-export function addDefaultRows(root: HTMLElement, env: RowsEnv): void {
-  const {settings} = env;
-  // US-009 AC-12: `Custom` shows while a width or a height is stored, or after
-  // the user chose it (nothing is stored yet then).
-  const stored = trimChoiceOf(settings.data.defaults.page);
+/**
+ * US-008 AC-1, US-009: the rows of the Defaults (not the heading).
+ * US-029 AC-1, AC-5: with `labels`, only the rows with these labels, in that
+ * order (a section's plain row, a modal's rows); without, every row as before.
+ */
+export function addDefaultRows(
+  root: HTMLElement,
+  env: RowsEnv,
+  labels?: readonly string[],
+): void {
+  const rows =
+    labels === undefined
+      ? DEFAULT_ROWS
+      : labels.map((label) => {
+          const row = DEFAULT_ROWS.find((r) => r.label === label);
+          if (row === undefined) throw new Error(`no row ${label}`);
+          return row;
+        });
+  const custom = startTrim(env);
+  for (const row of rows) addDefaultRow(root, env, row, custom);
+}
+
+/**
+ * US-009 AC-12: prepares the trim state for a draw and tells whether
+ * `Custom` shows: while a width or a height is stored, or after the user
+ * chose it (nothing is stored yet then).
+ */
+function startTrim(env: RowsEnv): boolean {
+  const page = env.settings.data.defaults.page;
+  const stored = trimChoiceOf(page);
   const custom = stored === 'Custom' || env.trim.custom;
-  const page = settings.data.defaults.page;
   env.trim.draft = {
     width: page?.trimWidth === undefined ? '' : String(page.trimWidth),
     height: page?.trimHeight === undefined ? '' : String(page.trimHeight),
   };
   env.trim.rows = [];
-  for (const row of DEFAULT_ROWS) {
-    const key = row.path.join('.');
-    if (key === 'page.trimWidth' || key === 'page.trimHeight') {
-      addTrimSizeRow(env, root, row, key === 'page.trimWidth', custom);
-      continue;
-    }
-    const owner = env.ownerNote(row.path);
-    const setting = new Setting(root).setName(row.label);
-    const hint = owner ?? row.hint ?? '';
-    setting.setDesc(hint);
-    if (owner !== null) setting.descEl.addClass('o2t-owned');
-    const current = env.shown(row.path);
-    /** Saves a new value; a refused value shows its message, the old one stays. */
-    const save = async (value: unknown): Promise<boolean> => {
-      const result = await saveDefaultsField(env, row.path, value);
-      showResult(setting, hint, result);
-      if (!result.ok) return false;
-      for (const notice of result.notices) new Notice(notice);
-      return true;
-    };
-    if (key === 'page.trimSize') {
-      addTrimDropdown(env, setting, custom);
-    } else if (row.kind === 'dropdown') {
-      // US-025 AC-7: `—` (the empty value) is "not set"; a choice is saved at
-      // once. A list of whole numbers is saved as numbers (US-026's signature).
-      const options = row.options ?? [];
-      const numeric = options.every((o) => /^\d+$/.test(o));
-      setting.addDropdown((d) => {
-        d.addOption('', '—');
-        for (const option of options) d.addOption(option, option);
-        d.setValue(current === undefined ? '' : String(current));
-        if (owner !== null) d.setDisabled(true);
-        d.onChange(async (value) => {
-          if (value === '') await save(undefined);
-          else await save(numeric ? Number(value) : value);
-        });
-      });
-    } else if (row.kind === 'toggle') {
-      setting.addToggle((t) => {
-        t.setValue(current === true);
-        if (owner !== null) t.setDisabled(true);
-        t.onChange(async (on) => {
-          // Facing pages decides whether the gutter field is enabled
-          // (US-009 AC-13): draw the host again (SCAR-016).
-          if ((await save(on)) && key === 'page.facingPages') env.redraw();
-        });
-      });
-    } else {
-      setting.addText((t) => {
-        t.setValue(current === undefined ? '' : String(current));
-        if (owner !== null) t.setDisabled(true);
-        if (key === 'page.gutter') {
-          const enabled = gutterEnabled(settings.data.defaults.page);
-          t.setDisabled(!enabled || owner !== null);
-          if (!enabled) setting.setDesc(owner ?? 'Used only with facing pages');
-        }
-        commitOnChange(
-          t.inputEl,
-          () => t.getValue(),
-          async (text) => {
-            const trimmed = text.trim();
-            if (trimmed === '') await save(undefined);
-            else if (row.kind === 'number') {
-              await save(
-                Number.isNaN(Number(trimmed)) ? trimmed : Number(trimmed),
-              );
-            } else await save(trimmed);
-          },
-        );
-      });
-    }
-    addResetButton(env, setting, row, save);
+  return custom;
+}
+
+/**
+ * US-008 AC-1, US-009 | US-029 AC-2, AC-3: one row of the Defaults. `hint`
+ * replaces the row's own hint (a feature row's description). A toggle shows
+ * the value an export would use: the shown value, else the built-in one
+ * (`builtinValue`, AC-3). Returns the row, or null for the trim width and
+ * height rows (drawn by `addTrimSizeRow`).
+ */
+function addDefaultRow(
+  root: HTMLElement,
+  env: RowsEnv,
+  row: FieldRow,
+  custom: boolean,
+  ownHint?: string,
+): Setting | null {
+  const {settings} = env;
+  const key = row.path.join('.');
+  if (key === 'page.trimWidth' || key === 'page.trimHeight') {
+    addTrimSizeRow(env, root, row, key === 'page.trimWidth', custom);
+    return null;
   }
+  const owner = env.ownerNote(row.path);
+  const setting = new Setting(root).setName(row.label);
+  const hint = owner ?? ownHint ?? row.hint ?? '';
+  setting.setDesc(hint);
+  if (owner !== null) setting.descEl.addClass('o2t-owned');
+  const current = env.shown(row.path);
+  /** Saves a new value; a refused value shows its message, the old one stays. */
+  const save = async (value: unknown): Promise<boolean> => {
+    const result = await saveDefaultsField(env, row.path, value);
+    showResult(env, setting, hint, result);
+    if (!result.ok) return false;
+    for (const notice of result.notices) new Notice(notice);
+    return true;
+  };
+  if (key === 'page.trimSize') {
+    addTrimDropdown(env, setting, custom);
+  } else if (row.kind === 'dropdown') {
+    // US-025 AC-7: `—` (the empty value) is "not set"; a choice is saved at
+    // once. A list of whole numbers is saved as numbers (US-026's signature).
+    const options = row.options ?? [];
+    const numeric = options.every((o) => /^\d+$/.test(o));
+    setting.addDropdown((d) => {
+      d.addOption('', '—');
+      for (const option of options) d.addOption(option, option);
+      d.setValue(current === undefined ? '' : String(current));
+      if (owner !== null) d.setDisabled(true);
+      d.onChange(async (value) => {
+        if (value === '') await save(undefined);
+        else await save(numeric ? Number(value) : value);
+      });
+    });
+  } else if (row.kind === 'toggle') {
+    setting.addToggle((t) => {
+      t.setValue((current ?? builtinValue(row.path)) === true);
+      if (owner !== null) t.setDisabled(true);
+      t.onChange(async (on) => {
+        // Facing pages decides whether the gutter field is enabled
+        // (US-009 AC-13): draw the host again (SCAR-016).
+        if ((await save(on)) && key === 'page.facingPages') env.redraw();
+      });
+    });
+  } else {
+    setting.addText((t) => {
+      t.setValue(current === undefined ? '' : String(current));
+      if (owner !== null) t.setDisabled(true);
+      if (key === 'page.gutter') {
+        const enabled = gutterEnabled(settings.data.defaults.page);
+        t.setDisabled(!enabled || owner !== null);
+        if (!enabled) setting.setDesc(owner ?? 'Used only with facing pages');
+      }
+      commitOnChange(
+        t.inputEl,
+        () => t.getValue(),
+        async (text) => {
+          const trimmed = text.trim();
+          if (trimmed === '') await save(undefined);
+          else if (row.kind === 'number') {
+            await save(
+              Number.isNaN(Number(trimmed)) ? trimmed : Number(trimmed),
+            );
+          } else await save(trimmed);
+        },
+        env.pending,
+      );
+    });
+  }
+  addResetButton(env, setting, row, save);
+  return setting;
 }
 
 /** US-010 AC-6: the rows of the Fonts section of the Defaults. */
@@ -397,8 +463,7 @@ export async function addFontRows(
       const result = await saveDefaultsField(env, row.path, value);
       accepted = result.ok;
       if (!result.ok) {
-        setting.setDesc(result.error);
-        setting.descEl.addClass('mod-warning');
+        refuse(env, setting, result.error);
         return false;
       }
       for (const notice of result.notices) new Notice(notice);
@@ -457,10 +522,157 @@ export async function addFontRows(
             } else await save(trimmed);
             if (accepted) env.redraw();
           },
+          env.pending,
         );
       });
     }
     addResetButton(env, setting, row, save);
+  }
+}
+
+/** US-029 AC-1: what a screen draws itself in a section of the layout. */
+export interface LayoutHooks {
+  /** The preset list (the tab's Presets section). */
+  presets?(body: HTMLElement): void;
+  /** The read-only cover rows (the panel's Cover section). */
+  cover?(body: HTMLElement): void;
+  /** A row that is no Defaults row: Strict mode, the folder rows. */
+  other?(body: HTMLElement, item: LayoutSection['items'][number]): void;
+}
+
+/**
+ * US-029 | AC-1, AC-7, AC-8: Draws `sections` into `root`, each as a
+ * collapsible section (`addSection`, open as `state` says): feature rows by
+ * `addFeatureRow`, plain Defaults rows by `addDefaultRows`, everything else by
+ * the screen's `hooks`.
+ */
+export function addLayoutSections(
+  root: HTMLElement,
+  env: RowsEnv,
+  sections: readonly LayoutSection[],
+  state: SectionState,
+  hooks: LayoutHooks,
+): void {
+  for (const section of sections) {
+    const body = addSection(root, section.name, state);
+    for (const item of section.items) {
+      if (item.kind === 'presets') hooks.presets?.(body);
+      else if (item.kind === 'cover') hooks.cover?.(body);
+      else if (item.kind === 'plain') {
+        if (DEFAULT_ROWS.some((row) => row.label === item.label)) {
+          addDefaultRows(body, env, [item.label]);
+        } else hooks.other?.(body, item);
+      } else if (item.toggle === 'strictMode') hooks.other?.(body, item);
+      else addFeatureRow(body, env, item);
+    }
+  }
+}
+
+/**
+ * US-029 | AC-2, AC-3, AC-8: A feature row. With a toggle field it is that
+ * field's Defaults row (same save, reset icon and owner rule, AC-3's shown
+ * value) with the feature's description; without one a row of name and
+ * description. In the panel, `env.ownedNote` adds the rows behind the gear
+ * that the preset owns (decision 7). A gear (`settings`, tooltip `Settings of
+ * <name>`) opens `FeatureModal` when the feature has rows; none otherwise.
+ */
+export function addFeatureRow(
+  root: HTMLElement,
+  env: RowsEnv,
+  item: FeatureItem,
+): void {
+  const owned = env.ownedNote?.(item.rows) ?? null;
+  const desc = owned === null ? item.desc : `${item.desc} ${owned}`;
+  let setting: Setting | null;
+  if (item.toggle === undefined) {
+    setting = new Setting(root).setName(item.name).setDesc(desc);
+  } else {
+    const row = DEFAULT_ROWS.find((r) => r.path.join('.') === item.toggle);
+    if (row === undefined) throw new Error(`no row for ${item.toggle}`);
+    setting = addDefaultRow(root, env, row, false, desc);
+  }
+  if (setting === null) return;
+  if (item.rows.length === 0) {
+    setting.settingEl.addClass('o2t-no-gear');
+    return;
+  }
+  setting.addExtraButton((b) =>
+    b
+      .setIcon('settings')
+      .setTooltip(`Settings of ${item.name}`)
+      .onClick(() => new FeatureModal(env.app, env, item).open()),
+  );
+}
+
+/**
+ * US-029 | AC-5: The modal of a feature row, titled with its name, holding its
+ * rows drawn by the row functions of the tab (the font rows by `addFontRows`).
+ * It redraws while open on a change of the settings or the presets that it did
+ * not save itself (a row the user is in keeps its place, as the panel's,
+ * US-012 AC-14) and when a row asks (gutter, trim size). Closing it (Escape,
+ * the close button, a click outside) saves the text typed but not yet saved
+ * (decision 3), stops listening and draws the screen behind again.
+ */
+export class FeatureModal extends Modal {
+  private readonly stops: (() => void)[] = [];
+  private readonly pending = createPendingFields();
+  /** True while a save that this modal started runs. */
+  private ownSave = false;
+
+  constructor(
+    app: App,
+    private readonly host: RowsEnv,
+    private readonly item: FeatureItem,
+  ) {
+    super(app);
+  }
+
+  override onOpen(): void {
+    this.titleEl.setText(this.item.name);
+    this.draw();
+    this.stops.push(
+      this.host.settings.onChange(() => {
+        if (!this.ownSave) this.draw();
+      }),
+      this.host.presets.onChange(() => this.draw()),
+    );
+  }
+
+  override onClose(): void {
+    this.pending.flush();
+    for (const stop of this.stops.splice(0)) stop();
+    this.contentEl.empty();
+    this.host.redraw();
+  }
+
+  /** Draws the rows from the stores of this moment (SCAR-016). */
+  private draw(): void {
+    const {contentEl, host} = this;
+    contentEl.empty();
+    this.pending.clear();
+    const settings: SettingsStore = Object.create(host.settings, {
+      setDefaults: {
+        value: async (fields: Parameters<SettingsStore['setDefaults']>[0]) => {
+          this.ownSave = true;
+          try {
+            return await host.settings.setDefaults(fields);
+          } finally {
+            this.ownSave = false;
+          }
+        },
+      },
+    });
+    const env: RowsEnv = {
+      ...host,
+      settings,
+      redraw: () => this.draw(),
+      pending: this.pending,
+    };
+    const fonts = this.item.rows.every((label) =>
+      FONT_ROWS.some((row) => row.label === label),
+    );
+    if (fonts) void addFontRows(contentEl.createDiv(), env);
+    else addDefaultRows(contentEl, env, this.item.rows);
   }
 }
 

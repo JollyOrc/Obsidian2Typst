@@ -14,6 +14,10 @@ export class Notice {
 }
 
 export class FakeEl {
+  /** US-029: the tag `createEl` was called with (`div` otherwise). */
+  tag = 'div';
+  /** US-029 AC-7: the `open` property of a `details` element. */
+  open = false;
   classes = new Set<string>();
   text = '';
   children: FakeEl[] = [];
@@ -79,8 +83,10 @@ export class FakeEl {
   empty(): void {
     this.children = [];
   }
-  createEl(_tag: string, options?: {text?: string; cls?: string}): FakeEl {
+  createEl(tag: string, options?: {text?: string; cls?: string}): FakeEl {
     const el = new FakeEl();
+    el.tag = tag;
+    el.parentElement = this;
     el.text = options?.text ?? '';
     if (options?.cls !== undefined) el.classes.add(options.cls);
     this.children.push(el);
@@ -170,15 +176,31 @@ export class FakeControl {
 
 export class FakeButton {
   icon = '';
+  /** US-029: the text and tooltip a test reads. */
+  text = '';
+  tooltip = '';
+  disabled = false;
   clicked: (() => unknown) | null = null;
   setIcon(icon: string): this {
     this.icon = icon;
     return this;
   }
-  setTooltip(): this {
+  setTooltip(tooltip: string): this {
+    this.tooltip = tooltip;
     return this;
   }
-  setButtonText(): this {
+  setButtonText(text: string): this {
+    this.text = text;
+    return this;
+  }
+  setDisabled(disabled: boolean): this {
+    this.disabled = disabled;
+    return this;
+  }
+  setCta(): this {
+    return this;
+  }
+  setWarning(): this {
     return this;
   }
   onClick(callback: () => unknown): this {
@@ -192,9 +214,14 @@ export class FakeSetting {
   desc = '';
   heading = false;
   readonly descEl = new FakeEl();
+  /** US-029 AC-2: the row element (its classes). */
+  readonly settingEl = new FakeEl();
   readonly controls: FakeControl[] = [];
   readonly buttons: FakeButton[] = [];
-  constructor() {
+  /** US-029: the element the row was made in (its section, its modal). */
+  readonly parent: unknown;
+  constructor(containerEl?: unknown) {
+    this.parent = containerEl;
     made.push(this);
   }
   setName(name: string): this {
@@ -207,6 +234,10 @@ export class FakeSetting {
   }
   setHeading(): this {
     this.heading = true;
+    return this;
+  }
+  setClass(cls: string): this {
+    this.settingEl.addClass(cls);
     return this;
   }
   private control(kind: string, build: (c: FakeControl) => void): this {
@@ -249,6 +280,15 @@ export class FakeModal {
   close(): void {}
 }
 export {FakeModal as Modal};
+
+/** US-029: the settings tab base class: a container and the plugin. */
+export class PluginSettingTab {
+  readonly containerEl = new FakeEl();
+  constructor(
+    readonly app: unknown,
+    readonly plugin: unknown,
+  ) {}
+}
 
 /** Forgets what earlier tests made. */
 export function resetFake(): void {

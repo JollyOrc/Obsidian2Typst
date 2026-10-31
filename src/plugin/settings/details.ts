@@ -5,13 +5,10 @@
 import {DEFAULT_COVER} from '../../core/cover';
 import {DEFAULT_FONTS} from '../../core/fonts';
 import {BUILTIN_HEADING_RULES} from '../../core/markers';
-import {
-  BUILTIN_DEFAULTS,
-  formatPresetError,
-  type PresetFields,
-} from '../../core/presets';
-import {ownerNote, shownValue} from '../../core/presets/owner';
+import {formatPresetError, type PresetFields} from '../../core/presets';
+import {builtinValue, ownerNote, shownValue} from '../../core/presets/owner';
 import type {PresetStore} from '../presets/store';
+import {layoutRowOrder} from './layout';
 import {DEFAULT_ROWS, FONT_ROWS} from './row-data';
 
 /** Where the used value comes from (AC-6); null for a row with no value. */
@@ -47,11 +44,25 @@ export interface DetailsDeps {
   settings: {readonly data: {activePreset: string; defaults: unknown}};
   usePreset(name: string): Promise<void>;
   openNote(path: string): Promise<void>;
+  /** US-029 AC-6: makes a copy of the preset (a notice on a refusal). */
+  duplicate(name: string): Promise<void>;
+  /** US-029 AC-6: asks for a new name; the new name, or null. */
+  rename(name: string): Promise<string | null>;
+  /** US-029 AC-6: asks first (`deletePreset`); true when it was deleted. */
+  remove(name: string): Promise<boolean>;
   close(): void;
 }
 
-/** The built-in value of every row: the US-008 built-ins and the fonts. */
-const BUILTIN: unknown = {...BUILTIN_DEFAULTS, fonts: DEFAULT_FONTS};
+/**
+ * US-021 AC-6 | US-029 AC-9: the built-in value of a row: a font field from
+ * `DEFAULT_FONTS` (a family is `—`: the default font), every other field from
+ * the export's merge (`builtinValue`, one lookup with the toggles).
+ */
+function builtin(path: readonly string[]): unknown {
+  return path[0] === 'fonts'
+    ? valueAt({fonts: DEFAULT_FONTS}, path)
+    : builtinValue(path);
+}
 
 /** The value at `path` of a plain object, or undefined. */
 function valueAt(root: unknown, path: readonly string[]): unknown {
@@ -96,7 +107,7 @@ function fieldRow(
   return {
     label,
     own,
-    used: text(valueAt(BUILTIN, path), '—'),
+    used: text(builtin(path), '—'),
     source: 'built-in',
   };
 }
@@ -113,17 +124,21 @@ function summaryRow(
 }
 
 /**
- * US-021 | AC-6: The table of a readable preset: every row of `DEFAULT_ROWS`
- * and `FONT_ROWS` in their order (label; the note's value; the used value
+ * US-021 | AC-6, US-029 | AC-9: The table of a readable preset: every row of
+ * `DEFAULT_ROWS` and `FONT_ROWS` in the order of the settings layout
+ * (`layoutRowOrder`) (label; the note's value; the used value
  * with its source — the preset when it owns the field, the trim size being one
  * group as in owner.ts; else the Defaults; else the built-in value), then the
  * summaries `Cover`, `Callout styles`, `Heading rules` (preset notes only)
  * and US-027 AC-8 `Contents place` (`before "Rules"`, or `default`).
  */
 export function detailRows(fields: unknown, defaults: unknown): DetailRow[] {
-  const rows = [...DEFAULT_ROWS, ...FONT_ROWS].map((row) =>
-    fieldRow(row.label, row.path, fields, defaults),
-  );
+  const all = [...DEFAULT_ROWS, ...FONT_ROWS];
+  const rows = layoutRowOrder().map((label) => {
+    const row = all.find((candidate) => candidate.label === label);
+    if (row === undefined) throw new Error(`no row ${label}`);
+    return fieldRow(row.label, row.path, fields, defaults);
+  });
   const own = (fields ?? {}) as PresetFields;
   const cover =
     own.cover === undefined
@@ -161,6 +176,10 @@ export function detailRows(fields: unknown, defaults: unknown): DetailRow[] {
  * active preset; it calls `usePreset` and leaves the pop-up open, decision 2),
  * `Open the note` (opens the note, then closes), `Close`; `Close` has the
  * focus.
+ * US-029 AC-6: between `Open the note` and `Close`, for a readable or an
+ * invalid preset, `Duplicate` (the pop-up stays), `Rename` (the modal follows
+ * the new name) and `Delete` (asks first; closes the pop-up after a
+ * confirmed delete).
  */
 export function detailsView(deps: DetailsDeps, name: string): DetailsView {
   const title = `Preset "${name}"`;
@@ -191,7 +210,22 @@ export function detailsView(deps: DetailsDeps, name: string): DetailsView {
       deps.close();
     },
   };
-  const buttons = [use, open, close];
+  const manage: DetailButton[] = [
+    {text: 'Duplicate', disabled: false, run: () => deps.duplicate(name)},
+    {
+      text: 'Rename',
+      disabled: false,
+      run: async () => void (await deps.rename(name)),
+    },
+    {
+      text: 'Delete',
+      disabled: false,
+      run: async () => {
+        if (await deps.remove(name)) deps.close();
+      },
+    },
+  ];
+  const buttons = [use, open, ...manage, close];
   if (!entry.valid || entry.preset === undefined) {
     const error =
       entry.error === undefined

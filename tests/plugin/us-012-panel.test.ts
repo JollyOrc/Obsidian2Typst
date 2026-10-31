@@ -86,12 +86,15 @@ describe('US-012 AC-1 the command and the single panel', () => {
     expect(ws.revealed).toEqual([]);
   });
 
-  it('US-012 AC-1: the panel holds the preset selector, the three groups, the range field, Refresh and the status line, in this order', () => {
-    const panel = read('src/plugin/preview/panel.ts');
+  // US-029 AC-8 (G2): the groups are the sections of PANEL_LAYOUT (Page,
+  // Text, Book, Cover; drawn sections tested in us-029-panel).
+  it('US-012 AC-1: the panel holds the preset selector, the sections, the range field, Refresh and the status line, in this order', () => {
+    // From the drawing code on (#112): a comment above may name the layout.
+    const source = read('src/plugin/preview/panel.ts');
+    const panel = source.slice(source.indexOf('private drawControls('));
     const order = [
       'presetSelector',
-      'pageRows',
-      'fontRows',
+      'PANEL_LAYOUT',
       'coverRows',
       'rangeField',
       'Refresh',
@@ -213,14 +216,21 @@ describe('US-012 AC-3 a change is a saved change', () => {
     expect(rows.match(/saveDefaultsField\(/g)?.length).toBeGreaterThanOrEqual(
       4,
     );
+    // US-029 AC-1, AC-8 (#112): both screens draw their rows through
+    // `addLayoutSections`, which calls the shared row functions; the screens
+    // no longer call them themselves.
     for (const file of [
       'src/plugin/settings/settings-tab.ts',
       'src/plugin/preview/panel.ts',
     ]) {
-      const source = read(file);
-      expect(source, file).toContain('addDefaultRows(');
-      expect(source, file).toContain('addFontRows(');
+      expect(read(file), file).toContain('addLayoutSections(');
     }
+    const drawer = rows.slice(
+      rows.indexOf('export function addLayoutSections('),
+    );
+    expect(drawer).toContain('addDefaultRows(');
+    expect(drawer).toContain('addFeatureRow(');
+    expect(rows).toMatch(/addFontRows\(contentEl\.createDiv\(\), env\)/);
   });
 });
 

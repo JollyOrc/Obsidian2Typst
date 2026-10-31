@@ -62,16 +62,17 @@ export interface DeletePresetDeps {
 /**
  * The flow behind the `Delete` button: a refusal comes first (no dialog), then
  * the question, and the note is trashed only after the user confirmed.
+ * US-029 AC-6: true when the note was deleted (the preset screen closes then).
  */
 export async function deletePreset(
   deps: DeletePresetDeps,
   name: string,
   active: string,
-): Promise<void> {
+): Promise<boolean> {
   const plan = deps.store.canRemove(name, active);
   if (!plan.ok) {
     deps.notify(plan.error);
-    return;
+    return false;
   }
   const confirmed = await deps.confirm(
     deleteConfirmation({
@@ -80,13 +81,14 @@ export async function deletePreset(
       next: plan.active,
     }),
   );
-  if (!confirmed) return;
+  if (!confirmed) return false;
   const result = await deps.store.remove(name, active);
   if (!result.ok) {
     deps.notify(result.error);
-    return;
+    return false;
   }
   await deps.setActive(result.active);
+  return true;
 }
 
 /**

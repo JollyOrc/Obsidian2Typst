@@ -113,10 +113,10 @@ More details:
 ## Using the menu
 
 Instead of editing the preset, click into a heading line in the editor,
-right-click, and choose **Use as glossary section**. After the question
+right-click, and choose **O2T: Use as glossary section**. After the question
 (for example `Add "Glossar" → glossary to the heading rules of preset
 "A5 print"?`) the rule is written into the active preset. On a heading that
-already is a glossary, the item reads **Stop using as glossary section**.
+already is a glossary, the item reads **O2T: Stop using as glossary section**.
 
 The item is offered on headings at the top level of the note that are not
 inside a glossary section. The plugin writes the smallest change: for

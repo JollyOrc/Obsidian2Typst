@@ -79,11 +79,13 @@ The printer icon (**Obsidian2Typst**) in the left ribbon opens a menu with:
 ### Note menus
 
 Right-click a Markdown note in the file explorer, or right-click inside the
-editor, to get:
+editor, to get the items below. In these menus every item of the plugin
+starts with **O2T:**, so you can tell it from Obsidian's own items and those
+of other plugins (the ribbon menu belongs to the plugin and has no prefix).
 
-- **Export to PDF**: exports that note (it does not have to be the active
-  one).
-- **Preview**: shows that note in the style panel.
+- **O2T: Export to PDF**: exports that note (it does not have to be the
+  active one).
+- **O2T: Preview**: shows that note in the style panel.
 
 Preset notes do not get these items; presets are never exported.
 
@@ -92,11 +94,11 @@ line the cursor is on:
 
 | The cursor is on | Menu item | Guide |
 | --- | --- | --- |
-| a heading | Use as glossary section / Stop using as glossary section | [Glossary and heading rules](glossary-and-heading-rules.md) |
-| a top-level `#` heading | Table of contents before this heading / after this heading / Remove table of contents placement | [Book structure](book-structure.md#table-of-contents) |
-| a line with an image | Use as cover / Stop using as cover | [Images and the cover](images-and-cover.md#the-cover) |
+| a heading | O2T: Use as glossary section / O2T: Stop using as glossary section | [Glossary and heading rules](glossary-and-heading-rules.md) |
+| a top-level `#` heading | O2T: Table of contents before this heading / … after this heading / O2T: Remove table of contents placement | [Book structure](book-structure.md#table-of-contents) |
+| a line with an image | O2T: Use as cover / O2T: Stop using as cover | [Images and the cover](images-and-cover.md#the-cover) |
 
-In the file explorer, an image file gets **Use as cover**, too.
+In the file explorer, an image file gets **O2T: Use as cover**, too.
 
 Each of these items asks first, naming the preset and the exact change
 (**Change preset** or **Cancel**; Cancel is the default). Only the one setting
@@ -167,7 +169,17 @@ The full description and a reference of every field are in
 ## The settings tab
 
 Open **Settings → Obsidian2Typst**. The first line shows the installed
-version. The tab has four sections.
+version. Below it are five sections: **Presets**, **Page**, **Text**,
+**Book** and **Export**. Click a section's heading (or press Enter or Space
+on it) to open or close it; Presets is open when you first open the tab, and
+a section stays open or closed until you close Obsidian.
+
+A section holds two kinds of rows:
+
+- A **feature row** names a feature and says what it does. Some have a
+  switch that turns the feature on or off; some have a gear icon (⚙) that
+  opens a window with the feature's settings; some have both.
+- A **plain row** is a single setting, edited on the spot.
 
 ### Presets
 
@@ -176,29 +188,63 @@ groups). The active preset reads `Active`; an invalid one shows its first
 error and the line in the note, for example
 `invalid: page.bleed must be a number of at least 0 (line 5)`.
 
-| Button | What it does |
+Each row has **Use** (**In use** for the active preset; disabled for an
+invalid one) and a gear that opens the preset's window. The same window
+opens from the info icon next to the preset dropdown in the
+[style panel](preview-panel.md).
+
+| Button in the preset's window | What it does |
 | --- | --- |
 | Use / In use | Makes the preset active. Disabled for the active and for invalid presets. |
-| Details | Opens a table of every setting: what the preset sets and what an export would use, with the source (preset, Defaults, built-in). |
+| Open the note | Opens the preset note in the editor. |
 | Duplicate | Copies the note as `<name> copy`. |
-| Rename | Renames the note; links to it are updated. |
+| Rename | Renames the note; links to it are updated. An active preset stays active. |
 | Delete | Asks first, then moves the note to the trash as set in Obsidian under **Files and links → Deleted files**. The last preset cannot be deleted. |
-| New preset | Creates an empty preset note. |
+| Close | Closes the window (it has the focus, so Enter alone changes nothing). |
+
+The window also shows a table of every setting: what the preset sets and
+what an export would use, with the source (preset, Defaults, built-in).
+Below the list, **New preset** creates an empty preset note.
 
 The settings tab does not edit the preset fields: open the note and edit its
 frontmatter.
 
-### Defaults
+### Page, Text and Book: the Defaults
 
-Values that every preset uses when its note does not set them. Leave a field
-empty, or set a dropdown to `—`, to use the built-in value. Each row has a
-reset icon (**Use the built-in value**) that asks before it removes a value.
+These three sections hold the **Defaults**: values that every preset uses
+when its note does not set them. Leave a field empty, or set a dropdown to
+`—`, to use the built-in value. Each row has a reset icon (**Use the
+built-in value**) that asks before it removes a value. A switch shows the
+value an export would use, also when the Defaults leave it unset.
 
 Text and number fields are saved when you leave the field or press Enter;
 switches and dropdowns are saved at once. A value that is not allowed shows
-its message under the row, and the previous value stays.
+its message under the row, and the previous value stays. When you close a
+settings window (Escape, the close button or a click outside), what you typed
+in its fields is saved as if you had left the field; a value that is not
+allowed then shows its message as a notice.
 
-| Row | Built-in value | Meaning | Guide |
+| Section | Row | Kind | Settings behind the gear |
+| --- | --- | --- | --- |
+| Page | Page setup | gear | Trim size, Trim width / height, the four margins, Bleed, Slug, Facing pages, Gutter |
+| Page | Page numbers | switch | — |
+| Page | Running header | switch, gear | Running header level |
+| Page | Page breaks | gear | Break before H1 … H6 |
+| Text | Fonts | gear | Font folder, the four fonts and their sizes |
+| Text | Heading numbering | plain | — |
+| Text | Highlight colour | plain | — |
+| Text | Page numbers in links | switch, gear | Link page level, Link page word |
+| Text | Footnotes for external links | switch | — |
+| Text | Template file | plain | — |
+| Book | Book parts | gear | First chapter, Colophon heading, Back notes heading |
+| Book | Roman folios in the front matter | switch | — |
+| Book | Signatures | gear | Pages per signature |
+| Book | Contents | gear | Contents depth, title, page numbers, dot leaders |
+| Book | Image fit | gear | Smallest image size |
+
+The built-in value of every setting:
+
+| Setting | Built-in value | Meaning | Guide |
 | --- | --- | --- | --- |
 | Highlight colour | `#ffeb3b` | Colour of `==highlighted==` text, `#rrggbb`. | [Markdown support](markdown-support.md) |
 | Heading numbering | `1.1` | Numbering pattern: `1.1`, `a.1`, `(1.1)`, … or `none`. | [Page layout](page-layout.md#heading-numbering) |
@@ -227,11 +273,9 @@ its message under the row, and the previous value stays.
 | Contents page numbers, Contents dot leaders | on | Page numbers and dots in the table of contents. | [Book structure](book-structure.md#table-of-contents) |
 | Smallest image size | 100 | How far an image may shrink to stay with its text, 10 to 100 %. | [Images and the cover](images-and-cover.md#keeping-images-with-their-text) |
 
-### Fonts
-
-The font rows of the Defaults. A dropdown lists the bundled fonts and the
-fonts in the font folder; under the default and body font it names the
-check-box glyphs the font lacks. See [Fonts](fonts.md).
+The **Fonts** window lists the bundled fonts and the fonts in the font
+folder; under the default and body font it names the check-box glyphs the
+font lacks. See [Fonts](fonts.md).
 
 | Row | Built-in value |
 | --- | --- |
@@ -242,14 +286,14 @@ check-box glyphs the font lacks. See [Fonts](fonts.md).
 | Caption font, size (pt) | the default font, 0.9 × body size |
 | Code font, size (pt) | DejaVu Sans Mono, 0.9 × body size |
 
-### Folders and warnings
+### Export
 
 These three settings belong to the plugin, not to a preset.
 
 | Row | Default | Meaning |
 | --- | --- | --- |
+| Strict mode | off | A switch: any conversion warning stops the export before anything is written. |
 | Presets folder | `Obsidian2Typst/presets` | Vault folder of the preset notes. If it does not exist, it is created with the two built-in presets. |
-| Strict mode | off | Any conversion warning stops the export before anything is written. |
 | Warnings note folder | empty (vault root) | Where the `<note> export warnings.md` note is written. |
 
 ## What the converter understands
@@ -268,7 +312,7 @@ Details and the exact rules are in [Markdown support](markdown-support.md).
 
 | Guide | Topics |
 | --- | --- |
-| [Presets](presets.md) | Preset notes, precedence, groups, the details pop-up, invalid presets, a reference of every field. |
+| [Presets](presets.md) | Preset notes, precedence, groups, the preset's window, invalid presets, a reference of every field. |
 | [Page layout](page-layout.md) | Page size, margins, bleed and slug, facing pages, page numbers, running header, page numbers after links, heading numbering. |
 | [Fonts](fonts.md) | Font roles, your own fonts from a vault folder, missing fonts and glyphs. |
 | [Images and the cover](images-and-cover.md) | Image sizes, where images are found and copied, keeping images with their text, the cover page. |

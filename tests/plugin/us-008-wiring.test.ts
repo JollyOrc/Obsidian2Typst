@@ -61,9 +61,11 @@ describe('US-008 AC-3 and AC-7 the vault port', () => {
 });
 
 describe('US-008 AC-1 the settings tab', () => {
-  it('US-008 AC-1: has sections for the Defaults, the presets, the presets folder, strict mode and the warnings folder', () => {
+  // US-029 AC-1 (G2): the Defaults are no longer one section; their rows
+  // are spread over Page, Text and Book (us-029-settings-tab tests the drawn
+  // sections), so `Defaults` left this list.
+  it('US-008 AC-1: has sections for the presets, the presets folder, strict mode and the warnings folder', () => {
     for (const text of [
-      'Defaults',
       'Presets',
       'Presets folder',
       'Strict mode',
@@ -92,9 +94,25 @@ describe('US-008 AC-17 the dialogs use the tested rules', () => {
     expect(tab).toMatch(/\.focus\(\)/);
   });
 
-  it('US-008 AC-17: Delete goes through deletePreset and the tab never calls presets.remove itself', () => {
-    expect(tab).toContain('deletePreset(');
-    expect(tab).not.toMatch(/\.remove\(/);
+  // US-029 AC-6 (#113): Delete moved from the tab's row into the preset
+  // screen (`presetScreenActions`, used by main.ts's openDetails); the rule
+  // is the same.
+  it('US-008 AC-17: Delete goes through deletePreset and neither the tab nor the preset screen calls presets.remove itself', () => {
+    const main = readFileSync('src/plugin/main.ts', 'utf8');
+    const open = main.slice(main.indexOf('private openDetails('));
+    expect(open.slice(0, open.indexOf('\n  }\n'))).toContain(
+      'presetScreenActions(',
+    );
+    const actions = readFileSync(
+      'src/plugin/settings/preset-actions.ts',
+      'utf8',
+    );
+    expect(actions).toContain('deletePreset(');
+    // `deps.remove(name)` in details.ts is the screen's call of this very
+    // deletePreset path; the store's own remove is what is forbidden.
+    expect(actions).not.toMatch(/(presets|store)\.remove\(/);
+    expect(tab).not.toMatch(/(presets|store)\.remove\(/);
+    expect(tab).toContain('deps.remove(name)');
     expect(dialog).toMatch(/store\.remove\(/);
   });
 

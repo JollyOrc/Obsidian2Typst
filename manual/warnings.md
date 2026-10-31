@@ -16,8 +16,8 @@ After each export:
   warnings there is no notice.
 - `export-warnings.md` is written to the export folder.
 - The same report is written as a vault note, `<note name> export
-  warnings.md`, in the **Warnings note folder** (settings tab; empty = vault
-  root). It is overwritten on every export, also with `No warnings.`, so it
+  warnings.md`, in the **Warnings note folder** (settings tab, section
+  **Export**; empty = vault root). It is overwritten on every export, also with `No warnings.`, so it
   never shows problems you have already fixed.
 
 The report starts with a summary (one row per warning code with its count),
@@ -47,8 +47,7 @@ Warnings are never printed into the PDF.
 
 ## Strict mode
 
-**Settings → Obsidian2Typst → Folders and warnings → Strict mode** (off by
-default). With strict mode on, any conversion warning stops the export before
+**Settings → Obsidian2Typst → Export → Strict mode** (off by default). With strict mode on, any conversion warning stops the export before
 anything is written; the export folder stays as it was. The notice lists the
 first five:
 

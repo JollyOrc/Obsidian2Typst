@@ -258,11 +258,14 @@ describe('US-012 AC-5, AC-14 what counts as a style change', () => {
       drawControls(): void;
     };
     view.drawControls();
-    const bleed = made.find((s) => s.name === 'Bleed (mm)');
+    // US-029 AC-1 (#112): Bleed moved into the Page setup modal; Highlight
+    // colour is a row of the panel itself.
+    const colour = made.find((s) => s.name === 'Highlight colour');
+    expect(colour).toBeDefined();
     made.length = 0;
-    bleed?.controls[0]?.type('4');
+    colour?.controls[0]?.type('#00ff00');
     await vi.waitFor(() =>
-      expect(r.settings.data.defaults.page?.bleed).toBe(4),
+      expect(r.settings.data.defaults.highlightColor).toBe('#00ff00'),
     );
     await flush();
     expect(made).toHaveLength(0);

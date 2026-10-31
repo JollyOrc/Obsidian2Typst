@@ -41,8 +41,8 @@ tab (the Defaults).
 
 1.  Create a folder in your vault, for example `Layout/Fonts`.
 2.  Copy the `.ttf` or `.otf` files into it (sub-folders are read, too).
-3.  Set it as **Font folder** in the settings tab, or as `fonts.folder` in a
-    preset.
+3.  Set it as **Font folder** in the settings tab (**Text → Fonts**, the
+    gear), or as `fonts.folder` in a preset.
 4.  Choose the family in the dropdowns, or write its name in the preset note.
 
 The family name is the name the font file reports, for example `EB Garamond`
@@ -90,8 +90,8 @@ Font "Libertinus Serif" lacks 2 characters: ☠ U+2620, ⚔ U+2694 (first at lin
 
 Task lists use the check-box characters ☐ and ☒. If the body font lacks
 them, the plugin writes `[ ]` and `[x]` instead. Under the Default font and
-Body font rows, the settings tab tells you which of the two the chosen font
-lacks, for example:
+Body font rows, the Fonts window of the settings tab tells you which of the
+two the chosen font lacks, for example:
 
 ```text
 Missing: ☐ U+2610, ☒ U+2612. Task lists will use [ ] and [x].
