@@ -31,6 +31,7 @@ import {
 } from '../../src/plugin/settings/data';
 import {LoopbackWorker} from '../support/fake-worker';
 import {readPdfPages, type PdfPage} from '../support/pdf';
+import {worldFacts} from '../support/settle';
 import {listFiles, SAMPLE_DIR, VAULT} from '../support/sample';
 
 afterAll(() => disposeBookCompiler());
@@ -39,6 +40,8 @@ interface Run {
   pages: PdfPage[];
   decisions: {d: string; line: number; name: string}[];
   typ: string;
+  /** The files the compile read (the copied images). */
+  files: Record<string, Uint8Array>;
 }
 
 /** Converts and compiles; returns the pages and the decisions read back. */
@@ -58,7 +61,7 @@ async function compileFit(source: string, options: BookOptions): Promise<Run> {
   const decisions =
     (compiled as unknown as {fitDecisions?: Run['decisions']}).fitDecisions ??
     [];
-  return {pages: readPdfPages(compiled.pdf), decisions, typ: result.typ};
+  return {pages: readPdfPages(compiled.pdf), decisions, typ: result.typ, files};
 }
 
 let measuredText: number | undefined;
@@ -556,6 +559,10 @@ describe(
       expect(run.pages.filter((p) => p.hasImage).length).toBeGreaterThanOrEqual(
         4,
       );
+      // #116 (measured at G2 with Typst's own warnings): the composed note
+      // settles in one compile; the old check read no warnings at all
+      const facts = await worldFacts(run.typ, run.files);
+      expect(facts.settled, facts.diagnostics.join('\n')).toBe(true);
     });
   },
 );
@@ -782,6 +789,8 @@ describe(
         decisions: all.filter((d) => d.d !== 'pos' && d.d !== 'fpage'),
         probe: all.filter((d) => d.d === 'pos').map((d) => Number(d.name)),
         floated: all.filter((d) => d.d === 'fpage').map((d) => d.name),
+        typ: prepared.typ,
+        assets,
       };
     }
 
@@ -812,6 +821,15 @@ describe(
         ]);
       expect(place(today.pages)).toHaveLength(1);
       expect(place(fitted.pages)).toEqual(place(today.pages));
+    });
+
+    // SCAR-030: 9.3 s under a full integration run (2026-11-03), inside the
+    // block's whole-book limit
+    it("US-028 AC-15 (#116): the sample's Book.md at 70 settles in one compile, so the export compiles it once (measured 2026-11-03)", async () => {
+      const fitted = await compileM18(70);
+      const facts = await worldFacts(fitted.typ, fitted.assets);
+      expect(facts.settled, facts.diagnostics.join('\n')).toBe(true);
+      expect(facts.decisions).toHaveLength(70);
     });
   },
 );

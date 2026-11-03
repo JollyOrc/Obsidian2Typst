@@ -31,3 +31,4 @@ steps and how it is recorded. A new check gets the next number, a file
 | [M17](manual-checks/M17.md) | Table of contents | US-027 AC-2 to AC-8 |
 | [M18](manual-checks/M18.md) | Images that stay with their text | US-028 AC-4 to AC-6, AC-9, AC-11, AC-13 |
 | [M19](manual-checks/M19.md) | The settings screen of feature rows, and marked menu items | US-029 AC-1 to AC-12, AC-14 |
+| [M20](manual-checks/M20.md) | A layout that settles | US-028 AC-14 to AC-17 (#116) |

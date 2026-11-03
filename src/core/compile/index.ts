@@ -2,6 +2,18 @@
 // exported files, the text of a compile error, and the request/result types.
 // No Obsidian, Node or I/O imports.
 
+export {
+  FIT_COMPILE_LIMIT,
+  IMAGE_FIT_OFF_WARNING,
+  LAYOUT_NOT_SETTLED_WARNING,
+  compilingNotice,
+  layoutSettled,
+  nextFitCompile,
+  withFitHints,
+  type FitHint,
+  type FitStep,
+} from './settle';
+
 /** What the compiler is given (US-007 AC-11). */
 export interface CompileRequest {
   /** Name of the main file, for example `Rules.typ`; errors name this file. */
@@ -24,6 +36,11 @@ export type CompileResult =
        * document order; absent when the document has none or the query failed.
        */
       fitDecisions?: unknown[];
+      /**
+       * US-028 AC-14: false when Typst warned that the layout did not
+       * converge; absent when the warnings could not be read.
+       */
+      settled?: boolean;
     }
   | {ok: false; kind: 'typst' | 'worker'; error: string};
 

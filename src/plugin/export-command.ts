@@ -6,7 +6,7 @@ import type {Warning} from '../core/emit';
 import type {FontSet} from './fonts';
 import {convertNote, noteNameOf, selectPreset} from './prepare-note';
 import type {PresetStore} from './presets/store';
-import type {ExportResult} from './run-export';
+import type {ExportResult, FallbackNote} from './run-export';
 import type {PluginData} from './settings/data';
 import type {ExportSource, WarningSettings} from './warning-flow';
 
@@ -24,6 +24,8 @@ export interface ExportRequest {
   template: string | null;
   exportDir: string;
   settings: WarningSettings;
+  /** US-028 AC-16: the same note text converted at `images.minScale: 100`. */
+  fallback?: () => Promise<FallbackNote | null>;
 }
 
 /** How the command ended when no export was run. */
@@ -119,6 +121,14 @@ export async function exportNoteAt(
     settings: {
       strictMode: data.strictMode,
       warningsNoteFolder: data.warningsNoteFolder,
+    },
+    // US-028 AC-16: the text read above, converted again without image fit.
+    fallback: async () => {
+      const at100 = await convertNote(deps, path, active, selected.preset, {
+        source: prepared.source,
+        imagesOff: true,
+      });
+      return at100.ok ? {typ: at100.typ} : null;
     },
   });
 }

@@ -80,11 +80,22 @@ export {FIT_DECISION_LABEL};
  * own text (decision 13, F1 measured 2026-10-29).
  * Changed from the probe only by the call's `line` and `name` and the
  * decision's value and label (the probe's own `<img>` marker removed).
+ * US-028 AC-17 (#116): the decision the image wants (`want`, its ratio `wr`)
+ * is computed as above; the one it takes (`d`, `r`) is the hint of
+ * `o2t-fit-hints` under the probe's label when one is given and either the
+ * compile is pinned (`o2t-fit-pinned`) or the probe has no place yet
+ * (Typst's first pass; seeded), else the wanted one. The record carries
+ * `d`, `line`, `name` (AC-5) and `key`, `r`, `want`, `wr` (AC-15). Measured
+ * 2026-11-03 (scratch probes `bn/`): seeded and pinned compiles reach the
+ * fixed point; with no hints compile 1 gives today's pages.
  */
 export const FIT_FLOW_HELPER = [
   '#let fit-flow(path, at, line, name, min: 0.7, sides: true, floats: true, reserve: 0pt, caption: none, width: auto, height: auto) = {',
   '  let body = context {',
-  '    let pos = locate(at).position()',
+  '    let key = str(at)',
+  '    let hint = o2t-fit-hints.at(key, default: none)',
+  '    let known = query(at).len() > 0',
+  '    let pos = if known { locate(at).position() } else { (page: 1, x: 0pt, y: 0pt) }',
   '    let mg = page.margin',
   '    let side(k, alt) = mg.at(k, default: mg.at(alt, default: 0pt))',
   '    let tw = page.width - side("inside", "left").length - side("outside", "right").length',
@@ -104,17 +115,30 @@ export const FIT_FLOW_HELPER = [
   '      let room = page.height - mg.bottom.length - pos.y - 0.5pt - reserve.to-absolute()',
   '      let own = query(label(str(at) + "-f")).filter(e => e.location().page() == pos.page).len() > 0',
   '      if own { room = room + h + cap(w) + 1em.to-absolute() }',
-  `      let rec(d) = [#metadata((d: d, line: line, name: name)) <${FIT_DECISION_LABEL}>]`,
-  '      if h + cap(w) <= room { rec("full"); fig(w) }',
-  '      else if h * min + cap(w * min) <= room { let r = (room - cap(w)) / h; rec("shrink"); fig(w * r) }',
-  '      else if floats and (not sides or calc.even(pos.page)) { rec("float"); place(top, float: true, clearance: 1em, [#fig(w) #label(str(at) + "-f")]) }',
-  '      else { rec("move"); fig(w) }',
+  '      let want = if h + cap(w) <= room { "full" } else if h * min + cap(w * min) <= room { "shrink" } else if floats and (not sides or calc.even(pos.page)) { "float" } else { "move" }',
+  '      let wr = if want == "shrink" { (room - cap(w)) / h } else { 1.0 }',
+  '      let use = hint != none and (o2t-fit-pinned or not known)',
+  '      let d = if use { hint.d } else { want }',
+  '      let r = if use { hint.r } else { wr }',
+  `      [#metadata((d: d, line: line, name: name, key: key, r: r, want: want, wr: wr)) <${FIT_DECISION_LABEL}>]`,
+  '      if d == "full" { fig(w) }',
+  '      else if d == "shrink" { fig(w * r) }',
+  '      else if d == "float" { place(top, float: true, clearance: 1em, [#fig(w) #label(str(at) + "-f")]) }',
+  '      else { fig(w) }',
   '    }',
   '    if floats { decide(tw) } else { layout(size => decide(size.width)) }',
   '  }',
   '  if floats { body } else { block(above: 0pt, width: 100%, body) }',
   '}',
 ].join('\n');
+
+/**
+ * US-028 | AC-17: The two preamble lines the helper reads, written before it:
+ * no hints and a seeded compile. A later compile of the export replaces them
+ * (`withFitHints`, `core/compile`).
+ */
+export const FIT_HINT_LINES =
+  '#let o2t-fit-hints = (:)\n#let o2t-fit-pinned = false';
 
 /**
  * US-028 | AC-5 (decision 2): the warnings of the decisions read back after a

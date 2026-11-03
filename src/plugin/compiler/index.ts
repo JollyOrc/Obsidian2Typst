@@ -17,7 +17,7 @@ export interface WorkerLike {
 
 /** US-012: the outcome of a vector compile (what the page renderer reads). */
 export type VectorResult =
-  | {ok: true; vector: Uint8Array; fitDecisions?: unknown[]}
+  | {ok: true; vector: Uint8Array; fitDecisions?: unknown[]; settled?: boolean}
   | Extract<CompileResult, {ok: false}>;
 
 /** US-012 AC-8: a running vector compile that can be ended. */
@@ -127,11 +127,18 @@ export function createTypstCompiler(
             pdf?: ArrayBuffer;
             vector?: ArrayBuffer;
             fitDecisions?: unknown;
+            settled?: unknown;
           };
-          // US-028 AC-5: the decisions only when the worker sent a list.
-          const fit = Array.isArray(message.fitDecisions)
-            ? {fitDecisions: message.fitDecisions as unknown[]}
-            : {};
+          // US-028 AC-5: the decisions only when the worker sent a list;
+          // AC-14: `settled` only when it sent a boolean.
+          const fit = {
+            ...(Array.isArray(message.fitDecisions)
+              ? {fitDecisions: message.fitDecisions as unknown[]}
+              : {}),
+            ...(typeof message.settled === 'boolean'
+              ? {settled: message.settled}
+              : {}),
+          };
           if (message.id !== id) return;
           if (message.type === 'ready') {
             current.postMessage({

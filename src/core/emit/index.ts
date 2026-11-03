@@ -9,6 +9,7 @@ export {emitBlocks, type BlockOptions, type BookLines} from './blocks';
 export {
   FIT_DECISION_LABEL,
   FIT_FLOW_HELPER,
+  FIT_HINT_LINES,
   FIT_IMAGE_HELPER,
   fitDecisionWarnings,
   imageRequest,

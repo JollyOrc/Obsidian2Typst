@@ -5,6 +5,7 @@
 // the story (text-and-fonts 40, cover 90), so no other rule moves.
 import {
   FIT_FLOW_HELPER,
+  FIT_HINT_LINES,
   FIT_IMAGE_HELPER,
   FOOTNOTE_RESTART_RULE,
   headingNumberingRule,
@@ -115,10 +116,12 @@ export const PREAMBLE_RULES: readonly PreambleRule[] = [
     render: ({usesFitImage}) => (usesFitImage ? FIT_IMAGE_HELPER : null),
   },
   {
-    // US-028 AC-3: after the image helper, once, only when an image uses it.
+    // US-028 AC-3: after the image helper, once, only when an image uses it;
+    // AC-17: its hints lines right before it.
     id: 'fit-flow',
     order: 81,
-    render: ({usesFitFlow}) => (usesFitFlow === true ? FIT_FLOW_HELPER : null),
+    render: ({usesFitFlow}) =>
+      usesFitFlow === true ? `${FIT_HINT_LINES}\n${FIT_FLOW_HELPER}` : null,
   },
   {
     // US-016 AC-11: after the image helper, before the cover; only when the

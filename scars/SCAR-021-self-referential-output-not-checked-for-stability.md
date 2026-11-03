@@ -23,8 +23,10 @@ target moved to page 2, and no number was printed (moved from SCAR-008 on
 
 A rule that reads its own effect is a fixed-point problem. It was tested at
 lengths where the fixed point exists and is reached at once; the lengths
-where it does not exist were never tried, and the compile path gives no
-warning.
+where it does not exist were never tried, and the compile path used gives
+no warning (corrected 2026-11-03: Typst does warn, "layout did not converge
+within 5 attempts", through `runWithWorld` diagnostics; `compiler.compile`
+drops it — SCAR-032).
 
 ## Prevention
 
@@ -41,5 +43,13 @@ warning.
   floated to the top of its own page, which pushed the probe down so that
   the float looked needed; 3,216 synthetic cases did not reach it, the
   sample's `Book.md` did.
+- Stability depends on how many self-referential decisions chain, not
+  only on a page edge: each decision moves the next. It is checked on
+  generated inputs of growing size, and Typst's own convergence warning is
+  read, not inferred from the output. Example (2026-11-03, #116): image fit
+  settled on the sample's `Book.md` (M18) and on generated notes of a few
+  images, but not at 10+ images in one flow; in a long book the padding
+  pages and back notes that appear only in the last pass printed folio `1`
+  and the last chapter's header.
 - Applies next to: running headers, "continued" markers, keep-together rules,
   anything that reads a page number or a position.

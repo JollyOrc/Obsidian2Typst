@@ -96,6 +96,18 @@ export, even in strict mode.
 Rarely, after a floated image the next paragraph does not fit in the gap
 either, and the gap stays.
 
+Each image's choice moves everything after it, so in a long book Typst may
+not finish placing the images in one compile. The export then compiles the
+note again, starting from the choices of the compile before, until the
+layout settles — at most 8 times; the notice shows `Compiling… (2 of up to
+8)`. A note that settles at once is compiled once, as before. The `.typ` in
+the export folder is always the one the PDF came from, so it compiles to the
+same pages on its own. If 8 compiles are not enough, the export compiles the
+note once more with image fit off (as `images.minScale: 100`) and reports
+`IMAGE_FIT_OFF`; your images are then at their full size, as without the
+rule. The preview compiles only once, so in a long book it may differ from
+the export.
+
 ## The cover
 
 The cover is a full-page picture on page 1, edge to edge (it fills the trim

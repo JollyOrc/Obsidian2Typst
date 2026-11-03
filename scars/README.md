@@ -47,6 +47,7 @@ Each SCAR covers:
 | [SCAR-029](SCAR-029-human-steps-buried-in-one-file.md) | Procedures a human runs are kept as sections of one large file | Process / Documentation | Low |
 | [SCAR-030](SCAR-030-test-time-limit-left-at-default.md) | A test's time limit is left at the default for heavy work | Verification / Test tooling | Low |
 | [SCAR-031](SCAR-031-decisions-left-in-the-shell-entry-point.md) | Decisions left in the plugin's entry point, where no test reaches them | Architecture / Verification | Medium |
+| [SCAR-032](SCAR-032-claim-wider-than-its-measurement.md) | A finding is claimed wider than what was measured | Requirements / Decision making | Medium |
 
 ## Recurring themes
 
@@ -72,10 +73,11 @@ not only by eye.
 
 **Choices and contracts not measured** (SCAR-020, SCAR-021, SCAR-022)
 Measure every alternative before offering it (SCAR-020). Output that depends
-on its own layout is swept across a page edge; non-convergence is not
-reported (SCAR-021). For every callback, read from its type whether it runs
-synchronously and list what data it has at that moment; what needs an
-asynchronous read moves into the action after the click (SCAR-022).
+on its own layout is swept across a page edge and over inputs of growing
+size, and Typst's convergence warning is read (SCAR-021). For every
+callback, read from its type whether it runs synchronously and list what
+data it has at that moment; what needs an asynchronous read moves into the
+action after the click (SCAR-022).
 
 **Rules checked only where they were tried** (SCAR-009)
 A rule that holds in the probe may fail where the output is really used.
@@ -165,6 +167,11 @@ read a unit by its id, not by slicing a larger file.
 A test that does seconds of work itself states its time limit, measured under
 a full parallel run with a margin; a timeout is first run alone before the
 code is blamed, and a raised limit goes to every test doing the same work.
+
+**Findings carry their scope** (SCAR-032)
+Every measured finding states the interface, inputs and range it covered; a
+negative finding names the paths not tried; an option is measured across the
+inputs it is offered for.
 
 **Decisions out of the entry point** (SCAR-031)
 The plugin's entry point only builds Obsidian objects and hands them over;

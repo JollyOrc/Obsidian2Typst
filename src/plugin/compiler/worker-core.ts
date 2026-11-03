@@ -7,6 +7,7 @@ import {
 } from '@myriaddreamin/typst.ts/dist/esm/compiler.mjs';
 import {TypstSnippet} from '@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs';
 import {loadFonts} from '@myriaddreamin/typst.ts/dist/esm/options.init.mjs';
+import {layoutSettled} from '../../core/compile';
 import {FIT_DECISION_LABEL} from '../../core/emit/fit-label';
 import type {FaceInfo} from '../../core/fonts';
 
@@ -61,38 +62,63 @@ function diagnosticLine(d: Diagnostic): string {
 const text = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-/** The part of the typst.ts compiler `readFitDecisions` uses. */
+/** The part of the typst.ts compiler `readLayoutFacts` uses. */
 interface QueryCompiler {
   runWithWorld<T>(
     options: {mainFilePath: string},
     cb: (world: {
-      compile(): Promise<unknown>;
+      compile(options?: {diagnostics: 'unix'}): Promise<unknown>;
       query(options: {selector: string; field?: string}): Promise<unknown>;
     }) => Promise<T>,
   ): Promise<T>;
 }
 
+/** What the world says after a compile (US-028 AC-5, AC-14). */
+export interface LayoutFacts {
+  /** False when Typst warned that the layout did not converge. */
+  settled?: boolean;
+  /** The image fit decisions in document order. */
+  fitDecisions?: unknown[];
+}
+
 /**
- * US-028 | AC-5: the values of the image fit decisions of the compiled main
- * file, in document order, with typst.ts `runWithWorld` and `query` (options
- * read from `compiler.d.mts`: `SnapshotOptions.mainFilePath`,
- * `QueryOptions.selector` and `field`; measured at G1 and by the TICKET-091
- * reader). The world compiles the document once more. A thrown query or a
- * result that is no list gives undefined: the export never fails on it.
+ * US-028 | AC-14, AC-5: Opens one typst.ts world on the compiled main file
+ * (`runWithWorld`), compiles it with `diagnostics: 'unix'` (options read
+ * from `compiler.d.mts`: `DiagOpts.diagnostics`; measured 2026-11-03: the
+ * only call that returns Typst's warnings, 0–6 ms after the compile) and
+ * sets `settled` by `layoutSettled` when the diagnostics are a list; with
+ * `decisions`, also reads the image fit decisions there (`query` by the
+ * label, field `value`; a list as text or array, else none). A thrown world
+ * gives nothing, a thrown query no decisions: a compile never fails on it.
  */
-export async function readFitDecisions(
+export async function readLayoutFacts(
   compiler: QueryCompiler,
   mainFilePath: string,
-): Promise<unknown[] | undefined> {
+  decisions: boolean,
+): Promise<LayoutFacts> {
   try {
-    const out = await compiler.runWithWorld({mainFilePath}, async (world) => {
-      await world.compile();
-      return world.query({selector: `<${FIT_DECISION_LABEL}>`, field: 'value'});
+    return await compiler.runWithWorld({mainFilePath}, async (world) => {
+      const compiled = await world.compile({diagnostics: 'unix'});
+      const diagnostics = (compiled as {diagnostics?: unknown} | null)
+        ?.diagnostics;
+      const facts: LayoutFacts = Array.isArray(diagnostics)
+        ? {settled: layoutSettled(diagnostics)}
+        : {};
+      if (!decisions) return facts;
+      try {
+        const out = await world.query({
+          selector: `<${FIT_DECISION_LABEL}>`,
+          field: 'value',
+        });
+        const values: unknown = typeof out === 'string' ? JSON.parse(out) : out;
+        if (Array.isArray(values)) facts.fitDecisions = values;
+      } catch {
+        // AC-5: no decisions, no warning.
+      }
+      return facts;
     });
-    const values: unknown = typeof out === 'string' ? JSON.parse(out) : out;
-    return Array.isArray(values) ? values : undefined;
   } catch {
-    return undefined;
+    return {};
   }
 }
 
@@ -156,11 +182,13 @@ export function createWorkerCore(post: Post): {
       pdf.byteOffset,
       pdf.byteOffset + pdf.byteLength,
     ) as ArrayBuffer;
-    // US-028 AC-5: only a document with image fit decisions is queried.
-    const decisions = message.source.includes(FIT_DECISION_LABEL)
-      ? await readFitDecisions(compiler as unknown as QueryCompiler, main)
-      : undefined;
-    const fit = decisions === undefined ? {} : {fitDecisions: decisions};
+    // US-028 AC-14: every compile reads Typst's warnings; AC-5: only a
+    // document with image fit decisions is queried for them.
+    const fit = await readLayoutFacts(
+      compiler as unknown as QueryCompiler,
+      main,
+      message.source.includes(FIT_DECISION_LABEL),
+    );
     if (vector) {
       post({type: 'vector-compiled', id: message.id, vector: buffer, ...fit}, [
         buffer,

@@ -38,3 +38,15 @@ describe('US-007 AC-9: the manual procedure M1', () => {
     expect(manual).toContain('An export is already running');
   });
 });
+
+describe('US-028 AC-5, AC-14 the preview hand-over in src/plugin/main.ts (SCAR-031)', () => {
+  it('US-028 AC-5, AC-14 (decision C): the vector compile hands the decisions and settled to the preview, each only when present', () => {
+    const flat = main.replace(/\s+/g, ' ');
+    expect(flat).toContain(
+      '...(vector.fitDecisions === undefined ? {} : {fitDecisions: vector.fitDecisions}),',
+    );
+    expect(flat).toContain(
+      '...(vector.settled === undefined ? {} : {settled: vector.settled}),',
+    );
+  });
+});

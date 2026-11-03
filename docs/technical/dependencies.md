@@ -8,7 +8,7 @@
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `@myriaddreamin/typst.ts`, `typst-ts-web-compiler`, `typst-ts-renderer` (WASM; bundles Typst 0.14.2) | 0.7.0 (exact) | Compile Typst to PDF and render previews inside Obsidian, offline |
+| `@myriaddreamin/typst.ts`, `typst-ts-web-compiler`, `typst-ts-renderer` (WASM; bundles Typst 0.14.2) | 0.7.0 (exact) | Compile Typst to PDF and render previews inside Obsidian, offline. Typst's warnings come only from `runWithWorld` → `world.compile({diagnostics: 'unix'})`; `compiler.compile` returns none (measured 2026-11-03, US-028 AC-14). Typst stops after 5 layout passes (`layout did not converge within 5 attempts`, a warning). More than about four whole-book compiles in one WASM instance end in a panic (#107); each compile has its own worker |
 
 | `markdown-it` | 15.0.3 (exact) | Markdown to token stream (CommonMark, tables, strikethrough, linkify). Decided 2026-10-16, `markdown-parser.md`. Adds about 108 kB minified to `main.js` |
 | `markdown-it-footnote` | 4.0.0 (exact) | `[^1]` and inline `^[…]` footnotes |

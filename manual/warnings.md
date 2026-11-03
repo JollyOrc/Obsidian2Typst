@@ -60,8 +60,9 @@ FONT_MISSING
 A good way to work: leave strict mode off while you fix the warnings, then
 switch it on so that no future export slips through with a problem.
 
-`IMAGE_FLOATED` and `IMAGE_MOVED` are an exception: they are known only after
-the compile, so they are reported but never stop an export.
+`IMAGE_FLOATED`, `IMAGE_MOVED`, `IMAGE_FIT_OFF` and `LAYOUT_NOT_SETTLED` are
+an exception: they are known only after the compile, so they are reported but
+never stop an export.
 
 ## Typst errors
 
@@ -89,6 +90,8 @@ report are still written. Errors usually come from a
 | `IMAGE_IN_HEADING` | An image in a heading is placed after the heading. |
 | `IMAGE_FLOATED` | An image did not fit after its text; it was placed at the top of the next page. |
 | `IMAGE_MOVED` | An image did not fit after its text and moved to the next page; the space before it stays empty. |
+| `IMAGE_FIT_OFF` | Image fit could not settle the layout in 8 compiles; the PDF was made without it (images at full size). |
+| `LAYOUT_NOT_SETTLED` | Typst could not finish the layout; page numbers, running headers and image places may be wrong. Also counted in the preview. |
 | `LINK_UNRESOLVED` | No heading matches a link; its text is printed without link. |
 | `LINK_AMBIGUOUS` | Several headings match a link; the first is used. |
 | `LINK_URL_NOT_SPELLED` | A web link inside a heading gets no address footnote. |

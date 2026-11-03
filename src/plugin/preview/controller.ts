@@ -29,6 +29,8 @@ export type PreviewCompile =
       release?: () => void;
       /** US-028 AC-5: the image fit decisions of this compile, if any. */
       fitDecisions?: unknown[];
+      /** US-028 AC-14: false when Typst's layout did not settle. */
+      settled?: boolean;
     }
   | {ok: false; error: string};
 
@@ -219,10 +221,12 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
       error: null,
       hint: null,
       greyed: false,
-      // US-028 AC-5 (decision 8): the fit warnings of this run count too.
+      // US-028 AC-5 (decision 8): the fit warnings of this run count too;
+      // AC-14 (decision C): and LAYOUT_NOT_SETTLED when it did not settle.
       warnings:
         prepared.warnings +
-        fitDecisionWarnings(result.fitDecisions ?? []).length,
+        fitDecisionWarnings(result.fitDecisions ?? []).length +
+        (result.settled === false ? 1 : 0),
       ...applyRange(),
     });
   };

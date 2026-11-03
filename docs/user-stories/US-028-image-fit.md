@@ -1,8 +1,10 @@
 # US-028 — Images that stay with their text
 
-**Status:** Done (M18 passed 2026-10-29)
+**Status:** Done (AC-1 to AC-13: M18 passed 2026-10-29; amendment #116,
+AC-14 to AC-18, decisions 14 to 17 and A to F: M20 passed 2026-11-03)
 **Introduced:** v0.10.0 (planned; a new feature bumps the minor version)
-**Implemented:** v0.10.0 (test build `0.10.0-m18.1`, M18 passed 2026-10-29)
+**Implemented:** v0.10.0 (test build `0.10.0-m18.1`, M18 passed 2026-10-29); amendment #116 in v0.11.1 (test build `0.11.1-m20.1`,
+M20 passed 2026-11-03)
 **Supersedes:** the backlog item "keep image with its text" (row "Image
 rules")
 
@@ -105,6 +107,46 @@ latter wider than the text; every case also compiled for diagnostics: none):
   before the image stayed — the same pages as a move (`page`: image p. 3,
   heading p. 4; `right`: image p. 3, heading p. 5, p. 4 blank). A float only
   helps when text follows it.
+
+Measured 2026-11-03 for #116 (scratch probes `bn/`; the bundled compiler):
+
+- **Typst reports a layout that did not settle, but the plugin never sees
+  it.** `compiler.compile({…, diagnostics: 'full'})` (the worker's call)
+  returns no warnings, not even for `#context if query(<m>).len() == 0
+  [#metadata(none) <m>]`. Inside `runWithWorld`, `world.compile({diagnostics:
+  'unix'})` returns `warning: layout did not converge within 5 attempts, …`
+  for it, and `…: warning: unknown font family: nope` for an unknown font.
+- **The decisions of this story form a chain that 5 passes do not settle.**
+  Each pass re-decides every image from the previous pass's positions; a
+  change moves everything after it. Generated notes (A5, facing pages, 70 %,
+  a chapter every 10 images, 1 to 7 filler paragraphs before each image, a
+  `map`, `wide` or `tall` image by seed): 2 images 0 of 3 do not settle, 5
+  images 0 of 3, 10 images 2 of 3, 20 images 3 of 3, 60 images 20 of 20; the
+  same notes at `minScale` 100 settle 24 of 24 (no break, `page`, `right`).
+  The sample's `Book.md` (69 images) settles at 50, 70 and 90. A private
+  350-page book with 60 images (signature 4, contents, glossary, page
+  references) did not settle: its padding pages and back notes printed folio
+  `1` and the last chapter's header (#116), its body settled with the images
+  off and with either half of them.
+- **What settles it.** *Pinned* (each image's decision fixed, read back and
+  re-decided from the result): always reaches a fixed point, after 11 to 23
+  compiles for generated notes with no break, 7 to 12 with `h1: page`, 3 to
+  5 with `h1: right`, 3 for the book. *Seeded* (the first of Typst's passes
+  takes the previous compile's decision, the others decide live): 4 to 6, 2
+  to 4 and 2 compiles; the result was checked to be the pinned fixed point
+  (8 of 8) and to settle alone; on the book it cycled (the same decisions
+  every compile from the third on, not a fixed point: 11 would change).
+  *Seeded, then pinned* once a compile changes no decision: the book in 7 (4
+  + 3), the generated notes as seeded. Dropped: a one-way rule (an image
+  only goes from full to shrink to float or move) settles in 1 to 4 but
+  leaves 4 to 24 of 60 images (11 in the book) worse than the fixed point,
+  against AC-4; no floats does not settle 17 of 20 generated notes.
+- **More than about four whole-book compiles in one realm end in a Typst
+  panic** (`unreachable`, #107; seen before at decision 12). The plugin
+  compiles each request in a Web Worker of its own and ends it
+  (`src/plugin/compiler/index.ts`, `start-worker.ts`); about 30 whole-book
+  compiles each in a fresh process ran without one. Not measured: the time
+  inside Obsidian (about 5 s per compile of the book in the probe).
 
 ---
 
@@ -282,7 +324,7 @@ latter wider than the text; every case also compiled for diagnostics: none):
   decision as listed in the test; the signature total and the back notes on
   the last page still hold (US-026 AC-5); an image just before a heading with a
   page break (US-025) is moved, not floated (AC-4, measured); the preview
-  shows the same.
+  shows the same as the export's first compile (decision C, #116).
 
 - **AC-13 (the look as today; decision 11; SCAR-025):** An image the rule
   keeps at full size has the page, the position and the size it has with
@@ -306,6 +348,98 @@ latter wider than the text; every case also compiled for diagnostics: none):
   `minScale` 10, 50, 70, 99 and 100; facing pages on and off; a sweep of the
   text length before the image over two page edges for each, checked for a
   stable result (the decision read from its own layout, SCAR-021).
+
+*Amendment for #116 (2026-11-03).* AC-11's "compiles without diagnostics"
+was checked through the call that returns no warnings; measured at G2 with
+`world.compile`: its composed note settles (16 pages).
+
+- **AC-14 (Typst's warnings reach the export; decision 14):** After each
+  compile of an export the plugin reads Typst's warnings with
+  `runWithWorld` → `world.compile({diagnostics})` (the world it already
+  opens for the decisions, AC-5; measured). When the export's last compile
+  did not settle, it reports `LAYOUT_NOT_SETTLED` without a source line
+  (text: decision A). Typst's other warnings are not reported here (decision
+  B: backlog #110). The preview reads the same warning from its one compile
+  (decision C). Neither stops an export or the preview, also in strict
+  mode (decision E). A thrown
+  or failed read gives no warning and does not fail the export, as AC-5.
+
+- **AC-15 (the export compiles until the layout settles; decision 14):**
+  With the rule on (`images.minScale` below 100) and at least one image
+  written with `fit-flow`, the export compiles up to 8 times:
+  1. Compile 1 is *seeded* with no hints (as today).
+  2. A seeded compile that settles (Typst gives no `layout did not
+     converge` warning) is the result. A pinned compile is the result when
+     it settles and no image would decide otherwise (`d` equals `want`, and
+     for a shrink `r` and `wr` differ by at most 0.001).
+  3. Else, when the compile was seeded and changed no decision against its
+     hints, or it was pinned (and step 5 does not apply), the next compile
+     is *pinned* to the decisions the images want (`want`, `wr`).
+  4. Else the next compile is *seeded* with the decisions it read (`d`,
+     `r`).
+  5. A pinned compile that does not settle while every image wants its
+     decision (the next compile would be the same text) ends the loop at
+     once: the fallback of AC-16 follows (decision 17).
+  Examples (measured 2026-11-03; generated notes as in AC-18, 60 images,
+  A5, facing pages, 70 %): seed 1 with no break settles at compile 4
+  (seeded); seed 3 at compile 6; seed 1 with `h1: right` at compile 2. The
+  private book: compiles 1 to 4 seeded (the fourth changed no decision),
+  5 and 6 pinned (11 and 7 decisions wanted otherwise), compile 7 pinned
+  with none — the result, 348 pages, the back notes on p. 348 with folio
+  `339` and no header. A note that settles at compile 1 (the sample's
+  `Book.md` at 70) is compiled once. The export's notice reads
+  `Compiling…` for compile 1 and `Compiling… (2 of up to 8)` from compile 2
+  on (decision D). The limit 8 is a constant (decision F). With the rule off, or no image
+  written with `fit-flow`, the export compiles once as today.
+
+- **AC-16 (the fallback; decisions 16, 17):** When compile 8 is not the
+  result, or the loop ends early by step 5 of AC-15,
+  the export converts the note again — the same note text that compile 1
+  was converted from — with `images.minScale: 100` (no
+  `fit-flow`, AC-10), compiles it once, writes that `.typ` and PDF, and
+  reports `IMAGE_FIT_OFF` (decision A) instead of the image fit
+  warnings of AC-5; if that compile does not settle either,
+  `LAYOUT_NOT_SETTLED` as well. Its notice is `Compiling…` (a new compile,
+  not a ninth try). The export command always hands the run this second
+  conversion; a run given none keeps compile 8 and reports
+  `LAYOUT_NOT_SETTLED`. Examples (measured): the private book at 100
+  settles at once (360 pages, the back notes on p. 360, folio `351`, no
+  header); the generated notes at 100 settle 24 of 24. With the limit set to
+  2 for a test (AC-18), seed 3 with no break falls back.
+
+- **AC-17 (what is written; decision 14):** The preamble gains, with
+  `fit-flow`, `#let o2t-fit-hints = (:)` and `#let o2t-fit-pinned = false`.
+  A later compile writes the decisions read back, keyed by the probe's label
+  (unique, AC-3; not the source line, which two images in one paragraph
+  share): `#let o2t-fit-hints = ("o2t-fit-1": (d: "float", r: 1.0), …)`,
+  and `true` for a pinned compile. In the helper, seeded: a hint is used
+  only while the probe has no position yet (`query(at).len() == 0`, Typst's
+  first pass); else the decision is made as today. Pinned: the hint is the
+  decision and its ratio. In both, the decision's metadata also carries
+  `want`, `wr` and the key; `d`, `line` and `name` stay as AC-5 reads them.
+  The `.typ` written to the export folder is the one of the result, so it
+  compiles alone to the same pages (measured 8 of 8 seeded and the book
+  pinned). Rule 7: the loop starts from the same text and decides only from
+  the compiler's output, so the same note, assets and settings give the
+  same `.typ`. Compile 1 gives today's pages (AC-13 still holds; measured
+  at G2, scratch probe `bn/g2.test.ts`): the sample's `Book.md` at 70 with
+  the seeded helper and no hints against today's helper at 70 — 416 of 416
+  pages single-sided and 424 of 424 with facing pages equal (text, and each
+  image's place and size; 71 images), and with facing pages 424 of 424
+  equal to the output at 100.
+
+- **AC-18 (tests; SCAR-019, SCAR-021, SCAR-030):** A test helper builds the
+  generated notes from a seed and an image count (as measured: a chapter
+  every 10 images, 1 to 7 filler paragraphs and a `map`, `wide` or `tall`
+  image per step from a fixed linear congruential sequence). The loop's
+  decisions are a function with the compile passed in (SCAR-031), tested
+  with scripted results (settled at 1; a seeded run settling at 4; a cycle
+  that switches to pinned; 8 failures and the fallback; a thrown read) and
+  with the real compiler on generated notes at `minScale` 10, 50, 70 and 99,
+  facing pages on and off, no break and `h1: right`. A test of the limit
+  injects a lower one. Whole-note loops run few compiles per process
+  (the panic of #107) and state their time limits, measured under a full
+  run.
 
 ---
 
@@ -418,6 +552,44 @@ latter wider than the text; every case also compiled for diagnostics: none):
    nor by `Book.md` cut after line 1140; the test is the sample's `Book.md`
    with the M18 settings. Alternatives not measured: forcing a float to the
    next page; accepting it and documenting the case.
+14. **A layout that settles** (AC-14, AC-15, AC-17; #116, the user's
+   decisions of 2026-11-03 after the measurements above). *Decided: seeded,
+   then pinned, at most 8 compiles, with Typst's non-convergence reported.*
+   The user first chose pinned compiles up to 4 on the book's measurement
+   alone; measured on generated notes it did not settle in 4 (SCAR-020), and
+   the limit was raised to 8 for the combination. Alternatives measured and
+   dropped: pinned only (up to 23 compiles), seeded only (cycles on the
+   book), a one-way rule (worse places), no floats (does not settle);
+   warning only (the output stays wrong) is the user's last resort.
+15. **Export only** (AC-15). *Decided: the loop runs in the export; the
+   preview compiles once as today.*
+16. **The fallback** (AC-16). *Decided: when 8 compiles do not settle, the
+   export converts again at `images.minScale: 100` and says so.*
+17. **A pinned compile that cannot change** (AC-15 step 5; found at G2,
+   decided after G2). *Decided: fall back at once.* A pinned compile whose
+   images all want their decision but that does not settle (something else
+   does not converge) would be repeated unchanged up to compile 8 (about
+   40 s on the private book); it ends the loop and AC-16 follows.
+
+## Decisions A to F (amendment #116; answered 2026-11-03)
+
+A. **The two new warnings' texts** (AC-14, AC-16). *Decided: as proposed
+   (`LAYOUT_NOT_SETTLED` confirmed after G2).*
+   - `LAYOUT_NOT_SETTLED`  `The layout did not settle; page numbers, running headers and image places may be wrong`
+   - `IMAGE_FIT_OFF`  `Image fit did not settle the layout in 8 compiles; exported without it (images.minScale 100)`
+B. **Typst's other warnings** (AC-14). *Decided: not in this story; added to
+   backlog #110 (error mapping).* Measured: they are returned
+   (`template.typ:24: unknown font family: …`). Proposed was: report each as
+   `TYPST_WARNING`.
+C. **The preview** (decision 15). *Decided: as proposed.* The preview stays
+   one compile, reads the same warnings and counts `LAYOUT_NOT_SETTLED` (no
+   extra compile: its world already compiles for AC-5; the warnings in its
+   vector path are measured at G2). AC-11's "the preview shows the same"
+   reads "the same as the export's first compile".
+D. **The notice while compiling** (AC-15). *Decided: as proposed.*
+E. **Strict mode** (US-006). *Decided: as proposed* — reported, never
+   stopping (as decision 8).
+F. **The limit** (AC-15). *Decided: a constant 8.*
 ---
 
 ## Notes
@@ -451,3 +623,8 @@ latter wider than the text; every case also compiled for diagnostics: none):
 - [TICKET-095](../tickets/TICKET-095-image-fit-look.md) — The look as today: the probe's space and the full-width figure (defect fix)
 - [TICKET-096](../tickets/TICKET-096-image-fit-floats.md) — Floats with the look as today: the full-width block only where floats are off (defect fix)
 - [TICKET-097](../tickets/TICKET-097-image-fit-own-page.md) — A float never on its probe's page: the room corrected by the float's own height (defect fix)
+- [#116](https://github.com/JollyOrc/Obsidian2Typst/issues/116) — Bug: image fit does not settle in a long book (the amendment of 2026-11-03)
+- [#117](https://github.com/JollyOrc/Obsidian2Typst/issues/117) — Hints, the helper's decisions and the choice of the next compile (core)
+- [#118](https://github.com/JollyOrc/Obsidian2Typst/issues/118) — The compiler reports whether Typst settled; the preview counts it (plugin)
+- [#119](https://github.com/JollyOrc/Obsidian2Typst/issues/119) — The export compiles until the layout settles, else falls back to 100 (plugin)
+- [#120](https://github.com/JollyOrc/Obsidian2Typst/issues/120) — The settle tests with the real compiler, documents, test build and M20

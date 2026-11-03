@@ -11,7 +11,7 @@ import type {CompileResult} from '../../src/core/compile';
 import type {Warning} from '../../src/core/emit';
 import {statusLine} from '../../src/core/preview/status';
 import type {TypstCompiler} from '../../src/plugin/compiler';
-import {readFitDecisions} from '../../src/plugin/compiler/worker-core';
+import {readLayoutFacts} from '../../src/plugin/compiler/worker-core';
 import {
   createPreviewController,
   type CompileJob,
@@ -26,6 +26,13 @@ import {
 import {DEFAULT_WARNING_SETTINGS} from '../../src/plugin/warning-flow';
 
 const PDF = new Uint8Array([37, 80, 68, 70]);
+
+/** US-028 AC-5: the decisions as the worker reads them (#118: with the warnings). */
+const readFitDecisions = async (
+  compiler: Parameters<typeof readLayoutFacts>[0],
+  main: string,
+): Promise<unknown[] | undefined> =>
+  (await readLayoutFacts(compiler, main, true)).fitDecisions;
 const FLOAT = {d: 'float', line: 12, name: 'map.png'};
 const MOVE = {d: 'move', line: 20, name: 'map.png'};
 const SHRINK = {d: 'shrink', line: 5, name: 'b.png'};

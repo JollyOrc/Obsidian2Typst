@@ -1,9 +1,19 @@
 // US-007 AC-1, AC-1b, AC-3, AC-4: one export run: write the .typ, the assets
 // and the template, compile, write the PDF, then the warnings report. The host,
 // the compiler and the file reader are injected; nothing here imports Obsidian.
-import {exportNames, type CompileRequest} from '../core/compile';
+import {
+  FIT_COMPILE_LIMIT,
+  IMAGE_FIT_OFF_WARNING,
+  LAYOUT_NOT_SETTLED_WARNING,
+  compilingNotice,
+  exportNames,
+  nextFitCompile,
+  withFitHints,
+  type CompileResult,
+  type FitStep,
+} from '../core/compile';
 import type {AssetUse} from '../core/assets';
-import {fitDecisionWarnings, type Warning} from '../core/emit';
+import {FIT_HINT_LINES, fitDecisionWarnings, type Warning} from '../core/emit';
 import type {TypstCompiler} from './compiler';
 import {copyAssets} from './copy-assets';
 import {
@@ -59,6 +69,19 @@ export interface RunExportOptions {
   compiler: TypstCompiler;
   fonts: readonly Uint8Array[];
   lock: ExportLock;
+  /**
+   * US-028 AC-16: the same note converted with `images.minScale: 100`, for
+   * when the image fit does not settle; null when it cannot be converted.
+   * Without it the last compile is kept.
+   */
+  fallback?: () => Promise<FallbackNote | null>;
+  /** US-028 AC-18: the most compiles before the fallback (tests only). */
+  fitCompileLimit?: number;
+}
+
+/** US-028 AC-16: the note converted again without image fit. */
+export interface FallbackNote {
+  typ: string;
 }
 
 /** How a run ended. */
@@ -68,7 +91,9 @@ export interface ExportResult {
 
 /**
  * US-007 AC-1 to AC-4: runs an export. The lock is released however the run
- * ends; an error of the host or the compiler reaches the caller.
+ * ends; an error of the host or the compiler reaches the caller. US-028
+ * AC-15, AC-16: the compile is repeated until the layout settles, else the
+ * note at 100 (`fallback`) is compiled (`compileSettled`).
  */
 export async function runExport(
   options: RunExportOptions,
@@ -107,22 +132,47 @@ export async function runExport(
         );
         files[names.template] = new TextEncoder().encode(options.template);
       }
-      host.notice('Compiling…');
-      const request: CompileRequest = {
-        file: names.typ,
-        source: options.typ,
-        files,
-        fonts: options.fonts,
-      };
-      const result = await options.compiler.compile(request);
+      // US-028 AC-15, AC-16: compile until the layout settles, else fall
+      // back to the note at 100 (`compileSettled`); one compile without the
+      // hints lines (the rule is off) as before.
+      const done = await compileSettled({
+        typ: options.typ,
+        compile: (source) =>
+          options.compiler.compile({
+            file: names.typ,
+            source,
+            files,
+            fonts: options.fonts,
+          }),
+        notice: (text) => host.notice(text),
+        // AC-16: the note at 100 uses the same images as compile 1 (image
+        // fit changes no image list; a US-008 test pins it), so nothing more
+        // is copied.
+        fallback:
+          options.fallback === undefined
+            ? undefined
+            : async () => (await options.fallback?.())?.typ ?? null,
+        limit: options.fitCompileLimit ?? FIT_COMPILE_LIMIT,
+      });
+      const {result} = done;
       if (!result.ok) {
         status = result.kind === 'typst' ? 'compile-error' : 'compiler-failed';
         host.notice(result.error);
         return {failed: true};
       }
+      // US-028 AC-17: the .typ of the result, when it is not the one written.
+      if (done.source !== options.typ) {
+        await host.writeExportFile(`${dir}/${names.typ}`, done.source);
+      }
       await host.writeExportBytes(`${dir}/${names.pdf}`, result.pdf);
-      // US-028 AC-5: the image fit warnings of this compile.
-      return {warnings: fitDecisionWarnings(result.fitDecisions ?? [])};
+      // US-028 AC-5: the image fit warnings of the result; AC-16: none after
+      // the fallback, which reports IMAGE_FIT_OFF; AC-14: a layout that did
+      // not settle.
+      const warnings = done.fellBack
+        ? [IMAGE_FIT_OFF_WARNING]
+        : fitDecisionWarnings(result.fitDecisions ?? []);
+      if (result.settled === false) warnings.push(LAYOUT_NOT_SETTLED_WARNING);
+      return {warnings};
     };
 
     const flow = await finishExport({
@@ -136,5 +186,56 @@ export async function runExport(
     return {status: flow.aborted ? 'aborted' : status};
   } finally {
     release();
+  }
+}
+
+/** What `compileSettled` needs. */
+interface SettleOptions {
+  /** The converted text; the hints lines make it loop (AC-15). */
+  typ: string;
+  compile: (source: string) => Promise<CompileResult>;
+  notice: (text: string) => void;
+  /** The text at 100, or null; none: keep the last compile. */
+  fallback: (() => Promise<string | null>) | undefined;
+  limit: number;
+}
+
+/** The compile that ends the loop and the text it compiled. */
+interface Settled {
+  result: CompileResult;
+  source: string;
+  fellBack: boolean;
+}
+
+/**
+ * US-028 | AC-15, AC-16: Compiles `typ` until the layout settles. Compile 1
+ * is `typ` as converted (seeded, no hints); a text without the hints lines
+ * (`FIT_HINT_LINES`, the rule off) is compiled once. After each compile
+ * `nextFitCompile` picks the result, the next compile (`withFitHints` on
+ * `typ`) or `'stuck'`; at `'stuck'` or after `limit` compiles the fallback's
+ * text is compiled once (`fellBack`), or, without one, the last compile is
+ * kept. A failed compile ends the loop at once. Each compile is announced
+ * by `compilingNotice`; the fallback's as `Compiling…` (a new compile, not
+ * a further try). Assumes `limit` ≥ 1.
+ */
+async function compileSettled(options: SettleOptions): Promise<Settled> {
+  const {typ, compile, notice, fallback, limit} = options;
+  const looping = typ.includes(FIT_HINT_LINES);
+  let step: FitStep = {mode: 'seeded', hints: []};
+  let source = typ;
+  for (let n = 1; ; n++) {
+    notice(compilingNotice(n, limit));
+    const result = await compile(source);
+    if (!result.ok || !looping) return {result, source, fellBack: false};
+    const next = nextFitCompile(step, result.settled, result.fitDecisions);
+    if (next === null) return {result, source, fellBack: false};
+    if (next === 'stuck' || n >= limit) {
+      const at100 = fallback === undefined ? null : await fallback();
+      if (at100 === null) return {result, source, fellBack: false};
+      notice(compilingNotice(1, limit));
+      return {result: await compile(at100), source: at100, fellBack: true};
+    }
+    step = next;
+    source = withFitHints(typ, next.hints, next.mode === 'pinned');
   }
 }

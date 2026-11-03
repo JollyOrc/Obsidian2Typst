@@ -50,6 +50,16 @@ export interface PreparedNote {
   template: string | null;
   /** US-010 AC-3: the vault fonts for the compiler (not the bundled ones). */
   fonts: Uint8Array[];
+  /** US-028 AC-16: the note text that was converted. */
+  source: string;
+}
+
+/** US-028 AC-16: how `convertNote` converts a second time. */
+export interface ConvertNoteOptions {
+  /** The note text to convert instead of reading the note again. */
+  source?: string;
+  /** Converts with `images.minScale: 100` (no image fit, AC-10). */
+  imagesOff?: boolean;
 }
 
 /**
@@ -94,12 +104,16 @@ export function selectPreset(
  * Typst text is the same; the Warnings are those of the template, the fonts and
  * the conversion, in this order. US-023 AC-1, AC-9: the one place that tells
  * `convert` whether the template defines the hook (SCAR-017).
+ * US-028 AC-16: `options.source` converts that text instead of reading the
+ * note again, and `options.imagesOff` converts with `images.minScale: 100`
+ * (the export's fallback); the text converted is returned as `source`.
  */
 export async function convertNote(
   deps: PrepareDeps,
   path: string,
   active: string,
   preset: Preset,
+  options: ConvertNoteOptions = {},
 ): Promise<PreparedNote | PresetRefusal> {
   const data = deps.settings.data;
   const templatePath = resolveFields(preset.fields, data.defaults).template;
@@ -121,8 +135,14 @@ export async function convertNote(
     deps.fonts === undefined
       ? null
       : await deps.fonts(effective.settings.fonts.folder);
+  const source = options.source ?? (await deps.notes.read(path));
+  // US-028 AC-16: the fallback converts without image fit.
+  const images =
+    options.imagesOff === true
+      ? {images: {...effective.settings.images, minScale: 100}}
+      : {};
   const converted = await convert({
-    source: await deps.notes.read(path),
+    source,
     noteName: noteNameOf(path),
     notePath: path,
     // US-023 AC-1, AC-9: the hook when the template copy defines `template`,
@@ -130,6 +150,7 @@ export async function convertNote(
     // is not null is the one `template: true` stands for (the callback above).
     settings: {
       ...effective.settings,
+      ...images,
       templateHook: templateText !== null && definesTemplateHook(templateText),
     },
     assets: {files: deps.vault.files(), readHead: deps.vault.readHead},
@@ -152,6 +173,7 @@ export async function convertNote(
     uses: converted.assets,
     template: templateText,
     fonts: fontSet?.files ?? [],
+    source,
   };
 }
 

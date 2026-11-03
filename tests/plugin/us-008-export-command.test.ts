@@ -509,3 +509,40 @@ describe('US-011 the cover reaches the export', () => {
     expect(r.requests).toEqual([]);
   });
 });
+
+describe('US-028 AC-16 the export command hands the run the note at 100', () => {
+  type Fallback = () => Promise<{typ: string; warnings: unknown[]}>;
+  const fallbackOf = (request: ExportRequest): Fallback => {
+    const f = (request as unknown as {fallback?: unknown}).fallback;
+    if (typeof f !== 'function') throw new Error('the request has no fallback');
+    return f as Fallback;
+  };
+
+  it('US-028 AC-16: with image fit on, the request carries a second conversion at images.minScale 100: no fit-flow, the same note otherwise', async () => {
+    const r = await rig(undefined, 'A.\n\n![[map.png]]\n\nB.');
+    r.data.defaults = {images: {minScale: 70}} as never;
+    await r.command();
+    const request = first(r);
+    expect(request.typ).toContain('#fit-flow(');
+    const at100 = await fallbackOf(request)();
+    expect(at100.typ).not.toContain('fit-flow');
+    expect(at100.typ).not.toContain('o2t-fit');
+    // the same conversion as a preset or the Defaults at 100 give
+    r.data.defaults = {images: {minScale: 100}} as never;
+    await r.command();
+    expect(at100.typ).toBe(r.requests[1]?.typ);
+    // the run copies no more images for it: the image list is the same
+    expect(r.requests[1]?.uses).toEqual(request.uses);
+    expect(request.uses.length).toBeGreaterThan(0);
+  });
+
+  it('US-028 AC-16: the second conversion converts the note text the export started with (a change meanwhile is not mixed in)', async () => {
+    const r = await rig(undefined, 'A.\n\n![[map.png]]\n\nB.');
+    r.data.defaults = {images: {minScale: 70}} as never;
+    await r.command();
+    r.texts.set(NOTE, 'A.\n\n![[map.png]]\n\nChanged.');
+    const at100 = await fallbackOf(first(r))();
+    expect(at100.typ).not.toContain('Changed.');
+    expect(at100.typ).toContain('B.');
+  });
+});
