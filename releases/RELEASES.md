@@ -2,11 +2,11 @@
 
 | Version | Release Notes | Download |
 |---------|---------------|----------|
+| v0.11.1 | [release notes](v0.11.1.md) | [⬇ GitHub release 0.11.1](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.11.1) |
 | v0.11.0 | [release notes](v0.11.0.md) | [⬇ GitHub release 0.11.0](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.11.0) |
 | v0.10.0 | [release notes](v0.10.0.md) | [⬇ GitHub release 0.10.0](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.10.0) |
 | v0.9.1 | [release notes](v0.9.1.md) | [⬇ GitHub release 0.9.1](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.9.1) |
 | v0.9.0 | [release notes](v0.9.0.md) | *(built before the repository; not published)* |
-| v0.8.0 | [release notes](v0.8.0.md) | *(built before the repository; not published)* |
 
 <!-- Maintain the last 5 releases. Add newest at the top.
      Format:
