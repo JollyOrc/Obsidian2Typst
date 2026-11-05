@@ -2,6 +2,9 @@
 
 Moved from `CLAUDE.md` (development process, step 0) on 2026-11-01, unchanged;
 SCAR-031 and SCAR-032 added 2026-11-03 (the user's go).
+SCAR-033 to SCAR-045 added 2026-11-05, when the SCARs were unified with the
+Vault Compiler and obsidian-webpage-export (shared repository, submodule
+`scars/`; the user's "unify the SCARs across the two projects first").
 Read `scars/README.md` and every SCAR file under `scars/`, then check the new
 instructions or user story against each question below.
 
@@ -117,6 +120,40 @@ instructions or user story against each question below.
   default, at both ends of the range and at one other value, and was a
   decision asked in terms of the default also asked for the other values
   (SCAR-019)?
+
+- Does the work take a path from the user? Is every such path classified
+  before use, with a table of example values in the story, "inside" tested as
+  root + separator, and every write routed through one checking writer
+  (SCAR-033)?
+- Does a rule classify input by its first lines? Are the non-content parts of
+  the format (frontmatter, BOM) removed once, before every rule (SCAR-034)?
+- Are fixtures and story examples synthetic, built from real data only as
+  measured numbers, with nothing published that names private data
+  (SCAR-035)?
+- Is a dependency bundled or removed? Is its licence checked before, and
+  every artifact that already carries it withdrawn after (SCAR-036)?
+- Does a tool merge the user's input with its own defaults? Is the merge
+  order measured, and which definition of a name wins (SCAR-037)?
+- Does a function that answers a question also report? Does only the step
+  that acts on the answer report, once, with its place (SCAR-038)?
+- Are markers written into the text for a later step? Is every step that
+  reads the text in between listed and tested with the markers present, and
+  are they removed in one place (SCAR-039)?
+- Does the story define an output format? Does it name the program that
+  reads it, and is the format measured there, with examples that tell the
+  candidate rules apart (SCAR-040)?
+- Does a rule read the start of a line? Does it read past a container's
+  marker (quote, list item) and is it tested in each container and a nested
+  one (SCAR-041)?
+- Does a development dependency change? Is the release artefact compared
+  before and after, and each difference classified (SCAR-042)?
+- Does a count or baseline cover a folder? Does it name its files and
+  exclude generated and third-party files by path (SCAR-043)?
+- Does a whole-tree check get assigned to a ticket? Is it the ticket after
+  which it can be green (SCAR-044)?
+- Was a failure seen only in the user's environment? Is the approach
+  measured there before the story builds on it, and does every claim name
+  the environment it was measured in (SCAR-045)?
 
 Flag any gap to the user before proceeding; do not paper over it with a
 guess or a TODO.

@@ -32,7 +32,12 @@ Follow this order strictly — do not skip ahead:
    every question in `docs/process/scar-review-checklist.md`. Flag any gap to
    the user; do not paper over it with a guess or a TODO. **After** a problem
    is resolved or a requirement refined, ask whether the root cause
-   generalises; if so, add a SCAR to `scars/` and update `scars/README.md`.
+   generalises; if so, add a SCAR in the shared repository and update its
+   `README.md`. The SCARs are shared with the other
+   two plugins: `scars/` is the git submodule of
+   <https://github.com/JollyOrc/scars>. Edit SCARs only there, never in
+   `scars/`, then `git submodule update --remote scars` and commit the new
+   pointer. A new SCAR takes the next free number.
 1. **User story** — write or amend the story and acceptance criteria first.
 2. **Tests** — specify and implement tests against the acceptance criteria.
 3. **Tickets** — GitHub issues with the ticket form
