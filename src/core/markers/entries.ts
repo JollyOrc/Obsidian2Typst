@@ -87,6 +87,9 @@ export interface EntriesSettings {
   image?: {minScale?: number};
   /** US-032 AC-1, AC-9: the unused right-page share that warns (0 = off). */
   emptyWarn?: number;
+  /** US-033 AC-12: the quick reference after each entries chapter, its title. */
+  quickReference?: boolean;
+  quickReferenceTitle?: string;
 }
 
 /** US-032 AC-1: the built-in values of the entry fit (G0-C8, one place). */
@@ -577,11 +580,23 @@ export function placeEntries(
   root: readonly BlockNode[],
   entries: ReadonlyMap<HeadingNode, EntryData>,
   rules: ReadonlyMap<string, HeadingRule>,
-): {warnings: PlaceWarning[]; bodies: Set<BlockNode>} {
+): {
+  warnings: PlaceWarning[];
+  bodies: Set<BlockNode>;
+  chapters: Set<BlockNode>;
+  sections: Set<BlockNode>;
+} {
   const warnings: PlaceWarning[] = [];
   const bodies = new Set<BlockNode>();
-  let chapter: {depth: number; text: string} | null = null;
-  let section: {depth: number; text: string} | null = null;
+  // US-033 AC-1, AC-2: the chapter headings that hold entries, and the
+  // section headings that do.
+  const chapters = new Set<BlockNode>();
+  const sections = new Set<BlockNode>();
+  let chapter: {depth: number; text: string; node: BlockNode} | null = null;
+  // The non-entry headings above the current block; an entry's section is
+  // the nearest one above it (a heading of the entry's own level holds no
+  // entry and never replaces it).
+  const headingsAbove: {depth: number; text: string; node: BlockNode}[] = [];
   const open: {depth: number}[] = [];
   for (const block of root) {
     if (block.kind !== 'heading') {
@@ -590,30 +605,41 @@ export function placeEntries(
     }
     if (chapter !== null && block.depth <= chapter.depth) {
       chapter = null;
-      section = null;
+      headingsAbove.length = 0;
       open.length = 0;
     }
     while (open.length > 0 && (open.at(-1)?.depth ?? 0) >= block.depth)
       open.pop();
-    if (section !== null && block.depth <= section.depth) section = null;
+    while (
+      headingsAbove.length > 0 &&
+      (headingsAbove.at(-1)?.depth ?? 0) >= block.depth
+    )
+      headingsAbove.pop();
     const entry = entries.get(block);
     if (chapter === null) {
       const text = headingText(block);
       if (rules.get(headingRuleKey(text)) === 'entries') {
-        chapter = {depth: block.depth, text};
+        chapter = {depth: block.depth, text, node: block};
         continue;
       }
     }
     if (entry === undefined) {
       if (chapter !== null && open.length === 0)
-        section = {depth: block.depth, text: headingText(block)};
+        headingsAbove.push({
+          depth: block.depth,
+          text: headingText(block),
+          node: block,
+        });
       else if (chapter !== null) bodies.add(block);
       continue;
     }
     if (chapter === null) continue;
+    chapters.add(chapter.node);
+    const section = open.length === 0 ? (headingsAbove.at(-1) ?? null) : null;
+    if (section !== null) sections.add(section.node);
     entry.place = {
       chapter: chapter.text,
-      section: section?.text ?? null,
+      section: open.length === 0 ? (headingsAbove.at(-1)?.text ?? null) : null,
       nested: open.length > 0,
       layout: 'auto',
     };
@@ -654,5 +680,5 @@ export function placeEntries(
       else entry.place.layout = known;
     }
   }
-  return {warnings, bodies};
+  return {warnings, bodies, chapters, sections};
 }

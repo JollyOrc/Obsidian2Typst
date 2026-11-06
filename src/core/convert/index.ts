@@ -209,14 +209,22 @@ const PORTRAIT = new Set(['spread-portrait', 'page-portrait']);
  */
 function planEntryLayout(
   entries: ReadonlyMap<BlockNode, EntryData>,
-  bodies: ReadonlySet<BlockNode>,
+  placed: {
+    bodies: ReadonlySet<BlockNode>;
+    chapters: ReadonlySet<BlockNode>;
+    sections: ReadonlySet<BlockNode>;
+  },
+  tocDepth: number,
   settings: ConvertSettings,
   sizeOf: (path: string) => {width: number; height: number} | null,
 ): EntryLayoutEnv | undefined {
   const all = [...entries.values()];
   if (!all.some((e) => e.place?.chapter != null && !e.place.nested))
     return undefined;
+  const {bodies, chapters, sections} = placed;
   const infos = new Map<BlockNode, EntryLayoutInfo>();
+  // US-033 AC-1: the first entry of each section closes its intro.
+  const opened = new Set<string>();
   for (const entry of all) {
     const place = entry.place;
     const inline =
@@ -256,6 +264,13 @@ function planEntryLayout(
       reason,
       auto: layout === 'auto',
       line: entry.line,
+      opensSection: (() => {
+        const name = place?.section ?? null;
+        if (inline || name === null || opened.has(`${place?.chapter}/${name}`))
+          return null;
+        opened.add(`${place?.chapter}/${name}`);
+        return name;
+      })(),
       image,
     });
   }
@@ -269,6 +284,9 @@ function planEntryLayout(
     facingPages: page.facingPages,
     fullImageHeader: settings.entries?.fullImageHeader === true,
     bodies,
+    chapters,
+    sections,
+    tocDepth,
   };
 }
 
@@ -469,7 +487,8 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   // chapter places one (else the output is as before).
   const entryLayout = planEntryLayout(
     entryPlan.entries,
-    placed.bodies,
+    placed,
+    contents === null ? 0 : toc.depth,
     input.settings,
     (path) => {
       const from = resolver.uses().find((use) => use.to === path)?.from;
@@ -479,6 +498,11 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
         : readImageSize(extensionOf(from), head);
     },
   );
+  // US-033 AC-6 (decision 3): with an entries chapter the outline lists
+  // every heading not unlisted.
+  if (contents !== null && entryLayout !== undefined) {
+    contents.text = contentsLines(toc, true);
+  }
   // US-030 AC-10 to AC-14, AC-18: the statblock of each entry and its data
   // checks, once per entry (SCAR-038), at the block's line.
   const models = new Map<BlockNode, StatblockModel & {line: number}>();
@@ -533,6 +557,13 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     input.settings.linkPageNumbers === true && folios
       ? {
           level: input.settings.linkPageLevel ?? 2,
+          // US-033 AC-8: links to entries are numbered at any level.
+          entries: new Set(
+            [...entryPlan.entries.values()].flatMap((entry) => {
+              const label = headings.byNode.get(entry.heading)?.label;
+              return label === undefined ? [] : [label];
+            }),
+          ),
           record: () => {
             pageRefCalls += 1;
           },

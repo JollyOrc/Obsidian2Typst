@@ -1,4 +1,4 @@
-// US-032 AC-10 — the entries' layout warnings reach the export and the
+// US-032 AC-10, US-033 AC-13 — the entries' layout warnings reach the export and the
 // worker reads the facts they come from: the export adds
 // `entryLayoutWarnings` of the compile's `<o2t-entry>` / `<o2t-entry-end>`
 // facts to its report, with the preset's `entries.emptyWarn`; the worker
@@ -61,6 +61,7 @@ function exportWith(more: Record<string, unknown>) {
         settled: true,
         entryPlaces: PLACES,
         entryEnds: ENDS,
+        entrySections: [{section: 'Horrors', page: 9, introEnd: 10}],
       }) as CompileResult,
     dispose: () => undefined,
   };
@@ -94,6 +95,8 @@ describe('US-032 AC-10 the export reports the entry facts', () => {
     expect(text).toContain('"Marsh Owl": page-landscape');
     expect(text).toContain('"Marsh Owl": page-landscape, about 3 lines over');
     expect(text).toContain('right page 85 % empty');
+    // US-033 AC-13 (G4 #129): the openers' warnings too.
+    expect(text).toContain('SECTION_INTRO_OVERFLOW');
   });
 
   it('US-032 AC-9: entries.emptyWarn 0 (off) gives no ENTRY_SPREAD_EMPTY', async () => {
@@ -124,7 +127,7 @@ describe('US-032 AC-10 the worker reads the entry facts', () => {
         }),
     };
     const facts = await readLayoutFacts(compiler, '/main.typ', false, true);
-    expect(asked).toEqual(['<o2t-entry>', '<o2t-entry-end>']);
+    expect(asked).toEqual(['<o2t-entry>', '<o2t-entry-end>', '<o2t-section>']);
     expect(facts.entryPlaces).toEqual(PLACES);
     expect(facts.entryEnds).toEqual(ENDS);
     asked.length = 0;

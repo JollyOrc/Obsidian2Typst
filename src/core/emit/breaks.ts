@@ -238,7 +238,11 @@ export function entriesLayoutHelper(bandSize: string): string {
   let body = if img.credit == none { image(img.path, width: w) } else { figure(image(img.path, width: w), caption: img.credit, numbering: none) }
   (body: body, w: w, h: w * img.h / img.w + cap-h)
 }
-#let o2t-entries(es, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70) = context {
+#let o2t-section-end() = context {
+  let s = query(selector(<o2t-section-start>).before(here())).last()
+  [#metadata((section: s.value.name, first: s.value.first, page: s.location().page(), introEnd: here().page())) <o2t-section>]
+}
+#let o2t-entries(es, next-opener: false, closes: false, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70) = context {
   let lh = measure([A \\ A]).height - measure([A]).height
   let body(e) = e.blocks.join(parbreak())
   let whole(e) = { e.head; parbreak(); body(e) }
@@ -367,6 +371,13 @@ export function entriesLayoutHelper(bandSize: string): string {
       last-left = not over.at(k - 1)
     }
   }
-  if facing and last-left { o2t-even() } else { pagebreak(weak: true) }
+  // US-033 AC-7: the chapter's last pages end here (the running header).
+  if closes { [#metadata(none) <o2t-chapter-end>] }
+  // US-033 AC-3: an unpaired left page before a section opener: the opener
+  // takes the facing right page; else that page stays blank (US-031 AC-10).
+  // With an opener next, its own break follows the content, so a page it
+  // adds lies between its markers (US-025's o2t-blank, AC-3's blank page).
+  if facing and last-left { if next-opener { pagebreak() } else { o2t-even() } }
+  else if not next-opener { pagebreak(weak: true) }
 }`;
 }

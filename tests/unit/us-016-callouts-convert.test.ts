@@ -476,7 +476,7 @@ describe('US-016 AC-11 the preamble rule callouts', () => {
 });
 
 describe('US-016 AC-11 names the plugin defines (template)', () => {
-  it('US-016 AC-11, US-017 AC-6, US-019 AC-3, US-018 AC-3, US-025 AC-6, US-026 AC-6, US-028 AC-3, AC-17, US-030 AC-15, US-031, US-032: PLUGIN_NAMES are fit-flow, fit-image, callout, callout-styles, glossary-term, o2t-blank, o2t-continued, o2t-entries, o2t-entry-end, o2t-entry-mark, o2t-even, o2t-fit, o2t-fit-decision, o2t-fit-hints, o2t-fit-pinned, o2t-fitted, o2t-part, o2t-statblock, page-ref, running-text and running-title', () => {
+  it('US-016 AC-11, US-017 AC-6, US-019 AC-3, US-018 AC-3, US-025 AC-6, US-026 AC-6, US-028 AC-3, AC-17, US-030 AC-15, US-031, US-032, US-033: PLUGIN_NAMES are fit-flow, fit-image, callout, callout-styles, glossary-term, o2t-blank, o2t-chapter-header, o2t-continued, o2t-entries, o2t-entry-end, o2t-entry-mark, o2t-even, o2t-fit, o2t-fit-decision, o2t-fit-hints, o2t-fit-pinned, o2t-fitted, o2t-part, o2t-section-end, o2t-statblock, page-ref, running-text and running-title', () => {
     expect([...PLUGIN_NAMES].sort()).toEqual([
       'callout',
       'callout-styles',
@@ -484,6 +484,7 @@ describe('US-016 AC-11 names the plugin defines (template)', () => {
       'fit-image',
       'glossary-term',
       'o2t-blank',
+      'o2t-chapter-header',
       'o2t-continued',
       'o2t-entries',
       'o2t-entry-end',
@@ -495,6 +496,7 @@ describe('US-016 AC-11 names the plugin defines (template)', () => {
       'o2t-fit-pinned',
       'o2t-fitted',
       'o2t-part',
+      'o2t-section-end',
       'o2t-statblock',
       'page-ref',
       'running-text',

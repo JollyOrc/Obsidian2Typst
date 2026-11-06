@@ -420,7 +420,11 @@ export default class Obsidian2TypstPlugin extends Plugin {
         // US-032 AC-10: the entries' facts reach the warning count.
         ...(vector.entryPlaces === undefined || vector.entryEnds === undefined
           ? {}
-          : {entryPlaces: vector.entryPlaces, entryEnds: vector.entryEnds}),
+          : {
+              entryPlaces: vector.entryPlaces,
+              entryEnds: vector.entryEnds,
+              entrySections: vector.entrySections ?? [],
+            }),
       };
     })();
     return {result, cancel: () => job.cancel()};

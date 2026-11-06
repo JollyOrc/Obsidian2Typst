@@ -122,6 +122,28 @@ export const O2T_CONTINUED_HELPER = [
 ].join('\n');
 
 /**
+ * US-033 | AC-7 (decision 1): the header of page `p` inside an entries
+ * chapter, or none outside them: "" on the chapter's opener page (from its
+ * `<o2t-chapter-start>` page), else the title of the last section that
+ * started on or before `p` (`<o2t-section-start>`), up to the chapter's
+ * `<o2t-chapter-end>` page; whatever `runningHeaderLevel` is. Reads where the
+ * markers fell and changes no layout (SCAR-021).
+ */
+export const O2T_CHAPTER_HEADER_HELPER = [
+  '#let o2t-chapter-header(p) = {',
+  '  for (s, e) in query(<o2t-chapter-start>).zip(query(<o2t-chapter-end>)) {',
+  '    let sp = s.location().page()',
+  '    if p == sp { return "" }',
+  '    if p > sp and p <= e.location().page() {',
+  '      let secs = query(<o2t-section-start>).filter(m => m.location().page() >= sp and m.location().page() <= p)',
+  '      return if secs.len() == 0 { "" } else { secs.last().value.name }',
+  '    }',
+  '  }',
+  '  none',
+  '}',
+].join('\n');
+
+/**
  * US-019 | AC-3, AC-4, AC-5, AC-8: The preamble rule `page-furniture`, or null
  * when both parts are off or the settings are missing (the output then is
  * exactly as before, AC-8).
@@ -167,11 +189,17 @@ export function pageFurnitureRule(
     ];
     const header =
       tests.length > 0 ? `if ${tests.join(' and ')} { ${title} }` : title;
+    // US-033 AC-7: inside an entries chapter the section's title, none on
+    // the opener page; blank pages stay without a header.
+    const chapterHeader =
+      `let h = o2t-chapter-header(here().page()); if h == none { ${header} } else if h != ""` +
+      (tests.length > 0 ? ` and ${tests.join(' and ')}` : '') +
+      ` { set text(size: 0.9em); align(center, h) }`;
     // US-032 AC-8 (decision 1): on an entry's overflow page the line
     // "<heading> (continued)" replaces the running header; the folio stays.
     parts.push(
       book.continued === true
-        ? `header: context { let c = o2t-continued(here().page()); if c != none { align(center, text(weight: "bold", c + " (continued)")) } else { ${header} } }`
+        ? `header: context { let c = o2t-continued(here().page()); if c != none { align(center, text(weight: "bold", c + " (continued)")) } else { ${chapterHeader} } }`
         : `header: context { ${header} }`,
     );
   }
@@ -190,6 +218,7 @@ export function pageFurnitureRule(
   const helpers = [RUNNING_TEXT_HELPER, RUNNING_TITLE_HELPER];
   if (blank) helpers.push(O2T_BLANK_HELPER);
   if (part) helpers.push(O2T_PART_HELPER);
-  if (book.continued === true) helpers.push(O2T_CONTINUED_HELPER);
+  if (book.continued === true)
+    helpers.push(O2T_CONTINUED_HELPER, O2T_CHAPTER_HEADER_HELPER);
   return [...helpers, line].join('\n');
 }

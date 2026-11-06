@@ -100,6 +100,8 @@ export interface EntryLayoutInfo {
   /** AC-4: the layout asked for when it was replaced, and why. */
   asked: string | null;
   reason: string | null;
+  /** US-033 AC-1: the section this entry is the first entry of, or null. */
+  opensSection: string | null;
   /** US-032 AC-2: the layout is chosen in the compile (`auto` or replaced). */
   auto: boolean;
   /** The block's line (the warnings made from the facts). */
@@ -126,6 +128,11 @@ export interface EntryLayoutEnv {
   fullImageHeader: boolean;
   /** The top-level blocks of the chapter entries (headings included). */
   bodies: ReadonlySet<BlockNode>;
+  /** US-033 AC-1, AC-2: the chapter headings and section headings. */
+  chapters: ReadonlySet<BlockNode>;
+  sections: ReadonlySet<BlockNode>;
+  /** US-033 AC-6: `toc.depth` when a contents is written, else 0. */
+  tocDepth: number;
 }
 
 /** US-031 AC-12: lists of up to this many items are never broken (D26). */
@@ -161,6 +168,7 @@ function keptList(items: readonly string[]): string {
 function entriesCall(
   run: readonly {info: EntryLayoutInfo; head: string; body: string[]}[],
   layout: EntryLayoutEnv,
+  then: {opener: boolean; closes: boolean},
 ): string {
   const content = (text: string): string =>
     text === '' ? '[]' : `[\n${indent(text, 4)}\n  ]`;
@@ -188,7 +196,9 @@ function entriesCall(
       `  blocks: ${blocks.length === 1 ? `(${blocks[0]},)` : `(${blocks.join(', ')})`}),`,
     ].join('\n');
   });
-  return `#o2t-entries((\n${entries.join('\n')}\n), tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, top: ${layout.marginTop}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader}, min-scale: ${layout.minScale})`;
+  // US-033 AC-1, AC-4: the end of the section's intro, before its entries.
+  const intro = run[0]?.info.opensSection != null ? '#o2t-section-end()\n' : '';
+  return `${intro}#o2t-entries((\n${entries.join('\n')}\n), next-opener: ${then.opener}, closes: ${then.closes}, tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, top: ${layout.marginTop}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader}, min-scale: ${layout.minScale})`;
 }
 
 /** US-030 AC-10, AC-16: what the emitter needs to write statblocks. */
@@ -600,10 +610,93 @@ function entryRuns(
       for (let k = i; k < j; k++) covered.add(k);
       i = j;
     }
-    at.set(start, entriesCall(run, layout));
+    // US-033 AC-3: a section opener after the run reuses a free right page;
+    // AC-7: the run that ends the chapter closes its pages.
+    const next = blocks[i];
+    at.set(
+      start,
+      entriesCall(run, layout, {
+        // A section or chapter opener writes its own right-page break.
+        opener:
+          next !== undefined &&
+          (layout.sections.has(next) || layout.chapters.has(next)),
+        closes: chapterEndsAt(blocks, i, layout),
+      }),
+    );
   }
   return {at, covered};
 }
+
+/**
+ * US-033 AC-7: true when the chapter that holds the block before `i` ends at
+ * `i` (the next heading of its level or higher, or the end of the blocks).
+ */
+function chapterEndsAt(
+  blocks: readonly BlockNode[],
+  i: number,
+  layout: EntryLayoutEnv,
+): boolean {
+  for (let k = i - 1; k >= 0; k--) {
+    const b = blocks[k];
+    if (b?.kind === 'heading' && layout.chapters.has(b)) {
+      const next = blocks[i];
+      return (
+        next === undefined || (next.kind === 'heading' && next.depth <= b.depth)
+      );
+    }
+  }
+  return false;
+}
+
+/**
+ * US-033 | AC-1 to AC-3, AC-5, AC-7: the lines in front of the chapter and
+ * section headings of the entries chapters and at the end of a chapter not
+ * closed by a run: the chapter heading opens a right page (it replaces
+ * US-025's rule for it), the first section shares it, every later section
+ * opens the next right page (`breakLines`, so an added page is `o2t-blank`);
+ * markers for the running header and the section facts.
+ */
+function openerLines(
+  blocks: readonly BlockNode[],
+  env: BlockEnv,
+  runs: {at: Map<number, string>; covered: Set<number>},
+): {before: Map<number, string>; end: string | null} {
+  const before = new Map<number, string>();
+  let end: string | null = null;
+  const layout = env.entryLayout;
+  if (layout === undefined) return {before, end};
+  const open = breakLines('right', layout.facingPages) ?? '';
+  let chapter: {depth: number; firstSection: boolean} | null = null;
+  const close = (k: number): void => {
+    // A run that ends the chapter writes its own end marker.
+    if (runs.covered.has(k - 1)) return;
+    if (k >= blocks.length) end = CHAPTER_END_LINE;
+    else before.set(k, CHAPTER_END_LINE);
+  };
+  blocks.forEach((block, k) => {
+    if (block.kind !== 'heading') return;
+    if (chapter !== null && block.depth <= chapter.depth) {
+      close(k);
+      chapter = null;
+    }
+    if (layout.chapters.has(block)) {
+      chapter = {depth: block.depth, firstSection: true};
+      before.set(k, `${open}\n${CHAPTER_START_LINE}`);
+    } else if (layout.sections.has(block) && chapter !== null) {
+      const marker = `#metadata((name: ${typstString(headingText(block))}, first: ${chapter.firstSection})) <${SECTION_START_LABEL}>`;
+      before.set(k, chapter.firstSection ? marker : `${open}\n${marker}`);
+      chapter.firstSection = false;
+    }
+  });
+  if (chapter !== null) close(blocks.length);
+  return {before, end};
+}
+
+const CHAPTER_START_LINE = '#metadata(none) <o2t-chapter-start>';
+const CHAPTER_END_LINE = '#metadata(none) <o2t-chapter-end>';
+const SECTION_START_LABEL = 'o2t-section-start';
+const headingText = (block: Extract<BlockNode, {kind: 'heading'}>): string =>
+  visibleText(block.children, {dropImages: true});
 
 /** The pieces of one level of blocks (`renderBlocks` joins them). */
 function renderPieces(
@@ -744,7 +837,15 @@ function renderPieces(
                 );
         } else if (role?.kind === 'in-term') {
           line = emitUnnumberedHeading(block.depth, text, info.label);
-        } else if (unlisted) {
+        } else if (
+          unlisted ||
+          // US-033 AC-6: with an entries chapter the outline has no depth;
+          // headings deeper than `toc.depth` that are not entries are unlisted.
+          (env.entryLayout !== undefined &&
+            env.entryLayout.tocDepth > 0 &&
+            block.depth > env.entryLayout.tocDepth &&
+            !env.entryLayout.entries.has(block))
+        ) {
           line = emitUnlistedHeading(block.depth, text, info.label);
         } else if (env.entryHeading !== null && block !== env.entryHeading) {
           // US-031 AC-11: a heading inside a chapter entry: small, no
@@ -954,6 +1055,19 @@ function renderPieces(
       }
     }
   });
+  // US-033 AC-1 to AC-3, AC-7: the openers of the entries chapters.
+  if (!nested && outer.where === 'body' && outer.entryHeading === null) {
+    const openers = openerLines(blocks, outer, runs);
+    pieces.forEach((piece, i) => {
+      const lines = openers.before.get(i);
+      if (lines === undefined) return;
+      pieces[i] = {
+        ...piece,
+        text: piece.text === '' ? lines : `${lines}\n${piece.text}`,
+      };
+    });
+    if (openers.end !== null) pieces.push({text: openers.end, kind: 'other'});
+  }
   if (top !== null) {
     pieces.forEach((piece, i) => {
       const lines = top.before[i];
@@ -1001,6 +1115,9 @@ function topLines(blocks: readonly BlockNode[], env: BlockEnv): TopLines {
       !env.hidden.has(block) &&
       // US-031 AC-11, AC-16: the entry layout writes the breaks in a chapter.
       env.entryLayout?.bodies.has(block) !== true &&
+      // US-033 AC-2: the entries chapter writes its own openers.
+      env.entryLayout?.chapters.has(block) !== true &&
+      env.entryLayout?.sections.has(block) !== true &&
       book?.noBreak.has(block) !== true &&
       env.headings.byNode.has(block)
         ? block.depth

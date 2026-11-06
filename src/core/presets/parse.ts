@@ -988,6 +988,25 @@ function readEntries(value: unknown, problems: Problem[]): EntriesSettings {
   );
   if (statblock !== undefined)
     out.statblock = readStatblock(statblock, problems);
+  // US-033 AC-12: the quick reference.
+  const quick = read(value, 'quickReference');
+  if (quick !== undefined) {
+    if (typeof quick === 'boolean') out.quickReference = quick;
+    else
+      problems.push({
+        path: 'entries.quickReference',
+        message: 'entries.quickReference must be true or false',
+      });
+  }
+  const quickTitle = read(value, 'quickReferenceTitle');
+  if (quickTitle !== undefined) {
+    if (typeof quickTitle === 'string') out.quickReferenceTitle = quickTitle;
+    else
+      problems.push({
+        path: 'entries.quickReferenceTitle',
+        message: 'entries.quickReferenceTitle must be text',
+      });
+  }
   // US-032 AC-1: the illustration's smallest scale and the empty-page warning.
   const image = readSubgroup(value, 'image', 'entries.image', problems);
   if (image !== undefined) {

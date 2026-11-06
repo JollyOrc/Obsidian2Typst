@@ -110,3 +110,74 @@ export function entryLayoutWarnings(
   }
   return out;
 }
+
+/** What `<o2t-section>` records (US-033 AC-1, AC-4). */
+export interface SectionFact {
+  section: string;
+  /** The opener page. */
+  page: number;
+  /** The page the intro ends on. */
+  introEnd: number;
+  /** The chapter's first section (it shares the chapter's opener page). */
+  first?: boolean;
+}
+
+/**
+ * US-033 | AC-3, AC-4, AC-13, US-031 AC-10: the page warnings of the
+ * entries chapters, from the compile's facts, each once:
+ * - `SECTION_INTRO_OVERFLOW "<section>"` for an intro that runs on;
+ * - `ENTRY_BLANK_PAGE "<section>"` when a page between the previous
+ *   section's last page and this opener holds nothing (the opener could not
+ *   reuse a free right page);
+ * - `ENTRY_UNPAIRED "<heading>"` for a page entry on a left page that does
+ *   not overflow, is followed by another entry or opener, and whose right
+ *   page holds neither an entry nor an opener.
+ * The gap page after a long intro is not reported as blank (AC-4).
+ */
+export function sectionWarnings(
+  sections: readonly SectionFact[],
+  places: readonly EntryPlaceFact[],
+  ends: readonly EntryEndFact[],
+): Warning[] {
+  const out: Warning[] = [];
+  const seen = new Set<string>();
+  const add = (code: string, message: string, line: number): void => {
+    const key = `${code} ${message}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({code, message, line});
+  };
+  const placed = places.filter((p) => p.size !== 'inline');
+  const endOf = (heading: string, page: number): number =>
+    ends.find((e) => e.heading === heading && e.page >= page)?.page ?? page;
+  const unique = sections.filter(
+    (s, i) =>
+      sections.findIndex(
+        (t) => t.section === s.section && t.page === s.page,
+      ) === i,
+  );
+  unique.forEach((s, i) => {
+    if (s.introEnd > s.page) add('SECTION_INTRO_OVERFLOW', `"${s.section}"`, 0);
+    const before = unique[i - 1];
+    // The first section of a chapter shares the chapter's opener page.
+    if (before === undefined || s.first === true) return;
+    const used = placed
+      .filter((p) => p.page > before.page && p.page < s.page)
+      .map((p) => endOf(p.heading, p.page));
+    const last = Math.max(before.introEnd, ...used);
+    if (s.page - last > 1) add('ENTRY_BLANK_PAGE', `"${s.section}"`, 0);
+  });
+  const openers = new Set(unique.map((s) => s.page));
+  const starts = new Set(placed.map((p) => p.page));
+  const lastPage = Math.max(0, ...placed.map((p) => p.page), ...openers);
+  for (const p of placed) {
+    if (p.size !== 'page' || p.page % 2 !== 0) continue;
+    if (endOf(p.heading, p.page) > p.page) continue;
+    // Something placed after it: the last entry's right page is what the
+    // chapter's next part (US-033's quick reference, the next chapter) uses.
+    if (p.page >= lastPage) continue;
+    if (!starts.has(p.page + 1) && !openers.has(p.page + 1))
+      add('ENTRY_UNPAIRED', `"${p.heading}"`, p.line ?? 0);
+  }
+  return out;
+}

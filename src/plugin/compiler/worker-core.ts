@@ -82,6 +82,8 @@ export interface LayoutFacts {
   /** US-032 AC-10: the entries' `<o2t-entry>` and `<o2t-entry-end>` facts. */
   entryPlaces?: unknown[];
   entryEnds?: unknown[];
+  /** US-033 AC-13: the section openers' `<o2t-section>` facts. */
+  entrySections?: unknown[];
 }
 
 /** US-031 AC-14: a document with an entries chapter writes these facts. */
@@ -125,9 +127,11 @@ export async function readLayoutFacts(
           };
           const places = await read('o2t-entry');
           const ends = await read('o2t-entry-end');
+          const sections = await read('o2t-section');
           if (places !== null && ends !== null) {
             facts.entryPlaces = places;
             facts.entryEnds = ends;
+            facts.entrySections = sections ?? [];
           }
         } catch {
           // no facts, no entry warnings

@@ -47,6 +47,8 @@ export type CompileResult =
        */
       entryPlaces?: unknown[];
       entryEnds?: unknown[];
+      /** US-033 AC-13: the section openers' facts. */
+      entrySections?: unknown[];
     }
   | {ok: false; kind: 'typst' | 'worker'; error: string};
 

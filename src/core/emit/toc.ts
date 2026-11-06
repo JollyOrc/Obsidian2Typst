@@ -23,6 +23,13 @@ const NO_PAGE_NUMBERS =
  */
 export function contentsLines(
   toc: Pick<TocSettings, 'depth' | 'title' | 'pageNumbers' | 'dotLeaders'>,
+  /**
+   * US-033 AC-6 (decision 3): with an entries chapter the outline lists
+   * every heading not written `outlined: false` (`depth: none`); the
+   * emitter unlists the headings deeper than `toc.depth` that are not
+   * entries. Without one the output is as before.
+   */
+  entries = false,
 ): string {
   const title =
     toc.title === ''
@@ -30,7 +37,7 @@ export function contentsLines(
       : [
           `#block(below: 1em)[#text(size: 1.4em, weight: "bold")[${escapeMarkup(toc.title, {atBlockStart: true})}]]`,
         ];
-  const outline = `#outline(title: none, depth: ${toc.depth})`;
+  const outline = `#outline(title: none, depth: ${entries ? 'none' : toc.depth})`;
   const rules = [
     ...(toc.dotLeaders ? [] : [NO_DOT_LEADERS]),
     ...(toc.pageNumbers ? [] : [NO_PAGE_NUMBERS]),

@@ -16,8 +16,10 @@ import type {AssetUse} from '../core/assets';
 import {FIT_HINT_LINES, fitDecisionWarnings, type Warning} from '../core/emit';
 import {
   entryLayoutWarnings,
+  sectionWarnings,
   type EntryEndFact,
   type EntryPlaceFact,
+  type SectionFact,
 } from '../core/entries/report';
 import {ENTRY_BUILTINS} from '../core/markers';
 import type {TypstCompiler} from './compiler';
@@ -186,6 +188,12 @@ export async function runExport(
           (result.entryPlaces ?? []) as EntryPlaceFact[],
           (result.entryEnds ?? []) as EntryEndFact[],
           {emptyWarn: options.entryEmptyWarn ?? ENTRY_BUILTINS.emptyWarn},
+        ),
+        // US-033 AC-13: the openers' and unpaired pages' warnings.
+        ...sectionWarnings(
+          (result.entrySections ?? []) as SectionFact[],
+          (result.entryPlaces ?? []) as EntryPlaceFact[],
+          (result.entryEnds ?? []) as EntryEndFact[],
         ),
       );
       return {warnings};

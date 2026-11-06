@@ -291,9 +291,14 @@ describe('US-033 AC-8 links to entries', () => {
     );
     const wyrm = place(c, 'Cave Wyrm').page;
     const folio = c.pages[wyrm - 1]?.footer.trim();
-    expect(c.pages.map((p) => p.text).join(' ')).toContain(
-      `Cave Wyrm (p. ${folio})`,
-    );
+    // Blanks collapsed as US-018's PDF tests do (`flat`): the link and the
+    // page reference are separate runs (G4 #129).
+    expect(
+      c.pages
+        .map((p) => p.text)
+        .join(' ')
+        .replace(/\s+/g, ' '),
+    ).toContain(`Cave Wyrm (p. ${folio})`);
   });
 });
 

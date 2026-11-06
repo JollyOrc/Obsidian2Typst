@@ -24,6 +24,7 @@ export type VectorResult =
       settled?: boolean;
       entryPlaces?: unknown[];
       entryEnds?: unknown[];
+      entrySections?: unknown[];
     }
   | Extract<CompileResult, {ok: false}>;
 
@@ -137,6 +138,7 @@ export function createTypstCompiler(
             settled?: unknown;
             entryPlaces?: unknown;
             entryEnds?: unknown;
+            entrySections?: unknown;
           };
           // US-028 AC-5: the decisions only when the worker sent a list;
           // AC-14: `settled` only when it sent a boolean.
@@ -153,6 +155,9 @@ export function createTypstCompiler(
               ? {
                   entryPlaces: message.entryPlaces as unknown[],
                   entryEnds: message.entryEnds as unknown[],
+                  entrySections: Array.isArray(message.entrySections)
+                    ? (message.entrySections as unknown[])
+                    : [],
                 }
               : {}),
           };

@@ -76,6 +76,9 @@ fixed by the story that owns the code.
 | `ENTRY_AUTO` | US-032 AC-2 | `"Marsh Owl": page-landscape`: the layout chosen for `layout: auto` (copy it into the note to fix it). Read after the compile | active |
 | `ENTRY_OVERFLOW` | US-032 AC-5, AC-7 | `"Cave Wyrm": spread-landscape, about 6 lines over` (with `(partner "Marsh Owl" moved)`): the entry runs on past its layout's pages even at `entries.image.minScale`. Read after the compile from the real positions | active |
 | `ENTRY_SPREAD_EMPTY` | US-032 AC-9 | `"Dragonet": spread-text, right page 85 % empty – consider an illustration or trimming`: a spread's right page leaves at least `entries.emptyWarn` % unused (not `full-image`; 0 = off). Read after the compile | active |
+| `ENTRY_UNPAIRED` | US-031 AC-10, US-033 AC-3 | `"Reed Cat"`: a page entry on a left page whose right page stays blank (no partner, no section opener there); not for the chapter's last entry. Read after the compile | active |
+| `ENTRY_BLANK_PAGE` | US-031 AC-5, US-033 AC-3 | `"Horrors"`: a section opener could not reuse a free right page; the left page before it shows the folio only. Read after the compile | active |
+| `SECTION_INTRO_OVERFLOW` | US-033 AC-4 | `"Horrors"`: a section's intro runs on past its opener page; the first entry starts on the next left page after it. Read after the compile | active |
 
 Not used (decided): `HEADING_DUPLICATE` (repeated titles are numbered silently,
 US-002 AC-3) and `LINK_LOCAL_FILE` (links to local files get a footnote,

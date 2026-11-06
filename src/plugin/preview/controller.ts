@@ -6,8 +6,10 @@ import type {CompileRequest} from '../../core/compile';
 import {fitDecisionWarnings} from '../../core/emit';
 import {
   entryLayoutWarnings,
+  sectionWarnings,
   type EntryEndFact,
   type EntryPlaceFact,
+  type SectionFact,
 } from '../../core/entries/report';
 import {ENTRY_BUILTINS} from '../../core/markers';
 import {aspectOf} from '../../core/preview/canvas';
@@ -40,6 +42,7 @@ export type PreviewCompile =
       /** US-032 AC-10: the entries' facts of this compile, if any. */
       entryPlaces?: unknown[];
       entryEnds?: unknown[];
+      entrySections?: unknown[];
     }
   | {ok: false; error: string};
 
@@ -241,6 +244,11 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
           (result.entryPlaces ?? []) as EntryPlaceFact[],
           (result.entryEnds ?? []) as EntryEndFact[],
           {emptyWarn: prepared.emptyWarn ?? ENTRY_BUILTINS.emptyWarn},
+        ).length +
+        sectionWarnings(
+          (result.entrySections ?? []) as SectionFact[],
+          (result.entryPlaces ?? []) as EntryPlaceFact[],
+          (result.entryEnds ?? []) as EntryEndFact[],
         ).length,
       ...applyRange(),
     });
