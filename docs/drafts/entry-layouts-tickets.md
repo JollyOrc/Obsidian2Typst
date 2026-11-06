@@ -32,7 +32,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 ## G0 decisions applied (2026-11-05)
 
 1. **Generic plugin (G0-C1, confirmed).** Game terms live in the preset, not in code: `entries.statblock.stats`, `.traits`, `.boxes`, `.track`, `.trackLabel`, `.trackKey`, `.trackDefault`, `entries.tagLabels`, the sum check of D-17. The built-in defaults are empty: no stat keys → no statblock; no tag map → no tags and no `TAG_UNMAPPED`; no track → no state track. The examples below use synthetic fields (`might`, `wits`, `speed`, total `vigour`).
-2. **Which chapter holds entries (G0-C2).** A preset heading, `entries.chapterHeading`. Tentative until the chapter-recognition spike.
+2. **Which chapter holds entries (G0-C2, measured).** A preset heading, named through US-017's `headingRules` with the rule `entries` (`Menagerie: entries`), not a separate setting. The spike (`docs/technical/spike-chapter-rules.md`) found the other two rules unsafe with a stray entry.
 3. **Measured layout.** Still open: the read-back mechanism of US-028 or Typst `measure()`, decided by the spike. Must be checked for stability (SCAR-021).
 4. **Warning codes.** `ENTRY_*`, `STAT_*` (now including `STAT_BOXES_MANY` and `STAT_BOXES_NOT_NUMBER`), `TAG_UNMAPPED`, `IMAGE_LOW_DPI` and `TEXT_WIDE_GAP`. Each one goes into `docs/technical/warning-codes.md` with a source location (agent rule 8).
 5. **Settings surface (G0-C9).** `entries.*` appear in preset notes and the Details view only, with no rows in the settings tab or style panel.
@@ -87,7 +87,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 - **User story:** US-030, all `entries.*` ACs; US-021 (Details view)
 - **Description:** Define the `entries` settings in `core/settings`, read them from preset notes, set the built-in defaults, and show them in the preset Details view. No rows in the settings tab or the style panel (G0-C9).
 - **Acceptance criteria (from the story):** *(at step 3)*. Expected settings:
-  - `entries.chapterHeading` (G0-C2)
+  - the rule name `entries` in `headingRules` (US-017 AC-1 gains it next to `glossary`; G0-C2)
   - `entries.statblock.stats`, `.traits`, `.fill`, `.frame`, `.rules`, `.fonts`, `.sizes`
   - `entries.statblock.boxes` (the key whose value sets the number of tick boxes), `entries.statblock.track` (every possible track cell, in order: label and SVG path), `entries.statblock.trackLabel` (the label above the track), `entries.statblock.trackKey` (the block key that sets an entry's own track; examples use `states`), `entries.statblock.trackDefault` (the cells used when an entry has no such key) (D48, D49)
   - `entries.tagLabels`, `entries.emptyWarn` (50 %), `entries.maxWordGap` (200 %), `entries.narrowJustification`, `entries.fullImageHeader` (off)
@@ -233,12 +233,13 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 
 - **User story:** US-033: section opener on a right page, chapter intro shared with the first section, gap reuse, long intro
 - **Description:**
-  - The entries chapter is the one named by `entries.chapterHeading` (G0-C2, tentative until the spike).
+  - The entries chapter is a heading matched by a `headingRules` key with the rule `entries` (G0-C2, `docs/technical/spike-chapter-rules.md`); its section runs to the next heading of the same or a higher level. A matched heading without entries is ignored. An entry outside every entries chapter keeps its statblock but gets no opener, pairing or left-page start, and `ENTRY_OUTSIDE_CHAPTER`.
   - A section's heading and intro go on one right page, and its first entry starts on the next left page.
   - The chapter intro shares the first section's opener page.
   - A free right page left by the previous section is used for the opener instead of adding a page.
   - Running header: the chapter opener page has none, as US-019 prints no header on a page where an H1 starts; later section openers show their section name (G0-C3).
 - **Acceptance criteria (from the story):** *(at step 3)*. Expected:
+  - an entry also embedded in another chapter → laid out there without the chapter layout, `ENTRY_OUTSIDE_CHAPTER "Fen Hare"`; a `### Menagerie` elsewhere without entries → ignored
   - the previous section ends on a left page → the opener is on the facing right page, with no blank page
   - the previous section ends on a right page → the opener is on the next right page, the left page between is blank (folio only, G0-C11), and `ENTRY_BLANK_PAGE "<section>"` is given
   - an intro longer than one page → `SECTION_INTRO_OVERFLOW`
