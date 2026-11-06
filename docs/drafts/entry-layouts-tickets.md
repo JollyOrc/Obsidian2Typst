@@ -1,6 +1,6 @@
 # Draft tickets — Entry layouts (epic #121)
 
-**Status:** Draft, 2026-11-05. **Not filed yet.** Amended 2026-11-05 with the G0 decisions (C1 to C14, the block contract A1 to A9) and the statblock tracks (D48 to D56: Grit boxes, Condition track, encounter sheet). Each amended draft cites its decision as G0-xx or Dnn. The behaviour spec is the vault note "Bestiary Layout User Stories" (BL-C1 to BL-C15); the stories written at G1 restate it in generic terms.
+**Status:** Draft, 2026-11-05. **Not filed yet.** Amended 2026-11-05 with the G0 decisions (C1 to C14, the block contract A1 to A9) and the statblock tracks (D48 to D56: Grit boxes, Condition track, encounter sheet). Each amended draft cites its decision as G0-xx or Dnn. The behaviour spec is "Bestiary Layout User Stories" (BL-C1 to BL-C15) in the private spec repository; the stories written at G1 restate it in generic terms.
 
 These drafts become `ticket` issues (form `.github/ISSUE_TEMPLATE/ticket.yml`, label `ticket` plus `US-NNN`) only after these steps, each with its gate:
 1. step 0 / G0: SCAR review (done 2026-11-05, 27 gaps; questions answered)
@@ -154,7 +154,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 - **Implementation notes:**
   - All user text goes through the one escaping function (agent rule 6).
   - The helper lives in the generated prelude, and its name is added to `PLUGIN_NAMES` (template name check).
-  - Reference look: the 2026-11-05 proof and the tracks print check (vault `Layouting/Statblock Proof/`), hand-set Typst files with the same parts at A5 (sizes 11.5 / 11 / 5.5 / 7.5 / 7 / 9 pt).
+  - Reference look: the 2026-11-05 proof and the tracks print check (private spec repository, `proofs/statblock-proof/` and `proofs/print-check/`), hand-set Typst files with the same parts at A5 (sizes 11.5 / 11 / 5.5 / 7.5 / 7 / 9 pt).
   - The drawing rules (part order, what is left out when empty) are written once and shared with D-20 (G0-A9).
 - **Tests:**
   - `tests/unit/emit-statblock.test.ts`: exact Typst for 3 data sets
@@ -443,7 +443,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 
 ## D-21 — Encounter sheet: A4 file and page in the book
 
-- **User story:** US-036 (D50, D56; vault BL-C15 AC-1, AC-2, AC-2a, AC-2b, AC-4)
+- **User story:** US-036 (D50, D56; spec BL-C15 AC-1, AC-2, AC-2a, AC-2b, AC-4)
 - **Description:** Generate a sheet of blank tracker rows in two forms:
   - **(a) standalone A4 file** (`entries.encounterSheetFile`): a separate one-page A4 portrait PDF written next to the book PDF as `<book file name> - Encounter Sheet.pdf`, whatever the book's page size. Margins 12 mm at the sides and top, 10 mm at the bottom. Rows **two across** (each 91 mm wide, 4 mm apart), as many lines as fit.
   - **(b) page in the book** (`entries.encounterSheet`): a page of its own after the quick-reference table, in the TOC. One column at the text width; two across when the text width allows two rows of at least 88 mm.
@@ -463,7 +463,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
   - Reuse the box and cell drawing of D-19; the row is a second caller, not a copy (SCAR-017).
   - The A4 file is a second compile with its own page setup. Decide at G1 whether it shares the book's prelude and fonts, and how the export reports two output files (US-007 export path, overwrite rules).
   - The icon key text, the round label and the credit line come from the preset (generic plugin, G0-C1).
-  - Reference mockup: vault `Layouting/Statblock Proof/Encounter sheet/` (`encounter-sheet-mockup.typ` and its PDF), compiled with Typst 0.15.1.
+  - Reference mockup: private spec repository, `proofs/encounter-sheet/` (`encounter-sheet-mockup.typ` and its PDF), compiled with Typst 0.15.1.
 - **Tests:**
   - `tests/unit/encounter-sheet.test.ts`: row count from given heights, one and two columns, stacked and side-by-side attacks
   - `tests/integration/encounter-sheet-pdf.test.ts`: page size, row and box counts, box size from the PDF, the second file's name (SCAR-015)
