@@ -458,6 +458,23 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-21 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | — (#121, G3) | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | — (#121, G3) | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | — (#121, G3) | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | — (#121, G3) | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-4 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-5 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-6 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-7 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-8 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-9 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-10 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-11 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-12 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-13 | — (#121, G3) | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-14 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-15 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-16 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — US-027 depth and a cover before the chapter are covered with US-033's tests |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-17 | — (#121, G3) | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — the story's test list; image ratios 1:4 to 4:1, runs of 1 to 4 pairs partly (1 and 2) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-1 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-1: (the field: six keys, four values, messages with lines, unknown keys, the Defaults, merge key by key) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-2 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts, tests/integration/us-025-page-breaks-pdf.test.ts | US-025 AC-2: (the three lines per side, facing pages off; the four page rows (the third re-measured at G2); guard: none = today) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-3 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-3: (no break for terms, in-term headings, callout, quote, list item, empty headings; the glossary heading breaks) | ✅ green (TICKET-075, 2026-10-28) |
