@@ -57,6 +57,39 @@ end position (`metadata`, read with `typst query` / `world.query`).
    (a `metadata` at its end) gives its real last page and fill. The empty-page
    warning and overflow can be read from these instead of from `measure()`.
 
+## Sweep: the whole chapter layout in one compile (2026-11-06)
+
+**Code:** `spikes/entry-measure/sweep.mjs` (generator), `check.mjs` (rules),
+`sweep.spike.ts` (WASM). The chapter rules are written with `measure()` and
+parity page breaks only (`pagebreak(to: "even")`, `pagebreak(weak: true, to:
+"odd")`), with no `locate`/`query` in the layout:
+
+- a section opener (heading and intro) takes a right page; a free right page
+  is reused because the break to an odd page is weak
+- the chapter heading and intro share the first section's opener page
+- the section's first entry starts on the next left page
+- a spread-sized entry starts on a left page
+- page-sized entries pair left + right in order, never across a section; an
+  unpaired one takes a left page
+
+Swept: 1 to 3 sections × 1 to 10 entries per section × 4 seeds = 120
+chapters, lengths a third each under one page, around one page and near two
+pages (CLI). A checker reads each entry's first and last page from
+`metadata` and tests every rule.
+
+| | Result |
+|---|---|
+| Chapters that keep every rule | 120 of 120 |
+| Compiles that did not converge | 0 |
+| Entries | 895 spread-sized (70 of them overflow to a third page), 74 pairs, 277 unpaired page-sized |
+| WASM vs CLI (12 chapters) | identical marks; 31–259 ms per chapter |
+
+**Finding:** the parity breaks keep every rule even after an entry overflows,
+because they place the next entry from where the previous one really ended.
+So a `measure()` miss near the two-page boundary needs **no second compile**:
+it shows up as `ENTRY_OVERFLOW`, read from the real positions, and the rest
+of the chapter stays correct.
+
 ## Consequence for D-11 (proposal for G1)
 
 - **Decide inside the compile with `measure()`**: page-sized or spread-sized,
@@ -65,19 +98,21 @@ end position (`metadata`, read with `typst query` / `world.query`).
 - **Report from the real positions** read after the compile
   (`ENTRY_SPREAD_EMPTY`, `ENTRY_OVERFLOW`, `ENTRY_AUTO`), not from the
   estimate.
-- **The rare miss near the two-page boundary** (5 in 1000 with the D-06
-  rules): either a second compile that pins those entries to the real result
-  (the positions do not depend on other entries, so it cannot oscillate —
-  to be confirmed at G2), or a margin: treat a spread as full above about 84 %
-  of its second page. To be decided at G1.
+- **Place with parity breaks, not computed page numbers:** with them, the
+  rare miss near the two-page boundary (5 in 1000 with the D-06 rules) needs
+  no second compile (sweep above); it is reported as `ENTRY_OVERFLOW`. Whether
+  a spread more than about 84 % full should be shrunk first (BL-C5) is
+  decided at G1.
+- **One compile for entries.** The US-028 read-back stays for body images
+  only (they are off inside entries, G0-C5).
 
 ## Not covered
 
 - Illustration layouts: the landscape slot, the portrait column (45 %), fit
   and shrink to `entries.image.minScale` — each changes the text area, so
   each candidate layout is measured at its own width and height.
-- Pairing of page-sized entries on facing pages and section openers (only the
-  left-page start was tested).
+- Section intros longer than a page (`SECTION_INTRO_OVERFLOW`) and the
+  running header on opener pages.
 - The "(continued)" heading on overflow pages, `justification-limits` in
   narrow columns, the book's own fonts.
 - Time in Obsidian's worker for a real chapter (here: Node).
