@@ -435,6 +435,29 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-17 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-18 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) (with AC-16's local-list check) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-19 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) — the hash check is green now and must stay green |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-1 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-2 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-3 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-4 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-5 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-6 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-7 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — only the missing image here; the credit is read by US-031's caption tests |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-8 | — (#121, G3) | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-9 | — (#121, G3) | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-10 | — (#121, G3) | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-11 | — (#121, G3) | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-12 | — (#121, G3) | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-13 | — (#121, G3) | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-14 | — (#121, G3) | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-15 | — (#121, G3) | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-16 | — (#121, G3) | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-17 | — (#121, G3) | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) — the hanging indent of long attack names is not asserted (manual check at 100 %) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-18 | — (#121, G3) | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-19 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — strict mode is not tested here; the plugin's strict-mode test gains the entry codes at G3 |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-20 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-21 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | — (#121, G3) | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-1 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-1: (the field: six keys, four values, messages with lines, unknown keys, the Defaults, merge key by key) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-2 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts, tests/integration/us-025-page-breaks-pdf.test.ts | US-025 AC-2: (the three lines per side, facing pages off; the four page rows (the third re-measured at G2); guard: none = today) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-3 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-3: (no break for terms, in-term headings, callout, quote, list item, empty headings; the glossary heading breaks) | ✅ green (TICKET-075, 2026-10-28) |
