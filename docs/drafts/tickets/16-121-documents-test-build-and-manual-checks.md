@@ -16,7 +16,7 @@ None of its own: this ticket closes the epic for US-030 to US-036 (every story's
 
 - `manual/`: the entries chapter (the block, the settings, the layouts, the warnings, the preview and its API, the encounter sheet, the print checks).
 - `docs/technical/`: `warning-codes.md` complete for #121; `architecture.md` (the entries modules, the report, the sheet, the print checks, the preview); `tests.md` (the AC-to-test map all green); `entry-block.md` final.
-- Documentation gaps found during #121: US-017's own text lists `glossary or none` (stale since US-026); US-029's `Strict mode` description says every warning aborts (stale since US-028 decision E and US-030 decision 4).
+- Documentation gaps found during #121: US-017's own text lists `glossary or none` (stale since US-026); US-029's `Strict mode` description says every warning aborts (stale since US-028 decision E, whose compile warnings arrive after the strict check; US-030's entry warnings do abort, decision 4 revised 2026-11-06).
 - Version: a new feature → the minor version (0.12.0); `manifest.json`, `package.json`, `versions.json` together; release notes.
 - Test build, installed in the scratch vault with backups and checksums (SCAR-018).
 - Manual checks, one file each with the index (SCAR-029): the statblock and layouts at 100 % (incl. an A5 print of a spread), the Obsidian preview (reading view, live preview, a preset switch, a Dataview call to the API), the encounter sheet printed at 100 % (boxes marked with a pencil), the print checks (a low-resolution image, a gappy line).

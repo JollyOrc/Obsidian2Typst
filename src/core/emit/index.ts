@@ -74,3 +74,10 @@ export {
   type BreakOptions,
 } from './breaks';
 export {pageRefCall, pageRefHelper, type PageRefEnv} from './page-refs';
+export {
+  STATBLOCK_HELPER,
+  hasStatblock,
+  splitAttack,
+  statblockCall,
+} from './entry';
+export {findImage, isImageSize} from './image';

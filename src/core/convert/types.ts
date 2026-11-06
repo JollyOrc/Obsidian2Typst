@@ -12,7 +12,11 @@ import type {
   PageGeometry,
   TocSettings,
 } from '../layout/page-setup';
-import type {CalloutsSettings, HeadingRulesSettings} from '../markers';
+import type {
+  CalloutsSettings,
+  EntriesSettings,
+  HeadingRulesSettings,
+} from '../markers';
 
 /**
  * US-015 AC-13: the vault as the pipeline sees it. The plugin implements it
@@ -88,6 +92,12 @@ export interface ConvertSettings {
    * (today's output).
    */
   images?: Partial<ImagesSettings>;
+  /**
+   * US-030 AC-8: the `entries` group (statblock fields, tag labels). Without
+   * it entry blocks are still read and never printed, but no statblock is
+   * written (AC-11, the built-in case).
+   */
+  entries?: EntriesSettings;
 }
 
 /** US-015 AC-1: the input of {@link convert}. */

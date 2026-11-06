@@ -14,6 +14,7 @@ import {
   contentsLines,
   emitBlocks,
   escapeMarkup,
+  findImage,
   paddingEndLines,
   pageRefHelper,
   bodyContentsLines,
@@ -29,7 +30,13 @@ import {
   type BookSettings,
 } from '../layout/page-setup';
 import {checkGlyphs, emitFonts, resolveFonts} from '../fonts';
-import {findGlossary, headingRuleTable} from '../markers';
+import {
+  findGlossary,
+  headingRuleTable,
+  planEntries,
+  readEntryBlock,
+  scanEntryBlocks,
+} from '../markers';
 import {indexHeadings, parse, type BlockNode} from '../parse';
 import {coverNames, planCover, resolveCover} from './cover';
 import {
@@ -220,8 +227,14 @@ function trimLines(lines: readonly string[]): string[] {
 export async function convert(input: ConvertInput): Promise<ConvertResult> {
   checkSettings(input.settings);
   const parsed = parse(input.source);
+  // US-030 AC-1, AC-4 (SCAR-034): the entry blocks leave the tree before any
+  // other step reads it; they are data, never printed.
+  const scan = scanEntryBlocks(parsed.root);
+  const reads = scan.found.map((found) =>
+    readEntryBlock(found, input.settings.entries),
+  );
   // US-011: the image in first position is taken out of the body first.
-  const plan = planCover(parsed.root, input.settings.cover);
+  const plan = planCover(scan.root, input.settings.cover);
   const {root} = plan;
   const coverFile = coverNames(plan.target);
 
@@ -230,6 +243,18 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     input.assets,
     new Set([
       ...referencedImageNames(root),
+      // US-030 AC-7: the entries' illustrations.
+      ...referencedImageNames([
+        {
+          kind: 'paragraph',
+          line: 0,
+          children: reads.flatMap((read) =>
+            read.data?.illustration == null
+              ? []
+              : [read.data.illustration.node],
+          ),
+        },
+      ]),
       ...coverFile,
       ...calloutIconNames(root, callouts),
     ]),
@@ -311,6 +336,21 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   const marks = createLineMarks(input.source);
   const recorder = createCalloutRecorder(callouts);
   for (const w of glossary.warnings) ctx.warn(w.code, w.message, w.line);
+  // US-030 AC-3 to AC-5, AC-21: the entries; a block under a glossary term
+  // is not one (decision 3).
+  const entryPlan = planEntries(reads, (heading) =>
+    glossary.roles.has(heading),
+  );
+  for (const w of [...scan.warnings, ...entryPlan.warnings]) {
+    ctx.warn(w.code, w.message, w.line);
+  }
+  // US-030 AC-7: an illustration that is not found counts as none.
+  for (const entry of entryPlan.entries.values()) {
+    const ill = entry.illustration;
+    if (ill === null) continue;
+    const path = findImage(ill.node, ctx, resolver);
+    entry.illustration = path === null ? null : {...ill, path};
+  }
   for (const w of arranged.warnings) ctx.warn(w.code, w.message, w.line);
   // US-018 AC-2, AC-6: page numbers after links only with the switch and the
   // folios on, so the printed number exists; the rule only with a call.
@@ -353,6 +393,8 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     book: pageLines,
     unlistNested: contents !== null,
     fit: imageFit(input.settings, arranged),
+    entries: entryPlan,
+    entrySettings: input.settings.entries,
   });
   // US-010 AC-5: characters of the source that their family lacks.
   if (resolved !== null && fontInfo !== undefined) {

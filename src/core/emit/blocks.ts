@@ -12,8 +12,16 @@
 // Transforms used (shared-utility register): rawBlock; escapeMarkup, wrapEmphasis,
 // rawInline and callSeparator through emitInline.
 import type {AssetResolver} from '../assets';
-import {EMPTY_GLOSSARY_PLAN, findCallout, type GlossaryPlan} from '../markers';
-import {indexHeadings} from '../parse';
+import {
+  EMPTY_ENTRY_PLAN,
+  EMPTY_GLOSSARY_PLAN,
+  findCallout,
+  flattenLinks,
+  type EntriesSettings,
+  type EntryPlan,
+  type GlossaryPlan,
+} from '../markers';
+import {indexHeadings, parseInline} from '../parse';
 import type {BlockNode, HeadingIndex, InlineNode} from '../parse';
 import {
   createCalloutRecorder,
@@ -27,6 +35,7 @@ import {
   emitUnlistedHeading,
   emitUnnumberedHeading,
 } from './glossary';
+import {statblockCall} from './entry';
 import {escapeMarkup} from './escape-markup';
 import {Notes} from './footnote';
 import type {PageRefEnv} from './page-refs';
@@ -73,6 +82,9 @@ interface BlockEnv {
   unlistNested: boolean;
   /** US-028: the image fit; undefined when the rule is off or in a footnote. */
   fit: BlockFit | undefined;
+  /** US-030: the entries by heading and the preset's `entries` settings. */
+  entries: EntryPlan;
+  entrySettings: EntriesSettings | undefined;
 }
 
 /** US-028 AC-3, AC-6: a reserve with its pt and em parts kept apart. */
@@ -491,9 +503,26 @@ function renderBlocks(
             .filter((part) => part !== '')
             .join(' ');
         }
+        // US-030 AC-1, AC-10: an entry's statblock call right after its
+        // heading, before the body.
+        const entry = env.entries.entries.get(block);
+        const call =
+          entry === undefined
+            ? null
+            : statblockCall(entry, env.entrySettings, (value) =>
+                emitInline(flattenLinks(parseInline(value, entry.line)), ctx, {
+                  ...inlineOf(env),
+                  atBlockStart: true,
+                  breaks: 'space',
+                }),
+              );
         return {
           // US-017 AC-8: images of a term follow its run-in paragraph.
-          text: [marked(env, block.line, line), ...figures].join('\n\n'),
+          text: [
+            marked(env, block.line, line),
+            ...(call === null ? [] : [call]),
+            ...figures,
+          ].join('\n\n'),
           kind:
             role?.kind === 'term' && role.runIn !== null
               ? 'paragraph'
@@ -792,6 +821,13 @@ export interface BlockOptions {
    */
   fit?: {min: number; sides: boolean; noFloat: ReadonlySet<BlockNode>};
   /**
+   * US-030 AC-1, AC-10: the entries of `blocks` (`planEntries`) and the
+   * preset's `entries` settings; an entry heading is followed by its
+   * statblock call. Default: no entries.
+   */
+  entries?: EntryPlan;
+  entrySettings?: EntriesSettings;
+  /**
    * US-015 AC-8: text put at the start of every heading, paragraph, item, quote,
    * code block, rule, table and table row (not inside a footnote definition),
    * given the source line. The pipeline uses it to build the line map and
@@ -839,6 +875,8 @@ export function emitBlocks(
     hidden: options.hidden ?? new Set<BlockNode>(),
     book: options.book,
     unlistNested: options.unlistNested ?? false,
+    entries: options.entries ?? EMPTY_ENTRY_PLAN,
+    entrySettings: options.entrySettings,
   };
   const fit: BlockFit | undefined =
     options.fit === undefined ? undefined : {...options.fit, reserve: null};

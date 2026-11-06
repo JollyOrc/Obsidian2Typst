@@ -1,6 +1,6 @@
 # US-030 — Entry data and the statblock
 
-**Status:** Ready (G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check)
+**Status:** Ready (G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
 **Introduced:** v0.12.0 (planned; a new feature bumps the minor version)
 **Implemented:** —
 **Supersedes:** —
@@ -358,13 +358,14 @@ They gather at dusk.
 - **AC-19 (warnings):** Every code of this story is in
   `docs/technical/warning-codes.md` with its text and a source line (rule
   8), is given once per entry and compile, and does not stop an export or
-  the preview, also in strict mode (as US-028 decision E): `ENTRY_YAML_INVALID`,
+  the preview. In strict mode each of them aborts the export, as every
+  conversion warning does (US-006 AC-4; decision 4, revised): `ENTRY_YAML_INVALID`,
   `ENTRY_ORPHAN_BLOCK`, `ENTRY_BLOCK_TWICE`, `ENTRY_BLOCK_IN_CONTAINER`,
   `ENTRY_VALUE_NOT_TEXT`, `ENTRY_TRACK_UNKNOWN`, `ENTRY_NO_LEDE`,
   `ENTRY_LEDE_SHORT`, `STAT_BOXES_MANY`, `STAT_BOXES_NOT_NUMBER`,
   `TAG_UNMAPPED`, `STAT_SUM_MISMATCH`, `STAT_ATTACK_NO_DICE`,
   `ENTRY_IN_GLOSSARY`.
-  None of them stops a strict-mode export (decision 4).
+  Strict mode has no exception for them (decision 4, revised 2026-11-06).
 
 ### Composed cases (SCAR-002)
 
@@ -411,7 +412,9 @@ They gather at dusk.
    `none` means no track (AC-13).
 3. **A block under a glossary term:** not supported; not read as an entry,
    `ENTRY_IN_GLOSSARY` (AC-21).
-4. **Strict mode:** no entry warning stops the export (AC-19).
+4. **Strict mode:** ~~no entry warning stops the export~~ — revised by
+   the user 2026-11-06 at #123's G4: entry warnings abort a strict-mode
+   export like every conversion warning (US-006 AC-4 unchanged; AC-19).
 
 ---
 

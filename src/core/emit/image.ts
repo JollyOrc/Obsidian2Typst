@@ -249,6 +249,65 @@ export function imageRequest(
 }
 
 /**
+ * US-003 AC-2c, AC-5, US-030 AC-7: the vault path of the file of `node`, or
+ * null when there is none; asks `assets` once (never for a remote address or
+ * an unsupported type) and reports `ASSET_REMOTE`, `ASSET_TYPE_UNSUPPORTED`,
+ * `ASSET_MISSING`, `ASSET_INVALID` or `ASSET_AMBIGUOUS` at `node.line`. The
+ * one place for these messages (SCAR-017): the image emitter and the entry
+ * illustration use it.
+ */
+export function findImage(
+  node: AnyImageNode,
+  ctx: EmitContext,
+  assets: AssetResolver,
+): string | null {
+  const asked = imageRequest(node);
+  const target = 'refused' in asked ? asked.target : asked.request.target;
+  const extension = extensionOf(target);
+  const missing = (code: string, message: string): null => {
+    ctx.warn(code, message, node.line);
+    return null;
+  };
+  if ('refused' in asked && asked.refused === 'remote') {
+    return missing('ASSET_REMOTE', `Remote image is not downloaded: ${target}`);
+  }
+  if ('refused' in asked) {
+    return missing(
+      'ASSET_TYPE_UNSUPPORTED',
+      extension === ''
+        ? `Image type is not supported: ${target}`
+        : `Image type .${extension} is not supported: ${target}`,
+    );
+  }
+  const result = assets.resolve(asked.request);
+  if (result.status === 'missing') {
+    return missing('ASSET_MISSING', `Image file not found: ${target}`);
+  }
+  if (result.status === 'invalid') {
+    return missing(
+      'ASSET_INVALID',
+      `Image file is not a valid .${extension} image: ${target}`,
+    );
+  }
+  if (result.status === 'ambiguous') {
+    ctx.warn(
+      'ASSET_AMBIGUOUS',
+      `"${target}" matches ${result.count} files; the first is used`,
+      node.line,
+    );
+  }
+  return result.path;
+}
+
+/**
+ * US-003 | AC-2c: `N` or `NxM` with whole numbers (an Obsidian size, never a
+ * caption or credit). Exported for US-030 AC-7.
+ */
+export function isImageSize(part: string): boolean {
+  return /^\d+(?:x\d+)?$/.test(part.trim());
+}
+
+/**
  * US-003 AC-1 to AC-7: the Typst for one image, with its warnings reported
  * into `ctx`. Asks `assets` once for a file (never for a remote or an
  * unsupported type). The result is one block, written as `#...`.
@@ -298,42 +357,9 @@ export function emitImage(
     const text = escapeMarkup(caption, {atBlockStart: true});
     return `#figure(${call}, caption: [${text}], numbering: none)`;
   };
-  const missing = (code: string, message: string): string => {
-    ctx.warn(code, message, node.line);
-    return place(PLACEHOLDER(target));
-  };
-
-  const asked = imageRequest(node);
-  const extension = extensionOf(target);
-  if ('refused' in asked && asked.refused === 'remote') {
-    return missing('ASSET_REMOTE', `Remote image is not downloaded: ${target}`);
-  }
-  if ('refused' in asked) {
-    return missing(
-      'ASSET_TYPE_UNSUPPORTED',
-      extension === ''
-        ? `Image type is not supported: ${target}`
-        : `Image type .${extension} is not supported: ${target}`,
-    );
-  }
-  const result = assets.resolve(asked.request);
-  if (result.status === 'missing') {
-    return missing('ASSET_MISSING', `Image file not found: ${target}`);
-  }
-  if (result.status === 'invalid') {
-    return missing(
-      'ASSET_INVALID',
-      `Image file is not a valid .${extension} image: ${target}`,
-    );
-  }
-  if (result.status === 'ambiguous') {
-    ctx.warn(
-      'ASSET_AMBIGUOUS',
-      `"${target}" matches ${result.count} files; the first is used`,
-      node.line,
-    );
-  }
-  const path = typstString(result.path);
+  const found = findImage(node, ctx, assets);
+  if (found === null) return place(PLACEHOLDER(target));
+  const path = typstString(found);
   if (fit !== undefined) {
     const label = `o2t-fit-${ctx.nextFitLabel()}`;
     const args = [

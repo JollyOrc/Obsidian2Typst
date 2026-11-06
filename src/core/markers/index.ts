@@ -30,3 +30,22 @@ export {
   type GlossaryRole,
   type GlossaryWarning,
 } from './glossary';
+export {
+  EMPTY_ENTRY_PLAN,
+  ENTRY_BLOCK_LANG,
+  ENTRY_LIST_KEYS,
+  entryKeys,
+  flattenLinks,
+  illustrationOf,
+  planEntries,
+  readEntryBlock,
+  scanEntryBlocks,
+  type EntriesSettings,
+  type EntryData,
+  type EntryField,
+  type EntryIllustration,
+  type EntryPlan,
+  type EntryRead,
+  type EntryWarning,
+  type FoundEntryBlock,
+} from './entries';

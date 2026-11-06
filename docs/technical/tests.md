@@ -435,13 +435,13 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-17 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-18 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) (with AC-16's local-list check) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-19 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) — `Book.md`, `Other.md`, `presets/Sample.md` byte for byte unchanged |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-1 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-2 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-3 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-4 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-5 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-6 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-7 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — only the missing image here; the credit is read by US-031's caption tests |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-1 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-2 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-3 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-4 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-5 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-6 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-7 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) — only the missing image here; the credit is read by US-031's caption tests |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-8 | #124 | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-9 | #124 | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-10 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
@@ -453,10 +453,10 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-16 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-17 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) — the hanging indent of long attack names is not asserted (manual check at 100 %) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-18 | #125 | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-19 | #123, #125 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — strict mode is not tested here; the plugin's strict-mode test gains the entry codes at G3 |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-20 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-21 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-19 | #123, #125 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — #123's six codes are in warning-codes.md (G4 2026-11-06); the composed test waits for #125. Strict mode (decision 4 revised 2026-11-06): the entry codes abort like every code, covered by US-006 AC-4's test over `warning-codes.md` |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-20 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-21 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | #125 | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | #126 | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |

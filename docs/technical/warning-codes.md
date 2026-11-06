@@ -55,6 +55,12 @@ fixed by the story that owns the code.
 | `BOOK_PART_EMPTY` | US-026 AC-8 | `The colophon section "Colophon" is empty and is left out` (or the back-notes form), at the heading's line: a part with a hidden heading and no blocks is not written; links to it are unresolved | active |
 | `TOC_HEADING_MISSING` | US-027 AC-5 | `The table of contents heading "Rules" is not in the note; the contents are at the default place` (line 0): the picked heading (`toc.heading`) is no top-level H1 of the body; the contents go before the first chapter | active |
 | `HEADING_IN_TERM` | US-017 AC-14 | `Heading "Deep" is inside the glossary term "Gambit"; it is printed without number and outline entry` (at the heading's line) | active |
+| `ENTRY_YAML_INVALID` | US-030 AC-3 | `"Fen Hare"`: an `o2t-entry` block whose YAML does not parse or is not a mapping (at the block's first line); the entry is laid out as ordinary text, no statblock | active |
+| `ENTRY_ORPHAN_BLOCK` | US-030 AC-4 | `o2t-entry block not directly under a heading; not read and not printed` (text between it and the heading above, or no heading above) | active |
+| `ENTRY_BLOCK_TWICE` | US-030 AC-4 | `"Fen Hare"`: a second `o2t-entry` block right under one heading; the first counts, the second is not printed | active |
+| `ENTRY_BLOCK_IN_CONTAINER` | US-030 AC-4 | `o2t-entry block inside a quote or callout; not read and not printed` (any depth) | active |
+| `ENTRY_VALUE_NOT_TEXT` | US-030 AC-5 | `"Fen Hare": attacks`: a value of a key the preset uses has the wrong shape (a map, a boolean, a list for a single value); it is left out (in a list: the wrong items) | active |
+| `ENTRY_IN_GLOSSARY` | US-030 AC-21 | `"Fen Hare"`: an `o2t-entry` block under a glossary term is not read as an entry and not printed (at the block's line; decision 3) | active |
 
 Not used (decided): `HEADING_DUPLICATE` (repeated titles are numbered silently,
 US-002 AC-3) and `LINK_LOCAL_FILE` (links to local files get a footnote,

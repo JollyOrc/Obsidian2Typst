@@ -76,7 +76,9 @@ and this compiled Markdown:
    `none` means no track (AC-13).
 3. **A block under a glossary term:** not supported; not read as an entry,
    `ENTRY_IN_GLOSSARY` (AC-21).
-4. **Strict mode:** no entry warning stops the export (AC-19).
+4. **Strict mode:** ~~no entry warning stops the export~~ — revised by
+   the user 2026-11-06 at #123's G4: entry warnings abort a strict-mode
+   export like every conversion warning (US-006 AC-4 unchanged; AC-19).
 
 ### Implementation notes
 
