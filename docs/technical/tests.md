@@ -428,7 +428,7 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-10 | TICKET-074 | tests/tooling/us-024-public.test.ts | ✅ green (TICKET-074, 2026-10-27) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-11 | TICKET-074 | tests/tooling/us-024-public.test.ts, manual (ticket procedure) | ✅ green (TICKET-074, 2026-10-27); the clean-copy gate green (1822 passed, 4 skipped, 1 todo; 389 passed, 1 skipped) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-12 | TICKET-072 | manual (ticket procedure) | ✅ done (TICKET-072, 2026-10-27; scan results in the ticket) |
-| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-13 | #122 | tests/tooling/us-024-entries.test.ts | 🟡 partly green (G4 2026-11-06, #122): the files are written; the preset check stays red until #126 adds the `entries` heading rule |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-13 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122; the preset check since #126 added the `entries` heading rule) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-14 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-15 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-16 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) — the local-list check ran with a 205-word list built from the vault's note names; it skips without the git-ignored list |
@@ -458,9 +458,9 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-21 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | #125 | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #125) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | #126 | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | #126 | tests/unit/us-031-layouts.test.ts | 🟢 green (G4 2026-11-06, #126) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟡 unit green (G4 2026-11-06, #126); the PDF placement waits for #127 |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟡 unit green (G4 2026-11-06, #126); the PDF placement waits for #127, #128 |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-4 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-5 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-6 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
@@ -470,7 +470,7 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-10 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-11 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-12 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-13 | #126 | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-13 | #126 | tests/unit/us-031-layouts.test.ts | 🟢 green (G4 2026-11-06, #126) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-14 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-15 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-16 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — US-027 depth and a cover before the chapter are covered with US-033's tests |

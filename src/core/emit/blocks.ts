@@ -149,6 +149,8 @@ interface BlockFit {
   sides: boolean;
   /** Top-level blocks whose images never float (the back notes, decision 7). */
   noFloat: ReadonlySet<BlockNode>;
+  /** US-031 AC-13: top-level blocks whose images are written without fit. */
+  plain?: ReadonlySet<BlockNode>;
   reserve: Reserve | null;
 }
 
@@ -441,10 +443,15 @@ function renderBlocks(
     if (beside.has(position)) return {text: '', kind: 'other'};
     // US-018 AC-2: a top-level block of a term's explanation, and everything
     // inside it, is in the explanation.
-    const env =
+    const inTerm =
       !nested && outer.glossary.explanations.has(block)
         ? {...outer, inExplanation: true}
         : outer;
+    // US-031 AC-13 (G0-C5): an entry's body is written without image fit.
+    const env =
+      !nested && inTerm.fit?.plain?.has(block) === true
+        ? {...inTerm, fit: undefined}
+        : inTerm;
     switch (block.kind) {
       case 'paragraph': {
         // US-017 AC-4: printed by the run-in term before it.
@@ -908,7 +915,12 @@ export interface BlockOptions {
    * pages); the images of the `noFloat` top-level blocks (the back notes)
    * never float. Default: none (today's output).
    */
-  fit?: {min: number; sides: boolean; noFloat: ReadonlySet<BlockNode>};
+  fit?: {
+    min: number;
+    sides: boolean;
+    noFloat: ReadonlySet<BlockNode>;
+    plain?: ReadonlySet<BlockNode>;
+  };
   /**
    * US-030 AC-10, AC-16: the statblocks of the entry headings; an entry
    * heading is followed by its statblock call. Default: none.

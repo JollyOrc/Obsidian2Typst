@@ -100,8 +100,10 @@ describe('US-031 AC-2 entries outside the chapter', () => {
     expect(warningsOf(warnings, CODES)).toEqual([
       'ENTRY_OUTSIDE_CHAPTER "Fen Hare"',
     ]);
+    // The outside entry's block line (G4 #126: was 7, the first entry's
+    // opening paragraph; every entry warning stands at its block's line).
     expect(warnings.find((w) => w.code === 'ENTRY_OUTSIDE_CHAPTER')?.line).toBe(
-      7,
+      12,
     );
     expect(statblockCalls(typ)).toBe(2);
   });

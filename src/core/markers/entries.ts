@@ -6,6 +6,7 @@
 // is docs/technical/entry-block.md.
 import {isMap, parseDocument} from 'yaml';
 import {parseInline, visibleText} from '../parse';
+import {headingRuleKey, type HeadingRule} from './heading-rules';
 import type {
   BlockNode,
   CodeNode,
@@ -242,6 +243,30 @@ export interface EntryIllustration {
   path?: string;
 }
 
+/** US-031 AC-3: the seven layouts; `auto` is decided by US-032. */
+export const ENTRY_LAYOUTS = [
+  'full-image',
+  'spread-landscape',
+  'spread-portrait',
+  'spread-text',
+  'page-landscape',
+  'page-portrait',
+  'page-text',
+] as const;
+export type EntryLayout = (typeof ENTRY_LAYOUTS)[number] | 'auto';
+
+/** US-031 AC-1 to AC-3: where an entry stands in the book. */
+export interface EntryPlace {
+  /** The entries chapter's heading text; null outside every chapter (AC-2). */
+  chapter: string | null;
+  /** The section heading (a non-entry heading holding entries) or null. */
+  section: string | null;
+  /** An entry inside another entry (AC-1, decision 3): inline, no page. */
+  nested: boolean;
+  /** The layout asked for (`auto` when missing or unknown). */
+  layout: EntryLayout;
+}
+
 /** AC-1, AC-5: one entry's data, read from its block. */
 export interface EntryData {
   heading: HeadingNode;
@@ -256,6 +281,8 @@ export interface EntryData {
   /** The list values the preset uses (one text is a one-item list). */
   lists: ReadonlyMap<string, readonly string[]>;
   illustration: EntryIllustration | null;
+  /** US-031: set by `placeEntries`. */
+  place?: EntryPlace;
 }
 
 /** One block read, before the glossary decides whether it counts. */
@@ -512,4 +539,111 @@ export function flattenLinks(nodes: readonly InlineNode[]): InlineNode[] {
         return [node];
     }
   });
+}
+
+/** A warning of the placement (US-031 AC-1 to AC-3). */
+export interface PlaceWarning {
+  code:
+    'ENTRY_OUTSIDE_CHAPTER' | 'ENTRY_NESTED_LAYOUT' | 'ENTRY_LAYOUT_UNKNOWN';
+  message: string;
+  line: number;
+}
+
+/**
+ * US-031 | AC-1 to AC-3, AC-13: places the entries of `plan` among the
+ * top-level headings of `root`. A heading whose text matches a key with the
+ * rule `entries` (US-017 AC-2's matching, `headingRuleKey`) starts an entries
+ * chapter running to the next heading of the same or a higher level; a
+ * chapter without entries changes nothing. Inside it a heading holding no
+ * block but entries below it is a section, and an entry inside another
+ * entry is nested. Sets `place` on every entry and returns:
+ * - the warnings: `ENTRY_OUTSIDE_CHAPTER` for an entry outside every
+ *   chapter (also one in a container), `ENTRY_NESTED_LAYOUT` for a nested
+ *   entry with a layout other than `auto`, `ENTRY_LAYOUT_UNKNOWN` for a
+ *   value that is not a layout (it counts as `auto`), all at the block's line;
+ * - `bodies`: the top-level blocks of the chapter entries, heading included
+ *   (their images are written without US-028's fit, G0-C5).
+ */
+export function placeEntries(
+  root: readonly BlockNode[],
+  entries: ReadonlyMap<HeadingNode, EntryData>,
+  rules: ReadonlyMap<string, HeadingRule>,
+): {warnings: PlaceWarning[]; bodies: Set<BlockNode>} {
+  const warnings: PlaceWarning[] = [];
+  const bodies = new Set<BlockNode>();
+  let chapter: {depth: number; text: string} | null = null;
+  let section: {depth: number; text: string} | null = null;
+  const open: {depth: number}[] = [];
+  for (const block of root) {
+    if (block.kind !== 'heading') {
+      if (chapter !== null && open.length > 0) bodies.add(block);
+      continue;
+    }
+    if (chapter !== null && block.depth <= chapter.depth) {
+      chapter = null;
+      section = null;
+      open.length = 0;
+    }
+    while (open.length > 0 && (open.at(-1)?.depth ?? 0) >= block.depth)
+      open.pop();
+    if (section !== null && block.depth <= section.depth) section = null;
+    const entry = entries.get(block);
+    if (chapter === null) {
+      const text = headingText(block);
+      if (rules.get(headingRuleKey(text)) === 'entries') {
+        chapter = {depth: block.depth, text};
+        continue;
+      }
+    }
+    if (entry === undefined) {
+      if (chapter !== null && open.length === 0)
+        section = {depth: block.depth, text: headingText(block)};
+      else if (chapter !== null) bodies.add(block);
+      continue;
+    }
+    if (chapter === null) continue;
+    entry.place = {
+      chapter: chapter.text,
+      section: section?.text ?? null,
+      nested: open.length > 0,
+      layout: 'auto',
+    };
+    bodies.add(block);
+    open.push({depth: block.depth});
+  }
+  for (const entry of entries.values()) {
+    const value = entry.fields.get('layout');
+    const written =
+      value === undefined || value === null ? null : String(value).trim();
+    if (entry.place === undefined) {
+      entry.place = {
+        chapter: null,
+        section: null,
+        nested: false,
+        layout: 'auto',
+      };
+      warnings.push({
+        code: 'ENTRY_OUTSIDE_CHAPTER',
+        message: `"${entry.text}"`,
+        line: entry.line,
+      });
+    } else if (entry.place.nested) {
+      if (written !== null && written !== '' && written !== 'auto')
+        warnings.push({
+          code: 'ENTRY_NESTED_LAYOUT',
+          message: `"${entry.text}": ${written}`,
+          line: entry.line,
+        });
+    } else if (written !== null && written !== '' && written !== 'auto') {
+      const known = ENTRY_LAYOUTS.find((l) => l === written);
+      if (known === undefined)
+        warnings.push({
+          code: 'ENTRY_LAYOUT_UNKNOWN',
+          message: `"${entry.text}: ${written}"`,
+          line: entry.line,
+        });
+      else entry.place.layout = known;
+    }
+  }
+  return {warnings, bodies};
 }

@@ -679,7 +679,7 @@ function readHeadingRules(
     if (name === undefined) {
       problems.push({
         path: at,
-        message: `${at} must be a rule name: glossary, colophon, back-notes or none`,
+        message: `${at} must be a rule name: glossary, colophon, back-notes, entries or none`,
       });
       continue;
     }

@@ -92,19 +92,19 @@ describe('US-017 AC-1 the preset field headingRules', () => {
       ],
       [
         ['headingRules:', '  Glossary: index'],
-        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes or none (line 4)',
+        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes, entries or none (line 4)',
       ],
       [
         ['headingRules:', '  Glossary: 5'],
-        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes or none (line 4)',
+        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes, entries or none (line 4)',
       ],
       [
         ['headingRules:', '  Glossary: {a: 1}'],
-        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes or none (line 4)',
+        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes, entries or none (line 4)',
       ],
       [
         ['headingRules:', '  Glossary: Glossary'],
-        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes or none (line 4)',
+        'headingRules.Glossary must be a rule name: glossary, colophon, back-notes, entries or none (line 4)',
       ],
       [
         ['headingRules:', '  Glossary: glossary', '  glossary: none'],

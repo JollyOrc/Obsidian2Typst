@@ -35,6 +35,7 @@ import {checkGlyphs, emitFonts, resolveFonts} from '../fonts';
 import {
   findGlossary,
   headingRuleTable,
+  placeEntries,
   planEntries,
   readEntryBlock,
   scanEntryBlocks,
@@ -159,12 +160,21 @@ function bookLines(
  * US-028 | AC-1, AC-2, AC-3, AC-10 (decisions 1, 7): the image fit of the
  * body, or undefined at `images.minScale` 100 (the built-in; the output is
  * then as before). `min` is the percentage as a fraction (`0.7`); the blocks
- * of the back notes, from their first block to the end, never float.
+ * of the back notes, from their first block to the end, never float; the
+ * blocks of `plain` (US-031 AC-13: entry bodies) are written without fit.
  */
 function imageFit(
   settings: ConvertSettings,
   arranged: ArrangedParts,
-): {min: number; sides: boolean; noFloat: ReadonlySet<BlockNode>} | undefined {
+  plain: ReadonlySet<BlockNode>,
+):
+  | {
+      min: number;
+      sides: boolean;
+      noFloat: ReadonlySet<BlockNode>;
+      plain: ReadonlySet<BlockNode>;
+    }
+  | undefined {
   const {minScale} = {...DEFAULT_IMAGES, ...settings.images};
   if (minScale >= 100) return undefined;
   const start =
@@ -175,6 +185,8 @@ function imageFit(
     min: minScale / 100,
     sides: settings.page.facingPages,
     noFloat: new Set(arranged.blocks.slice(start)),
+    // US-031 AC-13 (G0-C5): the entries' bodies are written without fit.
+    plain,
   };
 }
 
@@ -350,7 +362,18 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   const entryPlan = planEntries(reads, (heading) =>
     glossary.roles.has(heading),
   );
-  for (const w of [...scan.warnings, ...entryPlan.warnings]) {
+  // US-031 AC-1 to AC-3: the entries chapters, sections, nested entries and
+  // the layout values.
+  const placed = placeEntries(
+    root,
+    entryPlan.entries,
+    headingRuleTable(input.settings.headingRules),
+  );
+  for (const w of [
+    ...scan.warnings,
+    ...entryPlan.warnings,
+    ...placed.warnings,
+  ]) {
     ctx.warn(w.code, w.message, w.line);
   }
   // US-030 AC-7: an illustration that is not found counts as none.
@@ -447,7 +470,7 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     breaks,
     book: pageLines,
     unlistNested: contents !== null,
-    fit: imageFit(input.settings, arranged),
+    fit: imageFit(input.settings, arranged, placed.bodies),
     statblocks,
   });
   // US-010 AC-5: characters of the source that their family lacks.

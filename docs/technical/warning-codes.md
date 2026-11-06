@@ -69,6 +69,9 @@ fixed by the story that owns the code.
 | `TAG_UNMAPPED` | US-030 AC-14 | `"Fen Hare": rare`: a tag has no label in a non-empty `entries.tagLabels`; it is not printed (no warning when the map is empty) | active |
 | `STAT_SUM_MISMATCH` | US-030 AC-18 | `"Fen Hare": 20 ≠ 4+8+3`: with `entries.statblock.sum`, the total differs from the sum of its parts (skipped when a value is not a number) | active |
 | `STAT_ATTACK_NO_DICE` | US-030 AC-18 | `"Fen Hare": "Glare: frightens"`: an attack holds no `NdM` dice pool | active |
+| `ENTRY_OUTSIDE_CHAPTER` | US-031 AC-2 | `"Fen Hare"`: an entry outside every entries chapter (`headingRules` rule `entries`); it keeps its heading, statblock and body, no page or spread of its own (at the block's line) | active |
+| `ENTRY_NESTED_LAYOUT` | US-031 AC-1 | `"Fen Kit": page-text`: a nested entry asks for a layout other than `auto`; it stays inline in its parent (decision 3) | active |
+| `ENTRY_LAYOUT_UNKNOWN` | US-031 AC-3 | `"Fen Hare: sideways"`: the block's `layout` is not one of the seven layouts or `auto`; treated as `auto` | active |
 
 Not used (decided): `HEADING_DUPLICATE` (repeated titles are numbered silently,
 US-002 AC-3) and `LINK_LOCAL_FILE` (links to local files get a footnote,
