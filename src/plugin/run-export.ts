@@ -14,6 +14,12 @@ import {
 } from '../core/compile';
 import type {AssetUse} from '../core/assets';
 import {FIT_HINT_LINES, fitDecisionWarnings, type Warning} from '../core/emit';
+import {
+  entryLayoutWarnings,
+  type EntryEndFact,
+  type EntryPlaceFact,
+} from '../core/entries/report';
+import {ENTRY_BUILTINS} from '../core/markers';
 import type {TypstCompiler} from './compiler';
 import {copyAssets} from './copy-assets';
 import {
@@ -77,6 +83,8 @@ export interface RunExportOptions {
   fallback?: () => Promise<FallbackNote | null>;
   /** US-028 AC-18: the most compiles before the fallback (tests only). */
   fitCompileLimit?: number;
+  /** US-032 AC-9: `entries.emptyWarn` (built-in 50). */
+  entryEmptyWarn?: number;
 }
 
 /** US-028 AC-16: the note converted again without image fit. */
@@ -172,6 +180,14 @@ export async function runExport(
         ? [IMAGE_FIT_OFF_WARNING]
         : fitDecisionWarnings(result.fitDecisions ?? []);
       if (result.settled === false) warnings.push(LAYOUT_NOT_SETTLED_WARNING);
+      // US-032 AC-10: the entries' layout warnings, from the compile's facts.
+      warnings.push(
+        ...entryLayoutWarnings(
+          (result.entryPlaces ?? []) as EntryPlaceFact[],
+          (result.entryEnds ?? []) as EntryEndFact[],
+          {emptyWarn: options.entryEmptyWarn ?? ENTRY_BUILTINS.emptyWarn},
+        ),
+      );
       return {warnings};
     };
 

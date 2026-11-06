@@ -988,6 +988,41 @@ function readEntries(value: unknown, problems: Problem[]): EntriesSettings {
   );
   if (statblock !== undefined)
     out.statblock = readStatblock(statblock, problems);
+  // US-032 AC-1: the illustration's smallest scale and the empty-page warning.
+  const image = readSubgroup(value, 'image', 'entries.image', problems);
+  if (image !== undefined) {
+    const minScale = read(image, 'minScale');
+    if (minScale !== undefined) {
+      if (
+        typeof minScale === 'number' &&
+        Number.isInteger(minScale) &&
+        minScale >= 10 &&
+        minScale <= 100
+      )
+        out.image = {minScale};
+      else
+        problems.push({
+          path: 'entries.image.minScale',
+          message:
+            'entries.image.minScale must be a whole number from 10 to 100',
+        });
+    }
+  }
+  const emptyWarn = read(value, 'emptyWarn');
+  if (emptyWarn !== undefined) {
+    if (
+      typeof emptyWarn === 'number' &&
+      Number.isInteger(emptyWarn) &&
+      emptyWarn >= 0 &&
+      emptyWarn <= 100
+    )
+      out.emptyWarn = emptyWarn;
+    else
+      problems.push({
+        path: 'entries.emptyWarn',
+        message: 'entries.emptyWarn must be a whole number from 0 to 100',
+      });
+  }
   // US-031 AC-6: a full-image page keeps its header and folio.
   const fullImageHeader = read(value, 'fullImageHeader');
   if (fullImageHeader !== undefined) {

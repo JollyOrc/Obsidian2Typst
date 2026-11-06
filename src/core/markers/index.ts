@@ -32,6 +32,7 @@ export {
 } from './glossary';
 export {
   COLOR_MODES,
+  ENTRY_BUILTINS,
   STATBLOCK_BUILTINS,
   STATBLOCK_FONT_ROLES,
   STATBLOCK_SIZE_ROLES,

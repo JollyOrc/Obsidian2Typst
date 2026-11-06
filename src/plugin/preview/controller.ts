@@ -4,6 +4,12 @@
 // preparation and the compile are injected.
 import type {CompileRequest} from '../../core/compile';
 import {fitDecisionWarnings} from '../../core/emit';
+import {
+  entryLayoutWarnings,
+  type EntryEndFact,
+  type EntryPlaceFact,
+} from '../../core/entries/report';
+import {ENTRY_BUILTINS} from '../../core/markers';
 import {aspectOf} from '../../core/preview/canvas';
 import {
   RANGE_MESSAGE,
@@ -31,6 +37,9 @@ export type PreviewCompile =
       fitDecisions?: unknown[];
       /** US-028 AC-14: false when Typst's layout did not settle. */
       settled?: boolean;
+      /** US-032 AC-10: the entries' facts of this compile, if any. */
+      entryPlaces?: unknown[];
+      entryEnds?: unknown[];
     }
   | {ok: false; error: string};
 
@@ -42,7 +51,7 @@ export interface CompileJob {
 
 /** What the preparation gives: the request and the warning count, or a message. */
 export type PreparedPreview =
-  | {ok: true; request: CompileRequest; warnings: number}
+  | {ok: true; request: CompileRequest; warnings: number; emptyWarn?: number}
   | {ok: false; error: string};
 
 export interface PreviewDeps {
@@ -226,7 +235,13 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
       warnings:
         prepared.warnings +
         fitDecisionWarnings(result.fitDecisions ?? []).length +
-        (result.settled === false ? 1 : 0),
+        (result.settled === false ? 1 : 0) +
+        // US-032 AC-10: the entries' layout warnings of this compile.
+        entryLayoutWarnings(
+          (result.entryPlaces ?? []) as EntryPlaceFact[],
+          (result.entryEnds ?? []) as EntryEndFact[],
+          {emptyWarn: prepared.emptyWarn ?? ENTRY_BUILTINS.emptyWarn},
+        ).length,
       ...applyRange(),
     });
   };

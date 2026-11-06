@@ -417,6 +417,10 @@ export default class Obsidian2TypstPlugin extends Plugin {
           : {fitDecisions: vector.fitDecisions}),
         // US-028 AC-14 (decision C): so does a layout that did not settle.
         ...(vector.settled === undefined ? {} : {settled: vector.settled}),
+        // US-032 AC-10: the entries' facts reach the warning count.
+        ...(vector.entryPlaces === undefined || vector.entryEnds === undefined
+          ? {}
+          : {entryPlaces: vector.entryPlaces, entryEnds: vector.entryEnds}),
       };
     })();
     return {result, cancel: () => job.cancel()};

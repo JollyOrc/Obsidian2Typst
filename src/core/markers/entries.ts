@@ -83,7 +83,14 @@ export interface EntriesSettings {
   tagLabels?: Readonly<Record<string, string>>;
   /** US-031 AC-6: a `full-image` page keeps its header and folio. */
   fullImageHeader?: boolean;
+  /** US-032 AC-1: the smallest illustration scale inside entries (percent). */
+  image?: {minScale?: number};
+  /** US-032 AC-1, AC-9: the unused right-page share that warns (0 = off). */
+  emptyWarn?: number;
 }
+
+/** US-032 AC-1: the built-in values of the entry fit (G0-C8, one place). */
+export const ENTRY_BUILTINS = Object.freeze({imageMinScale: 70, emptyWarn: 50});
 
 /**
  * US-030 AC-8 (G0-C8): the built-in look of the statblock, in one place.

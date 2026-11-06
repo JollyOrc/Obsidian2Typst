@@ -41,6 +41,12 @@ export type CompileResult =
        * converge; absent when the warnings could not be read.
        */
       settled?: boolean;
+      /**
+       * US-032 AC-10: the entries' `<o2t-entry>` and `<o2t-entry-end>` facts;
+       * absent when the document places no entries or the query failed.
+       */
+      entryPlaces?: unknown[];
+      entryEnds?: unknown[];
     }
   | {ok: false; kind: 'typst' | 'worker'; error: string};
 

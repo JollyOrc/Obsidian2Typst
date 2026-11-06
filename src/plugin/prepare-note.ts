@@ -3,6 +3,7 @@
 // effective settings. Everything it needs from Obsidian is injected.
 import type {AssetUse} from '../core/assets';
 import {convert} from '../core/convert';
+import {ENTRY_BUILTINS} from '../core/markers';
 import type {Warning} from '../core/emit';
 import {
   effectiveSettings,
@@ -52,6 +53,8 @@ export interface PreparedNote {
   fonts: Uint8Array[];
   /** US-028 AC-16: the note text that was converted. */
   source: string;
+  /** US-032 AC-9: `entries.emptyWarn` of the preset (or the built-in). */
+  emptyWarn: number;
 }
 
 /** US-028 AC-16: how `convertNote` converts a second time. */
@@ -173,6 +176,8 @@ export async function convertNote(
     uses: converted.assets,
     template: templateText,
     fonts: fontSet?.files ?? [],
+    emptyWarn:
+      effective.settings.entries?.emptyWarn ?? ENTRY_BUILTINS.emptyWarn,
     source,
   };
 }

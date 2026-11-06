@@ -79,7 +79,13 @@ export interface LayoutFacts {
   settled?: boolean;
   /** The image fit decisions in document order. */
   fitDecisions?: unknown[];
+  /** US-032 AC-10: the entries' `<o2t-entry>` and `<o2t-entry-end>` facts. */
+  entryPlaces?: unknown[];
+  entryEnds?: unknown[];
 }
+
+/** US-031 AC-14: a document with an entries chapter writes these facts. */
+const ENTRY_FACTS = 'o2t-entry-mark';
 
 /**
  * US-028 | AC-14, AC-5: Opens one typst.ts world on the compiled main file
@@ -95,6 +101,7 @@ export async function readLayoutFacts(
   compiler: QueryCompiler,
   mainFilePath: string,
   decisions: boolean,
+  entries = false,
 ): Promise<LayoutFacts> {
   try {
     return await compiler.runWithWorld({mainFilePath}, async (world) => {
@@ -104,6 +111,28 @@ export async function readLayoutFacts(
       const facts: LayoutFacts = Array.isArray(diagnostics)
         ? {settled: layoutSettled(diagnostics)}
         : {};
+      // US-032 AC-10: the entries' facts, when the document places entries.
+      if (entries) {
+        try {
+          const read = async (label: string): Promise<unknown[] | null> => {
+            const out = await world.query({
+              selector: `<${label}>`,
+              field: 'value',
+            });
+            const values: unknown =
+              typeof out === 'string' ? JSON.parse(out) : out;
+            return Array.isArray(values) ? values : null;
+          };
+          const places = await read('o2t-entry');
+          const ends = await read('o2t-entry-end');
+          if (places !== null && ends !== null) {
+            facts.entryPlaces = places;
+            facts.entryEnds = ends;
+          }
+        } catch {
+          // no facts, no entry warnings
+        }
+      }
       if (!decisions) return facts;
       try {
         const out = await world.query({
@@ -188,6 +217,7 @@ export function createWorkerCore(post: Post): {
       compiler as unknown as QueryCompiler,
       main,
       message.source.includes(FIT_DECISION_LABEL),
+      message.source.includes(ENTRY_FACTS),
     );
     if (vector) {
       post({type: 'vector-compiled', id: message.id, vector: buffer, ...fit}, [

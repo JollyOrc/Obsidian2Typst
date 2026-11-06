@@ -80,7 +80,7 @@ export async function preparePreview(
   path: string,
   options: PreviewOptions,
 ): Promise<
-  | {ok: true; request: CompileRequest; warnings: number}
+  | {ok: true; request: CompileRequest; warnings: number; emptyWarn: number}
   | {ok: false; error: string}
 > {
   const prepared = await prepareNote(deps, path);
@@ -101,5 +101,5 @@ export async function preparePreview(
     readAsset: deps.vault.readBytes,
     downsample: options.downsample,
   });
-  return {ok: true, request, warnings: count};
+  return {ok: true, request, warnings: count, emptyWarn: prepared.emptyWarn};
 }

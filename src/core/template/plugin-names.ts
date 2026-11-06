@@ -8,7 +8,7 @@
  * of US-028 with its labels' prefix `o2t-fit` and `o2t-fit-decision`, and
  * its hints `o2t-fit-hints` and `o2t-fit-pinned`, AC-17; `o2t-statblock` of
  * US-030 AC-15; `o2t-entries`, `o2t-entry-mark`, `o2t-entry-end`, `o2t-even`,
- * `o2t-fitted` of US-031). The
+ * `o2t-fitted` of US-031; `o2t-continued` of US-032). The
  * preamble comes
  * after the template import, so these replace a template's definition of the
  * same name; `templateWarnings` reports it. A text check in the US-016 tests
@@ -21,6 +21,7 @@ export const PLUGIN_NAMES: readonly string[] = Object.freeze([
   'fit-image',
   'glossary-term',
   'o2t-blank',
+  'o2t-continued',
   'o2t-entries',
   'o2t-entry-end',
   'o2t-entry-mark',

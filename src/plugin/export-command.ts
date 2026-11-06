@@ -26,6 +26,8 @@ export interface ExportRequest {
   settings: WarningSettings;
   /** US-028 AC-16: the same note text converted at `images.minScale: 100`. */
   fallback?: () => Promise<FallbackNote | null>;
+  /** US-032 AC-9: `entries.emptyWarn` of the preset. */
+  entryEmptyWarn?: number;
 }
 
 /** How the command ended when no export was run. */
@@ -122,6 +124,8 @@ export async function exportNoteAt(
       strictMode: data.strictMode,
       warningsNoteFolder: data.warningsNoteFolder,
     },
+    // US-032 AC-9: the threshold of ENTRY_SPREAD_EMPTY.
+    entryEmptyWarn: prepared.emptyWarn,
     // US-028 AC-16: the text read above, converted again without image fit.
     fallback: async () => {
       const at100 = await convertNote(deps, path, active, selected.preset, {

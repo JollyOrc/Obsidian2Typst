@@ -100,6 +100,10 @@ export interface EntryLayoutInfo {
   /** AC-4: the layout asked for when it was replaced, and why. */
   asked: string | null;
   reason: string | null;
+  /** US-032 AC-2: the layout is chosen in the compile (`auto` or replaced). */
+  auto: boolean;
+  /** The block's line (the warnings made from the facts). */
+  line: number;
   /** The illustration's Typst path, size in px and credit; null without. */
   image: {
     path: string;
@@ -112,9 +116,12 @@ export interface EntryLayoutInfo {
 /** US-031: what the emitter needs to place entries. */
 export interface EntryLayoutEnv {
   entries: ReadonlyMap<BlockNode, EntryLayoutInfo>;
-  /** Text width and height in mm, facing pages, `entries.fullImageHeader`. */
+  /** Text width and height, top margin in mm, facing pages, `entries.fullImageHeader`. */
   textWidth: number;
   textHeight: number;
+  marginTop: number;
+  /** US-032 AC-4: `entries.image.minScale`. */
+  minScale: number;
   facingPages: boolean;
   fullImageHeader: boolean;
   /** The top-level blocks of the chapter entries (headings included). */
@@ -170,12 +177,18 @@ function entriesCall(
           })`;
     const blocks = body.map(content);
     return [
-      `  (heading: ${typstString(info.text)}, layout: ${typstString(info.layout)}, asked: ${str(info.asked)}, reason: ${str(info.reason)}, img: ${img},`,
+      `  (heading: ${typstString(info.text)}, layout: ${typstString(info.layout)}, chosen: ${info.auto}, line: ${info.line}, asked: ${str(info.asked)}, reason: ${str(info.reason)}, img: ${img}, orient: ${
+        info.image === null
+          ? 'none'
+          : info.image.width >= info.image.height
+            ? '"landscape"'
+            : '"portrait"'
+      },`,
       `  head: ${content(head)},`,
       `  blocks: ${blocks.length === 1 ? `(${blocks[0]},)` : `(${blocks.join(', ')})`}),`,
     ].join('\n');
   });
-  return `#o2t-entries((\n${entries.join('\n')}\n), tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader})`;
+  return `#o2t-entries((\n${entries.join('\n')}\n), tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, top: ${layout.marginTop}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader}, min-scale: ${layout.minScale})`;
 }
 
 /** US-030 AC-10, AC-16: what the emitter needs to write statblocks. */

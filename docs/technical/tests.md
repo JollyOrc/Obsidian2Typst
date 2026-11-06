@@ -460,7 +460,7 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | #125 | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #125) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | #126 | tests/unit/us-031-layouts.test.ts | 🟢 green (G4 2026-11-06, #126) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #126 and #127) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟡 unit green (G4 2026-11-06, #126); the measured `auto` placed (#127); US-032 replaces it (#128) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #126 to #128; the interim test retitled to US-032 AC-2) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-4 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-5 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-6 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
@@ -475,18 +475,18 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-15 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-16 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) — US-027 depth and a cover before the chapter are covered with US-033's tests |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-17 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) — the story's test list; image ratios 1:4 to 4:1, runs of 1 to 4 pairs partly (1 and 2) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-1 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-2 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-3 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) — the choice is per entry (AC-2's table); an unpaired result left alone is checked with US-033's sections |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-4 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-5 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-6 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-7 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-8 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-9 | #128 | tests/unit/us-032-fit.test.ts | 🔴 red (G2 2026-11-06) — from the facts; the real right-page fill of a spread is measured with the fixture |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-10 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-11 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) — the opener after an overflow goes with US-033's tests |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-12 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-1 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-2 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-3 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) — the choice is per entry (AC-2's table); an unpaired result left alone is checked with US-033's sections |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-4 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-5 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-6 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-7 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-8 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-9 | #128 | tests/unit/us-032-fit.test.ts | 🟢 green (G4 2026-11-06, #128) — from the facts; the real right-page fill of a spread is measured with the fixture |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-10 | #128 | tests/unit/us-032-fit.test.ts, tests/plugin/us-032-entry-report-export.test.ts (added at G4), tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-11 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) — the opener after an overflow goes with US-033's tests |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-12 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
 | [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-1 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-2 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-3 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |

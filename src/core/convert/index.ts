@@ -36,6 +36,7 @@ import {
 } from '../layout/page-setup';
 import {checkGlyphs, emitFonts, resolveFonts} from '../fonts';
 import {
+  ENTRY_BUILTINS,
   STATBLOCK_BUILTINS,
   findGlossary,
   headingRuleTable,
@@ -253,6 +254,8 @@ function planEntryLayout(
       layout,
       asked,
       reason,
+      auto: layout === 'auto',
+      line: entry.line,
       image,
     });
   }
@@ -261,6 +264,8 @@ function planEntryLayout(
     entries: infos,
     textWidth: page.pageWidth - page.margins.inside - page.margins.outside,
     textHeight: page.pageHeight - page.margins.top - page.margins.bottom,
+    marginTop: page.margins.top,
+    minScale: settings.entries?.image?.minScale ?? ENTRY_BUILTINS.imageMinScale,
     facingPages: page.facingPages,
     fullImageHeader: settings.entries?.fullImageHeader === true,
     bodies,
@@ -656,6 +661,8 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
           // the contents.
           parts: pageLines !== undefined,
           front: !frontMatter ? null : book.romanFrontMatter ? 'roman' : 'none',
+          // US-032 AC-8: the "(continued)" line of overflowing entries.
+          continued: entryLayout !== undefined,
         },
       ),
       // US-018 AC-3: the word follows ` (` inside a content block.

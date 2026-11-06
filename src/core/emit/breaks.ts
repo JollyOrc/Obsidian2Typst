@@ -231,73 +231,141 @@ export function paddingEndLines(signature: number): string {
 export function entriesLayoutHelper(bandSize: string): string {
   return `#show heading.where(outlined: false, bookmarked: false): it => block(sticky: true, above: 0.9em, below: 0.4em, text(size: ${bandSize}, weight: "bold", it.body))
 #let o2t-entry-mark(d) = context [#metadata(d + (page: here().page())) <o2t-entry>]
-#let o2t-entry-end(h) = context [#metadata((heading: h, page: here().page())) <o2t-entry-end>]
 #let o2t-even() = { [#metadata(none) <${BREAK_BEFORE_LABEL}>]; pagebreak(to: "even"); [#metadata(none) <${BREAK_AFTER_LABEL}>] }
-#let o2t-fitted(img, slot-w, slot-h) = {
+#let o2t-fitted(img, slot-w, slot-h, scale: 100) = {
   let cap-h = if img.credit == none { 0pt } else { measure(figure(box(height: 0pt), caption: img.credit, numbering: none), width: slot-w).height }
-  let w = calc.min(slot-w, (slot-h - cap-h) * img.w / img.h)
+  let w = calc.min(slot-w, (slot-h - cap-h) * img.w / img.h) * scale / 100
   let body = if img.credit == none { image(img.path, width: w) } else { figure(image(img.path, width: w), caption: img.credit, numbering: none) }
-  (body: body, w: w)
+  (body: body, w: w, h: w * img.h / img.w + cap-h)
 }
-#let o2t-entries(es, tw: 0pt, th: 0pt, facing: true, full-header: false) = context {
+#let o2t-entries(es, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70) = context {
+  let lh = measure([A \\ A]).height - measure([A]).height
   let body(e) = e.blocks.join(parbreak())
   let whole(e) = { e.head; parbreak(); body(e) }
-  let fits(c) = measure(block(width: tw, c)).height <= th
-  let lays = es.map(e => if e.layout == "auto" { if fits(whole(e)) { "page-text" } else { "spread-text" } } else { e.layout })
-  let kinds = lays.map(l => if l.starts-with("page") { "page" } else { "spread" })
-  let mark(e, l, size) = {
-    let d = (heading: e.heading, layout: l, size: size)
-    if e.asked != none { d.insert("asked", e.asked); d.insert("reason", e.reason) }
-    o2t-entry-mark(d)
-  }
-  let draw-page(e, l, side) = {
-    mark(e, l, "page")
+  let hgt(c) = measure(block(width: tw, c)).height
+  let scales = range(100, min-scale - 1, step: -5)
+  if scales.last() != min-scale { scales.push(min-scale) }
+  // The composed content of a page layout at a scale (measured as drawn;
+  // v(1fr) measures as nothing).
+  let portrait-slot(e) = (th - hgt(e.head) - 1.2em).to-absolute()
+  let page-content(e, l, s, side) = {
     if l == "page-text" { whole(e) }
-    else if l == "page-landscape" { whole(e); v(1fr); align(center, o2t-fitted(e.img, tw, th * 0.4).body) }
+    else if l == "page-landscape" { whole(e); v(1em); v(1fr); align(center, o2t-fitted(e.img, tw, th * 0.4, scale: s).body) }
     else {
       e.head
-      let rest = (th - measure(block(width: tw, e.head)).height - 1.2em).to-absolute()
-      let f = o2t-fitted(e.img, tw * 0.55, rest)
+      parbreak()
+      let f = o2t-fitted(e.img, tw * 0.55, portrait-slot(e), scale: s)
       grid(columns: if side == "left" { (f.w, 1fr) } else { (1fr, f.w) }, column-gutter: 4mm,
         ..if side == "left" { (f.body, body(e)) } else { (body(e), f.body) })
     }
-    o2t-entry-end(e.heading)
   }
-  let draw-spread(e, l) = {
-    mark(e, l, "spread")
+  // The left page of a split spread: the head and as many whole blocks as
+  // fit, measured as drawn.
+  let split(e) = {
+    let k = 0
+    let left = (e.head,)
+    while k < e.blocks.len() and hgt((..left, e.blocks.at(k)).join(parbreak())) <= th { left.push(e.blocks.at(k)); k += 1 }
+    (left: left, k: k)
+  }
+  let spread-fits(e, l, s) = {
+    if l == "spread-text" { hgt(whole(e)) <= 2 * th }
+    else if l == "spread-landscape" {
+      let t = hgt(whole(e))
+      t <= th or t - th + 1em.to-absolute() + o2t-fitted(e.img, tw, th / 2, scale: s).h <= th
+    } else if l == "spread-portrait" {
+      let sp = split(e)
+      let f = o2t-fitted(e.img, tw * 0.55, th, scale: s)
+      hgt(grid(columns: (1fr, f.w), column-gutter: 4mm, e.blocks.slice(sp.k).join(parbreak()), f.body)) <= th
+    } else { hgt(whole(e)) <= th }
+  }
+  let fits(e, l, s) = if l.starts-with("page") { hgt(page-content(e, l, s, "left")) <= th } else { spread-fits(e, l, s) }
+  let slot(l) = l in ("page-landscape", "page-portrait", "spread-landscape", "spread-portrait")
+  // The scale: the largest step at which the entry fits; min-scale when none.
+  let scale-of(e, l) = if not slot(l) { none } else {
+    let found = scales.find(s => fits(e, l, s))
+    if found == none { min-scale } else { found }
+  }
+  // US-032 AC-2: the automatic choice by orientation and measured fit.
+  let choose(e) = {
+    if e.layout != "auto" { return e.layout }
+    let suffix = if e.orient == none { "text" } else { e.orient }
+    let page-l = "page-" + suffix
+    let fits-page = if slot(page-l) { scales.any(s => fits(e, page-l, s)) } else { fits(e, page-l, 100) }
+    if fits-page { page-l } else { "spread-" + suffix }
+  }
+  let lays = es.map(choose)
+  let scls = es.zip(lays).map(((e, l)) => scale-of(e, l))
+  let kinds = lays.map(l => if l.starts-with("page") { "page" } else { "spread" })
+  let over = es.zip(lays, scls).map(((e, l, s)) => not fits(e, l, if s == none { 100 } else { s }))
+  let mark(e, l, size, s) = {
+    let d = (heading: e.heading, layout: l, size: size, line: e.line)
+    if e.chosen { d.insert("auto", true) }
+    if e.asked != none { d.insert("asked", e.asked); d.insert("reason", e.reason) }
+    if s != none { d.insert("scale", s) }
+    o2t-entry-mark(d)
+  }
+  // The end fact, from the real position: overflow lines, the right page's
+  // unused share, the moved partner (US-032 AC-5, AC-7, AC-9).
+  let fin(e, l, size, partner) = context {
+    let s = query(selector(<o2t-entry>).before(here())).filter(m => m.value.size != "inline").last().value
+    let own = s.page + if size == "spread" { 1 } else { 0 }
+    let p = here().page()
+    let y = here().position().y - top
+    let d = (heading: e.heading, page: p, overflowLines: if p > own { calc.max(1, calc.round(((p - own - 1) * th + y) / lh)) } else { 0 })
+    if size == "spread" and l != "full-image" {
+      d.insert("rightEmpty", if p > own { 0 } else if p < own { 100 } else { calc.max(0, calc.round((1 - y / th) * 100)) })
+    }
+    if partner != none { d.insert("partnerMoved", partner) }
+    [#metadata(d) <o2t-entry-end>]
+  }
+  let draw-page(e, l, s, side, partner) = {
+    mark(e, l, "page", s)
+    page-content(e, l, if s == none { 100 } else { s }, side)
+    fin(e, l, "page", partner)
+  }
+  let draw-spread(e, l, s) = {
+    mark(e, l, "spread", s)
     if l == "spread-text" { whole(e) }
     else if l == "spread-landscape" {
       whole(e)
-      if fits(whole(e)) { pagebreak() }
+      if hgt(whole(e)) <= th { pagebreak() }
+      v(1em)
       v(1fr)
-      align(center, o2t-fitted(e.img, tw, th / 2).body)
+      align(center, o2t-fitted(e.img, tw, th / 2, scale: s).body)
     } else if l == "full-image" {
-      whole(e)
-      let im = { align(center + horizon, o2t-fitted(e.img, tw, th).body); o2t-entry-end(e.heading) }
+      // US-032 AC-6: never shrunk; text that does not fit the left page
+      // runs on after the image page.
+      let sp = split(e)
+      sp.left.join(parbreak())
+      let im = align(center + horizon, o2t-fitted(e.img, tw, th).body)
       if full-header { page(im) } else { page(header: none, footer: none, im) }
-      return
+      e.blocks.slice(sp.k).join(parbreak())
     } else {
-      // The left page: the head and as many whole blocks as fit, measured
-      // exactly as they are drawn.
-      let k = 0
-      let left = (e.head,)
-      while k < e.blocks.len() and fits((..left, e.blocks.at(k)).join(parbreak())) { left.push(e.blocks.at(k)); k += 1 }
-      left.join(parbreak())
+      let sp = split(e)
+      sp.left.join(parbreak())
       pagebreak()
-      let f = o2t-fitted(e.img, tw * 0.55, th)
-      grid(columns: (1fr, f.w), column-gutter: 4mm, e.blocks.slice(k).join(parbreak()), f.body)
+      let f = o2t-fitted(e.img, tw * 0.55, th, scale: s)
+      grid(columns: (1fr, f.w), column-gutter: 4mm, e.blocks.slice(sp.k).join(parbreak()), f.body)
     }
-    o2t-entry-end(e.heading)
+    fin(e, l, "spread", none)
   }
   let k = 0
   let last-left = false
   while k < es.len() {
     if facing { o2t-even() } else { pagebreak(weak: true) }
-    if kinds.at(k) == "spread" { draw-spread(es.at(k), lays.at(k)); k += 1; last-left = false }
-    else if k + 1 < es.len() and kinds.at(k + 1) == "page" {
-      draw-page(es.at(k), lays.at(k), "left"); pagebreak()
-      draw-page(es.at(k + 1), lays.at(k + 1), "right"); k += 2; last-left = false
-    } else { draw-page(es.at(k), lays.at(k), if facing { "left" } else { "right" }); k += 1; last-left = true }
+    let (e, l, s) = (es.at(k), lays.at(k), scls.at(k))
+    let next-page = k + 1 < es.len() and kinds.at(k + 1) == "page"
+    if kinds.at(k) == "spread" { draw-spread(e, l, s); k += 1; last-left = false }
+    else if next-page and not over.at(k) {
+      draw-page(e, l, s, "left", none); pagebreak()
+      draw-page(es.at(k + 1), lays.at(k + 1), scls.at(k + 1), "right", none); k += 2; last-left = false
+    } else {
+      // US-032 AC-7: an overflowing page entry keeps its pages; the partner
+      // moves to the next left page.
+      draw-page(e, l, s, if facing { "left" } else { "right" }, if next-page and over.at(k) { es.at(k + 1).heading } else { none })
+      k += 1
+      last-left = not over.at(k - 1)
+    }
   }
   if facing and last-left { o2t-even() } else { pagebreak(weak: true) }
 }`;

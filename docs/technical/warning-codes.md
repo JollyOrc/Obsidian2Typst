@@ -72,6 +72,10 @@ fixed by the story that owns the code.
 | `ENTRY_OUTSIDE_CHAPTER` | US-031 AC-2 | `"Fen Hare"`: an entry outside every entries chapter (`headingRules` rule `entries`); it keeps its heading, statblock and body, no page or spread of its own (at the block's line) | active |
 | `ENTRY_NESTED_LAYOUT` | US-031 AC-1 | `"Fen Kit": page-text`: a nested entry asks for a layout other than `auto`; it stays inline in its parent (decision 3) | active |
 | `ENTRY_LAYOUT_UNKNOWN` | US-031 AC-3 | `"Fen Hare: sideways"`: the block's `layout` is not one of the seven layouts or `auto`; treated as `auto` | active |
+| `ENTRY_LAYOUT_CONFLICT` | US-031 AC-4, US-032 AC-11 | `"Bog Wight": full-image → page-text (no illustration)`: the layout needs an illustration that is missing or has the other orientation; the automatic choice is used. Read after the compile from the entry's facts | active |
+| `ENTRY_AUTO` | US-032 AC-2 | `"Marsh Owl": page-landscape`: the layout chosen for `layout: auto` (copy it into the note to fix it). Read after the compile | active |
+| `ENTRY_OVERFLOW` | US-032 AC-5, AC-7 | `"Cave Wyrm": spread-landscape, about 6 lines over` (with `(partner "Marsh Owl" moved)`): the entry runs on past its layout's pages even at `entries.image.minScale`. Read after the compile from the real positions | active |
+| `ENTRY_SPREAD_EMPTY` | US-032 AC-9 | `"Dragonet": spread-text, right page 85 % empty – consider an illustration or trimming`: a spread's right page leaves at least `entries.emptyWarn` % unused (not `full-image`; 0 = off). Read after the compile | active |
 
 Not used (decided): `HEADING_DUPLICATE` (repeated titles are numbered silently,
 US-002 AC-3) and `LINK_LOCAL_FILE` (links to local files get a footnote,

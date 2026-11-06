@@ -17,7 +17,14 @@ export interface WorkerLike {
 
 /** US-012: the outcome of a vector compile (what the page renderer reads). */
 export type VectorResult =
-  | {ok: true; vector: Uint8Array; fitDecisions?: unknown[]; settled?: boolean}
+  | {
+      ok: true;
+      vector: Uint8Array;
+      fitDecisions?: unknown[];
+      settled?: boolean;
+      entryPlaces?: unknown[];
+      entryEnds?: unknown[];
+    }
   | Extract<CompileResult, {ok: false}>;
 
 /** US-012 AC-8: a running vector compile that can be ended. */
@@ -128,6 +135,8 @@ export function createTypstCompiler(
             vector?: ArrayBuffer;
             fitDecisions?: unknown;
             settled?: unknown;
+            entryPlaces?: unknown;
+            entryEnds?: unknown;
           };
           // US-028 AC-5: the decisions only when the worker sent a list;
           // AC-14: `settled` only when it sent a boolean.
@@ -137,6 +146,14 @@ export function createTypstCompiler(
               : {}),
             ...(typeof message.settled === 'boolean'
               ? {settled: message.settled}
+              : {}),
+            // US-032 AC-10: the entries' facts, when the worker sent both.
+            ...(Array.isArray(message.entryPlaces) &&
+            Array.isArray(message.entryEnds)
+              ? {
+                  entryPlaces: message.entryPlaces as unknown[],
+                  entryEnds: message.entryEnds as unknown[],
+                }
               : {}),
           };
           if (message.id !== id) return;

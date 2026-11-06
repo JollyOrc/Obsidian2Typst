@@ -352,7 +352,7 @@ describe('US-031 AC-14 one compile', () => {
     expect(c.diagnostics.filter((d) => d.includes('converge'))).toEqual([]);
   });
 
-  it('US-031 AC-3 (decision 1): until US-032, auto is page-text when the entry fits one page, else spread-text', async () => {
+  it('US-031 AC-3, US-032 AC-2: auto without an illustration is page-text when the entry fits one page, else spread-text', async () => {
     const c = await compile(
       chapter(e('Short', 'auto', 2), e('Long', 'auto', 14)),
     );
