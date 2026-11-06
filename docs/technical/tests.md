@@ -442,8 +442,8 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-5 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-6 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-7 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) — only the missing image here; the credit is read by US-031's caption tests |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-8 | #124 | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-9 | #124 | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-8 | #124 | tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #124) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-9 | #124 | tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #124) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-10 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-11 | #125 | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-12 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |

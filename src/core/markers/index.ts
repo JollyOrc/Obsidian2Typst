@@ -31,6 +31,14 @@ export {
   type GlossaryWarning,
 } from './glossary';
 export {
+  COLOR_MODES,
+  STATBLOCK_BUILTINS,
+  STATBLOCK_FONT_ROLES,
+  STATBLOCK_SIZE_ROLES,
+  type ColorMode,
+  type LineStyle,
+  type StatblockSettings,
+  type TrackCell,
   EMPTY_ENTRY_PLAN,
   ENTRY_BLOCK_LANG,
   ENTRY_LIST_KEYS,

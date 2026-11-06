@@ -14,6 +14,7 @@ import type {
 } from '../layout/page-setup';
 import type {
   CalloutsSettings,
+  ColorMode,
   EntriesSettings,
   HeadingRulesSettings,
 } from '../markers';
@@ -98,6 +99,8 @@ export interface ConvertSettings {
    * written (AC-11, the built-in case).
    */
   entries?: EntriesSettings;
+  /** US-030 AC-8, AC-15: `grayscale` draws the statblock in gray; default `color`. */
+  colorMode?: ColorMode;
 }
 
 /** US-015 AC-1: the input of {@link convert}. */

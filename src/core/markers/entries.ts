@@ -24,21 +24,87 @@ export interface EntryField {
   label: string;
 }
 
+/** A cell of `entries.statblock.track` (AC-8, AC-13). */
+export interface TrackCell {
+  label: string;
+  /** Vault path of an SVG file. */
+  icon: string;
+}
+
+/** A frame or rule line (AC-8): colour `#rrggbb`, width in pt. */
+export interface LineStyle {
+  color?: string;
+  width?: number;
+}
+
+/** US-030 AC-8: the fonts of the statblock's parts (family names). */
+export const STATBLOCK_FONT_ROLES = [
+  'band',
+  'values',
+  'text',
+  'skills',
+  'tags',
+] as const;
+/** US-030 AC-8: the sizes of the statblock's parts, in pt. */
+export const STATBLOCK_SIZE_ROLES = [
+  'band',
+  'value',
+  'label',
+  'text',
+  'attacks',
+  'skills',
+] as const;
+
+/** US-030 AC-8: `entries.statblock` as a preset note sets it. */
+export interface StatblockSettings {
+  stats?: readonly EntryField[];
+  traits?: readonly EntryField[];
+  boxes?: string;
+  track?: readonly TrackCell[];
+  trackKey?: string;
+  trackLabel?: string;
+  trackDefault?: readonly string[];
+  sum?: {total: string; of: readonly string[]};
+  fill?: string;
+  frame?: LineStyle;
+  rules?: LineStyle;
+  boxFill?: string;
+  fonts?: Partial<Record<(typeof STATBLOCK_FONT_ROLES)[number], string>>;
+  sizes?: Partial<Record<(typeof STATBLOCK_SIZE_ROLES)[number], number>>;
+}
+
 /**
- * US-030 AC-8: the `entries` settings this module reads (the keys the preset
- * uses); the whole group and its validation are US-030's settings ticket.
+ * US-030 AC-8: the `entries` group of a preset note (preset notes only,
+ * G0-C9). Later stories of epic #121 add their fields here.
  */
 export interface EntriesSettings {
-  statblock?: {
-    stats?: readonly EntryField[];
-    traits?: readonly EntryField[];
-    boxes?: string;
-    trackKey?: string;
-    readonly [field: string]: unknown;
-  };
+  statblock?: StatblockSettings;
   tagLabels?: Readonly<Record<string, string>>;
-  readonly [field: string]: unknown;
 }
+
+/**
+ * US-030 AC-8 (G0-C8): the built-in look of the statblock, in one place.
+ * Fields not listed here are empty or unset when the preset does not set
+ * them; the fonts are the body font.
+ */
+export const STATBLOCK_BUILTINS = Object.freeze({
+  fill: 'none',
+  frame: Object.freeze({color: '#000000', width: 0.75}),
+  rules: Object.freeze({color: '#000000', width: 0.4}),
+  boxFill: '#ffffff',
+  sizes: Object.freeze({
+    band: 11.5,
+    value: 11,
+    label: 5.5,
+    text: 7,
+    attacks: 7.5,
+    skills: 9,
+  }),
+});
+
+/** US-030 AC-8, AC-15: `colorMode` (top level of a preset note). */
+export type ColorMode = 'color' | 'grayscale';
+export const COLOR_MODES: readonly ColorMode[] = ['color', 'grayscale'];
 
 /** The fixed list keys of the block (AC-5); the track key comes from the preset. */
 export const ENTRY_LIST_KEYS = ['attacks', 'skills', 'tags'] as const;
