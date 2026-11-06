@@ -58,10 +58,20 @@ export interface EntryPlace {
   asked?: string;
   /** Why it was replaced: `no illustration`, `image is portrait`, … */
   reason?: string;
+  /** US-032 AC-2: the layout was chosen by the automatic choice. */
+  auto?: boolean;
+  /** US-032 AC-4: the illustration's scale in percent (100 = not shrunk). */
+  scale?: number;
 }
 export interface EntryEnd {
   heading: string;
   page: number;
+  /** US-032 AC-5: body lines on pages after the layout's own (0 = none). */
+  overflowLines?: number;
+  /** US-032 AC-9: unused share of the right page's text height, percent; spread-text/-landscape/-portrait only. */
+  rightEmpty?: number;
+  /** US-032 AC-7: the would-be partner that moved to the next spread. */
+  partnerMoved?: string;
 }
 
 export interface CompiledEntries {
