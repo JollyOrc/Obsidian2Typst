@@ -42,7 +42,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-021](US-021-preset-groups-and-details.md) | Preset groups and a details pop-up | Done (2026-10-21) | TICKET-058, 059, 060, 061 |
 | [US-022](US-022-heading-and-image-menus.md) | Heading and image menus that change the active preset | Done (2026-10-22) | TICKET-062, 063, 064, 065 |
 | [US-023](US-023-templates-that-style-the-document.md) | Templates that style the document | Done (2026-10-22) | TICKET-066, 067, 068 |
-| [US-024](US-024-synthetic-public-fixture.md) | A synthetic public fixture replaces the private vault in the tests | Done (2026-10-27) | TICKET-069 to TICKET-074 |
+| [US-024](US-024-synthetic-public-fixture.md) | A synthetic public fixture replaces the private vault in the tests | Done (2026-10-27); amendment #121 Ready (G1 2026-11-06) | TICKET-069 to TICKET-074 |
 | [US-025](US-025-page-breaks-by-heading.md) | Page breaks by heading level | Done (M15 passed 2026-10-28) | TICKET-075, 076, 077 |
 | [US-026](US-026-book-parts-and-signatures.md) | Book parts and signatures | Done (M16 passed 2026-10-29; the two contents rows green with TICKET-085; decision 8 added 2026-10-29) | TICKET-078 to 082 |
 | [US-027](US-027-table-of-contents.md) | Table of contents | Done (M17 passed 2026-10-29) | TICKET-083 to 088 |

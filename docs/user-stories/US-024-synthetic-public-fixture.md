@@ -1,6 +1,6 @@
 # US-024 — A synthetic public fixture replaces the private vault in the tests
 
-**Status:** Done (2026-10-27)
+**Status:** Done (2026-10-27); amendment for epic #121 (AC-13 to AC-19): Ready (G1 2026-11-06; decisions 1 to 3 of the amendment answered the same day, G1 re-check)
 **Introduced:** v0.9.1 (planned; tests, fixtures and docs only, no change of
 the plugin's behaviour, so a patch version)
 **Implemented:** TICKET-069 to TICKET-074 (2026-10-27); the clean copy of the
@@ -338,6 +338,119 @@ with the plugin's `parse` and `convert`, and by grep):
   (release notes, Done tickets' evidence)
   keep their wording, except the quoted rules text that AC-9 removes; the
   ledger is not published and is not changed (D9).
+
+---
+
+
+## Amendment: the entries chapter (epic #121, 2026-11-06)
+
+Draft D-03 in `docs/drafts/entry-layouts-tickets.md`. The stories US-030 to
+US-036 test against a generated catalogue chapter; this amendment adds it to
+the sample vault. Decided by the user (G0-C13, 2026-11-05): a **new**
+generated note with invented entries; `Book.md` is unchanged; the
+forbidden-word guard also reads a git-ignored local word list made from the
+author's vault, so its names are never committed.
+
+- **AC-13 (new files):** `npm run fixtures` also writes, from the same seed
+  and with the same determinism (AC-1, AC-1b):
+  - `Menagerie.md`: the entries note (AC-14), written directly in the
+    compiled form the Vault Compiler produces — headings with their
+    `o2t-entry` blocks — with no separate entry notes (decision 2; the
+    plugin reads only this form, G0-C14);
+  - `presets/Entries.md`: a preset with `headingRules: {Menagerie: entries,
+    Relics: entries}` and the `entries` settings of US-030's examples (stats
+    `might`, `wits`, `speed`; traits `move`, `guard`; `boxes: vigour`; track
+    Fine, Hurt, Down, Fading, Gone; `trackKey: states`; `trackLabel: STATE`;
+    `trackDefault` without Fading; `tagLabels` for `beast` and `magical`;
+    `sum: {total: vigour, of: [might, wits, speed]}`; `quickReference`,
+    `encounterSheet`, `encounterSheetFile` on), A5, facing pages;
+  - `assets/icons/fine.svg` … `gone.svg`: five simple shapes (circle,
+    square, triangle, cross, bar), `fill="#000"`, under 400 bytes each; no
+    third-party icon;
+  - illustrations as solid-fill PNGs of fixed pixel sizes:
+    `entry-wide.png` 1280 × 1006, `entry-tall.png` 358 × 736,
+    `entry-square.png` 600 × 600, `entry-small.png` 272 × 334 (low
+    resolution, US-034), `entry-long.png` 2000 × 500 (4:1) and
+    `entry-slim.png` 300 × 1200 (1:4). The `entry-` prefix keeps them apart
+    from the in-memory `Sample/assets/wide.png` and `tall.png` of
+    `tests/support/book.ts`.
+
+  `Book.md`, `Other.md`, their assets and `presets/Sample.md` are written
+  byte for byte as today (AC-1b's check proves it).
+
+- **AC-14 (what `Menagerie.md` holds):** Invented words only, from the
+  generator's word list (AC-2), with every entry's `o2t-entry` block written
+  in the fixed YAML form (US-030 AC-2: `yaml` `stringify` with
+  `{nullStr: ''}`). The cases each story needs:
+
+  | Case | Story |
+  |---|---|
+  | `# Menagerie` with an intro; sections `## Beasts`, `## Horrors`, `## Spirits`, each with an intro | US-031 AC-1, US-033 AC-1/2 |
+  | 14 or more entries at level 3, covering all seven layouts and `auto` | US-031 AC-6/9, US-032 AC-2 |
+  | each illustration ratio of AC-13 at least once; an entry using `entry-small.png` | US-031 AC-7, US-034 AC-3 |
+  | text lengths just under and just over one page and two pages | US-032 AC-4/5 |
+  | an explicit `page-text` entry that overflows, as the first of a pair | US-032 AC-7 |
+  | an unpaired page entry at a section's end; a section ending on a right page | US-031 AC-10, US-033 AC-3 |
+  | a section intro longer than one page | US-033 AC-4 |
+  | box values 0, 11, 16, 45, 46 and `varies` | US-030 AC-12 |
+  | `states`: missing, `none`, the default plus `Fading`, one unknown label, one word (`states: Fine`) | US-030 AC-5/13 |
+  | tags: mapped, unmapped (`rare`) | US-030 AC-14 |
+  | an attack without dice, an attack without `: `, a bold attack name, a long attack name | US-030 AC-10/17/18 |
+  | a value with left-over link markup; a hand-typed map value (`- B: 2d6` written unquoted) | US-030 AC-5/6 |
+  | a block whose content holds three backticks, in a four-backtick fence | US-030 AC-1 |
+  | invalid YAML; a block not under a heading; a second block under a heading | US-030 AC-3/4 |
+  | an entry that starts with a list (no lede); one with a lede under 10 words | US-030 AC-16 |
+  | a nested entry (level 4 inside an entry), once with an explicit layout | US-030 AC-20, US-031 AC-1 |
+  | a block inside a callout | US-030 AC-4 |
+  | a list of 10 and one of 11 items; an entry with two `####` sub-headings | US-031 AC-11/12 |
+  | a sum mismatch | US-030 AC-18 |
+  | the writer's repeat comment between two entries, and one entry heading repeated | US-030 AC-21, US-033 AC-11 |
+  | a second entries chapter `# Relics` with two entries | US-033 AC-14 |
+  | `# Example Crypt` (no rule) holding a copy of one entry | US-031 AC-2 |
+  | a `# Glossary` with one term holding an `o2t-entry` block | US-030 AC-21 |
+  | links to entries from the body, at levels 1 to 6 | US-033 AC-8 |
+  | one narrow-column paragraph known to gap, fixed as data (decision 1): chosen at G2 by compiling candidates; a US-034 test fails if it stops gapping | US-034 AC-7 |
+
+- **AC-15 (manifest):** `manifest.json` gains `entries`, counted while
+  writing (AC-3): per entry its heading text, level, chapter, section, line,
+  `layout` value, illustration file with its pixel size, box value, track
+  value, tags, and the case names of AC-14 it was written for; per chapter
+  its sections and entry count; the icon files. Tests read their expected
+  values from here, never from the plugin's own functions. Example: the
+  test of US-030 AC-12's `46` row finds the entry by
+  `manifest.entries.byCase["boxes-46"]`.
+
+- **AC-16 (the local word list, G0-C13):** The forbidden-word check (AC-10)
+  also reads `tests/fixtures/private-words.local.txt` (decision 3: inside
+  the repository, git-ignored) when the file exists:
+  one word per line, made by the author from the private vault (creature
+  names, place names); every published file is checked against it, case
+  insensitive, whole words. The file is in `.gitignore`; without it, that
+  part of the check is skipped with an explicit `it.skipIf` and a comment
+  naming this AC (the public copy has no list, AC-11). A planted word in a
+  temporary copy is found (guard, SCAR-023).
+
+- **AC-17 (manual checks):** `npm run install:scratch` (AC-8) also installs
+  `Menagerie.md`, `presets/Entries.md` and the new assets, with the same
+  backup and checksum rules.
+
+- **AC-18 (no real data, SCAR-035):** No name, number or sentence of the
+  author's book is in the generator or its output; the AC-16 check over
+  `tests/fixtures/` proves it where the local list exists.
+
+- **AC-19 (tests of the amendment):** AC-1b's comparison covers the new
+  files; a test asserts that `Book.md`'s SHA-256 equals the value before the
+  amendment; a test counts the AC-14 cases in the manifest (every row of the
+  table has at least one entry); the YAML of every block parses with
+  `yaml` 2.9.1 and re-serialises to the same text (US-030 AC-22).
+
+### Decisions of the amendment (answered by the user, 2026-11-06)
+
+1. **The gap paragraph:** one paragraph, fixed as data, chosen at G2 by
+   compiling candidates; a US-034 test fails if it stops gapping.
+2. **`Menagerie.md`:** written directly in the compiled form.
+3. **The word list:** `tests/fixtures/private-words.local.txt`, in
+   `.gitignore`.
 
 ---
 
