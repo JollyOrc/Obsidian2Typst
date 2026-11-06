@@ -5,6 +5,8 @@
 //   <o2t-entry>      each entry placed (US-031 AC-14): heading, layout used,
 //                    size ("page" | "spread" | "inline"), first page
 //   <o2t-entry-end>  each entry's end: heading, last page
+//   <o2t-section>    each section opener (US-033): section, opener page,
+//                    the page its intro ends on
 // Source of truth: docs/user-stories/US-030-…, US-031-….
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -74,12 +76,20 @@ export interface EntryEnd {
   partnerMoved?: string;
 }
 
+/** A section opener (US-033 AC-1 to AC-4). */
+export interface SectionPlace {
+  section: string;
+  page: number;
+  introEnd: number;
+}
+
 export interface CompiledEntries {
   pages: PdfPage[];
   bookmarks: PdfBookmark[];
   statblocks: StatblockFact[];
   places: EntryPlace[];
   ends: EntryEnd[];
+  sections: SectionPlace[];
   diagnostics: string[];
   result: ConvertResult;
 }
@@ -156,21 +166,21 @@ export async function compileEntries(
       }) => Promise<T>,
     ): Promise<T>;
   };
-  const [diagnostics, blocks, places, ends] = await compiler.runWithWorld(
-    {mainFilePath: path},
-    async (w) => [
+  const [diagnostics, blocks, places, ends, sections] =
+    await compiler.runWithWorld({mainFilePath: path}, async (w) => [
       (await w.compile({diagnostics: 'unix'})).diagnostics ?? [],
       await w.query({selector: '<o2t-statblock>', field: 'value'}),
       await w.query({selector: '<o2t-entry>', field: 'value'}),
       await w.query({selector: '<o2t-entry-end>', field: 'value'}),
-    ],
-  );
+      await w.query({selector: '<o2t-section>', field: 'value'}),
+    ]);
   return {
     pages: readPdfPages(pdf),
     bookmarks: readPdfBookmarks(pdf),
     statblocks: parse<StatblockFact>(blocks),
     places: parse<EntryPlace>(places),
     ends: parse<EntryEnd>(ends),
+    sections: parse<SectionPlace>(sections),
     diagnostics: diagnostics as string[],
     result,
   };
