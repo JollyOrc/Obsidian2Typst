@@ -43,6 +43,8 @@ export interface PreambleContext {
   furniture?: string | null;
   /** US-018 AC-3: the page-ref helper, or null without a call in the body. */
   pageRefs?: string | null;
+  /** US-030 AC-15: the statblock helper; null when no entry draws one. */
+  statblock?: string | null;
 }
 
 /** One rule of the preamble; `render` returns null when it writes nothing. */
@@ -136,6 +138,13 @@ export const PREAMBLE_RULES: readonly PreambleRule[] = [
     id: 'glossary',
     order: 86,
     render: ({glossary}) => glossary ?? null,
+  },
+  {
+    // US-030 AC-15: after the glossary helper, before the cover; only when
+    // the body holds a statblock.
+    id: 'statblock',
+    order: 87,
+    render: ({statblock}) => statblock ?? null,
   },
   {
     // US-011 AC-4: after everything that sets up the document, with a blank

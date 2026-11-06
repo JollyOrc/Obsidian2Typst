@@ -295,6 +295,67 @@ const isText = (v: unknown): v is string | number =>
 const isUnset = (v: unknown): boolean =>
   v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
 
+/** AC-5: the keys of a mapping in lower case; the first of a case pair wins. */
+export function lowerKeys(raw: unknown): Map<string, unknown> {
+  const fields = new Map<string, unknown>();
+  if (raw !== null && typeof raw === 'object' && !Array.isArray(raw)) {
+    for (const [key, value] of Object.entries(raw)) {
+      const lower = key.toLowerCase();
+      if (!fields.has(lower)) fields.set(lower, value);
+    }
+  }
+  return fields;
+}
+
+/**
+ * US-030 | AC-5: the values of the keys the preset uses: single values as
+ * text (`4` and `"4"` alike), lists (one text is a one-item list), and the
+ * keys whose value has the wrong shape (left out; in a list the wrong items
+ * only). `null` and empty text are not set. The one reader of values, used
+ * by the block reader and the statblock model (SCAR-017).
+ */
+export function readEntryValues(
+  fields: ReadonlyMap<string, unknown>,
+  settings: EntriesSettings | undefined,
+): {
+  single: Map<string, string>;
+  lists: Map<string, string[]>;
+  wrong: string[];
+} {
+  const wrong: string[] = [];
+  const keys = entryKeys(settings);
+  const single = new Map<string, string>();
+  for (const key of keys.single) {
+    const value = fields.get(key);
+    if (isUnset(value)) continue;
+    if (isText(value)) single.set(key, String(value));
+    else wrong.push(key);
+  }
+  const lists = new Map<string, string[]>();
+  for (const key of keys.lists) {
+    const value = fields.get(key);
+    if (isUnset(value)) continue;
+    if (isText(value)) {
+      lists.set(key, [String(value)]);
+      continue;
+    }
+    if (!Array.isArray(value)) {
+      wrong.push(key);
+      continue;
+    }
+    const items: string[] = [];
+    let bad = false;
+    for (const item of value as unknown[]) {
+      if (isUnset(item)) continue;
+      if (isText(item)) items.push(String(item));
+      else bad = true;
+    }
+    if (bad) wrong.push(key);
+    if (items.length > 0) lists.set(key, items);
+  }
+  return {single, lists, wrong};
+}
+
 /**
  * US-030 | AC-3, AC-5, AC-7: reads one block's YAML (`yaml` 2.9.1, YAML
  * 1.2; any valid mapping, not only the fixed form). A parse error or a
@@ -321,49 +382,14 @@ export function readEntryBlock(
   if (doc.errors.length > 0) return invalid();
   if (doc.contents !== null && !isMap(doc.contents)) return invalid();
   const raw: unknown = doc.toJS();
-  const fields = new Map<string, unknown>();
-  if (raw !== null && typeof raw === 'object') {
-    for (const [key, value] of Object.entries(raw)) {
-      const lower = key.toLowerCase();
-      if (!fields.has(lower)) fields.set(lower, value);
-    }
-  }
-  const wrong = (key: string): void => {
+  const fields = lowerKeys(raw);
+  const {single, lists, wrong} = readEntryValues(fields, settings);
+  for (const key of wrong) {
     warnings.push({
       code: 'ENTRY_VALUE_NOT_TEXT',
       message: `"${text}": ${key}`,
       line: block.line,
     });
-  };
-  const keys = entryKeys(settings);
-  const single = new Map<string, string>();
-  for (const key of keys.single) {
-    const value = fields.get(key);
-    if (isUnset(value)) continue;
-    if (isText(value)) single.set(key, String(value));
-    else wrong(key);
-  }
-  const lists = new Map<string, string[]>();
-  for (const key of keys.lists) {
-    const value = fields.get(key);
-    if (isUnset(value)) continue;
-    if (isText(value)) {
-      lists.set(key, [String(value)]);
-      continue;
-    }
-    if (!Array.isArray(value)) {
-      wrong(key);
-      continue;
-    }
-    const items: string[] = [];
-    let bad = false;
-    for (const item of value as unknown[]) {
-      if (isUnset(item)) continue;
-      if (isText(item)) items.push(String(item));
-      else bad = true;
-    }
-    if (bad) wrong(key);
-    if (items.length > 0) lists.set(key, items);
   }
   return {
     found,

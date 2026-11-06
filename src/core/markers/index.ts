@@ -45,6 +45,8 @@ export {
   entryKeys,
   flattenLinks,
   illustrationOf,
+  lowerKeys,
+  readEntryValues,
   planEntries,
   readEntryBlock,
   scanEntryBlocks,

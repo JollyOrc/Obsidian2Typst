@@ -172,6 +172,8 @@ describe('US-015 AC-2 skeleton and fixed order', () => {
       ['fit-flow', 81],
       ['callouts', 85],
       ['glossary', 86],
+      // US-030 AC-15 (G4 #125): the statblock helper.
+      ['statblock', 87],
       ['cover', 90],
     ]);
   });

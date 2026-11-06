@@ -106,7 +106,8 @@ describe('US-030 AC-13 the state track', () => {
   it('US-030 AC-13: states none, missing and full give no warning', async () => {
     for (const states of [
       'states: none',
-      'might: 4',
+      // No track key (G4 #125: was a second `might: 4`, a duplicate key).
+      'wits: 2',
       'states: [Fine, Hurt, Down, Fading, Gone]',
     ]) {
       const {typ, warnings} = await runEntries(

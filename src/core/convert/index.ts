@@ -13,8 +13,10 @@ import {
   createCalloutRecorder,
   contentsLines,
   emitBlocks,
+  STATBLOCK_HELPER_DEF,
   escapeMarkup,
   findImage,
+  statblockLook,
   paddingEndLines,
   pageRefHelper,
   bodyContentsLines,
@@ -38,6 +40,7 @@ import {
   scanEntryBlocks,
 } from '../markers';
 import {indexHeadings, parse, type BlockNode} from '../parse';
+import {statblockModel, type StatblockModel} from '../entries/model';
 import {coverNames, planCover, resolveCover} from './cover';
 import {
   arrangeParts,
@@ -243,6 +246,12 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     input.assets,
     new Set([
       ...referencedImageNames(root),
+      // US-030 AC-13: the track icons of the preset.
+      ...(reads.length === 0
+        ? []
+        : (input.settings.entries?.statblock?.track ?? []).map((cell) =>
+            cell.icon.slice(cell.icon.lastIndexOf('/') + 1).normalize('NFC'),
+          )),
       // US-030 AC-7: the entries' illustrations.
       ...referencedImageNames([
         {
@@ -351,6 +360,52 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     const path = findImage(ill.node, ctx, resolver);
     entry.illustration = path === null ? null : {...ill, path};
   }
+  // US-030 AC-10 to AC-14, AC-18: the statblock of each entry and its data
+  // checks, once per entry (SCAR-038), at the block's line.
+  const models = new Map<BlockNode, StatblockModel & {line: number}>();
+  for (const entry of entryPlan.entries.values()) {
+    const model = statblockModel(
+      Object.fromEntries(entry.fields),
+      input.settings.entries,
+      {heading: entry.text, fileName: input.noteName, missing: 'omit'},
+    );
+    if (model === null) continue;
+    models.set(entry.heading, {...model, line: entry.line});
+    for (const check of model.checks) {
+      ctx.warn(
+        check.code,
+        check.detail === null
+          ? `"${entry.text}"`
+          : `"${entry.text}": ${check.detail}`,
+        entry.line,
+      );
+    }
+  }
+  // US-030 AC-13: each track icon resolved once; a missing one warns once
+  // (at the first entry that draws it) and its cell is drawn empty.
+  const icons = new Map<string, string | null>();
+  let statblocksWritten = 0;
+  const statblocks =
+    models.size === 0
+      ? undefined
+      : {
+          models,
+          look: statblockLook(input.settings.entries, input.settings.colorMode),
+          icon: (path: string, line: number): string | null => {
+            const known = icons.get(path);
+            if (known !== undefined) return known;
+            const found = findImage(
+              {kind: 'image', src: `/${path}`, alt: '', title: null, line},
+              ctx,
+              resolver,
+            );
+            icons.set(path, found);
+            return found;
+          },
+          written: () => {
+            statblocksWritten += 1;
+          },
+        };
   for (const w of arranged.warnings) ctx.warn(w.code, w.message, w.line);
   // US-018 AC-2, AC-6: page numbers after links only with the switch and the
   // folios on, so the printed number exists; the rule only with a call.
@@ -393,8 +448,7 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     book: pageLines,
     unlistNested: contents !== null,
     fit: imageFit(input.settings, arranged),
-    entries: entryPlan,
-    entrySettings: input.settings.entries,
+    statblocks,
   });
   // US-010 AC-5: characters of the source that their family lacks.
   if (resolved !== null && fontInfo !== undefined) {
@@ -463,6 +517,8 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       fonts: resolved === null ? null : emitFonts(resolved.fonts),
       callouts: calloutStylesRule(styleEntries),
       glossary: glossary.hasTerms ? GLOSSARY_HELPER : null,
+      // US-030 AC-15: the statblock helper, only when a statblock is drawn.
+      statblock: statblocksWritten > 0 ? STATBLOCK_HELPER_DEF : null,
       furniture: pageFurnitureRule(
         input.settings.pageFurniture,
         facingPages,

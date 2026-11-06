@@ -114,7 +114,8 @@ describe('US-030 AC-4 blocks in the wrong place', () => {
       '```o2t-entry',
       'might: 9',
       '```',
-      'Body.',
+      // An opening paragraph of 10+ words, so AC-16 adds no warning (G4 #125).
+      'The body after the second block, long enough to be a lede.',
     ].join('\n');
     const {typ, warnings} = await runEntries(source);
     expect(warningsOf(warnings, codes)).toEqual([

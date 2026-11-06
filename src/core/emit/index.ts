@@ -76,8 +76,10 @@ export {
 export {pageRefCall, pageRefHelper, type PageRefEnv} from './page-refs';
 export {
   STATBLOCK_HELPER,
-  hasStatblock,
-  splitAttack,
+  STATBLOCK_HELPER_DEF,
+  STATBLOCK_LAYOUT,
   statblockCall,
+  statblockLook,
+  type StatblockWriter,
 } from './entry';
 export {findImage, isImageSize} from './image';

@@ -12,16 +12,14 @@
 // Transforms used (shared-utility register): rawBlock; escapeMarkup, wrapEmphasis,
 // rawInline and callSeparator through emitInline.
 import type {AssetResolver} from '../assets';
+import type {StatblockModel} from '../entries/model';
 import {
-  EMPTY_ENTRY_PLAN,
   EMPTY_GLOSSARY_PLAN,
   findCallout,
   flattenLinks,
-  type EntriesSettings,
-  type EntryPlan,
   type GlossaryPlan,
 } from '../markers';
-import {indexHeadings, parseInline} from '../parse';
+import {indexHeadings, parseInline, visibleText} from '../parse';
 import type {BlockNode, HeadingIndex, InlineNode} from '../parse';
 import {
   createCalloutRecorder,
@@ -35,7 +33,7 @@ import {
   emitUnlistedHeading,
   emitUnnumberedHeading,
 } from './glossary';
-import {statblockCall} from './entry';
+import {statblockCall, type StatblockWriter} from './entry';
 import {escapeMarkup} from './escape-markup';
 import {Notes} from './footnote';
 import type {PageRefEnv} from './page-refs';
@@ -82,9 +80,57 @@ interface BlockEnv {
   unlistNested: boolean;
   /** US-028: the image fit; undefined when the rule is off or in a footnote. */
   fit: BlockFit | undefined;
-  /** US-030: the entries by heading and the preset's `entries` settings. */
-  entries: EntryPlan;
-  entrySettings: EntriesSettings | undefined;
+  /** US-030: the statblocks of the entry headings; undefined without any. */
+  statblocks: StatblockEnv | undefined;
+}
+
+/** US-030 AC-10, AC-16: what the emitter needs to write statblocks. */
+export interface StatblockEnv {
+  /** The model of each entry heading that gets a statblock. */
+  models: ReadonlyMap<BlockNode, StatblockModel & {line: number}>;
+  /** The look (`statblockLook`). */
+  look: string;
+  /** The Typst path of a track icon, or null when it is missing. */
+  icon: (path: string, line: number) => string | null;
+  /** Called for every call written (the prelude gets the helper). */
+  written: () => void;
+}
+
+/** US-030 AC-16: the minimum words of an opening paragraph (G0-C8). */
+export const LEDE_MIN_WORDS = 10;
+
+/**
+ * US-030 | AC-16: the kind of a first block that is not an opening
+ * paragraph, as the warning names it; null for a plain paragraph.
+ */
+function ledeKind(block: BlockNode): string | null {
+  switch (block.kind) {
+    case 'paragraph': {
+      const shown = block.children.filter(
+        (n) =>
+          !(n.kind === 'text' && n.value.trim() === '') &&
+          n.kind !== 'softbreak' &&
+          n.kind !== 'break',
+      );
+      return shown.length > 0 && shown.every((n) => isImageNode(n))
+        ? 'image'
+        : null;
+    }
+    case 'list':
+      return 'list';
+    case 'blockquote':
+      return findCallout(block) === null ? 'quote' : 'callout';
+    case 'heading':
+      return 'heading';
+    case 'table':
+      return 'table';
+    case 'code':
+      return 'code';
+    case 'thematic-break':
+      return 'rule';
+    default:
+      return 'html';
+  }
 }
 
 /** US-028 AC-3, AC-6: a reserve with its pt and em parts kept apart. */
@@ -389,7 +435,10 @@ function renderBlocks(
   // are written (a page break after an image's paragraph).
   const top =
     !nested && outer.where === 'body' ? topLines(blocks, outer) : null;
+  // US-030 AC-16: blocks written beside a statblock, not again in the flow.
+  const beside = new Set<number>();
   const pieces: Piece[] = blocks.map((block, position): Piece => {
+    if (beside.has(position)) return {text: '', kind: 'other'};
     // US-018 AC-2: a top-level block of a term's explanation, and everything
     // inside it, is in the explanation.
     const env =
@@ -503,19 +552,59 @@ function renderBlocks(
             .filter((part) => part !== '')
             .join(' ');
         }
-        // US-030 AC-1, AC-10: an entry's statblock call right after its
-        // heading, before the body.
-        const entry = env.entries.entries.get(block);
-        const call =
-          entry === undefined
-            ? null
-            : statblockCall(entry, env.entrySettings, (value) =>
-                emitInline(flattenLinks(parseInline(value, entry.line)), ctx, {
-                  ...inlineOf(env),
-                  atBlockStart: true,
-                  breaks: 'space',
-                }),
+        // US-030 AC-10, AC-16: an entry's statblock right after its heading,
+        // with the opening paragraph (or the first block) beside it.
+        const model = env.statblocks?.models.get(block);
+        let call: string | null = null;
+        if (model !== undefined && env.statblocks !== undefined) {
+          const sbEnv = env.statblocks;
+          let next = position + 1;
+          while (
+            blocks[next]?.kind === 'comment' ||
+            blocks[next]?.kind === 'footnote-def'
+          )
+            next++;
+          const first = blocks[next];
+          const nested =
+            first?.kind === 'heading' && env.statblocks.models.has(first);
+          let lede: string | null = null;
+          if (first !== undefined && !nested) {
+            const kind = ledeKind(first);
+            const name = `"${model.band}"`;
+            if (kind !== null) {
+              ctx.warn(
+                'ENTRY_NO_LEDE',
+                `${name}: starts with ${kind}`,
+                model.line,
               );
+            } else if (first.kind === 'paragraph') {
+              const words = visibleText(first.children)
+                .split(/\s+/)
+                .filter((w) => w !== '').length;
+              if (words < LEDE_MIN_WORDS)
+                ctx.warn(
+                  'ENTRY_LEDE_SHORT',
+                  `${name}: ${words} words`,
+                  model.line,
+                );
+            }
+            if (kind !== 'heading') {
+              lede = renderBlocks([first], ctx, true, within(env, NO_RESERVE));
+              beside.add(next);
+            }
+          }
+          const writer: StatblockWriter = {
+            content: (value) =>
+              emitInline(flattenLinks(parseInline(value, model.line)), ctx, {
+                ...inlineOf(env),
+                atBlockStart: true,
+                breaks: 'space',
+              }),
+            icon: (path) => sbEnv.icon(path, model.line),
+          };
+          call = statblockCall(model, sbEnv.look, writer, lede);
+          sbEnv.written();
+        }
         return {
           // US-017 AC-8: images of a term follow its run-in paragraph.
           text: [
@@ -821,12 +910,10 @@ export interface BlockOptions {
    */
   fit?: {min: number; sides: boolean; noFloat: ReadonlySet<BlockNode>};
   /**
-   * US-030 AC-1, AC-10: the entries of `blocks` (`planEntries`) and the
-   * preset's `entries` settings; an entry heading is followed by its
-   * statblock call. Default: no entries.
+   * US-030 AC-10, AC-16: the statblocks of the entry headings; an entry
+   * heading is followed by its statblock call. Default: none.
    */
-  entries?: EntryPlan;
-  entrySettings?: EntriesSettings;
+  statblocks?: StatblockEnv;
   /**
    * US-015 AC-8: text put at the start of every heading, paragraph, item, quote,
    * code block, rule, table and table row (not inside a footnote definition),
@@ -875,8 +962,7 @@ export function emitBlocks(
     hidden: options.hidden ?? new Set<BlockNode>(),
     book: options.book,
     unlistNested: options.unlistNested ?? false,
-    entries: options.entries ?? EMPTY_ENTRY_PLAN,
-    entrySettings: options.entrySettings,
+    statblocks: options.statblocks,
   };
   const fit: BlockFit | undefined =
     options.fit === undefined ? undefined : {...options.fit, reserve: null};

@@ -61,6 +61,14 @@ fixed by the story that owns the code.
 | `ENTRY_BLOCK_IN_CONTAINER` | US-030 AC-4 | `o2t-entry block inside a quote or callout; not read and not printed` (any depth) | active |
 | `ENTRY_VALUE_NOT_TEXT` | US-030 AC-5 | `"Fen Hare": attacks`: a value of a key the preset uses has the wrong shape (a map, a boolean, a list for a single value); it is left out (in a list: the wrong items) | active |
 | `ENTRY_IN_GLOSSARY` | US-030 AC-21 | `"Fen Hare"`: an `o2t-entry` block under a glossary term is not read as an entry and not printed (at the block's line; decision 3) | active |
+| `ENTRY_TRACK_UNKNOWN` | US-030 AC-13 | `"Fen Hare": Lost`: a label of the block's track key is not in `entries.statblock.track`; that cell is left out | active |
+| `ENTRY_NO_LEDE` | US-030 AC-16 | `"Fen Hare": starts with list`: the entry's first block is not a plain paragraph (list, image, callout, quote, heading, table, code); it starts beside the statblock | active |
+| `ENTRY_LEDE_SHORT` | US-030 AC-16 | `"Fen Hare": 9 words`: the opening paragraph has fewer than 10 words; it is used as normal | active |
+| `STAT_BOXES_MANY` | US-030 AC-12 | `"Fen Hare": 46`: the box value is over 45; it is printed, no boxes are drawn | active |
+| `STAT_BOXES_NOT_NUMBER` | US-030 AC-12 | `"Fen Hare"`: the box value is not a whole number from 0 (`varies`, `2d6`, `-3`, `2.5`); printed as written, no boxes | active |
+| `TAG_UNMAPPED` | US-030 AC-14 | `"Fen Hare": rare`: a tag has no label in a non-empty `entries.tagLabels`; it is not printed (no warning when the map is empty) | active |
+| `STAT_SUM_MISMATCH` | US-030 AC-18 | `"Fen Hare": 20 ≠ 4+8+3`: with `entries.statblock.sum`, the total differs from the sum of its parts (skipped when a value is not a number) | active |
+| `STAT_ATTACK_NO_DICE` | US-030 AC-18 | `"Fen Hare": "Glare: frightens"`: an attack holds no `NdM` dice pool | active |
 
 Not used (decided): `HEADING_DUPLICATE` (repeated titles are numbered silently,
 US-002 AC-3) and `LINK_LOCAL_FILE` (links to local files get a footnote,

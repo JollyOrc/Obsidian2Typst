@@ -444,20 +444,20 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-7 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) — only the missing image here; the credit is read by US-031's caption tests |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-8 | #124 | tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #124) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-9 | #124 | tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #124) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-10 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-11 | #125 | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-12 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-13 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-14 | #125 | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-15 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-16 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-17 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) — the hanging indent of long attack names is not asserted (manual check at 100 %) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-18 | #125 | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-19 | #123, #125 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — #123's six codes are in warning-codes.md (G4 2026-11-06); the composed test waits for #125. Strict mode (decision 4 revised 2026-11-06): the entry codes abort like every code, covered by US-006 AC-4's test over `warning-codes.md` |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-10 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-11 | #125 | tests/unit/us-030-statblock.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-12 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-13 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-14 | #125 | tests/unit/us-030-statblock.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-15 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-16 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-17 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) — the hanging indent of long attack names is not asserted (manual check at 100 %) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-18 | #125 | tests/unit/us-030-statblock.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-19 | #123, #125 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123 and #125; all 14 codes in warning-codes.md). Strict mode (decision 4 revised 2026-11-06): the entry codes abort like every code, covered by US-006 AC-4's test over `warning-codes.md` |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-20 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-21 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | #125 | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | #125 | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #125) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | #126 | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
@@ -515,10 +515,10 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-11 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-12 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — callouts, tables, footnotes and floated images not yet |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-13 | #133 | tests/unit/us-034-print-checks.test.ts, tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — the fixture's fixed gap paragraph after the generator |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-1 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) — live preview rendering in Obsidian itself: manual check |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-2 | #125, #134 | tests/unit/us-035-model.test.ts, tests/integration/us-035-model-vs-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-3 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-4 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-1 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🟡 model green (G4 2026-11-06, #125); the preview waits for #134 — live preview rendering in Obsidian itself: manual check |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-2 | #125, #134 | tests/unit/us-035-model.test.ts, tests/integration/us-035-model-vs-pdf.test.ts | 🟡 model green (G4 2026-11-06, #125); the preview waits for #134 |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-3 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🟡 model green (G4 2026-11-06, #125); the preview waits for #134 |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-4 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🟡 model green (G4 2026-11-06, #125); the preview waits for #134 |
 | [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-5 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-6 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-7 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) — the live-preview rebuild after a preset change: manual check (not measured) |
