@@ -54,6 +54,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-033](US-033-entry-openers-navigation-quick-reference.md) | Entry openers, navigation and the quick reference (epic #121) | Ready (G1 2026-11-06; decisions 1 to 3 answered) | — |
 | [US-034](US-034-print-checks-resolution-and-word-gaps.md) | Print checks: image resolution and word gaps (epic #121) | Ready (G1 2026-11-06; decisions 1 and 2 answered) | — |
 | [US-035](US-035-entry-block-preview-in-obsidian.md) | Statblock preview of entry blocks in Obsidian (epic #121) | Ready (G1 2026-11-06; decisions 1 to 3 answered) | — |
+| [US-036](US-036-encounter-sheet.md) | The encounter sheet: A4 file and book page (epic #121) | Ready (G1 2026-11-06; decisions 1 and 2 answered) | — |
 
 ### Backlog
 
