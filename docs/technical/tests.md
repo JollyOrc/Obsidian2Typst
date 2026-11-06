@@ -442,100 +442,100 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-5 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-6 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-7 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — only the missing image here; the credit is read by US-031's caption tests |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-8 | — (#121, G3) | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-9 | — (#121, G3) | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-10 | — (#121, G3) | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-11 | — (#121, G3) | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-12 | — (#121, G3) | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-13 | — (#121, G3) | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-14 | — (#121, G3) | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-15 | — (#121, G3) | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-16 | — (#121, G3) | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-17 | — (#121, G3) | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) — the hanging indent of long attack names is not asserted (manual check at 100 %) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-18 | — (#121, G3) | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-19 | #123, ticket 4 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — strict mode is not tested here; the plugin's strict-mode test gains the entry codes at G3 |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-8 | #124 | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-9 | #124 | tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-10 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-11 | #125 | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-12 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-13 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-14 | #125 | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-15 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-16 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-17 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🔴 red (G2 2026-11-06) — the hanging indent of long attack names is not asserted (manual check at 100 %) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-18 | #125 | tests/unit/us-030-statblock.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-19 | #123, #125 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) — strict mode is not tested here; the plugin's strict-mode test gains the entry codes at G3 |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-20 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-21 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | #123 | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | — (#121, G3) | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | — (#121, G3) | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | — (#121, G3) | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | — (#121, G3) | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-4 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-5 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-6 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-7 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-8 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-9 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-10 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-11 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-12 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-13 | — (#121, G3) | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-14 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-15 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-16 | — (#121, G3) | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — US-027 depth and a cover before the chapter are covered with US-033's tests |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-17 | — (#121, G3) | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — the story's test list; image ratios 1:4 to 4:1, runs of 1 to 4 pairs partly (1 and 2) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-1 | — (#121, G3) | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-2 | — (#121, G3) | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-3 | — (#121, G3) | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) — the choice is per entry (AC-2's table); an unpaired result left alone is checked with US-033's sections |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-4 | — (#121, G3) | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-5 | — (#121, G3) | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-6 | — (#121, G3) | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-7 | — (#121, G3) | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-8 | — (#121, G3) | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-9 | — (#121, G3) | tests/unit/us-032-fit.test.ts | 🔴 red (G2 2026-11-06) — from the facts; the real right-page fill of a spread is measured with the fixture |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-10 | — (#121, G3) | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-11 | — (#121, G3) | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) — the opener after an overflow goes with US-033's tests |
-| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-12 | — (#121, G3) | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-1 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-2 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-3 | — (#121, G3) | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-4 | — (#121, G3) | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-5 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-6 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-7 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-8 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-9 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-10 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-11 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-12 | — (#121, G3) | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-13 | — (#121, G3) | tests/unit/us-033-openers.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-14 | — (#121, G3) | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) — a TOC before the chapter and the glossary after are not yet tested |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-15 | — (#121, G3) | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) — intros of 0.3 and 1.0 pages and linkPageLevel 2 and 6 not yet |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-1 | — (#121, G3) | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-2 | — (#121, G3) | tests/unit/us-034-print-checks.test.ts, tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-3 | — (#121, G3) | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-4 | — (#121, G3) | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — the record is written in every compile; the preview's own check of it goes with the plugin tests at G3 |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-5 | — (#121, G3) | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-6 | — (#121, G3) | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-7 | — (#121, G3) | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-8 | — (#121, G3) | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-9 | — (#121, G3) | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-10 | — (#121, G3) | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-11 | — (#121, G3) | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-12 | — (#121, G3) | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — callouts, tables, footnotes and floated images not yet |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-13 | — (#121, G3) | tests/unit/us-034-print-checks.test.ts, tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — the fixture's fixed gap paragraph after the generator |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-1 | — (#121, G3) | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) — live preview rendering in Obsidian itself: manual check |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-2 | — (#121, G3) | tests/unit/us-035-model.test.ts, tests/integration/us-035-model-vs-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-3 | — (#121, G3) | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-4 | — (#121, G3) | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-5 | — (#121, G3) | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-6 | — (#121, G3) | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-7 | — (#121, G3) | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) — the live-preview rebuild after a preset change: manual check (not measured) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-8 | — (#121, G3) | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-9 | — (#121, G3) | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-10 | — (#121, G3) | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts, tests/integration/us-035-model-vs-pdf.test.ts | 🔴 red (G2 2026-11-06) — the manual check (its own M-file) is written at G3 |
-| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-11 | — (#121, G3) | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) — a call from a Dataview script: manual check (not measured) |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-1 | — (#121, G3) | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-2 | — (#121, G3) | tests/unit/us-036-sheet.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-3 | — (#121, G3) | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-4 | — (#121, G3) | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-5 | — (#121, G3) | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) — the export run writing the second file (worker, disk) goes with the plugin tests at G3 |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-6 | — (#121, G3) | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) — two across in a wide text area not yet |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-7 | — (#121, G3) | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-8 | — (#121, G3) | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-9 | — (#121, G3) | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) — a 7-cell track and facing pages off not yet |
-| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-10 | — (#121, G3) | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) — the print check at 100 % is a manual check (its own M-file) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | #125 | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🔴 red (G2 2026-11-06) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | #126 | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-4 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-5 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-6 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-7 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-8 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-9 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-10 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-11 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-12 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-13 | #126 | tests/unit/us-031-layouts.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-14 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-15 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-16 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — US-027 depth and a cover before the chapter are covered with US-033's tests |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-17 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — the story's test list; image ratios 1:4 to 4:1, runs of 1 to 4 pairs partly (1 and 2) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-1 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-2 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-3 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) — the choice is per entry (AC-2's table); an unpaired result left alone is checked with US-033's sections |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-4 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-5 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-6 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-7 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-8 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-9 | #128 | tests/unit/us-032-fit.test.ts | 🔴 red (G2 2026-11-06) — from the facts; the real right-page fill of a spread is measured with the fixture |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-10 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-11 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) — the opener after an overflow goes with US-033's tests |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-12 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-1 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-2 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-3 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-4 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-5 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-6 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-7 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-8 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-9 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-10 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-11 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-12 | #130 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-13 | #129 | tests/unit/us-033-openers.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-14 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) — a TOC before the chapter and the glossary after are not yet tested |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-15 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) — intros of 0.3 and 1.0 pages and linkPageLevel 2 and 6 not yet |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-1 | #132 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-2 | #132 | tests/unit/us-034-print-checks.test.ts, tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-3 | #132 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-4 | #132 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — the record is written in every compile; the preview's own check of it goes with the plugin tests at G3 |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-5 | #133 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-6 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-7 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-8 | #133 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-9 | #131 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-10 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-11 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-12 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — callouts, tables, footnotes and floated images not yet |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-13 | #133 | tests/unit/us-034-print-checks.test.ts, tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — the fixture's fixed gap paragraph after the generator |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-1 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) — live preview rendering in Obsidian itself: manual check |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-2 | #125, #134 | tests/unit/us-035-model.test.ts, tests/integration/us-035-model-vs-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-3 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-4 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-5 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-6 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-7 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) — the live-preview rebuild after a preset change: manual check (not measured) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-8 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-9 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-10 | #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts, tests/integration/us-035-model-vs-pdf.test.ts | 🔴 red (G2 2026-11-06) — the manual check (its own M-file) is written at G3 |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-11 | #134 | tests/plugin/us-035-preview.test.ts | 🔴 red (G2 2026-11-06) — a call from a Dataview script: manual check (not measured) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-1 | #135 | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-2 | #135 | tests/unit/us-036-sheet.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-3 | #135 | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-4 | #135 | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-5 | #135, #136 | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) — the export run writing the second file (worker, disk) goes with the plugin tests at G3 |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-6 | #135 | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) — two across in a wide text area not yet |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-7 | #135 | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-8 | #135 | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-9 | #135 | tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) — a 7-cell track and facing pages off not yet |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-10 | #135 | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🔴 red (G2 2026-11-06) — the print check at 100 % is a manual check (its own M-file) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-1 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-1: (the field: six keys, four values, messages with lines, unknown keys, the Defaults, merge key by key) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-2 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts, tests/integration/us-025-page-breaks-pdf.test.ts | US-025 AC-2: (the three lines per side, facing pages off; the four page rows (the third re-measured at G2); guard: none = today) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-3 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-3: (no break for terms, in-term headings, callout, quote, list item, empty headings; the glossary heading breaks) | ✅ green (TICKET-075, 2026-10-28) |

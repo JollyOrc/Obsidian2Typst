@@ -1,4 +1,4 @@
-<!-- Filed 2026-11-06 as #123 (labels `ticket`, `US-030`) on the user's go; ticket 2 of 16. Title: "US-030: reading the o2t-entry block (core)" -->
+<!-- Filed 2026-11-06 as #123 on the user's go (epic #121, ticket 2 of 16). -->
 
 ### User story
 
@@ -6,7 +6,7 @@
 
 ### Description
 
-Read every `o2t-entry` block as the data of the heading above it, never print it, report misplaced and malformed blocks, and hand the data to the statblock helper call `#o2t-statblock(…)`; write the block's contract once in `docs/technical/entry-block.md`. The drawing itself is ticket 4.
+Read every `o2t-entry` block as the data of the heading above it, never print it, report misplaced and malformed blocks, and hand the data to the statblock helper call `#o2t-statblock(…)`; write the block's contract once in `docs/technical/entry-block.md`. The drawing itself is #125.
 
 ### Acceptance criteria (from the user story)
 
@@ -163,15 +163,15 @@ They gather at dusk.
 - YAML: `yaml` 2.9.1 `parse` (YAML 1.2); a non-mapping or a parse error → `ENTRY_YAML_INVALID` with the block's first line; keys lowercased; value shapes as AC-5 (`ENTRY_VALUE_NOT_TEXT`); one text for a list key → a one-item list.
 - Formatting in values: the inline parser of US-001 for bold and italic; link markup reduced to its display text before escaping (`[[a|b]]` → `b`, `[[a]]` → `a`, `[t](u)` → `t`); all text through `typstString`/the escaping of US-013.
 - The illustration value: `![alt](path)`, `![[path|alt]]` or a bare path; an alias of digits or digits `x` digits is a size, not a credit; the image resolved through the asset index as US-003 (missing → `ASSET_MISSING`).
-- Emission: the heading as today, then `#o2t-statblock((…data…))` when the entry has at least one stat or attack in the settings' terms (ticket 4 decides what is drawn; here the helper may draw nothing), then the body. Without `entries.*` settings the call is not written (US-030 AC-11's built-in case).
+- Emission: the heading as today, then `#o2t-statblock((…data…))` when the entry has at least one stat or attack in the settings' terms (#125 decides what is drawn; here the helper may draw nothing), then the body. Without `entries.*` settings the call is not written (US-030 AC-11's built-in case).
 - Determinism (rule 7): the data dictionary is written in the settings' order, not the block's.
 - `docs/technical/entry-block.md`: the contract of AC-2, naming its reader (this plugin) and its writer (JollyOrc/ObsidianVaultCompiler#108).
 - `docs/technical/warning-codes.md`: rows for `ENTRY_YAML_INVALID`, `ENTRY_ORPHAN_BLOCK`, `ENTRY_BLOCK_TWICE`, `ENTRY_BLOCK_IN_CONTAINER`, `ENTRY_VALUE_NOT_TEXT`, `ENTRY_IN_GLOSSARY` (US-030).
-- `PLUGIN_NAMES` gains `o2t-statblock` (its drawing is ticket 4).
+- `PLUGIN_NAMES` gains `o2t-statblock` (its drawing is #125).
 
 ### Tests
 
-- `tests/unit/us-030-entry-block.test.ts`: all, except `US-030 AC-19: a composed note gives each warning once, in order` (it needs ticket 4's checks).
+- `tests/unit/us-030-entry-block.test.ts`: all, except `US-030 AC-19: a composed note gives each warning once, in order` (it needs #125's checks).
 - `tests/support/entries.ts` (support, unchanged).
 - Guards that must stay green: the US-001, US-013, US-014, US-017 and US-024 tests (parsing, escaping, glossary, the sample vault, whose `Book.md` holds no `o2t-entry` block).
 
@@ -180,7 +180,7 @@ They gather at dusk.
 - SCAR-039 (in-band markers read by other steps): every step that reads `code` nodes is listed and checked against `o2t-entry`: the code emitter (US-001 AC-7), the page-break rules (US-025), image fit (US-028), the glossary marker (US-017), the line map (US-015). Only the entry reader consumes it; the others see no node.
 - SCAR-040 (an output format names its reader): `entry-block.md` names this plugin as reader and the Vault Compiler as writer.
 - SCAR-041 (line-start rules blind to containers): the container check walks quotes and callouts at any depth.
-- SCAR-034 (input classified before its header is removed): the block is read before "first paragraph" is decided (ticket 4 relies on it).
+- SCAR-034 (input classified before its header is removed): the block is read before "first paragraph" is decided (#125 relies on it).
 - SCAR-007, SCAR-002: the ACs' examples are the tests' inputs; composed cases AC-20, AC-21.
 - SCAR-009, SCAR-010 (rules verified in isolation; join hazards): the heading, the call and the body join as three blocks; the tests compare whole outputs.
 - SCAR-017: one function reduces link markup, used for every value.
