@@ -48,6 +48,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-027](US-027-table-of-contents.md) | Table of contents | Done (M17 passed 2026-10-29) | TICKET-083 to 088 |
 | [US-028](US-028-image-fit.md) | Images that stay with their text | Done (M18 passed 2026-10-29; amendment #116: M20 passed 2026-11-03) | TICKET-089 to 097; #116, #117 to #120 |
 | [US-029](US-029-settings-screen-and-menu-marking.md) | A settings screen of feature rows, and marked menu items | Done (M19 passed 2026-10-31; AC-7 keyboard variance accepted) | #111 to #115 |
+| [US-030](US-030-entry-data-and-statblock.md) | Entry data and the statblock (epic #121) | Ready (G1 2026-11-06; decisions 1 to 4 answered) | — |
 
 ### Backlog
 
