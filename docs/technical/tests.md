@@ -459,22 +459,22 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | #125 | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #125) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | #126 | tests/unit/us-031-layouts.test.ts | 🟢 green (G4 2026-11-06, #126) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟡 unit green (G4 2026-11-06, #126); the PDF placement waits for #127 |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟡 unit green (G4 2026-11-06, #126); the PDF placement waits for #127, #128 |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-4 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-5 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-6 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-7 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-8 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-9 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-10 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-11 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-12 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #126 and #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟡 unit green (G4 2026-11-06, #126); the measured `auto` placed (#127); US-032 replaces it (#128) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-4 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-5 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-6 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-7 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-8 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-9 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-10 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-11 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-12 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
 | [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-13 | #126 | tests/unit/us-031-layouts.test.ts | 🟢 green (G4 2026-11-06, #126) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-14 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-15 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-16 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — US-027 depth and a cover before the chapter are covered with US-033's tests |
-| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-17 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🔴 red (G2 2026-11-06) — the story's test list; image ratios 1:4 to 4:1, runs of 1 to 4 pairs partly (1 and 2) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-14 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-15 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-16 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) — US-027 depth and a cover before the chapter are covered with US-033's tests |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-17 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) — the story's test list; image ratios 1:4 to 4:1, runs of 1 to 4 pairs partly (1 and 2) |
 | [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-1 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-2 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-3 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🔴 red (G2 2026-11-06) — the choice is per entry (AC-2's table); an unpaired result left alone is checked with US-033's sections |

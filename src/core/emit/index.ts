@@ -5,7 +5,13 @@ export {
   type MarkupOptions,
   type Transform,
 } from './escape-markup';
-export {emitBlocks, type BlockOptions, type BookLines} from './blocks';
+export {
+  emitBlocks,
+  type BlockOptions,
+  type BookLines,
+  type EntryLayoutEnv,
+  type EntryLayoutInfo,
+} from './blocks';
 export {
   FIT_DECISION_LABEL,
   FIT_FLOW_HELPER,
@@ -83,3 +89,4 @@ export {
   type StatblockWriter,
 } from './entry';
 export {findImage, isImageSize} from './image';
+export {entriesLayoutHelper} from './breaks';

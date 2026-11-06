@@ -280,7 +280,11 @@ describe('US-031 AC-11 and AC-12 inside an entry', () => {
     const c = await compile(source);
     expect(c.bookmarks.some((b) => b.title.includes('Habits'))).toBe(false);
     expect(c.pages.map((p) => p.text).join(' ')).toMatch(/(^|\s)Habits/);
-    expect(c.pages.map((p) => p.text).join(' ')).not.toMatch(/\d\s+Habits/);
+    // A heading number is dotted (`1.1.1.1 Habits`); G4 #127: a bare digit
+    // before it is the statblock's `Might 4`, drawn right above.
+    expect(c.pages.map((p) => p.text).join(' ')).not.toMatch(
+      /\d+(\.\d+)+\s+Habits/,
+    );
     expect(c.places).toHaveLength(1);
   });
 

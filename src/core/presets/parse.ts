@@ -988,6 +988,17 @@ function readEntries(value: unknown, problems: Problem[]): EntriesSettings {
   );
   if (statblock !== undefined)
     out.statblock = readStatblock(statblock, problems);
+  // US-031 AC-6: a full-image page keeps its header and folio.
+  const fullImageHeader = read(value, 'fullImageHeader');
+  if (fullImageHeader !== undefined) {
+    if (typeof fullImageHeader === 'boolean')
+      out.fullImageHeader = fullImageHeader;
+    else
+      problems.push({
+        path: 'entries.fullImageHeader',
+        message: 'entries.fullImageHeader must be true or false',
+      });
+  }
   const tags = readSubgroup(value, 'tagLabels', 'entries.tagLabels', problems);
   if (tags !== undefined) {
     const labels: Record<string, string> = {};

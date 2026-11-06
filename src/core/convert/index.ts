@@ -1,7 +1,7 @@
 // US-015: the conversion pipeline. One note in, the Typst text, the assets to
 // copy, the warnings and the line map out. Pure: no Obsidian, Node, or I/O
 // imports; the vault is only read through the injected `AssetIndex`.
-import {createAssetResolver} from '../assets';
+import {createAssetResolver, extensionOf, readImageSize} from '../assets';
 import {
   EmitContext,
   GLOSSARY_HELPER,
@@ -14,6 +14,7 @@ import {
   contentsLines,
   emitBlocks,
   STATBLOCK_HELPER_DEF,
+  entriesLayoutHelper,
   escapeMarkup,
   findImage,
   statblockLook,
@@ -24,6 +25,8 @@ import {
   partStartLine,
   type BookLines,
   type CalloutStyleEntry,
+  type EntryLayoutEnv,
+  type EntryLayoutInfo,
 } from '../emit';
 import {
   DEFAULT_BOOK,
@@ -33,8 +36,10 @@ import {
 } from '../layout/page-setup';
 import {checkGlyphs, emitFonts, resolveFonts} from '../fonts';
 import {
+  STATBLOCK_BUILTINS,
   findGlossary,
   headingRuleTable,
+  type EntryData,
   placeEntries,
   planEntries,
   readEntryBlock,
@@ -190,6 +195,78 @@ function imageFit(
   };
 }
 
+/** US-031 AC-4: the layouts that need an illustration, by orientation. */
+const LANDSCAPE = new Set(['spread-landscape', 'page-landscape']);
+const PORTRAIT = new Set(['spread-portrait', 'page-portrait']);
+
+/**
+ * US-031 | AC-1 to AC-4, AC-7: the entry layout of the note, or undefined
+ * when no entries chapter places an entry. A layout that needs an
+ * illustration is replaced by `auto` when there is none (`no illustration`)
+ * or it has the other orientation (`image is portrait` / `image is
+ * landscape`; width = height counts as landscape).
+ */
+function planEntryLayout(
+  entries: ReadonlyMap<BlockNode, EntryData>,
+  bodies: ReadonlySet<BlockNode>,
+  settings: ConvertSettings,
+  sizeOf: (path: string) => {width: number; height: number} | null,
+): EntryLayoutEnv | undefined {
+  const all = [...entries.values()];
+  if (!all.some((e) => e.place?.chapter != null && !e.place.nested))
+    return undefined;
+  const infos = new Map<BlockNode, EntryLayoutInfo>();
+  for (const entry of all) {
+    const place = entry.place;
+    const inline =
+      place === undefined || place.chapter === null || place.nested;
+    const ill = entry.illustration;
+    const size = ill?.path === undefined ? null : sizeOf(ill.path);
+    const image =
+      ill?.path === undefined || size === null
+        ? null
+        : {
+            path: ill.path,
+            width: size.width,
+            height: size.height,
+            credit: ill.credit,
+          };
+    let layout: string = place?.layout ?? 'auto';
+    let asked: string | null = null;
+    let reason: string | null = null;
+    const needs =
+      layout === 'full-image' || LANDSCAPE.has(layout) || PORTRAIT.has(layout);
+    if (!inline && needs) {
+      if (image === null) reason = 'no illustration';
+      else if (LANDSCAPE.has(layout) && image.width < image.height)
+        reason = 'image is portrait';
+      else if (PORTRAIT.has(layout) && image.width >= image.height)
+        reason = 'image is landscape';
+      if (reason !== null) {
+        asked = layout;
+        layout = 'auto';
+      }
+    }
+    infos.set(entry.heading, {
+      text: entry.text,
+      inline,
+      layout,
+      asked,
+      reason,
+      image,
+    });
+  }
+  const page = settings.page;
+  return {
+    entries: infos,
+    textWidth: page.pageWidth - page.margins.inside - page.margins.outside,
+    textHeight: page.pageHeight - page.margins.top - page.margins.bottom,
+    facingPages: page.facingPages,
+    fullImageHeader: settings.entries?.fullImageHeader === true,
+    bodies,
+  };
+}
+
 /** Typst's line breaks; none of them may reach the header comment. */
 const LINE_BREAKS = new RegExp(
   `[${[0x0a, 0x0b, 0x0c, 0x0d, 0x85, 0x2028, 0x2029]
@@ -254,6 +331,16 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   const coverFile = coverNames(plan.target);
 
   const callouts = input.settings.callouts ?? {};
+  // US-031 AC-4, AC-7: the illustrations' sizes are read like the cover's.
+  const illustrations = referencedImageNames([
+    {
+      kind: 'paragraph',
+      line: 0,
+      children: reads.flatMap((read) =>
+        read.data?.illustration == null ? [] : [read.data.illustration.node],
+      ),
+    },
+  ]);
   const heads = await readHeads(
     input.assets,
     new Set([
@@ -265,21 +352,11 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
             cell.icon.slice(cell.icon.lastIndexOf('/') + 1).normalize('NFC'),
           )),
       // US-030 AC-7: the entries' illustrations.
-      ...referencedImageNames([
-        {
-          kind: 'paragraph',
-          line: 0,
-          children: reads.flatMap((read) =>
-            read.data?.illustration == null
-              ? []
-              : [read.data.illustration.node],
-          ),
-        },
-      ]),
+      ...illustrations,
       ...coverFile,
       ...calloutIconNames(root, callouts),
     ]),
-    coverFile,
+    new Set([...coverFile, ...illustrations]),
   );
   const none = new Uint8Array(0);
   const resolver = createAssetResolver({
@@ -383,6 +460,20 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     const path = findImage(ill.node, ctx, resolver);
     entry.illustration = path === null ? null : {...ill, path};
   }
+  // US-031 AC-1 to AC-4, AC-7: the layout of each entry, written only when a
+  // chapter places one (else the output is as before).
+  const entryLayout = planEntryLayout(
+    entryPlan.entries,
+    placed.bodies,
+    input.settings,
+    (path) => {
+      const from = resolver.uses().find((use) => use.to === path)?.from;
+      const head = from === undefined ? undefined : heads.get(from);
+      return from === undefined || head === undefined
+        ? null
+        : readImageSize(extensionOf(from), head);
+    },
+  );
   // US-030 AC-10 to AC-14, AC-18: the statblock of each entry and its data
   // checks, once per entry (SCAR-038), at the block's line.
   const models = new Map<BlockNode, StatblockModel & {line: number}>();
@@ -472,6 +563,7 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     unlistNested: contents !== null,
     fit: imageFit(input.settings, arranged, placed.bodies),
     statblocks,
+    entryLayout,
   });
   // US-010 AC-5: characters of the source that their family lacks.
   if (resolved !== null && fontInfo !== undefined) {
@@ -542,12 +634,21 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       glossary: glossary.hasTerms ? GLOSSARY_HELPER : null,
       // US-030 AC-15: the statblock helper, only when a statblock is drawn.
       statblock: statblocksWritten > 0 ? STATBLOCK_HELPER_DEF : null,
+      // US-031: the entry layout, only when a chapter places an entry.
+      entries:
+        entryLayout === undefined
+          ? null
+          : entriesLayoutHelper(
+              `${input.settings.entries?.statblock?.sizes?.band ?? STATBLOCK_BUILTINS.sizes.band}pt`,
+            ),
       furniture: pageFurnitureRule(
         input.settings.pageFurniture,
         facingPages,
         // US-026 AC-6: the first chapter's break and the padding before the
         // back notes write the US-025 markers too.
         breaks !== undefined ||
+          // US-031 AC-5: the entry layout adds pages with the same markers.
+          entryLayout !== undefined ||
           frontMatter ||
           (book.signature > 0 && arranged.backNotes !== null),
         {

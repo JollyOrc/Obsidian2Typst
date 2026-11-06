@@ -45,6 +45,8 @@ export interface PreambleContext {
   pageRefs?: string | null;
   /** US-030 AC-15: the statblock helper; null when no entry draws one. */
   statblock?: string | null;
+  /** US-031: the entry layout; null when no chapter places an entry. */
+  entries?: string | null;
 }
 
 /** One rule of the preamble; `render` returns null when it writes nothing. */
@@ -145,6 +147,13 @@ export const PREAMBLE_RULES: readonly PreambleRule[] = [
     id: 'statblock',
     order: 87,
     render: ({statblock}) => statblock ?? null,
+  },
+  {
+    // US-031: after the statblock helper (its entries draw statblocks),
+    // before the cover; only when a chapter places an entry.
+    id: 'entries',
+    order: 88,
+    render: ({entries}) => entries ?? null,
   },
   {
     // US-011 AC-4: after everything that sets up the document, with a blank

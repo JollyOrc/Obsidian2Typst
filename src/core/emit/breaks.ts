@@ -200,3 +200,105 @@ export function paddingEndLines(signature: number): string {
     '}',
   ].join('\n');
 }
+
+/**
+ * US-031 | AC-5 to AC-12, AC-14, AC-15: the entry layout of an entries
+ * chapter, written once into the prelude when a chapter places an entry.
+ * `o2t-entries(es, …)` places one run of entries (consecutive entries of a
+ * section) inside one compile, from `measure()` and parity page breaks only
+ * (the measured approach of docs/technical/spike-entry-measure.md; no
+ * `locate`/`query`, SCAR-021):
+ * - each entry's layout: as asked, or for `auto` `page-text` when the whole
+ *   entry fits the text height, else `spread-text` (decision 1, until
+ *   US-032);
+ * - a spread-sized entry starts on a left (even) page; consecutive page-sized
+ *   entries pair left + right; an unpaired one takes a left page and leaves
+ *   its right page blank; without facing pages everything is consecutive;
+ * - pages a break adds sit between `<o2t-break-before>` and
+ *   `<o2t-break-after>`, so US-025's `o2t-blank` prints the folio only;
+ * - illustrations fit their slot (the smaller of the two scales, never
+ *   cropped), the credit as a caption whose height is part of the slot;
+ * - a `full-image` right page is its own `page()` without header and folio
+ *   (`full-header: true` keeps them);
+ * - `spread-portrait` splits the body between the pages at block boundaries
+ *   (as many blocks as fit the left page; Typst cannot flow a page into a
+ *   narrower column on the next one).
+ * Each entry records `<o2t-entry>` (heading, layout, size, page, asked and
+ * reason when replaced) and `<o2t-entry-end>` (heading, page). Sub-headings
+ * inside entries (`outlined: false, bookmarked: false`) are set small and
+ * sticky. This file is the one writer of page breaks (SCAR-017).
+ */
+export function entriesLayoutHelper(bandSize: string): string {
+  return `#show heading.where(outlined: false, bookmarked: false): it => block(sticky: true, above: 0.9em, below: 0.4em, text(size: ${bandSize}, weight: "bold", it.body))
+#let o2t-entry-mark(d) = context [#metadata(d + (page: here().page())) <o2t-entry>]
+#let o2t-entry-end(h) = context [#metadata((heading: h, page: here().page())) <o2t-entry-end>]
+#let o2t-even() = { [#metadata(none) <${BREAK_BEFORE_LABEL}>]; pagebreak(to: "even"); [#metadata(none) <${BREAK_AFTER_LABEL}>] }
+#let o2t-fitted(img, slot-w, slot-h) = {
+  let cap-h = if img.credit == none { 0pt } else { measure(figure(box(height: 0pt), caption: img.credit, numbering: none), width: slot-w).height }
+  let w = calc.min(slot-w, (slot-h - cap-h) * img.w / img.h)
+  let body = if img.credit == none { image(img.path, width: w) } else { figure(image(img.path, width: w), caption: img.credit, numbering: none) }
+  (body: body, w: w)
+}
+#let o2t-entries(es, tw: 0pt, th: 0pt, facing: true, full-header: false) = context {
+  let body(e) = e.blocks.join(parbreak())
+  let whole(e) = { e.head; parbreak(); body(e) }
+  let fits(c) = measure(block(width: tw, c)).height <= th
+  let lays = es.map(e => if e.layout == "auto" { if fits(whole(e)) { "page-text" } else { "spread-text" } } else { e.layout })
+  let kinds = lays.map(l => if l.starts-with("page") { "page" } else { "spread" })
+  let mark(e, l, size) = {
+    let d = (heading: e.heading, layout: l, size: size)
+    if e.asked != none { d.insert("asked", e.asked); d.insert("reason", e.reason) }
+    o2t-entry-mark(d)
+  }
+  let draw-page(e, l, side) = {
+    mark(e, l, "page")
+    if l == "page-text" { whole(e) }
+    else if l == "page-landscape" { whole(e); v(1fr); align(center, o2t-fitted(e.img, tw, th * 0.4).body) }
+    else {
+      e.head
+      let rest = (th - measure(block(width: tw, e.head)).height - 1.2em).to-absolute()
+      let f = o2t-fitted(e.img, tw * 0.55, rest)
+      grid(columns: if side == "left" { (f.w, 1fr) } else { (1fr, f.w) }, column-gutter: 4mm,
+        ..if side == "left" { (f.body, body(e)) } else { (body(e), f.body) })
+    }
+    o2t-entry-end(e.heading)
+  }
+  let draw-spread(e, l) = {
+    mark(e, l, "spread")
+    if l == "spread-text" { whole(e) }
+    else if l == "spread-landscape" {
+      whole(e)
+      if fits(whole(e)) { pagebreak() }
+      v(1fr)
+      align(center, o2t-fitted(e.img, tw, th / 2).body)
+    } else if l == "full-image" {
+      whole(e)
+      let im = { align(center + horizon, o2t-fitted(e.img, tw, th).body); o2t-entry-end(e.heading) }
+      if full-header { page(im) } else { page(header: none, footer: none, im) }
+      return
+    } else {
+      // The left page: the head and as many whole blocks as fit, measured
+      // exactly as they are drawn.
+      let k = 0
+      let left = (e.head,)
+      while k < e.blocks.len() and fits((..left, e.blocks.at(k)).join(parbreak())) { left.push(e.blocks.at(k)); k += 1 }
+      left.join(parbreak())
+      pagebreak()
+      let f = o2t-fitted(e.img, tw * 0.55, th)
+      grid(columns: (1fr, f.w), column-gutter: 4mm, e.blocks.slice(k).join(parbreak()), f.body)
+    }
+    o2t-entry-end(e.heading)
+  }
+  let k = 0
+  let last-left = false
+  while k < es.len() {
+    if facing { o2t-even() } else { pagebreak(weak: true) }
+    if kinds.at(k) == "spread" { draw-spread(es.at(k), lays.at(k)); k += 1; last-left = false }
+    else if k + 1 < es.len() and kinds.at(k + 1) == "page" {
+      draw-page(es.at(k), lays.at(k), "left"); pagebreak()
+      draw-page(es.at(k + 1), lays.at(k + 1), "right"); k += 2; last-left = false
+    } else { draw-page(es.at(k), lays.at(k), if facing { "left" } else { "right" }); k += 1; last-left = true }
+  }
+  if facing and last-left { o2t-even() } else { pagebreak(weak: true) }
+}`;
+}

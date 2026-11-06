@@ -174,6 +174,8 @@ describe('US-015 AC-2 skeleton and fixed order', () => {
       ['glossary', 86],
       // US-030 AC-15 (G4 #125): the statblock helper.
       ['statblock', 87],
+      // US-031 (G4 #127): the entry layout.
+      ['entries', 88],
       ['cover', 90],
     ]);
   });

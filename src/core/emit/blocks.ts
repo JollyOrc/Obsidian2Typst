@@ -48,6 +48,7 @@ import {
 import {breakLines, mergeRules, ruleOf, type BreakOptions} from './breaks';
 import {ptLength} from './length';
 import {rawBlock} from './raw';
+import {typstString} from './typst-string';
 import {emitTable} from './table';
 import {TaskMarkers, type FontInfo} from './tasks';
 
@@ -82,6 +83,99 @@ interface BlockEnv {
   fit: BlockFit | undefined;
   /** US-030: the statblocks of the entry headings; undefined without any. */
   statblocks: StatblockEnv | undefined;
+  /** US-031: the entry layout; undefined when no chapter places an entry. */
+  entryLayout: EntryLayoutEnv | undefined;
+  /** US-031 AC-11, AC-12: the heading of the chapter entry being written. */
+  entryHeading: BlockNode | null;
+}
+
+/** US-031 AC-3, AC-4, AC-7: what the layout knows of one entry. */
+export interface EntryLayoutInfo {
+  /** The heading's text (the facts and the messages). */
+  text: string;
+  /** `page` / `spread` placement in a chapter, or `inline` (AC-1, AC-2). */
+  inline: boolean;
+  /** The layout to use (`auto` for the measured choice). */
+  layout: string;
+  /** AC-4: the layout asked for when it was replaced, and why. */
+  asked: string | null;
+  reason: string | null;
+  /** The illustration's Typst path, size in px and credit; null without. */
+  image: {
+    path: string;
+    width: number;
+    height: number;
+    credit: string | null;
+  } | null;
+}
+
+/** US-031: what the emitter needs to place entries. */
+export interface EntryLayoutEnv {
+  entries: ReadonlyMap<BlockNode, EntryLayoutInfo>;
+  /** Text width and height in mm, facing pages, `entries.fullImageHeader`. */
+  textWidth: number;
+  textHeight: number;
+  facingPages: boolean;
+  fullImageHeader: boolean;
+  /** The top-level blocks of the chapter entries (headings included). */
+  bodies: ReadonlySet<BlockNode>;
+}
+
+/** US-031 AC-12: lists of up to this many items are never broken (D26). */
+export const LIST_KEEP_ITEMS = 10;
+
+/**
+ * US-031 | AC-12 (D26): a list inside an entry: up to 10 items in one
+ * unbreakable block; a longer one as three parts — the first two items
+ * sticky to the rest, the middle free to break, the last two unbreakable —
+ * so a break leaves at least two items on each side.
+ */
+function keptList(items: readonly string[]): string {
+  const part = (list: readonly string[], opts: string): string =>
+    `#block(${opts})[\n${indent(list.join('\n'), 2)}\n]`;
+  if (items.length <= LIST_KEEP_ITEMS)
+    return part(items, 'breakable: false, width: 100%');
+  return [
+    part(
+      items.slice(0, 2),
+      'breakable: false, sticky: true, width: 100%, below: 0.65em',
+    ),
+    part(items.slice(2, -2), 'width: 100%, above: 0.65em, below: 0.65em'),
+    part(items.slice(-2), 'breakable: false, width: 100%, above: 0.65em'),
+  ].join('\n');
+}
+
+/**
+ * US-031 | AC-5 to AC-10, AC-14: the call that places one run of chapter
+ * entries (`o2t-entries`, breaks.ts): per entry its heading text, layout,
+ * replacement, illustration, the head (heading and statblock), the body and
+ * the body's top-level blocks (the portrait split).
+ */
+function entriesCall(
+  run: readonly {info: EntryLayoutInfo; head: string; body: string[]}[],
+  layout: EntryLayoutEnv,
+): string {
+  const content = (text: string): string =>
+    text === '' ? '[]' : `[\n${indent(text, 4)}\n  ]`;
+  const str = (v: string | null): string =>
+    v === null ? 'none' : typstString(v);
+  const entries = run.map(({info, head, body}) => {
+    const img =
+      info.image === null
+        ? 'none'
+        : `(path: ${typstString(info.image.path)}, w: ${info.image.width}, h: ${info.image.height}, credit: ${
+            info.image.credit === null
+              ? 'none'
+              : `[${escapeMarkup(info.image.credit, {atBlockStart: true})}]`
+          })`;
+    const blocks = body.map(content);
+    return [
+      `  (heading: ${typstString(info.text)}, layout: ${typstString(info.layout)}, asked: ${str(info.asked)}, reason: ${str(info.reason)}, img: ${img},`,
+      `  head: ${content(head)},`,
+      `  blocks: ${blocks.length === 1 ? `(${blocks[0]},)` : `(${blocks.join(', ')})`}),`,
+    ].join('\n');
+  });
+  return `#o2t-entries((\n${entries.join('\n')}\n), tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader})`;
 }
 
 /** US-030 AC-10, AC-16: what the emitter needs to write statblocks. */
@@ -387,26 +481,33 @@ function renderList(
   ctx: EmitContext,
   env: BlockEnv,
 ): string {
-  return list.children
-    .map((item, index) => {
-      const lead =
-        item.checked === null
-          ? undefined
-          : env.tasks.marker(item.checked, item.line);
-      const marker = list.ordered ? `${(list.start ?? 1) + index}. ` : '- ';
-      // US-028 AC-6: a list item reserves nothing; its images never float.
-      const body = renderBlocks(
-        item.children,
-        ctx,
-        true,
-        within(env, NO_RESERVE),
-        lead,
-      );
-      const at = env.mark(item.line);
-      if (body === '') return at + marker.trimEnd();
-      return at + marker + indent(body, marker.length).slice(marker.length);
-    })
-    .join('\n');
+  return listItems(list, ctx, env).join('\n');
+}
+
+/** The items of one list, each with its marker (US-031 AC-12 splits them). */
+function listItems(
+  list: Extract<BlockNode, {kind: 'list'}>,
+  ctx: EmitContext,
+  env: BlockEnv,
+): string[] {
+  return list.children.map((item, index) => {
+    const lead =
+      item.checked === null
+        ? undefined
+        : env.tasks.marker(item.checked, item.line);
+    const marker = list.ordered ? `${(list.start ?? 1) + index}. ` : '- ';
+    // US-028 AC-6: a list item reserves nothing; its images never float.
+    const body = renderBlocks(
+      item.children,
+      ctx,
+      true,
+      within(env, NO_RESERVE),
+      lead,
+    );
+    const at = env.mark(item.line);
+    if (body === '') return at + marker.trimEnd();
+    return at + marker + indent(body, marker.length).slice(marker.length);
+  });
 }
 
 /** A row of a table as text: the cells separated by ` | ` (AC-16). */
@@ -432,14 +533,92 @@ function renderBlocks(
   outer: BlockEnv,
   lead?: string,
 ): string {
+  return join(renderPieces(blocks, ctx, nested, outer, lead), nested);
+}
+
+/**
+ * US-031 | AC-5 to AC-10: the runs of chapter entries among the top-level
+ * blocks: each run (consecutive entries; a section heading or other text
+ * ends it) is written as one `o2t-entries` call at its first block.
+ */
+function entryRuns(
+  blocks: readonly BlockNode[],
+  ctx: EmitContext,
+  env: BlockEnv,
+): {at: Map<number, string>; covered: Set<number>} {
+  const at = new Map<number, string>();
+  const covered = new Set<number>();
+  const layout = env.entryLayout;
+  if (layout === undefined) return {at, covered};
+  const isChapterEntry = (block: BlockNode | undefined): boolean =>
+    block !== undefined &&
+    block.kind === 'heading' &&
+    layout.entries.get(block)?.inline === false;
+  let i = 0;
+  while (i < blocks.length) {
+    if (!isChapterEntry(blocks[i])) {
+      i++;
+      continue;
+    }
+    const start = i;
+    const run: {info: EntryLayoutInfo; head: string; body: string[]}[] = [];
+    while (isChapterEntry(blocks[i])) {
+      const heading = blocks[i] as Extract<BlockNode, {kind: 'heading'}>;
+      let j = i + 1;
+      while (
+        j < blocks.length &&
+        !(
+          blocks[j]?.kind === 'heading' &&
+          (blocks[j] as {depth: number}).depth <= heading.depth
+        )
+      )
+        j++;
+      const pieces = renderPieces(blocks.slice(i, j), ctx, false, {
+        ...env,
+        entryHeading: heading,
+        fit: undefined,
+      });
+      const [head, ...rest] = pieces;
+      run.push({
+        info: layout.entries.get(heading) as EntryLayoutInfo,
+        head: head?.text ?? '',
+        body: rest.map((p) => p.text).filter((t) => t !== ''),
+      });
+      for (let k = i; k < j; k++) covered.add(k);
+      i = j;
+    }
+    at.set(start, entriesCall(run, layout));
+  }
+  return {at, covered};
+}
+
+/** The pieces of one level of blocks (`renderBlocks` joins them). */
+function renderPieces(
+  blocks: readonly BlockNode[],
+  ctx: EmitContext,
+  nested: boolean,
+  outer: BlockEnv,
+  lead?: string,
+): Piece[] {
   // US-025, US-026, US-027: the lines put in front of the top-level blocks
   // of the body and after the last one; US-028 reads them before the blocks
-  // are written (a page break after an image's paragraph).
+  // are written (a page break after an image's paragraph). Not inside a
+  // chapter entry, whose layout writes its own breaks (US-031 AC-16).
   const top =
-    !nested && outer.where === 'body' ? topLines(blocks, outer) : null;
+    !nested && outer.where === 'body' && outer.entryHeading === null
+      ? topLines(blocks, outer)
+      : null;
+  // US-031 AC-5 to AC-10: the runs of chapter entries at the top level.
+  const runs =
+    !nested && outer.where === 'body' && outer.entryHeading === null
+      ? entryRuns(blocks, ctx, outer)
+      : {at: new Map<number, string>(), covered: new Set<number>()};
   // US-030 AC-16: blocks written beside a statblock, not again in the flow.
   const beside = new Set<number>();
   const pieces: Piece[] = blocks.map((block, position): Piece => {
+    const run = runs.at.get(position);
+    if (run !== undefined) return {text: run, kind: 'other'};
+    if (runs.covered.has(position)) return {text: '', kind: 'other'};
     if (beside.has(position)) return {text: '', kind: 'other'};
     // US-018 AC-2: a top-level block of a term's explanation, and everything
     // inside it, is in the explanation.
@@ -554,6 +733,10 @@ function renderBlocks(
           line = emitUnnumberedHeading(block.depth, text, info.label);
         } else if (unlisted) {
           line = emitUnlistedHeading(block.depth, text, info.label);
+        } else if (env.entryHeading !== null && block !== env.entryHeading) {
+          // US-031 AC-11: a heading inside a chapter entry: small, no
+          // number, not in the contents or the bookmarks, no page break.
+          line = `#heading(level: ${block.depth}, outlined: false, bookmarked: false, numbering: none)[${text}] <${info.label}>`;
         } else {
           line = ['='.repeat(block.depth), text, `<${info.label}>`]
             .filter((part) => part !== '')
@@ -612,10 +795,18 @@ function renderBlocks(
           call = statblockCall(model, sbEnv.look, writer, lede);
           sbEnv.written();
         }
+        // US-031 AC-1, AC-2: an entry outside the chapters, or nested, is
+        // placed inline; its fact says so.
+        const layoutInfo = env.entryLayout?.entries.get(block);
+        const inlineMark =
+          layoutInfo?.inline === true
+            ? `#o2t-entry-mark((heading: ${typstString(layoutInfo.text)}, layout: ${typstString(layoutInfo.layout)}, size: "inline"))`
+            : null;
         return {
           // US-017 AC-8: images of a term follow its run-in paragraph.
           text: [
             marked(env, block.line, line),
+            ...(inlineMark === null ? [] : [inlineMark]),
             ...(call === null ? [] : [call]),
             ...figures,
           ].join('\n\n'),
@@ -626,6 +817,10 @@ function renderBlocks(
         };
       }
       case 'list':
+        // US-031 AC-12: a list at the top of a chapter entry's body.
+        if (!nested && env.entryHeading !== null) {
+          return {text: keptList(listItems(block, ctx, env)), kind: 'other'};
+        }
         return {text: renderList(block, ctx, env), kind: 'list'};
       case 'blockquote': {
         // US-016 AC-1 to AC-6, AC-10: a callout is its own call, also with an
@@ -761,7 +956,7 @@ function renderBlocks(
     // The first block is not a paragraph (or there is none): marker alone.
     pieces.unshift({text: lead, kind: 'paragraph'});
   }
-  return join(pieces, nested);
+  return pieces;
 }
 
 /** US-025, US-026, US-027: the lines in front of each top-level block and after the last. */
@@ -791,6 +986,8 @@ function topLines(blocks: readonly BlockNode[], env: BlockEnv): TopLines {
       block?.kind === 'heading' &&
       !env.glossary.roles.has(block) &&
       !env.hidden.has(block) &&
+      // US-031 AC-11, AC-16: the entry layout writes the breaks in a chapter.
+      env.entryLayout?.bodies.has(block) !== true &&
       book?.noBreak.has(block) !== true &&
       env.headings.byNode.has(block)
         ? block.depth
@@ -926,6 +1123,8 @@ export interface BlockOptions {
    * heading is followed by its statblock call. Default: none.
    */
   statblocks?: StatblockEnv;
+  /** US-031: the entry layout of the entries chapters. Default: none. */
+  entryLayout?: EntryLayoutEnv;
   /**
    * US-015 AC-8: text put at the start of every heading, paragraph, item, quote,
    * code block, rule, table and table row (not inside a footnote definition),
@@ -975,6 +1174,8 @@ export function emitBlocks(
     book: options.book,
     unlistNested: options.unlistNested ?? false,
     statblocks: options.statblocks,
+    entryLayout: options.entryLayout,
+    entryHeading: null,
   };
   const fit: BlockFit | undefined =
     options.fit === undefined ? undefined : {...options.fit, reserve: null};

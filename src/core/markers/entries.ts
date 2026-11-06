@@ -81,6 +81,8 @@ export interface StatblockSettings {
 export interface EntriesSettings {
   statblock?: StatblockSettings;
   tagLabels?: Readonly<Record<string, string>>;
+  /** US-031 AC-6: a `full-image` page keeps its header and folio. */
+  fullImageHeader?: boolean;
 }
 
 /**
