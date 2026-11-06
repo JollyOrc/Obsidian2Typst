@@ -51,6 +51,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-030](US-030-entry-data-and-statblock.md) | Entry data and the statblock (epic #121) | Ready (G1 2026-11-06; decisions 1 to 4 answered) | — |
 | [US-031](US-031-entry-layouts-on-facing-pages.md) | Entry layouts on facing pages (epic #121) | Ready (G1 2026-11-06; decisions 1 to 3 answered) | — |
 | [US-032](US-032-entry-fit-overflow-and-auto-layout.md) | Entry fit, overflow and the automatic layout (epic #121) | Ready (G1 2026-11-06; decisions 1 and 2 answered) | — |
+| [US-033](US-033-entry-openers-navigation-quick-reference.md) | Entry openers, navigation and the quick reference (epic #121) | Ready (G1 2026-11-06; decisions 1 to 3 answered) | — |
 
 ### Backlog
 
