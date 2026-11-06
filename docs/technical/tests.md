@@ -428,13 +428,13 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-10 | TICKET-074 | tests/tooling/us-024-public.test.ts | ✅ green (TICKET-074, 2026-10-27) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-11 | TICKET-074 | tests/tooling/us-024-public.test.ts, manual (ticket procedure) | ✅ green (TICKET-074, 2026-10-27); the clean-copy gate green (1822 passed, 4 skipped, 1 todo; 389 passed, 1 skipped) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-12 | TICKET-072 | manual (ticket procedure) | ✅ done (TICKET-072, 2026-10-27; scan results in the ticket) |
-| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-13 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
-| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-14 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
-| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-15 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
-| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-16 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) — the local-list check skips without the git-ignored list |
-| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-17 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
-| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-18 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) (with AC-16's local-list check) |
-| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-19 | — (#121, G3) | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) — the hash check is green now and must stay green |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-13 | #122 | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-14 | #122 | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-15 | #122 | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-16 | #122 | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) — the local-list check skips without the git-ignored list |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-17 | #122 | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-18 | #122 | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) (with AC-16's local-list check) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-19 | #122 | tests/tooling/us-024-entries.test.ts | 🔴 red (G2 2026-11-06; the generator does not write the amendment yet) — the hash check is green now and must stay green |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-1 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-2 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-3 | — (#121, G3) | tests/unit/us-030-entry-block.test.ts | 🔴 red (G2 2026-11-06) |
