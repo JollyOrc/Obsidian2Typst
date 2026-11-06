@@ -90,6 +90,35 @@ So a `measure()` miss near the two-page boundary needs **no second compile**:
 it shows up as `ENTRY_OVERFLOW`, read from the real positions, and the rest
 of the chapter stays correct.
 
+## Fit with an illustration, and the "(continued)" line (2026-11-06)
+
+**Code:** `spikes/entry-measure/fit.mjs`, `fitcheck.sh`, `fitw.spike.ts`.
+`page-landscape` entries (text 15–75 % of a page, a statblock, an
+illustration of ratio 4:3, 3:2 or 2:1 at full width and at most 40 % of the
+text height, drawn as a grey box of that ratio). Inside the compile, the
+entry is shrunk in 5 % steps from 100 % down to `minScale` and the largest
+scale at which `measure()` of **the whole entry as laid out** (heading,
+statblock row, body, gap, illustration block) fits the text height is used;
+an entry that fits at no step overflows. On every page after an entry's first
+that the entry still runs on, the page header shows "<name> (continued)" — in
+the header, outside the body, so it cannot move the text; the header finds
+the entry with `query` of the entries' start and end `metadata`.
+
+| `minScale` | Chapters × entries | Fit (of them shrunk) | Overflow | Fit predicted wrong | "(continued)" lines wrong | Did not converge |
+|---|---|---|---|---|---|---|
+| 70 | 6 × 30 | 63 (35) | 117 | 0 | 0 | 0 |
+| 10 | 3 × 30 | 80 (68) | 10 | 0 | 0 | 0 |
+| 100 | 3 × 30 | 12 (0) | 78 | 0 | 0 | 0 |
+
+WASM gives the same decisions, pages and lines as the CLI (3 chapters at 70).
+
+**Finding:** measuring the parts and adding them is wrong (a first run that
+added the text height, a gap and the image height mispredicted up to 20 of 30
+entries: paragraph spacing and the line an inline box sits in were missing);
+measuring the composed entry at each candidate scale is exact. The
+"(continued)" line in the header settles in one compile because it changes
+nothing in the body.
+
 ## Consequence for D-11 (proposal for G1)
 
 - **Decide inside the compile with `measure()`**: page-sized or spread-sized,
@@ -108,11 +137,9 @@ of the chapter stays correct.
 
 ## Not covered
 
-- Illustration layouts: the landscape slot, the portrait column (45 %), fit
-  and shrink to `entries.image.minScale` — each changes the text area, so
-  each candidate layout is measured at its own width and height.
+- The portrait column (45 %) and the full-page slot; `page-landscape` and
+  its shrink are covered above.
 - Section intros longer than a page (`SECTION_INTRO_OVERFLOW`) and the
   running header on opener pages.
-- The "(continued)" heading on overflow pages, `justification-limits` in
-  narrow columns, the book's own fonts.
+- `justification-limits` in narrow columns, the book's own fonts.
 - Time in Obsidian's worker for a real chapter (here: Node).

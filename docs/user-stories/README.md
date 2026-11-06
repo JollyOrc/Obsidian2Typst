@@ -50,6 +50,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-029](US-029-settings-screen-and-menu-marking.md) | A settings screen of feature rows, and marked menu items | Done (M19 passed 2026-10-31; AC-7 keyboard variance accepted) | #111 to #115 |
 | [US-030](US-030-entry-data-and-statblock.md) | Entry data and the statblock (epic #121) | Ready (G1 2026-11-06; decisions 1 to 4 answered) | — |
 | [US-031](US-031-entry-layouts-on-facing-pages.md) | Entry layouts on facing pages (epic #121) | Ready (G1 2026-11-06; decisions 1 to 3 answered) | — |
+| [US-032](US-032-entry-fit-overflow-and-auto-layout.md) | Entry fit, overflow and the automatic layout (epic #121) | Ready (G1 2026-11-06; decisions 1 and 2 answered) | — |
 
 ### Backlog
 
