@@ -7,6 +7,7 @@
 //   <o2t-entry-end>  each entry's end: heading, last page
 //   <o2t-section>    each section opener (US-033): section, opener page,
 //                    the page its intro ends on
+//   <o2t-image>      each block image drawn (US-034 AC-2): file, drawn width (mm)
 // Source of truth: docs/user-stories/US-030-…, US-031-….
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -90,6 +91,7 @@ export interface CompiledEntries {
   places: EntryPlace[];
   ends: EntryEnd[];
   sections: SectionPlace[];
+  images: {file: string; widthMm: number}[];
   diagnostics: string[];
   result: ConvertResult;
 }
@@ -166,13 +168,14 @@ export async function compileEntries(
       }) => Promise<T>,
     ): Promise<T>;
   };
-  const [diagnostics, blocks, places, ends, sections] =
+  const [diagnostics, blocks, places, ends, sections, drawn] =
     await compiler.runWithWorld({mainFilePath: path}, async (w) => [
       (await w.compile({diagnostics: 'unix'})).diagnostics ?? [],
       await w.query({selector: '<o2t-statblock>', field: 'value'}),
       await w.query({selector: '<o2t-entry>', field: 'value'}),
       await w.query({selector: '<o2t-entry-end>', field: 'value'}),
       await w.query({selector: '<o2t-section>', field: 'value'}),
+      await w.query({selector: '<o2t-image>', field: 'value'}),
     ]);
   return {
     pages: readPdfPages(pdf),
@@ -181,6 +184,7 @@ export async function compileEntries(
     places: parse<EntryPlace>(places),
     ends: parse<EntryEnd>(ends),
     sections: parse<SectionPlace>(sections),
+    images: parse<{file: string; widthMm: number}>(drawn),
     diagnostics: diagnostics as string[],
     result,
   };
