@@ -37,6 +37,7 @@ const EXCLUDED = [
   'node_modules/',
   'main.js',
   '.DS_Store',
+  'tests/fixtures/private-words.local.txt',
 ];
 
 const READERS = [

@@ -114,8 +114,15 @@
   },
   "files": [
     "Book.md",
+    "Menagerie.md",
     "Other.md",
     "assets/cover.png",
+    "assets/entry-long.png",
+    "assets/entry-slim.png",
+    "assets/entry-small.png",
+    "assets/entry-square.png",
+    "assets/entry-tall.png",
+    "assets/entry-wide.png",
     "assets/figure-01.png",
     "assets/figure-02.png",
     "assets/figure-03.png",
@@ -171,6 +178,11 @@
     "assets/figure-63.png",
     "assets/figure-64.png",
     "assets/figure-66.png",
+    "assets/icons/down.svg",
+    "assets/icons/fading.svg",
+    "assets/icons/fine.svg",
+    "assets/icons/gone.svg",
+    "assets/icons/hurt.svg",
     "assets/map.png",
     "assets/notes.pdf",
     "assets/plates/figure-05.png",
@@ -184,6 +196,7 @@
     "assets/plates/figure-53.png",
     "assets/plates/figure-59.png",
     "assets/plates/figure-65.png",
+    "presets/Entries.md",
     "presets/Sample.md"
   ],
   "glossary": {
@@ -1032,5 +1045,690 @@
       "heading": "Commodo Dolore",
       "text": "Rutrum viverra ex cupidatat eros duis laborum enim elementum duis magna eget leo."
     }
-  ]
+  ],
+  "entries": {
+    "list": [
+      {
+        "heading": "Fen Hare",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Beasts",
+        "line": 11,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 11,
+        "states": null,
+        "tags": [
+          "beast"
+        ],
+        "cases": [
+          "attack-bold",
+          "boxes-11",
+          "chapter-intro",
+          "layout-page-text",
+          "length-under-1",
+          "list-10",
+          "repeated-heading",
+          "section-intro",
+          "states-missing",
+          "subheadings",
+          "tag-mapped"
+        ]
+      },
+      {
+        "heading": "Marsh Owl",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Beasts",
+        "line": 49,
+        "layout": "page-landscape",
+        "illustration": {
+          "file": "assets/entry-wide.png",
+          "width": 1280,
+          "height": 1006
+        },
+        "boxes": 16,
+        "states": [
+          "Fine",
+          "Hurt",
+          "Down",
+          "Fading",
+          "Gone"
+        ],
+        "tags": [
+          "beast"
+        ],
+        "cases": [
+          "boxes-16",
+          "layout-page-landscape",
+          "outside-chapter",
+          "ratio-wide",
+          "states-plus-fading"
+        ]
+      },
+      {
+        "heading": "Cave Wyrm",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Beasts",
+        "line": 76,
+        "layout": "spread-landscape",
+        "illustration": {
+          "file": "assets/entry-long.png",
+          "width": 2000,
+          "height": 500
+        },
+        "boxes": 45,
+        "states": null,
+        "tags": [
+          "beast",
+          "magical"
+        ],
+        "cases": [
+          "attack-long",
+          "boxes-45",
+          "layout-spread-landscape",
+          "length-over-1",
+          "ratio-long"
+        ]
+      },
+      {
+        "heading": "Reed Cat",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Beasts",
+        "line": 105,
+        "layout": "page-portrait",
+        "illustration": {
+          "file": "assets/entry-tall.png",
+          "width": 358,
+          "height": 736
+        },
+        "boxes": 0,
+        "states": "none",
+        "tags": [],
+        "cases": [
+          "boxes-0",
+          "gap-paragraph",
+          "layout-page-portrait",
+          "ratio-tall",
+          "states-none"
+        ]
+      },
+      {
+        "heading": "Quill Rat",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Beasts",
+        "line": 125,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 46,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "boxes-46",
+          "overflow-first-of-pair"
+        ]
+      },
+      {
+        "heading": "Sedge Mole",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Beasts",
+        "line": 153,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 9,
+        "states": [
+          "Fine",
+          "Lost"
+        ],
+        "tags": [],
+        "cases": [
+          "states-unknown"
+        ]
+      },
+      {
+        "heading": "Tussock Vole",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Beasts",
+        "line": 174,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 7,
+        "states": null,
+        "tags": [],
+        "cases": []
+      },
+      {
+        "heading": "Moss Newt",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Beasts",
+        "line": 192,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 5,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "unpaired-at-section-end"
+        ]
+      },
+      {
+        "heading": "Bog Wight",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Horrors",
+        "line": 214,
+        "layout": "full-image",
+        "illustration": {
+          "file": "assets/entry-square.png",
+          "width": 600,
+          "height": 600
+        },
+        "boxes": 14,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "attack-no-dice",
+          "layout-full-image",
+          "ratio-square"
+        ]
+      },
+      {
+        "heading": "Dune Lark",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Horrors",
+        "line": 234,
+        "layout": "spread-text",
+        "illustration": null,
+        "boxes": 20,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "attack-no-colon",
+          "layout-spread-text",
+          "length-under-2",
+          "sum-mismatch"
+        ]
+      },
+      {
+        "heading": "Mire Toad",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Horrors",
+        "line": 264,
+        "layout": "spread-portrait",
+        "illustration": {
+          "file": "assets/entry-slim.png",
+          "width": 300,
+          "height": 1200
+        },
+        "boxes": 18,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "layout-spread-portrait",
+          "length-over-2",
+          "ratio-slim",
+          "value-link-markup"
+        ]
+      },
+      {
+        "heading": "Ash Moth",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Horrors",
+        "line": 302,
+        "layout": "auto",
+        "illustration": {
+          "file": "assets/entry-small.png",
+          "width": 272,
+          "height": 334
+        },
+        "boxes": "varies",
+        "states": "Fine",
+        "tags": [
+          "beast",
+          "rare"
+        ],
+        "cases": [
+          "boxes-varies",
+          "layout-auto",
+          "low-dpi",
+          "states-one-word",
+          "tag-unmapped"
+        ]
+      },
+      {
+        "heading": "Fog Eel",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Horrors",
+        "line": 323,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 8,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "list-11",
+          "no-lede"
+        ]
+      },
+      {
+        "heading": "Gorse Imp",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Horrors",
+        "line": 348,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": null,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "section-ends-right",
+          "short-lede",
+          "value-map"
+        ]
+      },
+      {
+        "heading": "Lamp Wisp",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Spirits",
+        "line": 375,
+        "layout": null,
+        "illustration": null,
+        "boxes": null,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "long-section-intro",
+          "yaml-invalid"
+        ]
+      },
+      {
+        "heading": "Dew Shade",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Spirits",
+        "line": 386,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 10,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "block-orphan",
+          "block-twice"
+        ]
+      },
+      {
+        "heading": "Rime Sprite",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Spirits",
+        "line": 410,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 6,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "fence-four"
+        ]
+      },
+      {
+        "heading": "Rime Kit",
+        "level": 4,
+        "chapter": "Menagerie",
+        "section": "Spirits",
+        "line": 429,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": null,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "nested",
+          "nested-layout"
+        ]
+      },
+      {
+        "heading": "Cinder Wraith",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Spirits",
+        "line": 439,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 12,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "block-in-callout",
+          "links-to-entries",
+          "repeat-comment"
+        ]
+      },
+      {
+        "heading": "Fen Hare",
+        "level": 3,
+        "chapter": "Menagerie",
+        "section": "Spirits",
+        "line": 464,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": 11,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "attack-bold",
+          "boxes-11",
+          "chapter-intro",
+          "layout-page-text",
+          "length-under-1",
+          "list-10",
+          "repeated-heading",
+          "section-intro",
+          "states-missing",
+          "subheadings",
+          "tag-mapped"
+        ]
+      },
+      {
+        "heading": "Ember Ring",
+        "level": 3,
+        "chapter": "Relics",
+        "section": "Rings",
+        "line": 488,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": null,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "second-chapter"
+        ]
+      },
+      {
+        "heading": "Frost Ring",
+        "level": 3,
+        "chapter": "Relics",
+        "section": "Rings",
+        "line": 501,
+        "layout": "page-text",
+        "illustration": null,
+        "boxes": null,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "second-chapter"
+        ]
+      },
+      {
+        "heading": "Marsh Owl",
+        "level": 3,
+        "chapter": "Example Crypt",
+        "section": null,
+        "line": 520,
+        "layout": "page-landscape",
+        "illustration": null,
+        "boxes": 16,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "boxes-16",
+          "layout-page-landscape",
+          "outside-chapter",
+          "ratio-wide",
+          "states-plus-fading"
+        ]
+      },
+      {
+        "heading": "Tallow",
+        "level": 2,
+        "chapter": "Glossary",
+        "section": null,
+        "line": 538,
+        "layout": null,
+        "illustration": null,
+        "boxes": null,
+        "states": null,
+        "tags": [],
+        "cases": [
+          "glossary-term-block"
+        ]
+      }
+    ],
+    "byCase": {
+      "attack-bold": [
+        "Fen Hare"
+      ],
+      "attack-long": [
+        "Cave Wyrm"
+      ],
+      "attack-no-colon": [
+        "Dune Lark"
+      ],
+      "attack-no-dice": [
+        "Bog Wight"
+      ],
+      "block-in-callout": [
+        "Cinder Wraith"
+      ],
+      "block-orphan": [
+        "Dew Shade"
+      ],
+      "block-twice": [
+        "Dew Shade"
+      ],
+      "boxes-0": [
+        "Reed Cat"
+      ],
+      "boxes-11": [
+        "Fen Hare"
+      ],
+      "boxes-16": [
+        "Marsh Owl"
+      ],
+      "boxes-45": [
+        "Cave Wyrm"
+      ],
+      "boxes-46": [
+        "Quill Rat"
+      ],
+      "boxes-varies": [
+        "Ash Moth"
+      ],
+      "chapter-intro": [
+        "Fen Hare"
+      ],
+      "fence-four": [
+        "Rime Sprite"
+      ],
+      "gap-paragraph": [
+        "Reed Cat"
+      ],
+      "glossary-term-block": [
+        "Tallow"
+      ],
+      "layout-auto": [
+        "Ash Moth"
+      ],
+      "layout-full-image": [
+        "Bog Wight"
+      ],
+      "layout-page-landscape": [
+        "Marsh Owl"
+      ],
+      "layout-page-portrait": [
+        "Reed Cat"
+      ],
+      "layout-page-text": [
+        "Fen Hare"
+      ],
+      "layout-spread-landscape": [
+        "Cave Wyrm"
+      ],
+      "layout-spread-portrait": [
+        "Mire Toad"
+      ],
+      "layout-spread-text": [
+        "Dune Lark"
+      ],
+      "length-over-1": [
+        "Cave Wyrm"
+      ],
+      "length-over-2": [
+        "Mire Toad"
+      ],
+      "length-under-1": [
+        "Fen Hare"
+      ],
+      "length-under-2": [
+        "Dune Lark"
+      ],
+      "links-to-entries": [
+        "Cinder Wraith"
+      ],
+      "list-10": [
+        "Fen Hare"
+      ],
+      "list-11": [
+        "Fog Eel"
+      ],
+      "long-section-intro": [
+        "Lamp Wisp"
+      ],
+      "low-dpi": [
+        "Ash Moth"
+      ],
+      "nested": [
+        "Rime Kit"
+      ],
+      "nested-layout": [
+        "Rime Kit"
+      ],
+      "no-lede": [
+        "Fog Eel"
+      ],
+      "outside-chapter": [
+        "Marsh Owl"
+      ],
+      "overflow-first-of-pair": [
+        "Quill Rat"
+      ],
+      "ratio-long": [
+        "Cave Wyrm"
+      ],
+      "ratio-slim": [
+        "Mire Toad"
+      ],
+      "ratio-square": [
+        "Bog Wight"
+      ],
+      "ratio-tall": [
+        "Reed Cat"
+      ],
+      "ratio-wide": [
+        "Marsh Owl"
+      ],
+      "repeat-comment": [
+        "Cinder Wraith"
+      ],
+      "repeated-heading": [
+        "Fen Hare"
+      ],
+      "second-chapter": [
+        "Ember Ring",
+        "Frost Ring"
+      ],
+      "section-ends-right": [
+        "Gorse Imp"
+      ],
+      "section-intro": [
+        "Fen Hare"
+      ],
+      "short-lede": [
+        "Gorse Imp"
+      ],
+      "states-missing": [
+        "Fen Hare"
+      ],
+      "states-none": [
+        "Reed Cat"
+      ],
+      "states-one-word": [
+        "Ash Moth"
+      ],
+      "states-plus-fading": [
+        "Marsh Owl"
+      ],
+      "states-unknown": [
+        "Sedge Mole"
+      ],
+      "subheadings": [
+        "Fen Hare"
+      ],
+      "sum-mismatch": [
+        "Dune Lark"
+      ],
+      "tag-mapped": [
+        "Fen Hare"
+      ],
+      "tag-unmapped": [
+        "Ash Moth"
+      ],
+      "unpaired-at-section-end": [
+        "Moss Newt"
+      ],
+      "value-link-markup": [
+        "Mire Toad"
+      ],
+      "value-map": [
+        "Gorse Imp"
+      ],
+      "yaml-invalid": [
+        "Lamp Wisp"
+      ]
+    },
+    "chapters": {
+      "Menagerie": {
+        "sections": [
+          "Beasts",
+          "Horrors",
+          "Spirits"
+        ],
+        "entries": 19
+      },
+      "Relics": {
+        "sections": [
+          "Rings"
+        ],
+        "entries": 2
+      },
+      "Example Crypt": {
+        "sections": [],
+        "entries": 1
+      },
+      "Glossary": {
+        "sections": [],
+        "entries": 0
+      }
+    },
+    "icons": [
+      "assets/icons/fine.svg",
+      "assets/icons/hurt.svg",
+      "assets/icons/down.svg",
+      "assets/icons/fading.svg",
+      "assets/icons/gone.svg"
+    ]
+  }
 }

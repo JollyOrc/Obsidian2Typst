@@ -78,9 +78,9 @@ const NOTE = [
   '',
   '# Glossary',
   '',
-  '## Grit',
+  '## Tallow',
   '',
-  'Grit text.',
+  'Tallow text.',
 ].join('\n');
 
 describe('US-027 AC-1 the fields', () => {
@@ -290,7 +290,7 @@ describe('US-027 AC-3 what is listed', () => {
 
   it('US-027 AC-3: a heading inside a glossary term stays unlisted (already outlined: false)', async () => {
     const {typ} = await convertWith(
-      '# Glossary\n\n## Grit\n\nGrit text.\n\n### Detail\n\nMore.',
+      '# Glossary\n\n## Tallow\n\nTallow text.\n\n### Detail\n\nMore.',
       {depth: 3},
     );
     expect(typ).toMatch(/#heading\(level: 3, numbering: none, outlined: false/);
@@ -343,7 +343,7 @@ describe('US-027 AC-5 a picked place (decisions 1 and 5)', () => {
       heading: 'Glossary',
       position: 'after',
     });
-    expect(at(typ, 'Grit text.')).toBeLessThan(at(typ, OUTLINE(2)));
+    expect(at(typ, 'Tallow text.')).toBeLessThan(at(typ, OUTLINE(2)));
     expect(at(typ, OUTLINE(2))).toBeLessThan(at(typ, 'Note text.'));
   });
 

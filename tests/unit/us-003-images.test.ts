@@ -71,9 +71,9 @@ function typ2(md: string): string {
 
 describe('US-003 AC-1b pipe in the alt text', () => {
   it('US-003 AC-1b: uses the part before the first pipe as the caption (the title written twice)', () => {
-    expect(
-      typ2('![Limb Regeneration|Limb Regeneration ](assets/limb.png)'),
-    ).toBe(fig('assets/limb.png', 'Limb Regeneration'));
+    expect(typ2('![Moss Lantern|Moss Lantern ](assets/lantern.png)')).toBe(
+      fig('assets/lantern.png', 'Moss Lantern'),
+    );
   });
 
   it('US-003 AC-1b: reads a numeric part after the pipe as the size', () => {

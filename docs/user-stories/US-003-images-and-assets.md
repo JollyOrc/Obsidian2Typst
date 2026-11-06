@@ -40,8 +40,8 @@ copied next to it,
   the title twice (8 images in `The Rules/compiledtext.md`); decided by the
   user 2026-10-16:
   ```
-  md : ![Limb Regeneration|Limb Regeneration ](assets/limb.png)
-  typ: #figure(fit-image("assets/limb.png"), caption: [Limb Regeneration], numbering: none)
+  md : ![Moss Lantern|Moss Lantern ](assets/lantern.png)
+  typ: #figure(fit-image("assets/lantern.png"), caption: [Moss Lantern], numbering: none)
   md : ![A crypt|300](assets/crypt.png)
   typ: #figure(image("assets/crypt.png", width: 225pt), caption: [A crypt], numbering: none)
   md : ![|300](assets/crypt.png)

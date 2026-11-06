@@ -417,7 +417,7 @@ They gather at dusk.
 
 ## Notes
 
-- The vault side (the creature template, migration, icons, the Bestiary key)
+- The vault side (the creature template, migration, icons, the chapter key)
   is the author's work, outside this repository.
 - Not measured here: the time to draw a chapter of 40 statblocks with icons
   in the preview (US-012 AC-13 budget); measured at G2 with the fixture.
