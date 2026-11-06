@@ -1,6 +1,6 @@
 # Draft tickets — Entry layouts (epic #121)
 
-**Status:** Draft, 2026-11-05. **Not filed yet.** Amended 2026-11-05 with the G0 decisions (C1 to C14, the block contract A1 to A9) and the statblock tracks (D48 to D56: Grit boxes, Condition track, encounter sheet). Each amended draft cites its decision as G0-xx or Dnn. The behaviour spec is "Bestiary Layout User Stories" (BL-C1 to BL-C15) in the private spec repository; the stories written at G1 restate it in generic terms.
+**Status:** Draft, 2026-11-05. **Not filed yet.** Amended 2026-11-05 with the G0 decisions (C1 to C14, the block contract A1 to A9) and the statblock tracks (D48 to D56: tick boxes, a state track, an encounter sheet). Each amended draft cites its decision as G0-xx or Dnn. The behaviour spec is "Bestiary Layout User Stories" (BL-C1 to BL-C15) in the private spec repository; the stories written at G1 restate it in generic terms.
 
 These drafts become `ticket` issues (form `.github/ISSUE_TEMPLATE/ticket.yml`, label `ticket` plus `US-NNN`) only after these steps, each with its gate:
 1. step 0 / G0: SCAR review (done 2026-11-05, 27 gaps; questions answered)
@@ -13,7 +13,7 @@ Each draft follows the form. The **SCAR check** field is filled at G3, not here.
 
 | Story | Title | Drafts |
 |---|---|---|
-| US-030 | Entry data and statblock (with Grit boxes and Condition track) | D-01, D-02, D-04, D-05, D-17, D-19 |
+| US-030 | Entry data and statblock (with tick boxes and a state track) | D-01, D-02, D-04, D-05, D-17, D-19 |
 | US-031 | Entry layouts on facing pages | D-06, D-07, D-08, D-10 |
 | US-032 | Fit, overflow and automatic layout choice | D-11, D-12, D-13 |
 | US-033 | Section openers, navigation and quick reference | D-09, D-14 |
@@ -31,10 +31,10 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 
 ## G0 decisions applied (2026-11-05)
 
-1. **Generic plugin (G0-C1, confirmed).** Game terms live in the preset, not in code: `entries.statblock.stats`, `.traits`, `.boxes`, `.track`, `.trackDefault`, `entries.tagLabels`, the sum check of D-17. The built-in defaults are empty: no stat keys → no statblock; no tag map → no tags and no `TAG_UNMAPPED`; no track → no Condition track. The examples below use synthetic fields (`might`, `wits`, `speed`, total `vigour`).
+1. **Generic plugin (G0-C1, confirmed).** Game terms live in the preset, not in code: `entries.statblock.stats`, `.traits`, `.boxes`, `.track`, `.trackLabel`, `.trackKey`, `.trackDefault`, `entries.tagLabels`, the sum check of D-17. The built-in defaults are empty: no stat keys → no statblock; no tag map → no tags and no `TAG_UNMAPPED`; no track → no state track. The examples below use synthetic fields (`might`, `wits`, `speed`, total `vigour`).
 2. **Which chapter holds entries (G0-C2).** A preset heading, `entries.chapterHeading`. Tentative until the chapter-recognition spike.
 3. **Measured layout.** Still open: the read-back mechanism of US-028 or Typst `measure()`, decided by the spike. Must be checked for stability (SCAR-021).
-4. **Warning codes.** `ENTRY_*`, `STAT_*` (now including `STAT_BOXES_MANY` and `STAT_GRIT_NOT_NUMBER`), `TAG_UNMAPPED`, `IMAGE_LOW_DPI` and `TEXT_WIDE_GAP`. Each one goes into `docs/technical/warning-codes.md` with a source location (agent rule 8).
+4. **Warning codes.** `ENTRY_*`, `STAT_*` (now including `STAT_BOXES_MANY` and `STAT_BOXES_NOT_NUMBER`), `TAG_UNMAPPED`, `IMAGE_LOW_DPI` and `TEXT_WIDE_GAP`. Each one goes into `docs/technical/warning-codes.md` with a source location (agent rule 8).
 5. **Settings surface (G0-C9).** `entries.*` appear in preset notes and the Details view only, with no rows in the settings tab or style panel.
 6. **Constants (G0-C8).** The 45/55 split, the 60 % narrow-column threshold, 10 list items, 10 lede words and the 40 % landscape height are named constants in one place, documented, not settings.
 7. **Preview (G0-C10).** The preview runs the full entry layout, so its pages match the export (US-012 AC-13). Only the PDF word-gap scan is export-only.
@@ -89,7 +89,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 - **Acceptance criteria (from the story):** *(at step 3)*. Expected settings:
   - `entries.chapterHeading` (G0-C2)
   - `entries.statblock.stats`, `.traits`, `.fill`, `.frame`, `.rules`, `.fonts`, `.sizes`
-  - `entries.statblock.boxes` (the key whose value sets the number of tick boxes), `entries.statblock.track` (every possible Condition cell, in order: label and SVG path), `entries.statblock.trackDefault` (the cells used when an entry has no `conditions` key) (D48, D49)
+  - `entries.statblock.boxes` (the key whose value sets the number of tick boxes), `entries.statblock.track` (every possible track cell, in order: label and SVG path), `entries.statblock.trackLabel` (the label above the track), `entries.statblock.trackKey` (the block key that sets an entry's own track; examples use `states`), `entries.statblock.trackDefault` (the cells used when an entry has no such key) (D48, D49)
   - `entries.tagLabels`, `entries.emptyWarn` (50 %), `entries.maxWordGap` (200 %), `entries.narrowJustification`, `entries.fullImageHeader` (off)
   - `entries.image.minScale` (70 %), separate from `images.minScale` (G0-C5)
   - `entries.quickReference` (off), `entries.encounterSheet` (off), `entries.encounterSheetFile` (off) (D56)
@@ -110,7 +110,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 ## D-03 — Synthetic entries chapter in the sample vault
 
 - **User story:** US-024 (amendment)
-- **Description:** The fixture generator writes a **new** generated note with a synthetic bestiary chapter that exercises every case, so that no test or manual check uses real book data (agent rule 2, SCAR-035). `Book.md` is unchanged (G0-C13).
+- **Description:** The fixture generator writes a **new** generated note with a synthetic entries chapter that exercises every case, so that no test or manual check uses real book data (agent rule 2, SCAR-035). `Book.md` is unchanged (G0-C13).
 - **Acceptance criteria (from the story):** *(at step 3)*. Expected content, generated:
   - 3 sections
   - 12 entries covering all 7 layouts
@@ -121,14 +121,14 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
   - one entry with no opening paragraph
   - one with an unmapped tag
   - one repeated tag set
-  - for the tracks (D48, D49): a box value of 30 (two box rows), one above 45, one non-number (`varies`), one entry with `conditions: none`, one whose `conditions` adds the optional cell
+  - for the tracks (D48, D49): a box value of 30 (two box rows), one above 45, one non-number (`varies`), one entry with `states: none`, one whose `states` adds the optional cell
   - one value with bold and one with left-over link markup (G0-A7); one illustration with alt text (credit) and one with a numeric size alias (G0-A6)
   - one repeat comment from the Vault Compiler between two entries (G0-B3)
   - a numbered-heading variant of the chapter for G0-C12
 - **Implementation notes:**
   - The fixture changes only through its generator (agent rule 2).
   - The images are generated: solid fills at fixed pixel sizes, landscape 1280 × 1006, portrait 358 × 736, small 272 × 334.
-  - The track icons are generated too: six simple, distinct SVG shapes. The book's game-icons.net files are not used in the fixture.
+  - The track icons are generated too: six simple, distinct SVG shapes. No third-party icon files are used in the fixture.
   - The forbidden-word guard also reads a **git-ignored local word list** generated from the user's vault, so the vault's names are never committed (G0-C13).
 - **Tests:** `tests/unit/fixture-generator.test.ts`: the chapter is present, the counts are as listed, and two runs give byte-identical output.
 - **SCAR check:** *(at G3; expected focus 018, 035)*
@@ -138,7 +138,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 - **User story:** US-030, statblock content, style, grayscale, never split, tall blocks, no links
 - **Description:** Emit the statblock as a Typst helper call, built from the block data and the preset. The parts, top to bottom, separated by thin rules:
   - title band: the name between ◆, **without a heading number** even when headings are numbered (G0-C12)
-  - the box row and the Condition track (D-19)
+  - the box row and the state track (D-19)
   - attributes line and traits line, centred, only the fields that are set (the box key is no longer in a stats row, D40)
   - attacks, name left and dice right, with a hanging indent
   - `Skills:` line
@@ -317,7 +317,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
   - Entries are **always** TOC entries, whatever `toc.depth` is (G0-C4).
   - Links to an entry **always** get a page number, whatever `linkPageLevel` is (G0-C4), pointing to its first page.
   - The running header on entry pages is the section name, with none on `full-image` pages and none on the chapter opener (G0-C3, D-09).
-  - After the last entry, a generated table lists every entry: name, section, the box value, the attribute values from `entries.statblock.stats`, a **Track** column and the page. **Track** is empty for the default track (`trackDefault`), `+ <cell>` when the entry adds a cell, `none` for `conditions: none`, and otherwise the cells in short form. It is sorted by name, starts on a left page under a configurable heading (`Quick Reference`), is in the TOC, its header row repeats, and `entries.quickReference` switches it on (default off, G0-C1).
+  - After the last entry, a generated table lists every entry: name, section, the box value, the attribute values from `entries.statblock.stats`, a **Track** column and the page. **Track** is empty for the default track (`trackDefault`), `+ <cell>` when the entry adds a cell, `none` for an entry without a track, and otherwise the cells in short form. It is sorted by name, starts on a left page under a configurable heading (`Quick Reference`), is in the TOC, its header row repeats, and `entries.quickReference` switches it on (default off, G0-C1).
 - **Acceptance criteria (from the story):** *(at step 3)*. Expected:
   - the fixture's TOC has all 12 entries, also with `toc.depth: 2`
   - a link to an h3 entry has a page number with `linkPageLevel: 2`
@@ -398,19 +398,19 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 - **Tests:** the full quality gate
 - **SCAR check:** *(at G3/G4; expected focus 006, 012, 018, 025, 028, 029, 030)*
 
-## D-19 — Tick boxes and Condition track in the statblock
+## D-19 — Tick boxes and state track in the statblock
 
 - **User story:** US-030, tracks (D48, D49, D51, D52)
 - **Description:** Two parts of the statblock, drawn between the title band and the attributes line:
-  - **Box row:** on the left, the label of the `entries.statblock.boxes` key above its value, in the accent colour. On the right, one empty box per point of the value, 15 per row in three groups of 5, filling from the top left. The boxes share the remaining width, so their size follows from the statblock width (about 2.4 mm in A5 MU; the print check of 2026-11-05 found 2.0 mm still fine). The value is the base value only (D52).
-  - **Condition track:** the label `CONDITION`, then one framed cell of equal width per cell of the entry's track, in one row, each with its SVG icon recoloured to the frame colour and drawn at 75 % opacity. The track is `entries.statblock.trackDefault` unless the entry has a `conditions` key: a list of cell labels, matched case-insensitively against `entries.statblock.track`, or `none` for no track.
+  - **Box row:** on the left, the label of the `entries.statblock.boxes` key above its value, in the accent colour. On the right, one empty box per point of the value, 15 per row in three groups of 5, filling from the top left. The boxes share the remaining width, so their size follows from the statblock width (about 2.4 mm in the reference A5 preset; the print check of 2026-11-05 found 2.0 mm still fine). The value is the base value only (D52).
+  - **State track:** the label from `entries.statblock.trackLabel`, then one framed cell of equal width per cell of the entry's track, in one row, each with its SVG icon recoloured to the frame colour and drawn at 75 % opacity. The track is `entries.statblock.trackDefault` unless the entry has the `entries.statblock.trackKey` key: a list of cell labels, matched case-insensitively against `entries.statblock.track`, or `none` for no track.
   - Boxes and cells are filled with the page colour, not the statblock fill, so pencil marks stay visible (white with a `#4d4d4d` frame in grayscale).
 - **Acceptance criteria (from the story):** *(at step 3)*. Expected:
   - value 11 → 11 boxes in one row; 30 → two rows of 15; 45 → three rows
   - value 46 → printed without boxes and `STAT_BOXES_MANY "<name>": 46`
-  - value `0` → printed as written, no boxes, no warning; `varies` → printed as written, no boxes, `STAT_GRIT_NOT_NUMBER "<name>"` (the code names the configured key's role, not RoA's Grit; the final code name is decided at G1)
+  - value `0` → printed as written, no boxes, no warning; `varies` → printed as written, no boxes, `STAT_BOXES_NOT_NUMBER "<name>"`
   - no `entries.statblock.boxes` → no box row, and the value stays in the attributes line
-  - no `conditions` → the `trackDefault` cells; `conditions: none` → no track; a `conditions` list with an unknown label → that cell is left out with a warning
+  - no track key → the `trackDefault` cells; `states: none` → no track; a `states` list with an unknown label → that cell is left out with a warning
   - no statblock (no stats and no attacks) → no track either
   - grayscale: icons and frames `#4d4d4d`, boxes white
 - **Implementation notes:**
@@ -425,7 +425,7 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
 ## D-20 — Statblock preview of `o2t-entry` blocks in Obsidian
 
 - **User story:** US-035 (G0-A9)
-- **Description:** Register a Markdown code-block processor for `o2t-entry`. In reading view and live preview it draws the statblock (title band, box row, Condition track, attributes, traits, attacks, skills, tags) from the block's YAML, with the `entries.*` settings of the active preset, as HTML and CSS.
+- **Description:** Register a Markdown code-block processor for `o2t-entry`. In reading view and live preview it draws the statblock (title band, box row, state track, attributes, traits, attacks, skills, tags) from the block's YAML, with the `entries.*` settings of the active preset, as HTML and CSS.
 - **Acceptance criteria (from the story):** *(at step 3)*. Expected:
   - the fixture's `Fen Hare` block shows a statblock with its name, 11 boxes, the default track and its attacks
   - a missing value shows `—`, an attack without dice is highlighted
@@ -449,11 +449,11 @@ D-15 and D-16 don't depend on the entry work and can be done any time after D-02
   - **(b) page in the book** (`entries.encounterSheet`): a page of its own after the quick-reference table, in the TOC. One column at the text width; two across when the text width allows two rows of at least 88 mm.
 
   Every row, framed with a 0.4 pt line and 2.5 mm padding, has three lines:
-  1. a write-in line for the name, then small write-in boxes (7 × 4.5 mm) for each attribute in `entries.statblock.stats` (Body, Mind, Agility in A5 MU)
+  1. a write-in line for the name, then small write-in boxes (7 × 4.5 mm) for each attribute in `entries.statblock.stats`
   2. 30 tick boxes (two rows of 15 in groups of 5) and next to them **every** cell of `entries.statblock.track`, with icons
   3. two attack slots, `ATTACK` (write-in line) and `DICE` (10 mm field): side by side when the row is at least 100 mm wide, one above the other in narrower rows
 
-  Both forms have the heading `Encounter Sheet` with a write-in field for the round, a one-line icon key with the marking rule, and the icon credit at the foot of the page. The number of rows follows from the measured row height and a 2 mm gap: 8 lines × 2 = 16 rows on A4, 5 rows on an A5 MU page.
+  Both forms have the heading `Encounter Sheet` with a write-in field for the round, a one-line icon key with the marking rule, and the icon credit at the foot of the page. The number of rows follows from the measured row height and a 2 mm gap: 8 lines × 2 = 16 rows on A4, 5 rows on an A5 page with the reference preset's margins.
 - **Acceptance criteria (from the story):** *(at step 3)*. Expected:
   - with `encounterSheetFile: true`, the export writes two PDFs; the second has exactly one A4 page with 16 rows
   - with `encounterSheet: true`, the book has the sheet page right after the quick reference, in the TOC, with 5 rows in an A5 preset
