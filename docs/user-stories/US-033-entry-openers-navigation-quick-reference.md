@@ -146,12 +146,10 @@ entries}`, A5, facing pages, folios and running header on with
   at the chapter's section level; the heading is in the contents. Columns:
   Entry, Section, the `entries.statblock.boxes` key's label (when set), one
   column per `entries.statblock.stats` label, Track (when `track` is set),
-  Page. One row per entry of the chapter (nested entries excluded), sorted
-  by the entry's plain text in the order of the document's language (the
-  preset's `lang`, US-001; `Intl.Collator(lang, {sensitivity: "base"})`,
-  decision 2: `Æther`, `Bog Wight`, `cave wyrm`, `Élan`, `Zebra` with
-  `lang: en`), across all sections. A
-  missing value is `—`. Page is the entry's first page (as AC-8).
+  Page. One row per entry of the chapter (nested entries excluded), in the
+  order the entries stand in the note (decision 2, revised 2026-11-06: the
+  compiled note already lists them in the author's order; no further
+  sorting). A missing value is `—`. Page is the entry's first page (as AC-8).
 
 - **AC-10 (the Track column):** Compared with `trackDefault` (US-030 AC-13):
 
@@ -169,8 +167,8 @@ entries}`, A5, facing pages, folios and running header on with
 - **AC-11 (layout and repeats):** The table may break across pages; its
   header row repeats on each page. An entry heading that appears twice in the
   chapter (a repeat the writer missed) has one row, for its first
-  occurrence. Example with the outline above: 5 rows — Bog Wight, Cave Wyrm,
-  Fen Hare, Marsh Owl, Reed Cat; columns Entry, Section, vigour (the key, no stats label; US-030 AC-12), Might, Wits,
+  occurrence. Example with the outline above: 5 rows — Fen Hare, Marsh Owl,
+  Cave Wyrm, Reed Cat, Bog Wight (the note's order); columns Entry, Section, vigour (the key, no stats label; US-030 AC-12), Might, Wits,
   Speed, Track, Page.
 
 - **AC-12 (settings):** Two `entries` fields (US-030 AC-8's messages and
@@ -211,127 +209,12 @@ entries}`, A5, facing pages, folios and running header on with
 
 1. **An entries chapter that is not an H1:** the same opener and header rules
    whatever its level (AC-2, AC-7).
-2. **Quick reference sorting:** the language's order, from the preset's
-   `lang` (AC-9).
+2. **Quick reference order (revised 2026-11-06 at G2):** the order of the
+   note, with no further sorting (AC-9). The first answer ("the language's
+   order, from the preset's `lang`") rested on a setting that does not
+   exist: Obsidian2Typst has no document language.
 3. **The contents with an entries chapter:** the measured output of AC-6 is
    accepted.
-
----
-
-## Notes` outside
-  the chapter are not. With `toc.depth: 0` there is no contents and nothing
-  is listed (US-027).
-
-- **AC-7 (running header, D30, G0-C3):** On pages of an entries chapter, the
-  running header (US-019) shows the title of the current section (the last
-  section heading before or on the page), whatever
-  `page.runningHeaderLevel` is, with these exceptions:
-  - the chapter opener page: none (US-019 rule 1: an H1 starts there; when
-    the chapter heading is not an H1, its page still shows none, decision 1);
-  - a `full-image` page: none (US-031 AC-6);
-  - an overflow page: the "(continued)" line (US-032 AC-8);
-  - a blank page: none (US-025 AC-6).
-
-  | Page | Header |
-  |---|---|
-  | chapter opener (`# Menagerie`, `## Beasts`) | — |
-  | Fen Hare … Reed Cat | `Beasts` |
-  | opener of `## Horrors` | `Horrors` |
-  | Bog Wight text page | `Horrors` |
-  | Bog Wight `full-image` page | — (no folio either) |
-
-  Outside entries chapters the header is US-019's, unchanged.
-
-- **AC-8 (links to entries, G0-C4):** A link to an entry gets the page
-  number of the entry's first page when US-018 AC-2's conditions 1 and 2
-  hold, whatever `linkPageLevel` is (condition 3 is met by any link whose
-  target is an entry). Example, `linkPageLevel: 1`: `[Cave Wyrm](#cave-wyrm)`
-  in Fen Hare's body → `Cave Wyrm (p. 6)` where the entry starts on p. 6,
-  never the number of its overflow page.
-
-### Quick reference
-
-- **AC-9 (the table, D35):** With `entries.quickReference: true`, a table
-  follows each entries chapter's last entry, starting on a new left page
-  under a heading `entries.quickReferenceTitle` (built-in `Quick Reference`)
-  at the chapter's section level; the heading is in the contents. Columns:
-  Entry, Section, the `entries.statblock.boxes` key's label (when set), one
-  column per `entries.statblock.stats` label, Track (when `track` is set),
-  Page. One row per entry of the chapter (nested entries excluded), sorted
-  by the entry's plain text in the order of the document's language (the
-  preset's `lang`, US-001; `Intl.Collator(lang, {sensitivity: "base"})`,
-  decision 2: `Æther`, `Bog Wight`, `cave wyrm`, `Élan`, `Zebra` with
-  `lang: en`), across all sections. A
-  missing value is `—`. Page is the entry's first page (as AC-8).
-
-- **AC-10 (the Track column):** Compared with `trackDefault` (US-030 AC-13):
-
-  | Entry's cells | Track |
-  |---|---|
-  | the default | empty |
-  | the default plus Fading | `+ Fading` |
-  | the default without Down | `− Down` |
-  | `states: none` | `none` |
-  | any other set (Fine, Gone) | `Fine, Gone` |
-
-  The column tells a reader how to use the blank cells of the encounter sheet
-  (US-036).
-
-- **AC-11 (layout and repeats):** The table may break across pages; its
-  header row repeats on each page. An entry heading that appears twice in the
-  chapter (a repeat the writer missed) has one row, for its first
-  occurrence. Example with the outline above: 5 rows — Bog Wight, Cave Wyrm,
-  Fen Hare, Marsh Owl, Reed Cat; columns Entry, Section, vigour (the key, no stats label; US-030 AC-12), Might, Wits,
-  Speed, Track, Page.
-
-- **AC-12 (settings):** Two `entries` fields (US-030 AC-8's messages and
-  Details view): `entries.quickReference` (switch, built-in `false`) and
-  `entries.quickReferenceTitle` (text, built-in `Quick Reference`; empty →
-  no heading, then the table is not in the contents).
-
-### Warnings, composed cases, tests
-
-- **AC-13 (warnings):** `ENTRY_BLANK_PAGE`, `SECTION_INTRO_OVERFLOW` (and
-  US-031's `ENTRY_UNPAIRED`, which AC-3 suppresses) come from the real
-  positions after the compile, once per section or entry, never stopping an
-  export; in `warning-codes.md` with a source line.
-
-- **AC-14 (composed, SCAR-002):**
-  - a TOC placed by `toc.heading` before the entries chapter (US-027 AC-5):
-    the chapter opener's parity is the PDF page's, as US-025 measured;
-  - two entries chapters (`{Menagerie: entries, Relics: entries}`): each has
-    its own openers and, when on, its own quick reference after its last
-    entry;
-  - glossary after the chapter (US-017): the quick reference ends the
-    entries chapter's pages; the glossary starts by its own rules;
-  - `page.runningHeader: false`: no header anywhere (AC-7 does not switch it
-    on).
-
-- **AC-15 (tests, SCAR-019):** Facing pages on and off; a previous section
-  ending left and right; intros of 0.3, 1.0 and 1.3 pages; `toc.depth` 0, 1,
-  2, 6; `linkPageLevel` 1, 2, 6; `page.runningHeaderLevel` 1, 2, 3; the
-  quick reference on and off, with and without `boxes` and `track`; one and
-  two entries chapters. The PDF tests read page parity, header text per page,
-  the outline entries (bookmarks and contents text), link texts with page
-  numbers and the table's rows and page numbers (SCAR-015), on the generated
-  fixture (D-03).
-
----
-
-## Open decisions
-
-1. **A chapter heading that is not an H1 (AC-2, AC-7):** an entries chapter
-   named by an `##` heading inside a larger `#` chapter — should its opener
-   still force a right page and suppress the header, or follow the
-   surrounding chapter's pages? Not measured: no such book exists yet.
-2. **Quick reference sorting (AC-9):** by the entry's plain text with a
-   simple case-insensitive comparison (`Æther` after `Zebra`), or by the
-   language's collation (Typst's / the preset's `lang`)?
-3. **US-027's output when an entries chapter exists (AC-6):** `depth: none`
-   plus `outlined: false, bookmarked: true` on deeper headings (measured)
-   changes the written outline only in documents with an entries chapter.
-   Acceptable, or should the outline keep `depth: <toc.depth>` and list
-   entries some other way (not measured)?
 
 ---
 
