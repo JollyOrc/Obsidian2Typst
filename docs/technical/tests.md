@@ -510,7 +510,7 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-6 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-7 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-8 | #133 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-9 | #131 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-9 | #131 | tests/unit/us-034-print-checks.test.ts, tests/unit/us-034-pdf-reader.test.ts; guard: every test reading PDFs through tests/support/pdf.ts | 🟢 green (G4 2026-11-07) |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-10 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-11 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-12 | #133 | tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) — callouts, tables, footnotes and floated images not yet |
