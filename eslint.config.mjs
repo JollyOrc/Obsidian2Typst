@@ -6,6 +6,8 @@ export default defineConfig(
   globalIgnores([
     'node_modules/',
     'main.js',
+    // build output of build/release.mjs
+    'dist/',
     'spikes/',
     'The Rules/',
     'releases/',

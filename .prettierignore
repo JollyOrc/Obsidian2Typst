@@ -8,3 +8,4 @@ scars
 docs
 *.md
 tests/fixtures/sample
+dist

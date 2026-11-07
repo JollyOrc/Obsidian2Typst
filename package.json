@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit && node esbuild.config.mjs",
     "install:scratch": "tsc --noEmit && node build/install-scratch.mjs",
+    "release:build": "node build/release.mjs --clean --gate",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "test": "vitest run tests/unit tests/plugin tests/tooling",
