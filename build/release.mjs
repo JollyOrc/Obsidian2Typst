@@ -11,7 +11,8 @@
 // 2. with `--clean`: refuses a working tree with uncommitted changes, clones
 //    HEAD into a temporary folder, `npm ci`; with `--gate` also runs
 //    typecheck, lint, `npm test` and `npm run test:integration` there;
-// 3. builds `main.js` (in the clone, or here);
+// 3. builds `main.js` with `npm run build` in the folder it builds from
+//    (the clone, or here), and refuses a `main.js` that names that folder;
 // 4. writes `dist/release/<x.y.z>/`: `main.js`, `manifest.json`,
 //    `styles.css`, `LICENSE`, `THIRD_PARTY_NOTICES.md`, the zip
 //    `artefact-v<x.y.z>.zip` of those five, `SHA256SUMS.txt` and
@@ -33,7 +34,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {basename, join} from 'node:path';
 import {crc32, deflateRawSync} from 'node:zlib';
 
 /** The files of a release, in the order they go into the zip. */
@@ -247,8 +248,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         '--gate needs --clean (the gate runs in the clean clone).',
       );
     }
-    const {buildPlugin} = await import(join(from, 'build/build-plugin.mjs'));
-    await buildPlugin({outfile: join(from, 'main.js'), logLevel: 'warning'});
+    // Built in its own folder with the project's own command: esbuild
+    // writes module paths relative to the working directory into main.js,
+    // so a build run from elsewhere would name the build folder.
+    run('npm', ['run', '-s', 'build'], from);
+    if (
+      temp !== null &&
+      readFileSync(join(from, 'main.js'), 'utf8').includes(basename(temp))
+    ) {
+      throw new Error(`main.js names the build folder ${temp}; not released.`);
+    }
     const out = join(root, 'dist', 'release', version);
     const {zip, sums} = assembleRelease({from, out, version});
     if (temp !== null) rmSync(temp, {recursive: true, force: true});
