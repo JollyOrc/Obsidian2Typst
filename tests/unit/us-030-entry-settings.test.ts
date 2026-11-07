@@ -121,6 +121,38 @@ describe('US-030 AC-9 the Details view', () => {
     ).toBe('preset');
   });
 
+  // Added 2026-11-07 (a gap of #127 to #133, found at #133's G4): the
+  // layout's and the print checks' entries fields have their rows too.
+  it('US-031 AC-6, US-032 AC-1, US-033 AC-12, US-034 AC-5, US-036 AC-1: the later entries fields are rows with their values, in order', () => {
+    const result = parsePreset(
+      note(
+        'entries:',
+        '  fullImageHeader: true',
+        '  image: {minScale: 80}',
+        '  emptyWarn: 60',
+        '  quickReference: true',
+        '  quickReferenceTitle: Overview',
+        '  maxWordGap: 250',
+        '  encounterSheet: true',
+        '  encounterSheetBoxes: 15',
+      ),
+    );
+    if (!result.ok) throw new Error('preset must be valid');
+    const rows = detailRows(result.fields, {}).filter((r) =>
+      r.label.startsWith('entries.'),
+    );
+    expect(rows.map((r) => [r.label, r.used, r.source])).toEqual([
+      ['entries.fullImageHeader', 'true', 'preset'],
+      ['entries.image.minScale', '80', 'preset'],
+      ['entries.emptyWarn', '60', 'preset'],
+      ['entries.quickReference', 'true', 'preset'],
+      ['entries.quickReferenceTitle', 'Overview', 'preset'],
+      ['entries.maxWordGap', '250', 'preset'],
+      ['entries.encounterSheet', 'true', 'preset'],
+      ['entries.encounterSheetBoxes', '15', 'preset'],
+    ]);
+  });
+
   it('US-030 AC-9: a preset without entries lists no entries rows', () => {
     const labels = detailRows({}, {}).map((r) => r.label);
     expect(labels.filter((l) => l.startsWith('entries.'))).toEqual([]);

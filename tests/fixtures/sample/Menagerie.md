@@ -11,8 +11,8 @@ Mollit turpis ac deserunt quisque anim euismod consequat veniam pretium morbi bi
 ### Fen Hare
 ```o2t-entry
 vigour: 11
-might: 6
-wits: 1
+might: 5
+wits: 0
 speed: 6
 attacks:
   - "Kick: 2d6"
@@ -49,9 +49,9 @@ Et sapien tristique dui nisi cupidatat semper nisl lacus sagittis dolore bibendu
 ### Marsh Owl
 ```o2t-entry
 vigour: 16
-might: 1
-wits: 1
-speed: 1
+might: 5
+wits: 5
+speed: 6
 attacks:
   - "Rake: 2d6"
 states:
@@ -76,9 +76,9 @@ Sollicitudin aenean mollit.
 ### Cave Wyrm
 ```o2t-entry
 vigour: 45
-might: 6
-wits: 6
-speed: 5
+might: 15
+wits: 15
+speed: 15
 attacks:
   - "Tail sweep across the whole front rank of its foes: 4d6"
   - "Bite: 3d6"
@@ -105,9 +105,9 @@ Non consectetur ut mi tincidunt accumsan accumsan lorem in nibh quisque purus vi
 ### Reed Cat
 ```o2t-entry
 vigour: 0
-might: 3
-wits: 1
-speed: 6
+might: 0
+wits: 0
+speed: 0
 attacks:
   - "Claw: 1d6"
 states: none
@@ -125,9 +125,9 @@ Nulla cillum eiusmod adipiscing ipsum veniam anim aliqua excepteur. Suscipit mae
 ### Quill Rat
 ```o2t-entry
 vigour: 46
-might: 3
-wits: 4
-speed: 3
+might: 13
+wits: 18
+speed: 15
 attacks:
   - "Quills: 2d4"
 layout: page-text
@@ -153,9 +153,9 @@ Phasellus elit.
 ### Sedge Mole
 ```o2t-entry
 vigour: 9
-might: 2
-wits: 2
-speed: 1
+might: 3
+wits: 3
+speed: 3
 attacks:
   - "Dig: 1d4"
 states:
@@ -192,9 +192,9 @@ Laboris ultrices quis.
 ### Moss Newt
 ```o2t-entry
 vigour: 5
-might: 2
-wits: 1
-speed: 3
+might: 1
+wits: 0
+speed: 4
 attacks:
   - "Lick: 1d4"
 layout: page-text
@@ -214,8 +214,8 @@ Fermentum netus nunc fames sagittis dictum aenean elementum tempor nibh duis aen
 ### Bog Wight
 ```o2t-entry
 vigour: 14
-might: 5
-wits: 5
+might: 4
+wits: 4
 speed: 6
 attacks:
   - "Glare: frightens"
@@ -264,9 +264,9 @@ Interdum velit non aliqua vitae ut aliquip pariatur sollicitudin turpis incididu
 ### Mire Toad
 ```o2t-entry
 vigour: 18
-might: 1
-wits: 3
-speed: 3
+might: 2
+wits: 7
+speed: 9
 attacks:
   - "Tongue: 2d6"
 skills:
@@ -323,9 +323,9 @@ Nisi elementum.
 ### Fog Eel
 ```o2t-entry
 vigour: 8
-might: 6
-wits: 2
-speed: 5
+might: 3
+wits: 1
+speed: 4
 attacks:
   - "Coil: 2d4"
 layout: page-text
@@ -387,8 +387,8 @@ Ad ultrices aliquet ornare fames placerat netus mi labore mauris. Lorem proident
 ```o2t-entry
 vigour: 10
 might: 1
-wits: 2
-speed: 3
+wits: 3
+speed: 6
 attacks:
   - "Chill: 1d6"
 layout: page-text
@@ -410,9 +410,9 @@ Quisque cupidatat reprehenderit dictum dui ornare accumsan excepteur qui et inte
 ### Rime Sprite
 ````o2t-entry
 vigour: 6
-might: 5
-wits: 6
-speed: 6
+might: 1
+wits: 2
+speed: 3
 attacks:
   - "Frost: 1d6"
 note: Uses ```code``` here
@@ -439,8 +439,8 @@ Semper lacinia nibh laborum dolore reprehenderit turpis lobortis consectetur lac
 ### Cinder Wraith
 ```o2t-entry
 vigour: 12
-might: 6
-wits: 6
+might: 4
+wits: 4
 speed: 4
 attacks:
   - "Burn: 2d6"
@@ -465,8 +465,8 @@ Nostrud eros cillum dolore fermentum sed est anim vivamus adipiscing sit anim. E
 ```o2t-entry
 vigour: 11
 might: 1
-wits: 2
-speed: 4
+wits: 3
+speed: 7
 attacks:
   - "Kick: 2d6"
 layout: page-text
@@ -520,9 +520,9 @@ Euismod qui irure magna aliquip lorem elit.
 ### Marsh Owl
 ```o2t-entry
 vigour: 16
-might: 3
+might: 4
 wits: 1
-speed: 6
+speed: 11
 attacks:
   - "Rake: 2d6"
 layout: page-landscape

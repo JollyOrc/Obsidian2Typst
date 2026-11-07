@@ -1309,12 +1309,21 @@ function writeMenagerie(): {
     if (counted !== undefined && level === 3) counted.entries++;
   };
   const lede = (): string[] => [sentence(14), sentence(12), ''];
-  const stats = (vigour: unknown = 11): Record<string, unknown> => ({
-    vigour,
-    might: 1 + Math.floor(random() * 6),
-    wits: 1 + Math.floor(random() * 6),
-    speed: 1 + Math.floor(random() * 6),
-  });
+  // The preset's sum rule (vigour = might + wits + speed) holds for every
+  // generated entry: a numeric vigour is split in the proportions of three
+  // dice. The same three draws as before, so the rest of the note is
+  // unchanged (2026-11-07; before, nearly every entry broke the rule).
+  // `Dune Lark` sets its own values and breaks it on purpose (`sum-mismatch`).
+  const stats = (vigour: unknown = 11): Record<string, unknown> => {
+    const dice = [0, 0, 0].map(() => 1 + Math.floor(random() * 6));
+    if (typeof vigour !== 'number') {
+      return {vigour, might: dice[0], wits: dice[1], speed: dice[2]};
+    }
+    const total = dice.reduce((a, b) => a + b, 0);
+    const might = Math.floor((vigour * (dice[0] as number)) / total);
+    const wits = Math.floor((vigour * (dice[1] as number)) / total);
+    return {vigour, might, wits, speed: vigour - might - wits};
+  };
 
   heading(1, 'Menagerie');
   push('', ...body(60));

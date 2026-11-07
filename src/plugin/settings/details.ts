@@ -188,6 +188,13 @@ const ENTRY_ROW_PATHS: readonly (readonly string[])[] = [
     'sizes',
   ].map((key) => ['entries', 'statblock', key]),
   ['entries', 'tagLabels'],
+  // US-031 AC-6, US-032 AC-1, US-033 AC-12: the layout's fields (added
+  // 2026-11-07; they were missing since #127 to #130).
+  ['entries', 'fullImageHeader'],
+  ['entries', 'image', 'minScale'],
+  ['entries', 'emptyWarn'],
+  ['entries', 'quickReference'],
+  ['entries', 'quickReferenceTitle'],
   // US-034 AC-5: the word-gap settings (shown when the preset sets them).
   ['entries', 'narrowJustification'],
   ['entries', 'maxWordGap'],
