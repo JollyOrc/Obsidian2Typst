@@ -61,7 +61,8 @@ Measured (SCAR-024):
   `0` = off. In preset notes and the Defaults (US-008 AC-1 precedence).
   Settings screen (US-029 AC-1, AC-2): a feature row `Print resolution`,
   description `Warns about images below this dpi; off at 0.`, with a gear
-  whose modal holds the number field — the form of the `Contents` row
+  whose modal holds the number field `Minimum print resolution` (hint
+  `dpi, 0 to 2400`; named at #132) — the form of the `Contents` row
   (`off while its depth is 0`). The row is placed after `Image fit`. Invalid
   values make the preset invalid (US-008 AC-4): `images.minDpi must be a
   whole number from 0 to 2400 (line N)`. A digital preset may set it lower.
@@ -71,10 +72,15 @@ Measured (SCAR-024):
   its pixel width divided by its drawn width in inches, after fit, shrink,
   float or an entry slot. The drawn width comes from the compile: the image
   helper records each image's file and drawn width as `metadata`, read after
-  the compile (as US-028 AC-5's decisions); the pixel width from the image
-  file's header (PNG, JPEG, WebP, GIF). SVG and other vector images are not
-  checked. An inline image (inside text) and a refused image (US-003 AC-6)
-  are not checked.
+  the compile (as US-028 AC-5's decisions); an image whose drawn width is
+  fixed by its call (a size written in the note, the cover filling the sheet)
+  is recorded by the conversion instead (refined at #132, so these calls stay
+  as before); the pixel width from the image file's header (PNG, JPEG, WebP,
+  GIF). SVG and other vector images are not checked. An image written inside
+  text is set as a block of its own (US-003) and is checked like one
+  (refined at #132: the converter draws no image inline); drawn icons
+  (callout icons, track cells) and a refused image (US-003 AC-6) are not
+  checked.
 
 - **AC-3 (the warning):** Below `images.minDpi`:
   `IMAGE_LOW_DPI "<file>": <d> dpi at <w> mm (min <m>)`, with `d` rounded to

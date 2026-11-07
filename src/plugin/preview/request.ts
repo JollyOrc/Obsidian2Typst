@@ -2,7 +2,9 @@
 // here writes a file, copies an asset, shows a notice or takes the export lock:
 // assets are read into memory under the paths the export would write.
 import {extensionOf, type AssetUse} from '../../core/assets';
+import {pixelWidthOf} from '../../core/checks/print';
 import {exportNames, type CompileRequest} from '../../core/compile';
+import type {ImageFact} from '../../core/emit';
 import {compileFonts} from '../compile-fonts';
 import {noteNameOf, prepareNote, type PrepareDeps} from '../prepare-note';
 
@@ -30,6 +32,12 @@ export interface PreviewRequestInput {
     bytes: Uint8Array,
     extension: string,
   ) => Promise<Uint8Array | null>;
+  /**
+   * US-034 AC-2: filled with the raster files' pixel widths by export path,
+   * read from the bytes before a smaller copy is made (the preview's copies
+   * would understate the resolution).
+   */
+  pixelWidths?: Record<string, number>;
 }
 
 /**
@@ -46,6 +54,10 @@ export async function buildPreviewRequest(
   for (const use of input.uses) {
     if (use.to in files) continue;
     const bytes = await input.readAsset(use.from);
+    // US-034 AC-2: the pixel width of the file, before a smaller copy.
+    const width = pixelWidthOf(use.to, bytes);
+    if (width !== null && input.pixelWidths !== undefined)
+      input.pixelWidths[use.to] = width;
     const extension = extensionOf(use.to);
     const smaller = SHRINKABLE.has(extension)
       ? await input.downsample(bytes, extension)
@@ -61,6 +73,14 @@ export async function buildPreviewRequest(
     files,
     fonts: [...input.fonts],
   };
+}
+
+/** US-032 AC-9, US-034 AC-2, AC-4: what the preview's post-compile checks need. */
+export interface PreviewChecks {
+  emptyWarn: number;
+  minDpi: number;
+  fixedImages: ImageFact[];
+  pixelWidths: Record<string, number>;
 }
 
 export interface PreviewOptions {
@@ -80,7 +100,7 @@ export async function preparePreview(
   path: string,
   options: PreviewOptions,
 ): Promise<
-  | {ok: true; request: CompileRequest; warnings: number; emptyWarn: number}
+  | ({ok: true; request: CompileRequest; warnings: number} & PreviewChecks)
   | {ok: false; error: string}
 > {
   const prepared = await prepareNote(deps, path);
@@ -92,6 +112,7 @@ export async function preparePreview(
       error: `Preview stopped: ${count} ${count === 1 ? 'warning' : 'warnings'} (strict mode)`,
     };
   }
+  const widths: Record<string, number> = {};
   const request = await buildPreviewRequest({
     noteName: noteNameOf(path),
     typ: prepared.typ,
@@ -100,6 +121,16 @@ export async function preparePreview(
     fonts: compileFonts(options.bundledFonts ?? [], prepared.fonts),
     readAsset: deps.vault.readBytes,
     downsample: options.downsample,
+    pixelWidths: widths,
   });
-  return {ok: true, request, warnings: count, emptyWarn: prepared.emptyWarn};
+  return {
+    ok: true,
+    request,
+    warnings: count,
+    emptyWarn: prepared.emptyWarn,
+    // US-034 AC-4: the print resolution check runs in the preview too.
+    minDpi: prepared.minDpi,
+    fixedImages: prepared.fixedImages,
+    pixelWidths: widths,
+  };
 }

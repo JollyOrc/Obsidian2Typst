@@ -4,7 +4,8 @@
 import type {AssetUse} from '../core/assets';
 import {convert} from '../core/convert';
 import {ENTRY_BUILTINS} from '../core/markers';
-import type {Warning} from '../core/emit';
+import type {ImageFact, Warning} from '../core/emit';
+import {MIN_DPI_BUILTIN} from '../core/layout/page-setup';
 import {
   effectiveSettings,
   formatPresetError,
@@ -55,6 +56,10 @@ export interface PreparedNote {
   source: string;
   /** US-032 AC-9: `entries.emptyWarn` of the preset (or the built-in). */
   emptyWarn: number;
+  /** US-034 AC-1: `images.minDpi` of the preset (or the built-in 300). */
+  minDpi: number;
+  /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
+  fixedImages: ImageFact[];
 }
 
 /** US-028 AC-16: how `convertNote` converts a second time. */
@@ -178,6 +183,8 @@ export async function convertNote(
     fonts: fontSet?.files ?? [],
     emptyWarn:
       effective.settings.entries?.emptyWarn ?? ENTRY_BUILTINS.emptyWarn,
+    minDpi: effective.settings.images?.minDpi ?? MIN_DPI_BUILTIN,
+    fixedImages: converted.images ?? [],
     source,
   };
 }

@@ -2,7 +2,7 @@
 // imports.
 import type {AssetUse} from '../assets';
 import type {CoverSettings} from '../cover';
-import type {FontInfo, Warning} from '../emit';
+import type {FontInfo, ImageFact, Warning} from '../emit';
 import type {FontsSettings} from '../fonts/types';
 import type {
   BookSettings,
@@ -134,4 +134,10 @@ export interface ConvertResult {
   assets: AssetUse[];
   warnings: Warning[];
   lineMap: LineMapEntry[];
+  /**
+   * US-034 AC-2: the block images whose drawn width the conversion fixes (a
+   * written size, the cover); absent when there are none. The others are
+   * the compile's `<o2t-image>` facts.
+   */
+  images?: ImageFact[];
 }

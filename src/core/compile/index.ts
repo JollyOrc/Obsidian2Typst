@@ -49,6 +49,8 @@ export type CompileResult =
       entryEnds?: unknown[];
       /** US-033 AC-13: the section openers' facts. */
       entrySections?: unknown[];
+      /** US-034 AC-2: the block images' drawn widths (`<o2t-image>`). */
+      images?: unknown[];
     }
   | {ok: false; kind: 'typst' | 'worker'; error: string};
 

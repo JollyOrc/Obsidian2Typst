@@ -12,7 +12,7 @@ import {
 } from '../assets';
 import type {ImageNode, WikilinkNode} from '../parse';
 import type {EmitContext} from './context';
-import {FIT_DECISION_LABEL} from './fit-label';
+import {FIT_DECISION_LABEL, IMAGE_FACT_LABEL} from './fit-label';
 import {escapeMarkup} from './escape-markup';
 import {typstString} from './typst-string';
 
@@ -20,13 +20,16 @@ import {typstString} from './typst-string';
  * US-003 AC-2b: the helper that places an image at its natural size, never
  * wider than the available width, never taller than the available height, and
  * never enlarged. The pipeline writes it once into the preamble (US-015).
+ * US-034 AC-2: records the file and its drawn width as `<o2t-image>`.
  */
 export const FIT_IMAGE_HELPER = [
   '#let fit-image(path) = layout(size => {',
   '  let m = measure(image(path))',
   '  let w = calc.min(m.width, size.width)',
   '  let h = m.height * (w / m.width)',
-  '  image(path, width: w * calc.min(1, size.height / h))',
+  '  let dw = w * calc.min(1, size.height / h)',
+  `  [#metadata((file: path, widthMm: dw / 1mm)) <${IMAGE_FACT_LABEL}>]`,
+  '  image(path, width: dw)',
   '})',
 ].join('\n');
 
@@ -51,7 +54,7 @@ export interface ImageFit {
 const fitProbe = (label: string): string =>
   `#block(height: 0pt, below: 0pt, width: 100%)[] <${label}>`;
 
-export {FIT_DECISION_LABEL};
+export {FIT_DECISION_LABEL, IMAGE_FACT_LABEL};
 
 /**
  * US-028 | AC-3, AC-4, AC-6, AC-7: the helper that keeps an image with its
@@ -121,6 +124,7 @@ export const FIT_FLOW_HELPER = [
   '      let d = if use { hint.d } else { want }',
   '      let r = if use { hint.r } else { wr }',
   `      [#metadata((d: d, line: line, name: name, key: key, r: r, want: want, wr: wr)) <${FIT_DECISION_LABEL}>]`,
+  `      [#metadata((file: path, widthMm: (if d == "shrink" { w * r } else { w }).to-absolute() / 1mm)) <${IMAGE_FACT_LABEL}>]`,
   '      if d == "full" { fig(w) }',
   '      else if d == "shrink" { fig(w * r) }',
   '      else if d == "float" { place(top, float: true, clearance: 1em, [#fig(w) #label(str(at) + "-f")]) }',
@@ -385,6 +389,8 @@ export function emitImage(
     ctx.markFitImagePlaced();
     return place(`fit-image(${path})`);
   }
+  // US-034 AC-2: the width written is the width drawn (1 px = 0.75 pt).
+  ctx.fixedImage(found, (size.width * 0.75 * 25.4) / 72);
   const dimensions = [`width: ${points(size.width)}`];
   if (size.height !== null) dimensions.push(`height: ${points(size.height)}`);
   return place(`image(${path}, ${dimensions.join(', ')})`);

@@ -175,6 +175,9 @@ export function resolveFields(
       preset.images?.[key] ?? defaults.images?.[key] ?? DEFAULT_IMAGES[key],
     ]),
   ) as unknown as ImagesSettings;
+  // US-034 AC-1: passed on only when set (the built-in is read where used).
+  const minDpi = preset.images?.minDpi ?? defaults.images?.minDpi;
+  if (minDpi !== undefined) images.minDpi = minDpi;
   overlayPage(page, defaults.page);
   overlayPage(page, preset.page);
   return {

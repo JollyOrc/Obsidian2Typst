@@ -8,7 +8,7 @@ import {
 import {TypstSnippet} from '@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs';
 import {loadFonts} from '@myriaddreamin/typst.ts/dist/esm/options.init.mjs';
 import {layoutSettled} from '../../core/compile';
-import {FIT_DECISION_LABEL} from '../../core/emit/fit-label';
+import {FIT_DECISION_LABEL, IMAGE_FACT_LABEL} from '../../core/emit/fit-label';
 import type {FaceInfo} from '../../core/fonts';
 
 /** Sends a message to the plugin; `transfer` lists buffers that move. */
@@ -84,6 +84,8 @@ export interface LayoutFacts {
   entryEnds?: unknown[];
   /** US-033 AC-13: the section openers' `<o2t-section>` facts. */
   entrySections?: unknown[];
+  /** US-034 AC-2: the block images' `<o2t-image>` drawn widths. */
+  images?: unknown[];
 }
 
 /** US-031 AC-14: a document with an entries chapter writes these facts. */
@@ -104,6 +106,7 @@ export async function readLayoutFacts(
   mainFilePath: string,
   decisions: boolean,
   entries = false,
+  images = false,
 ): Promise<LayoutFacts> {
   try {
     return await compiler.runWithWorld({mainFilePath}, async (world) => {
@@ -135,6 +138,20 @@ export async function readLayoutFacts(
           }
         } catch {
           // no facts, no entry warnings
+        }
+      }
+      // US-034 AC-2: the drawn widths, when a helper that records them is in.
+      if (images) {
+        try {
+          const out = await world.query({
+            selector: `<${IMAGE_FACT_LABEL}>`,
+            field: 'value',
+          });
+          const values: unknown =
+            typeof out === 'string' ? JSON.parse(out) : out;
+          if (Array.isArray(values)) facts.images = values;
+        } catch {
+          // no facts, no IMAGE_LOW_DPI
         }
       }
       if (!decisions) return facts;
@@ -222,6 +239,7 @@ export function createWorkerCore(post: Post): {
       main,
       message.source.includes(FIT_DECISION_LABEL),
       message.source.includes(ENTRY_FACTS),
+      message.source.includes(`<${IMAGE_FACT_LABEL}>`),
     );
     if (vector) {
       post({type: 'vector-compiled', id: message.id, vector: buffer, ...fit}, [

@@ -23,20 +23,21 @@ const HEADER =
 describe('US-015 AC-8 line map', () => {
   it('US-015 AC-8: returns the line map of the composed example', async () => {
     const {lineMap} = await run(COMPOSED_NOTE);
+    // US-034 AC-2 (#132): the fit-image helper is two lines longer.
     expect(lineMap).toEqual([
-      {typLine: 13, sourceLine: 1},
-      {typLine: 15, sourceLine: 3},
-      {typLine: 17, sourceLine: 5},
-      {typLine: 19, sourceLine: 7},
-      {typLine: 20, sourceLine: 8},
-      {typLine: 22, sourceLine: 10},
-      {typLine: 24, sourceLine: 12},
-      {typLine: 27, sourceLine: 12},
-      {typLine: 28, sourceLine: 14},
+      {typLine: 15, sourceLine: 1},
+      {typLine: 17, sourceLine: 3},
+      {typLine: 19, sourceLine: 5},
+      {typLine: 21, sourceLine: 7},
+      {typLine: 22, sourceLine: 8},
+      {typLine: 24, sourceLine: 10},
+      {typLine: 26, sourceLine: 12},
+      {typLine: 29, sourceLine: 12},
+      {typLine: 30, sourceLine: 14},
     ]);
   });
 
-  it('US-015 AC-8: without the image and its helper the lines move up by 8 after the image and by 6 before it', async () => {
+  it('US-015 AC-8: without the image and its helper the lines move up by 10 after the image and by 8 before it', async () => {
     const note = COMPOSED_NOTE.replace('![Map](assets/map.png)\n\n', '');
     const {lineMap} = await run(note);
     expect(lineMap.map((e) => e.typLine)).toEqual([

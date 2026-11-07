@@ -13,7 +13,14 @@ import {
   type FitStep,
 } from '../core/compile';
 import type {AssetUse} from '../core/assets';
-import {FIT_HINT_LINES, fitDecisionWarnings, type Warning} from '../core/emit';
+import {imageFacts, lowDpiWarnings, pixelWidths} from '../core/checks/print';
+import {
+  FIT_HINT_LINES,
+  fitDecisionWarnings,
+  type ImageFact,
+  type Warning,
+} from '../core/emit';
+import {MIN_DPI_BUILTIN} from '../core/layout/page-setup';
 import {
   entryLayoutWarnings,
   sectionWarnings,
@@ -87,11 +94,17 @@ export interface RunExportOptions {
   fitCompileLimit?: number;
   /** US-032 AC-9: `entries.emptyWarn` (built-in 50). */
   entryEmptyWarn?: number;
+  /** US-034 AC-1: `images.minDpi` (built-in 300; 0 = off). */
+  minDpi?: number;
+  /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
+  fixedImages?: readonly ImageFact[];
 }
 
 /** US-028 AC-16: the note converted again without image fit. */
 export interface FallbackNote {
   typ: string;
+  /** US-034 AC-2: its fixed-width images (sized images lose `fit-flow`). */
+  images?: readonly ImageFact[];
 }
 
 /** How a run ended. */
@@ -142,6 +155,7 @@ export async function runExport(
         );
         files[names.template] = new TextEncoder().encode(options.template);
       }
+      let fallbackImages: readonly ImageFact[] = [];
       // US-028 AC-15, AC-16: compile until the layout settles, else fall
       // back to the note at 100 (`compileSettled`); one compile without the
       // hints lines (the rule is off) as before.
@@ -161,7 +175,11 @@ export async function runExport(
         fallback:
           options.fallback === undefined
             ? undefined
-            : async () => (await options.fallback?.())?.typ ?? null,
+            : async () => {
+                const note = await options.fallback?.();
+                fallbackImages = note?.images ?? [];
+                return note?.typ ?? null;
+              },
         limit: options.fitCompileLimit ?? FIT_COMPILE_LIMIT,
       });
       const {result} = done;
@@ -194,6 +212,18 @@ export async function runExport(
           (result.entrySections ?? []) as SectionFact[],
           (result.entryPlaces ?? []) as EntryPlaceFact[],
           (result.entryEnds ?? []) as EntryEndFact[],
+        ),
+      );
+      // US-034 AC-2, AC-3, decision 1: images below the print resolution
+      // (after the strict check: never stops an export).
+      warnings.push(
+        ...lowDpiWarnings(
+          [
+            ...(done.fellBack ? fallbackImages : (options.fixedImages ?? [])),
+            ...imageFacts(result.images ?? []),
+          ],
+          pixelWidths(files),
+          options.minDpi ?? MIN_DPI_BUILTIN,
         ),
       );
       return {warnings};

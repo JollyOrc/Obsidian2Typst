@@ -171,6 +171,13 @@ const EXPECTED_TAB: LayoutSection[] = [
         desc: 'Images shrink to stay with their text; off at 100 %.',
         rows: ['Smallest image size'],
       },
+      // US-034 AC-1 (#132): the print resolution row, after Image fit.
+      {
+        kind: 'feature',
+        name: 'Print resolution',
+        desc: 'Warns about images below this dpi; off at 0.',
+        rows: ['Minimum print resolution'],
+      },
     ],
   },
   {
@@ -210,10 +217,11 @@ describe('US-029 AC-1, AC-2 the settings tab layout', () => {
     expect(JSON.parse(JSON.stringify(TAB_LAYOUT))).toEqual(EXPECTED_TAB);
   });
 
-  it('US-029 AC-1: every row of DEFAULT_ROWS and FONT_ROWS and every global row stands exactly once (37 + 10 + 3)', async () => {
+  it('US-029 AC-1: every row of DEFAULT_ROWS and FONT_ROWS and every global row stands exactly once (38 + 10 + 3)', async () => {
     const {TAB_LAYOUT} = await load();
     const labels = labelsOf(TAB_LAYOUT);
-    expect(DEFAULT_ROWS).toHaveLength(37);
+    // US-034 AC-1 (#132): Minimum print resolution added.
+    expect(DEFAULT_ROWS).toHaveLength(38);
     expect(FONT_ROWS).toHaveLength(10);
     const all = [
       ...DEFAULT_ROWS.map((r) => r.label),
@@ -314,6 +322,7 @@ describe('US-029 AC-9 the details table in the order of the layout', () => {
       'Pages per signature',
       ...CONTENTS,
       'Smallest image size',
+      'Minimum print resolution',
       'Cover',
       'Callout styles',
       'Heading rules',
@@ -339,8 +348,9 @@ describe('US-029 AC-9 the details table reads the built-in values (found at G3)'
       ['Contents page numbers', 'true (built-in)'],
       ['Contents dot leaders', 'true (built-in)'],
       ['Smallest image size', '100 (built-in)'],
+      ['Minimum print resolution', '300 (built-in)'],
     ];
-    expect(expected).toHaveLength(16);
+    expect(expected).toHaveLength(17);
     for (const [label, value] of expected) {
       expect(used.get(label), label).toBe(value);
     }
@@ -369,7 +379,7 @@ describe('US-029 AC-3, AC-9 one built-in lookup for every row (SCAR-017)', () =>
       .filter((row) => effectiveValue({}, {}, row.path) === undefined)
       .map((row) => row.label);
     expect(missing).toEqual([]);
-    expect(checked).toHaveLength(34);
+    expect(checked).toHaveLength(35);
     const value = (label: string): unknown =>
       effectiveValue(
         {},

@@ -2,7 +2,7 @@
 // which settings, which folder, and what the export run gets. Everything the
 // command needs from Obsidian is injected, so it runs without Obsidian.
 import type {AssetUse} from '../core/assets';
-import type {Warning} from '../core/emit';
+import type {ImageFact, Warning} from '../core/emit';
 import type {FontSet} from './fonts';
 import {convertNote, noteNameOf, selectPreset} from './prepare-note';
 import type {PresetStore} from './presets/store';
@@ -28,6 +28,10 @@ export interface ExportRequest {
   fallback?: () => Promise<FallbackNote | null>;
   /** US-032 AC-9: `entries.emptyWarn` of the preset. */
   entryEmptyWarn?: number;
+  /** US-034 AC-1: `images.minDpi` of the preset. */
+  minDpi?: number;
+  /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
+  fixedImages?: readonly ImageFact[];
 }
 
 /** How the command ended when no export was run. */
@@ -126,13 +130,16 @@ export async function exportNoteAt(
     },
     // US-032 AC-9: the threshold of ENTRY_SPREAD_EMPTY.
     entryEmptyWarn: prepared.emptyWarn,
+    // US-034 AC-1, AC-2: the print resolution check.
+    minDpi: prepared.minDpi,
+    fixedImages: prepared.fixedImages,
     // US-028 AC-16: the text read above, converted again without image fit.
     fallback: async () => {
       const at100 = await convertNote(deps, path, active, selected.preset, {
         source: prepared.source,
         imagesOff: true,
       });
-      return at100.ok ? {typ: at100.typ} : null;
+      return at100.ok ? {typ: at100.typ, images: at100.fixedImages} : null;
     },
   });
 }

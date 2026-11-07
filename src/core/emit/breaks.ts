@@ -5,6 +5,7 @@
 // `weak: true` adds nothing on an empty page, an added page is told from a
 // real one by the two markers around the break (`o2t-blank`, furniture.ts).
 import type {BreakLevel, BreakRule, BreakRules} from '../layout/page-setup';
+import {IMAGE_FACT_LABEL} from './fit-label';
 
 /** US-025 AC-2: the label before every written break. */
 export const BREAK_BEFORE_LABEL = 'o2t-break-before';
@@ -235,7 +236,8 @@ export function entriesLayoutHelper(bandSize: string): string {
 #let o2t-fitted(img, slot-w, slot-h, scale: 100) = {
   let cap-h = if img.credit == none { 0pt } else { measure(figure(box(height: 0pt), caption: img.credit, numbering: none), width: slot-w).height }
   let w = calc.min(slot-w, (slot-h - cap-h) * img.w / img.h) * scale / 100
-  let body = if img.credit == none { image(img.path, width: w) } else { figure(image(img.path, width: w), caption: img.credit, numbering: none) }
+  let fact = [#metadata((file: img.path, widthMm: w.to-absolute() / 1mm)) <${IMAGE_FACT_LABEL}>]
+  let body = fact + if img.credit == none { image(img.path, width: w) } else { figure(image(img.path, width: w), caption: img.credit, numbering: none) }
   (body: body, w: w, h: w * img.h / img.w + cap-h)
 }
 #let o2t-section-end() = context {

@@ -789,5 +789,6 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       typLine: e.typLine + offset,
       sourceLine: e.sourceLine,
     })),
+    ...(ctx.fixedImages.length > 0 ? {images: [...ctx.fixedImages]} : {}),
   };
 }

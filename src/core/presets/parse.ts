@@ -780,6 +780,23 @@ function readImages(value: unknown, problems: Problem[]): ImagesPresetFields {
       });
     }
   }
+  // US-034 AC-1: the print resolution check.
+  const minDpi = read(value, 'minDpi');
+  if (minDpi !== undefined) {
+    if (
+      typeof minDpi === 'number' &&
+      Number.isInteger(minDpi) &&
+      minDpi >= 0 &&
+      minDpi <= 2400
+    ) {
+      out.minDpi = minDpi;
+    } else {
+      problems.push({
+        path: 'images.minDpi',
+        message: 'images.minDpi must be a whole number from 0 to 2400',
+      });
+    }
+  }
   return out;
 }
 

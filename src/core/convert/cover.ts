@@ -176,6 +176,12 @@ export function resolveCover(options: {
       width: page.pageWidth - 2 * page.slug,
       height: page.pageHeight - 2 * page.slug,
     };
+    // US-034 AC-2: the cover fills the sheet; its drawn width is the
+    // sheet's width, or more when the sheet is relatively taller (cropped).
+    ctx.fixedImage(
+      result.path,
+      Math.max(sheet.width, (sheet.height * size.width) / size.height),
+    );
     const percent = cropPercent(size, sheet);
     if (percent > cover.cropWarningPercent) {
       ctx.warn('COVER_CROPPED', cropMessage(percent, size, sheet), target.line);

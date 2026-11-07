@@ -142,6 +142,12 @@ const BOOK: LayoutSection = {
       desc: 'Images shrink to stay with their text; off at 100 %.',
       rows: ['Smallest image size'],
     },
+    {
+      kind: 'feature',
+      name: 'Print resolution',
+      desc: 'Warns about images below this dpi; off at 0.',
+      rows: ['Minimum print resolution'],
+    },
   ],
 };
 

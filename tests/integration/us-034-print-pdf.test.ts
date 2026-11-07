@@ -30,7 +30,11 @@ const checks = async (): Promise<ChecksModule> => {
 };
 
 describe('US-034 AC-2 and AC-4 drawn widths', () => {
-  it('US-034 AC-2: a body image and an entry illustration record their drawn width; an inline image does not', async () => {
+  // G4 #132 (SCAR-023): the G2 input took `Text with an ![](…) inline image.`
+  // for an inline image; the converter sets an image inside text as a block
+  // of its own (US-003), so it prints like any block image and is recorded.
+  // What is drawn inline are icons (track cells, callout icons): not recorded.
+  it('US-034 AC-2: a body image, an image written in text and an entry illustration record their drawn width; drawn icons do not', async () => {
     const source = [
       '# Players',
       '',
@@ -60,7 +64,9 @@ describe('US-034 AC-2 and AC-4 drawn widths', () => {
     });
     const facts = c.images;
     expect(facts.filter((f) => f.file.endsWith('e-wide.png'))).toHaveLength(2);
-    expect(facts.some((f) => f.file.endsWith('e-small.png'))).toBe(false);
+    expect(facts.filter((f) => f.file.endsWith('e-small.png'))).toHaveLength(1);
+    expect(c.statblocks[0]?.cells.length).toBeGreaterThan(0);
+    expect(facts.some((f) => f.file.endsWith('.svg'))).toBe(false);
     const drawn = c.pages
       .flatMap((p) => p.images)
       .map((i) => Math.round((i.width * 25.4) / 72));

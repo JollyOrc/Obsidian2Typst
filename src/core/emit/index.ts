@@ -17,6 +17,7 @@ export {
   FIT_FLOW_HELPER,
   FIT_HINT_LINES,
   FIT_IMAGE_HELPER,
+  IMAGE_FACT_LABEL,
   fitDecisionWarnings,
   imageRequest,
 } from './image';
@@ -24,7 +25,7 @@ export {headingNumberingRule} from './heading';
 export {FOOTNOTE_RESTART_RULE, type NoteEnv} from './footnote';
 export {DEFAULT_BODY_FAMILY, type FontInfo} from './tasks';
 export {CALL_TRANSFORMS, callSeparator} from './call';
-export {EmitContext, type Warning} from './context';
+export {EmitContext, type ImageFact, type Warning} from './context';
 export {
   emitInline,
   type InlineOptions,

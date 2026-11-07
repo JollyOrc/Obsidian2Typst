@@ -2,6 +2,7 @@
 // preset or the Defaults. US-029 AC-3, AC-9: the value an export would use,
 // with the built-in value from the export's own merge. Pure core: no Obsidian
 // or I/O imports.
+import {MIN_DPI_BUILTIN} from '../layout/page-setup';
 import {resolveFields, type ResolvedFields} from './merge';
 
 /** Trim size, width and height are one group (US-009 AC-14). */
@@ -75,11 +76,17 @@ const FURNITURE = ['folios', 'runningHeader', 'runningHeaderLevel'];
  * `breakBefore.hN`; every other path as it is. Undefined for a field without
  * a built-in of its own (`page.trimWidth`, `page.trimHeight`: the trim size
  * decides) and for font fields (not resolved here); `null` for `template`.
+ * US-034 AC-1: `images.minDpi` is passed on only when set (the merged
+ * settings stay as before), so its built-in is `MIN_DPI_BUILTIN`, the value
+ * the export and the preview take when it is unset.
  */
 export function builtinValue(path: readonly string[]): unknown {
   builtins ??= resolveFields({}, {});
   const [head, second, ...rest] = path;
   if (head === 'fonts') return undefined;
+  if (head === 'images' && second === 'minDpi' && rest.length === 0) {
+    return MIN_DPI_BUILTIN;
+  }
   if (head === 'page' && second !== undefined) {
     if (FURNITURE.includes(second) && rest.length === 0) {
       return valueAt(builtins.pageFurniture, [second]);
