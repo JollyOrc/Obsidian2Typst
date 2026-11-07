@@ -48,7 +48,6 @@ const ICON_FILES = Object.fromEntries(
 );
 const TEXT = {
   title: 'Encounter Sheet',
-  round: 'Round',
   name: 'NAME',
   attack: 'ATTACK',
   dice: 'DICE',
@@ -113,26 +112,28 @@ async function compileA4(entries: unknown, colorMode?: string) {
 }
 
 describe('US-036 AC-5 the A4 file', () => {
-  it('US-036 AC-5 and AC-8: one A4 portrait page, two across, 16 rows (the measured count)', async () => {
+  // M23 (2026-11-07): three attack slots and no round line, at the user's
+  // request; with the rule and the credit 12 rows fit (measured).
+  it('US-036 AC-5 and AC-8: one A4 portrait page, two across, 12 rows with rule and credit (the measured count)', async () => {
     const {pages, sheets} = await compileA4(SHEET_ENTRIES);
     expect(pages).toHaveLength(1);
     expect(Math.round(pages[0]?.width ?? 0)).toBe(595);
     expect(Math.round(pages[0]?.height ?? 0)).toBe(842);
     expect(sheets).toEqual([
-      expect.objectContaining({form: 'A4', rows: 16, columns: 2}),
+      expect.objectContaining({form: 'A4', rows: 12, columns: 2}),
     ]);
     expect(sheets[0]?.boxMm ?? 0).toBeGreaterThanOrEqual(2.0);
   });
 
-  it('US-036 AC-3: every row has 30 boxes, every track cell, the stats boxes and two attack slots', async () => {
+  it('US-036 AC-3: every row has 30 boxes, every track cell, the stats boxes and three attack slots', async () => {
     const {rows} = await compileA4(SHEET_ENTRIES);
-    expect(rows).toHaveLength(16);
+    expect(rows).toHaveLength(12);
     for (const r of rows) {
       expect(r).toEqual({
         boxes: 30,
         cells: ['Fine', 'Hurt', 'Down', 'Fading', 'Gone'],
         stats: ['MIGHT', 'WITS', 'SPEED'],
-        attacks: 2,
+        attacks: 3,
       });
     }
   });
@@ -150,12 +151,11 @@ describe('US-036 AC-5 the A4 file', () => {
     }
   });
 
-  it('US-036 AC-7: title, round, the key with every cell label, the rule and the credit', async () => {
+  it('US-036 AC-7: title, the key with every cell label, the rule and the credit; no round line (M23)', async () => {
     const {pages} = await compileA4(SHEET_ENTRIES);
     const text = pages[0]?.text ?? '';
     for (const t of [
       'Encounter Sheet',
-      'Round',
       'Fine',
       'Hurt',
       'Down',
@@ -169,6 +169,7 @@ describe('US-036 AC-5 the A4 file', () => {
     ]) {
       expect(text, t).toContain(t);
     }
+    expect(text).not.toContain('Round');
   });
 
   it('US-036 AC-1: empty rule and credit are left out; translated labels are used', async () => {

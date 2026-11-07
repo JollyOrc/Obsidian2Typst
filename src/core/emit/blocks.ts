@@ -789,6 +789,14 @@ function quickReferenceText(
     ...(quick.track ? ['Track'] : []),
     'Page',
   ];
+  const columns = [
+    '1.5fr',
+    '1.2fr',
+    ...(quick.boxLabel === null ? [] : ['auto']),
+    ...quick.statLabels.map(() => 'auto'),
+    ...(quick.track ? ['1fr'] : []),
+    'auto',
+  ];
   const body = rows.map(({info, row, label}) =>
     [
       plain(info.text),
@@ -811,7 +819,11 @@ function quickReferenceText(
     // Set a little smaller, as reference tables are, so the columns fit.
     '#block[',
     '#set text(size: 0.85em)',
-    `#table(columns: ${head.length}, align: left,`,
+    // M21 (2026-11-07): Entry, Section and Track share the width left by
+    // the number columns, which take their content's width; a narrow cell
+    // inset. With equal columns, words such as "Horrors" ran into the next
+    // cell (12 pt body, 100 mm text width).
+    `#table(columns: (${columns.join(', ')}), align: left, inset: (x: 3pt, y: 4pt),`,
     `  table.header(repeat: true, ${head.map((h) => `[*${escapeMarkup(h, {atBlockStart: true})}*]`).join(', ')}),`,
     ...body.map((r) => `  ${r},`),
     ')',

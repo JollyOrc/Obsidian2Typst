@@ -1154,7 +1154,6 @@ function readEntries(value: unknown, problems: Problem[]): EntriesSettings {
     const texts: NonNullable<EntriesSettings['encounterSheetText']> = {};
     for (const key of [
       'title',
-      'round',
       'name',
       'attack',
       'dice',

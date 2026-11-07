@@ -36,7 +36,7 @@ describe('US-036 AC-1 settings', () => {
         '  encounterSheet: true',
         '  encounterSheetFile: true',
         '  encounterSheetBoxes: 45',
-        '  encounterSheetText: {title: Begegnung, round: Runde, name: NAME, attack: ANGRIFF, dice: WÜRFEL, rule: "", credit: ""}',
+        '  encounterSheetText: {title: Begegnung, name: NAME, attack: ANGRIFF, dice: WÜRFEL, rule: "", credit: ""}',
       ),
     ).toBeNull();
     expect(errorOf('entries:', '  encounterSheetBoxes: 20')).toBe(

@@ -29,7 +29,8 @@ describe('US-036 AC-5 the A4 sheet in the plugin’s compiler', () => {
     const ms = performance.now() - t0;
     if (!result.ok) throw new Error(result.error);
     expect(result.sheets).toEqual([
-      {form: 'A4', rows: 16, columns: 2, boxMm: expect.closeTo(2.62, 1)},
+      // M23 (2026-11-07): three attack slots, no round line: 14 rows.
+      {form: 'A4', rows: 14, columns: 2, boxMm: expect.closeTo(2.62, 1)},
     ]);
     // SCAR-030: measured, not assumed; the bound is generous on purpose.
     console.info(`US-036 AC-5: A4 sheet compile ${Math.round(ms)} ms`);

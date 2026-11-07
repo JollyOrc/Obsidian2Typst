@@ -1,5 +1,5 @@
 // US-036: the encounter sheet — blank tracker rows (a name and the stats, the
-// tick boxes and every track cell, two attack slots) on an A4 page of its own
+// tick boxes and every track cell, three attack slots) on an A4 page of its own
 // and on a page in the book. Pure: no Obsidian, Node, or I/O imports. One
 // row drawing for both forms, and the statblock's own box and cell drawing
 // (`ENTRY_MARKS_DEF`, SCAR-017). The row count is measured in the compile
@@ -13,7 +13,6 @@ import type {ColorMode, EntriesSettings} from '../markers/entries';
 /** US-036 AC-1: the sheet's texts; `rule` and `credit` empty → left out. */
 export interface SheetText {
   title: string;
-  round: string;
   name: string;
   attack: string;
   dice: string;
@@ -26,7 +25,6 @@ export const SHEET_BUILTINS = Object.freeze({
   boxes: 30,
   text: Object.freeze<SheetText>({
     title: 'Encounter Sheet',
-    round: 'Round',
     name: 'NAME',
     attack: 'ATTACK',
     dice: 'DICE',
@@ -81,9 +79,10 @@ export const sheetFailedWarning = (error: string): Warning => ({
  * draws one framed row (0.4 pt, 2.5 mm padding) of three lines 1.6 mm
  * apart: the name and 7 × 4.5 mm stat boxes; the tick boxes in the box
  * column (shrunk when the row is narrower) with the track cells beside them
- * when each gets 4.5 mm, else under them; two attack slots, side by side
+ * when each gets 4.5 mm, else under them; three attack slots (M23,
+ * 2026-11-07), two side by side and the third below
  * from 100 mm, else stacked 1.2 mm apart; and records `<o2t-sheet-row>`.
- * `o2t-sheet(d, …)` draws the header (the heading or title, the round line,
+ * `o2t-sheet(d, …)` draws the header (the heading or title,
  * the icon key, the rule between two lines), as many lines of rows as fit
  * `th` below it and above the credit with a 2 mm gap (`measure()` of one
  * row), the credit at the foot, and records `<o2t-sheet>` (form, rows,
@@ -110,16 +109,15 @@ export const SHEET_HELPER_DEF = `#let o2t-sheet-row(d, w, box-col) = {
     grid(columns: (bc, 1fr), column-gutter: 2mm, align: horizon, boxes, cells)
   } else { stack(spacing: 1.6mm, boxes, cells) }
   let slot = grid(columns: (auto, 1fr, auto, 10mm), column-gutter: 1.5mm, align: bottom, lab(d.text.attack), wline, lab(d.text.dice), wline)
-  let line3 = if w >= 100mm { grid(columns: (1fr, 1fr), column-gutter: 4mm, slot, slot) } else { stack(spacing: 1.2mm, slot, slot) }
+  let line3 = if w >= 100mm { grid(columns: (1fr, 1fr), column-gutter: 4mm, row-gutter: 1.2mm, slot, slot, slot) } else { stack(spacing: 1.2mm, slot, slot, slot) }
   block(width: w, breakable: false, stroke: 0.4pt + lk.frame.color, inset: 2.5mm, fill: lk.fill, stack(spacing: 1.6mm, line1, line2, line3))
-  [#metadata((boxes: d.boxes, cells: d.cells.map(c => c.label), stats: d.stats, attacks: 2)) <o2t-sheet-row>]
+  [#metadata((boxes: d.boxes, cells: d.cells.map(c => c.label), stats: d.stats, attacks: 3)) <o2t-sheet-row>]
 }
 #let o2t-sheet(d, form: "book", tw: 0mm, th: 0mm, columns: 1, row-w: 0mm, box-col: 55mm, head: none) = context {
   let lk = d.look
   let lab(t) = text(size: lk.sizes.text, fill: lk.accent, t)
-  let round = grid(columns: (auto, 25mm), column-gutter: 1.5mm, align: bottom, lab(d.text.round), box(width: 100%, height: 1em, stroke: (bottom: 0.5pt + lk.frame.color)))
-  let title = if head != none { head; align(right, round) } else {
-    grid(columns: (1fr, auto), align: bottom, text(size: lk.sizes.band * 1.4, weight: "bold", fill: lk.accent, d.text.title), round)
+  let title = if head != none { head } else {
+    text(size: lk.sizes.band * 1.4, weight: "bold", fill: lk.accent, d.text.title)
   }
   let key = d.cells.map(c => box(height: 4mm, if c.icon == none { none } else { o2t-icon(c.icon, lk.icon) }) + h(1mm) + lab(c.label)).join(h(4mm))
   let header = block(width: tw, {
@@ -202,7 +200,7 @@ export function sheetData(
         ? `(${items[0]},)`
         : `(${items.join(', ')})`;
   const t = settings.text;
-  const text = `(title: ${content(t.title)}, round: ${content(t.round)}, name: ${content(t.name)}, attack: ${content(t.attack)}, dice: ${content(t.dice)}, rule: ${content(t.rule)}, credit: ${content(t.credit)})`;
+  const text = `(title: ${content(t.title)}, name: ${content(t.name)}, attack: ${content(t.attack)}, dice: ${content(t.dice)}, rule: ${content(t.rule)}, credit: ${content(t.credit)})`;
   return `(look: ${statblockLook(entries, colorMode)}, stats: ${array(stats)}, boxes: ${settings.boxes}, cells: ${array(cells)}, text: ${text})`;
 }
 

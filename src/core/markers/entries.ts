@@ -101,10 +101,7 @@ export interface EntriesSettings {
   encounterSheetBoxes?: number;
   /** US-036 AC-1: the sheet's texts (each over its built-in). */
   encounterSheetText?: Partial<
-    Record<
-      'title' | 'round' | 'name' | 'attack' | 'dice' | 'rule' | 'credit',
-      string
-    >
+    Record<'title' | 'name' | 'attack' | 'dice' | 'rule' | 'credit', string>
   >;
 }
 

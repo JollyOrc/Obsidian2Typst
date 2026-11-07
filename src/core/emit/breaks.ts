@@ -335,6 +335,7 @@ export function entriesLayoutHelper(bandSize: string): string {
   }
   let draw-spread(e, l, s) = {
     mark(e, l, "spread", s)
+    let ended = false
     if l == "spread-text" { whole(e) }
     else if l == "spread-landscape" {
       whole(e)
@@ -348,8 +349,13 @@ export function entriesLayoutHelper(bandSize: string): string {
       let sp = split(e)
       sp.left.join(parbreak())
       let im = align(center + horizon, o2t-fitted(e.img, tw, th).body)
-      if full-header { page(im) } else { page(header: none, footer: none, im) }
-      e.blocks.slice(sp.k).join(parbreak())
+      // M21 (2026-11-07): with no text left the entry ends on its image
+      // page; its end marker goes there, not onto the page after it.
+      let rest = e.blocks.slice(sp.k)
+      let end = if rest.len() == 0 { fin(e, l, "spread", none) } else { none }
+      if full-header { page({ im; end }) } else { page(header: none, footer: none, { im; end }) }
+      if rest.len() > 0 { rest.join(parbreak()) }
+      ended = rest.len() == 0
     } else {
       let sp = split(e)
       sp.left.join(parbreak())
@@ -357,7 +363,7 @@ export function entriesLayoutHelper(bandSize: string): string {
       let f = o2t-fitted(e.img, tw * 0.55, th, scale: s)
       grid(columns: (1fr, f.w), column-gutter: 4mm, col(e.blocks.slice(sp.k).join(parbreak()), tw - f.w - 4mm), f.body)
     }
-    fin(e, l, "spread", none)
+    if not ended { fin(e, l, "spread", none) }
   }
   let k = 0
   let last-left = false

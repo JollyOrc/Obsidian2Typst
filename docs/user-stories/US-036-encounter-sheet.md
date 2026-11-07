@@ -14,7 +14,7 @@ Epic #121, last of seven stories (see US-030). Draft D-21 in
 
 **As a** reader running a game with the book,
 **I want** a printable sheet of blank tracker rows — a name, the attributes,
-the tick boxes, the state track and two attacks per row — as a separate A4
+the tick boxes, the state track and three attacks per row — as a separate A4
 page and as a page in the book,
 **so that** I can track several creatures of one kind at the table without
 writing in the book.
@@ -65,7 +65,10 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
   | `entries.encounterSheet` | switch: the page in the book | `false` |
   | `entries.encounterSheetFile` | switch: the A4 file | `false` |
   | `entries.encounterSheetBoxes` | 15, 30 or 45 | 30 |
-  | `entries.encounterSheetText` | `{title, round, name, attack, dice, rule, credit}` | `{title: "Encounter Sheet", round: "Round", name: "NAME", attack: "ATTACK", dice: "DICE", rule: "", credit: ""}` |
+  | `entries.encounterSheetText` | `{title, name, attack, dice, rule, credit}` | `{title: "Encounter Sheet", name: "NAME", attack: "ATTACK", dice: "DICE", rule: "", credit: ""}` |
+
+  (Changed after M23, 2026-11-07, at the user's request: the `round` text and
+  its write-in line are removed; three attack slots instead of two.)
 
   `rule` is the one-line marking rule under the icon key; `credit` is the
   icons' credit at the foot (the author's licence text). Both are printed as
@@ -88,9 +91,10 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
   2. `encounterSheetBoxes` tick boxes in rows of 15 (groups of 5, as US-030
      AC-12; 30 → two rows) in the box column, and beside them **every** cell
      of `entries.statblock.track` with its icon (US-030 AC-13);
-  3. two attack slots, each the `attack` label, a write-in line, the `dice`
-     label and a 10 mm write-in line: side by side when the row is at least
-     100 mm wide, one above the other (1.2 mm apart) otherwise.
+  3. three attack slots (M23, 2026-11-07), each the `attack` label, a
+     write-in line, the `dice` label and a 10 mm write-in line: two side by
+     side and the third below when the row is at least 100 mm wide, one
+     above the other (1.2 mm apart) otherwise.
 
   The look (frame, fills, fonts, `colorMode`) is the statblock's (US-030
   AC-15). Box size follows from the box column's width as in US-030 AC-12
@@ -115,7 +119,8 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
   existing file is overwritten, no other file is touched), whatever the
   book's page size: one A4 portrait page, margins 12 mm (sides, top) and
   10 mm (bottom), rows 91 mm wide in two columns 4 mm apart, box column
-  46 mm, as many lines as fit (16 rows with the preset above). With US-007
+  46 mm, as many lines as fit (14 rows with the preset above since M23's
+  change; 16 before). With US-007
   AC-1b's rule, the names stay different from the note's files and
   `template.typ`, compared ignoring case (a note `Rules - Encounter Sheet`
   gives `Rules - Encounter Sheet - Encounter Sheet.pdf` for its sheet).
@@ -133,8 +138,8 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
   88 mm with a 4 mm gap. As many rows as fit on that one page (5 on the A5
   of the example). The preview shows it (US-012 AC-13: preview = export).
 
-- **AC-7 (header and key):** Both forms start with the title, a `round` label
-  and a write-in line on the right, then a key line: each track cell's icon
+- **AC-7 (header and key):** Both forms start with the title (no round line
+  since M23, 2026-11-07), then a key line: each track cell's icon
   with its label, in track order, then `rule` (if set) on the next line,
   centred, between two rules. `credit` (if set) sits at the foot of the
   page. Example key line: `[Fine-icon] Fine  [Hurt-icon] Hurt  …  [Gone-icon]
@@ -144,7 +149,9 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
   `measure()` of one row at its width, then the most rows (or lines of two)
   that fit the space below the key and above the credit with a 2 mm gap.
   Measured examples: A4 16 rows, A5 5 rows (with the example's three stats and
-  five track cells).
+  five track cells). Re-measured after M23's change (three attack slots, no
+  round line, 2026-11-07): A4 14 rows (12 with a rule and a credit), A5 5
+  rows.
 
 ### Composed cases and tests
 

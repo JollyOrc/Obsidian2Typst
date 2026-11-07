@@ -201,7 +201,7 @@ header row repeats.
 ## The encounter sheet
 
 A sheet of blank tracker rows for the table: a name and the stats, the tick
-boxes and every track cell, and two attack slots per row. Unused boxes are
+boxes and every track cell, and three attack slots per row. Unused boxes are
 struck out by hand.
 
 | Field | Value | Built-in |
@@ -209,7 +209,7 @@ struck out by hand.
 | `entries.encounterSheet` | the sheet as a page in the book | `false` |
 | `entries.encounterSheetFile` | the sheet as an A4 file next to the PDF | `false` |
 | `entries.encounterSheetBoxes` | 15, 30 or 45 tick boxes a row | 30 |
-| `entries.encounterSheetText` | `{title, round, name, attack, dice, rule, credit}` | `Encounter Sheet`, `Round`, `NAME`, `ATTACK`, `DICE`, no rule, no credit |
+| `entries.encounterSheetText` | `{title, name, attack, dice, rule, credit}` | `Encounter Sheet`, `NAME`, `ATTACK`, `DICE`, no rule, no credit |
 
 `rule` is one line under the icon key (how to mark the cells); `credit` is a
 line at the foot of the page (your icons' licence). The sheet needs a state
@@ -220,7 +220,7 @@ sheet.
   on a new page with a heading at the section level, as many rows as fit
   (5 on A5). On a wide page the rows stand two across.
 - **The A4 file:** `<note> - Encounter Sheet.pdf` and `.typ` in the export
-  folder, one A4 page, two rows across, as many as fit (16 with three stats
+  folder, one A4 page, two rows across, as many as fit (14 with three stats
   and five track cells). A sheet that fails to compile gives
   `ENCOUNTER_SHEET_FAILED`; the book is written anyway.
 
