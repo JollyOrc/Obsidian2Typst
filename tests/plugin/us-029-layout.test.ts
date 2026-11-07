@@ -186,7 +186,8 @@ const EXPECTED_TAB: LayoutSection[] = [
       {
         kind: 'feature',
         name: 'Strict mode',
-        desc: 'Any warning aborts the export.',
+        // #137: since US-028 the warnings after the compile never abort.
+        desc: 'Conversion warnings abort the export.',
         toggle: 'strictMode',
         rows: [],
       },

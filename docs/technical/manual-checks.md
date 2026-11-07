@@ -32,3 +32,7 @@ steps and how it is recorded. A new check gets the next number, a file
 | [M18](manual-checks/M18.md) | Images that stay with their text | US-028 AC-4 to AC-6, AC-9, AC-11, AC-13 |
 | [M19](manual-checks/M19.md) | The settings screen of feature rows, and marked menu items | US-029 AC-1 to AC-12, AC-14 |
 | [M20](manual-checks/M20.md) | A layout that settles | US-028 AC-14 to AC-17 (#116) |
+| [M21](manual-checks/M21.md) | Statblocks and entry layouts in the PDF | US-030 AC-10 to AC-17; US-031 AC-5 to AC-10; US-032 AC-5, AC-8; US-033 AC-1, AC-6, AC-7, AC-9, AC-11 |
+| [M22](manual-checks/M22.md) | The statblock in Obsidian and its API | US-035 AC-1 to AC-9, AC-11 |
+| [M23](manual-checks/M23.md) | The encounter sheet printed at 100 % | US-036 AC-3, AC-5 to AC-8, AC-10 |
+| [M24](manual-checks/M24.md) | The print checks: low resolution and wide word gaps | US-034 AC-1 to AC-8 |

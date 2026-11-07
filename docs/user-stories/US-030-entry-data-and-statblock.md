@@ -1,8 +1,8 @@
 # US-030 — Entry data and the statblock
 
-**Status:** Ready (G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
+**Status:** Implemented, manual checks M21 to M24 pending (G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
 **Introduced:** v0.12.0 (planned; a new feature bumps the minor version)
-**Implemented:** —
+**Implemented:** v0.12.0, epic #121 (tickets #122 to #137, 2026-11-07); test build `0.12.0-m21.1` in the manual checks M21 to M24
 **Supersedes:** —
 
 Epic #121 (entry layouts). First of seven stories: US-030 entry data and the

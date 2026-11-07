@@ -1,8 +1,8 @@
 # US-036 — The encounter sheet
 
-**Status:** Ready (G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Implemented, manual checks M21 to M24 pending (G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-035)
-**Implemented:** —
+**Implemented:** v0.12.0, epic #121 (tickets #122 to #137, 2026-11-07); test build `0.12.0-m21.1` in the manual checks M21 to M24
 **Supersedes:** —
 
 Epic #121, last of seven stories (see US-030). Draft D-21 in

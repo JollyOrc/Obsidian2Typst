@@ -121,7 +121,7 @@ Today (read from the code, 2026-10-31):
   | Signatures | `Blank pages at the end to fill a signature.` |
   | Contents | `A table of contents; off while its depth is 0.` |
   | Image fit | `Images shrink to stay with their text; off at 100 %.` |
-  | Strict mode | `Any warning aborts the export.` |
+  | Strict mode | `Conversion warnings abort the export.` (corrected at #137: the warnings found after the compile never abort, US-028 decision E, US-034 decision 1) |
 
 - **AC-3 (a toggle shows the effective value; fixes the G0 defect):** A
   toggle — on a feature row or inside a modal — shows the value an export

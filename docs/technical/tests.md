@@ -69,7 +69,7 @@ fixture. No test reads the author's private vault.
 These cover what only a real Obsidian can show. The automated plugin tests use
 fakes and do not replace them.
 
-Procedures that need more than a few steps are manual checks, one file per check in [manual-checks/](manual-checks/) (`M01.md` to `M18.md`), listed with what each covers in the index [manual-checks.md](manual-checks.md) (split 2026-10-29, SCAR-029).
+Procedures that need more than a few steps are manual checks, one file per check in [manual-checks/](manual-checks/) (`M01.md` to `M24.md`), listed with what each covers in the index [manual-checks.md](manual-checks.md) (split 2026-10-29, SCAR-029).
 
 ### §1 — Clickable warning line (US-006 AC-2b)
 

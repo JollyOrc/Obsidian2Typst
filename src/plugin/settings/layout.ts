@@ -163,7 +163,7 @@ export const TAB_LAYOUT: readonly LayoutSection[] = [
       {
         kind: 'feature',
         name: 'Strict mode',
-        desc: 'Any warning aborts the export.',
+        desc: 'Conversion warnings abort the export.',
         toggle: 'strictMode',
         rows: [],
       },

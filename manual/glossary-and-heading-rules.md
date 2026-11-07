@@ -3,17 +3,19 @@
 [Back to the manual](manual.md)
 
 A **heading rule** gives a section of your note a special role, chosen by the
-heading's text. There are three rules:
+heading's text. There are four rules:
 
 | Rule | What it does | Built-in heading |
 | --- | --- | --- |
 | `glossary` | The headings one level below become glossary entries. | `Glossary` |
 | `colophon` | The section becomes the colophon at the front of the book. | `Colophon` |
 | `back-notes` | The section goes to the very end of the book. | `Back notes` |
+| `entries` | The section is an entries chapter: each entry gets a page or a spread. | none |
 
 This guide covers the glossary and how to set up heading rules. The colophon
 and back notes are described in
-[Book structure](book-structure.md#colophon-and-back-notes).
+[Book structure](book-structure.md#colophon-and-back-notes), the entries
+chapter in [Entries](entries.md#the-entries-chapter).
 
 ## Contents
 
