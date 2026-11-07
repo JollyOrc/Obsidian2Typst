@@ -114,17 +114,35 @@ const colourOr = (value: string): string =>
   value === 'none' ? 'none' : rgb(value);
 const pt = (n: number): string => `${Number(n.toFixed(4))}pt`;
 
+/** US-030 AC-15, US-035 AC-3: the resolved look of a statblock (one source for PDF and preview). */
+export interface StatblockLookValues {
+  /** `none` or `#rrggbb`. */
+  fill: string;
+  frame: {color: string; width: number};
+  rules: {color: string; width: number};
+  /** `none` or `#rrggbb`. */
+  boxFill: string;
+  /** Band, box label and value, tags (the frame colour). */
+  accent: string;
+  /** The colour the track icons are recoloured to. */
+  icon: string;
+  /** Font families by role, as the preset names them. */
+  fonts: Record<string, string>;
+  /** Sizes in pt by role. */
+  sizes: Record<string, number>;
+}
+
 /**
- * US-030 | AC-15 (G0-C6, G0-C7): the look as a Typst dictionary: the
- * preset's `entries.statblock` over the built-ins (`STATBLOCK_BUILTINS`). In
+ * US-030 | AC-15 (G0-C6, G0-C7), US-035 AC-3: the look: the preset's
+ * `entries.statblock` over the built-ins (`STATBLOCK_BUILTINS`). In
  * grayscale there is no fill; frame, rules, band, box label and value, icons
  * and tags are `#4d4d4d`; boxes and cells white; values, attacks and skills
  * keep the text colour.
  */
-export function statblockLook(
+export function statblockLookValues(
   settings: EntriesSettings | undefined,
   colorMode: ColorMode | undefined,
-): string {
+): StatblockLookValues {
   const sb = settings?.statblock ?? {};
   const B = STATBLOCK_BUILTINS;
   const gray = colorMode === 'grayscale';
@@ -132,29 +150,46 @@ export function statblockLook(
     color: gray ? L.gray : (sb.frame?.color ?? B.frame.color),
     width: sb.frame?.width ?? B.frame.width,
   };
-  const rules = {
-    color: gray ? L.gray : (sb.rules?.color ?? B.rules.color),
-    width: sb.rules?.width ?? B.rules.width,
+  return {
+    fill: gray ? 'none' : (sb.fill ?? B.fill),
+    frame,
+    rules: {
+      color: gray ? L.gray : (sb.rules?.color ?? B.rules.color),
+      width: sb.rules?.width ?? B.rules.width,
+    },
+    boxFill: gray ? '#ffffff' : (sb.boxFill ?? B.boxFill),
+    accent: frame.color,
+    icon: frame.color,
+    fonts: {...sb.fonts},
+    sizes: {...B.sizes, ...sb.sizes},
   };
-  const fill = gray ? 'none' : (sb.fill ?? B.fill);
-  const boxFill = gray ? '#ffffff' : (sb.boxFill ?? B.boxFill);
-  const sizes = {...B.sizes, ...sb.sizes};
-  const fonts = Object.entries(sb.fonts ?? {})
+}
+
+/**
+ * US-030 | AC-15: the look as a Typst dictionary (`statblockLookValues`),
+ * with the lede column's justification limits (US-034 AC-6).
+ */
+export function statblockLook(
+  settings: EntriesSettings | undefined,
+  colorMode: ColorMode | undefined,
+): string {
+  const v = statblockLookValues(settings, colorMode);
+  const fonts = Object.entries(v.fonts)
     .map(([role, family]) => `${role}: ${typstString(family)}`)
     .join(', ');
   return `(${[
-    `fill: ${colourOr(fill)}`,
-    `frame: (color: ${rgb(frame.color)}, width: ${pt(frame.width)})`,
-    `rules: (color: ${rgb(rules.color)}, width: ${pt(rules.width)})`,
-    `box-fill: ${colourOr(boxFill)}`,
-    `accent: ${rgb(frame.color)}`,
-    `icon: ${typstString(frame.color)}`,
+    `fill: ${colourOr(v.fill)}`,
+    `frame: (color: ${rgb(v.frame.color)}, width: ${pt(v.frame.width)})`,
+    `rules: (color: ${rgb(v.rules.color)}, width: ${pt(v.rules.width)})`,
+    `box-fill: ${colourOr(v.boxFill)}`,
+    `accent: ${rgb(v.accent)}`,
+    `icon: ${typstString(v.icon)}`,
     `fonts: (${fonts === '' ? ':' : fonts})`,
-    // US-034 AC-6: the lede column's justification limits.
-    `narrow: ${narrowLimits(settings?.narrowJustification)}`,
-    `sizes: (${Object.entries(sizes)
+    `sizes: (${Object.entries(v.sizes)
       .map(([role, size]) => `${role}: ${pt(size)}`)
       .join(', ')})`,
+    // US-034 AC-6: the lede column's justification limits.
+    `narrow: ${narrowLimits(settings?.narrowJustification)}`,
   ].join(', ')})`;
 }
 

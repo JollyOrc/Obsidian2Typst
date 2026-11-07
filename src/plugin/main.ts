@@ -7,6 +7,8 @@ import {
   Notice,
   Plugin,
   TFolder,
+  normalizePath,
+  type MarkdownPostProcessorContext,
   type WorkspaceLeaf,
 } from 'obsidian';
 import {
@@ -40,6 +42,14 @@ import {
 } from './compiler/embedded-wasm';
 import {startWorker} from './compiler/start-worker';
 import {createDiskWriter} from './disk-writer';
+import {
+  createEntriesApi,
+  createEntryProcessor,
+  headingAbove,
+  inQuote,
+  type EntriesApi,
+  type PreviewDeps,
+} from './entries/processor';
 import {createFontSet} from './fonts';
 import {createExportHost} from './obsidian/export-host';
 import {chooseExportFolder} from './obsidian/folder-dialog';
@@ -71,6 +81,7 @@ import {Obsidian2TypstSettingTab} from './settings/settings-tab';
 import {
   RESET_NOTICE,
   createSettingsStore,
+  onActivePresetChange,
   type SettingsStore,
 } from './settings/data';
 
@@ -134,6 +145,46 @@ export default class Obsidian2TypstPlugin extends Plugin {
     },
   });
 
+  /**
+   * US-035 AC-1, AC-7: what the `o2t-entry` preview reads, each time a
+   * block is drawn (SCAR-016): the active preset (`pickActive`, as every
+   * other part of the plugin), the icon files, the block's place.
+   */
+  private readonly entryDeps: PreviewDeps = {
+    settings: async () => {
+      const view = this.activeView();
+      if (!view.valid || view.fields === null) return null;
+      return {entries: view.fields.entries, colorMode: view.fields.colorMode};
+    },
+    readIcon: async (path) => {
+      const at = normalizePath(path);
+      const adapter = this.app.vault.adapter;
+      return (await adapter.exists(at)) ? adapter.read(at) : null;
+    },
+    heading: (handle) => {
+      const place = this.blockPlace(handle);
+      return place === null ? null : headingAbove(place.lines, place.at);
+    },
+    fileName: (handle) => {
+      const path = (handle as {ctx: MarkdownPostProcessorContext}).ctx
+        .sourcePath;
+      return path.slice(path.lastIndexOf('/') + 1).replace(/\.md$/i, '');
+    },
+    inContainer: (handle) => {
+      const place = this.blockPlace(handle);
+      return place !== null && inQuote(place.lines, place.at);
+    },
+  };
+
+  /** US-035 AC-1: the processor of `o2t-entry` blocks. */
+  private readonly entryProcessor = createEntryProcessor(this.entryDeps);
+
+  /**
+   * US-035 AC-11 (decision 1): the drawing API for the author's vault views,
+   * `app.plugins.plugins["obsidian2typst"].api` (documented in the manual).
+   */
+  api: EntriesApi | null = null;
+
   /** US-020 AC-1: what the actions are built over. */
   private readonly actionDeps: ActionDeps = {
     notes: createNoteSource(this.app),
@@ -195,6 +246,21 @@ export default class Obsidian2TypstPlugin extends Plugin {
       callback: () => void this.actions.previewNote(),
     });
     this.app.workspace.onLayoutReady(() => void this.presets.load());
+    // US-035 AC-1, AC-11: the o2t-entry preview and its drawing API.
+    this.registerMarkdownCodeBlockProcessor('o2t-entry', (source, el, ctx) =>
+      this.entryProcessor.handler(source, el, {ctx, el}),
+    );
+    this.api = createEntriesApi(this.entryDeps);
+    // US-035 AC-7 (decision 2): a change of the active preset, or of its
+    // note, redraws the open previews at once.
+    this.register(
+      onActivePresetChange(this.pluginSettings, () => this.redrawEntries()),
+    );
+    this.register(
+      this.presets.onChange((names) => {
+        if (names.includes(this.activeView().name ?? '')) this.redrawEntries();
+      }),
+    );
     this.addCommand({
       id: 'export-current-note',
       name: 'Export current note',
@@ -283,6 +349,39 @@ export default class Obsidian2TypstPlugin extends Plugin {
         );
       }),
     );
+  }
+
+  /**
+   * US-035 AC-1, AC-9: the note's lines and the block's first line, from the
+   * section info of the processor's context; null when Obsidian gives none.
+   */
+  private blockPlace(handle: unknown): {lines: string[]; at: number} | null {
+    const {ctx, el} = handle as {
+      ctx: MarkdownPostProcessorContext;
+      el: HTMLElement;
+    };
+    const info = ctx.getSectionInfo(el);
+    if (info === null) return null;
+    return {lines: info.text.split('\n'), at: info.lineStart};
+  }
+
+  /**
+   * US-035 AC-7 (decision 2): forgets the icons and redraws every open note
+   * holding an `o2t-entry` block: reading views with
+   * `previewMode.rerender(true)`; live-preview editors through a refresh of
+   * the editor options, which rebuilds their block widgets (not measured;
+   * the manual check covers it).
+   */
+  private redrawEntries(): void {
+    this.entryProcessor.clearIconCache();
+    this.api?.clearIconCache();
+    for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
+      const view = leaf.view;
+      if (!(view instanceof MarkdownView)) continue;
+      if (!view.getViewData().includes('```o2t-entry')) continue;
+      view.previewMode.rerender(true);
+    }
+    this.app.workspace.updateOptions();
   }
 
   /** US-022 AC-6: the active preset as the menus see it when they open. */

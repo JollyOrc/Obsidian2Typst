@@ -79,3 +79,48 @@ Fen hares are quick and shy. They live in reed beds and flee at the first sound.
 - Takes the block out of the tree right after parsing, before any other
   step reads it (SCAR-034, SCAR-039): no other step sees an `o2t-entry`
   code node.
+
+## The Obsidian preview and the drawing API (US-035, #134)
+
+In reading view and live preview a `o2t-entry` block is drawn as a
+statblock from the same model as the PDF (`src/core/entries/model.ts`), with
+the **active** preset's `entries` and `colorMode`. Code:
+`src/plugin/entries/processor.ts`; styles: `styles.css` (`o2t-sb-*`).
+
+Instead of a statblock, the raw block is shown with one notice:
+
+| Case | Notice |
+|---|---|
+| no valid active preset, or no `entries.statblock.stats` | `No statblock: the active preset has no entries settings.` |
+| no stat and no attack set | `No statblock: no stats or attacks.` |
+| YAML that does not parse or is not a mapping | `ENTRY_YAML_INVALID (line N)` |
+| the block is in a quote or callout | `ENTRY_BLOCK_IN_CONTAINER` |
+
+The data checks of the statblock (`STAT_BOXES_MANY: 46`, …) are a notice
+line under it. A missing value is shown as `—`; an attack without dice has
+the class `o2t-sb-nodice`. Sizes: 1 pt of the preset = 1/10.5 em of the
+editor's text. Boxes and cells have no click handlers.
+
+A change of the active preset, or a save of its note, forgets the icons and
+redraws the open notes that hold a block (reading views at once; live
+preview through a refresh of the editor options — checked by hand).
+
+### The API (version 1)
+
+For the author's own vault views (a note preview, an encounter tracker):
+
+```js
+const api = app.plugins.plugins["obsidian2typst"].api;
+api.version; // 1 — raised by a change that breaks callers
+const {boxes, cells} = await api.renderStatblock(el, data, {heading: "Fen Hare"});
+```
+
+- `el`: the element to draw into (Obsidian's `HTMLElement`).
+- `data`: a plain object of note properties; keys in any case (`Vigour`
+  is `vigour`). Read with the active preset, as the block is.
+- `options.heading`: the band; else `data.name`; else `—`.
+- Returns the boxes and the track cells (`aria-label` = the cell's label)
+  in their drawn order, so the caller can add its own click handlers; the
+  API adds none. Without a statblock it draws the notice and returns two
+  empty lists.
+- `api.clearIconCache()` forgets the icons it has read.
