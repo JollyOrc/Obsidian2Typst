@@ -113,17 +113,22 @@ describe('US-034 AC-7 and AC-10 the scan', () => {
     expect(Math.abs(at('Omega') - 300)).toBeLessThanOrEqual(2);
   });
 
+  // G4 #133 (SCAR-023): the G2 input (a 40 mm column) never set "Go to"
+  // alone: the long word (about 56 mm) fits no 40 mm line, so Typst kept it
+  // on the first line and shrank the spaces. In 60 mm Typst still keeps the
+  // word with "Go to" (measured at 56 to 60 mm) and stretches both spaces;
+  // the quoted line is that whole line.
   it('US-034 AC-7: a justified narrow line with one stretched gap warns, quoting the line', async () => {
     const {scanWordGaps} = await checks();
     const pdf = await compileSource(
-      '#set page(width: 148mm, height: 210mm)\n#set par(justify: true)\n#set text(hyphenate: false)\n#block(width: 40mm)[Go to Ultramegasupercalifragilistic and then more words follow here.]\n',
+      '#set page(width: 148mm, height: 210mm)\n#set par(justify: true)\n#set text(hyphenate: false)\n#block(width: 60mm)[Go to Ultramegasupercalifragilistic and then more words follow here.]\n',
     );
     const {lines, warnings} = scanWordGaps(pdf, {maxWordGap: 200});
     const gappy = lines.find((l) => l.text.startsWith('Go to'));
     expect(gappy?.maxGap ?? 0).toBeGreaterThan(200);
     expect(warnings.map((w) => w.code)).toContain('TEXT_WIDE_GAP');
     expect(warnings.find((w) => w.code === 'TEXT_WIDE_GAP')?.message).toMatch(
-      /^"p\. \d+": "Go to" \(\d+ %\)$/,
+      /^"p\. \d+": "Go to Ultramegasupercalifragilistic" \(\d+ %\)$/,
     );
   });
 

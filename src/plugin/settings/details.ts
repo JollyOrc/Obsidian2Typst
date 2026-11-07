@@ -188,6 +188,9 @@ const ENTRY_ROW_PATHS: readonly (readonly string[])[] = [
     'sizes',
   ].map((key) => ['entries', 'statblock', key]),
   ['entries', 'tagLabels'],
+  // US-034 AC-5: the word-gap settings (shown when the preset sets them).
+  ['entries', 'narrowJustification'],
+  ['entries', 'maxWordGap'],
   ['colorMode'],
 ];
 

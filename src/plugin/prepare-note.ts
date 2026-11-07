@@ -58,6 +58,8 @@ export interface PreparedNote {
   emptyWarn: number;
   /** US-034 AC-1: `images.minDpi` of the preset (or the built-in 300). */
   minDpi: number;
+  /** US-034 AC-5: `entries.maxWordGap` of the preset (or the built-in 200). */
+  maxWordGap: number;
   /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
   fixedImages: ImageFact[];
 }
@@ -184,6 +186,8 @@ export async function convertNote(
     emptyWarn:
       effective.settings.entries?.emptyWarn ?? ENTRY_BUILTINS.emptyWarn,
     minDpi: effective.settings.images?.minDpi ?? MIN_DPI_BUILTIN,
+    maxWordGap:
+      effective.settings.entries?.maxWordGap ?? ENTRY_BUILTINS.maxWordGap,
     fixedImages: converted.images ?? [],
     source,
   };

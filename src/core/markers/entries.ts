@@ -90,10 +90,47 @@ export interface EntriesSettings {
   /** US-033 AC-12: the quick reference after each entries chapter, its title. */
   quickReference?: boolean;
   quickReferenceTitle?: string;
+  /** US-034 AC-5: the justification limits of narrow columns. */
+  narrowJustification?: NarrowJustification;
+  /** US-034 AC-5: the widest word gap in percent before a warning (0 = no scan). */
+  maxWordGap?: number;
 }
 
-/** US-032 AC-1: the built-in values of the entry fit (G0-C8, one place). */
-export const ENTRY_BUILTINS = Object.freeze({imageMinScale: 70, emptyWarn: 50});
+/**
+ * US-034 AC-5, AC-6: Typst's `justification-limits` for narrow columns:
+ * `spacing` in percent of the normal space, `tracking` in em. Each field
+ * the preset leaves out keeps its built-in.
+ */
+export interface NarrowJustification {
+  spacing?: {min?: number; max?: number};
+  tracking?: {min?: number; max?: number};
+}
+
+/** US-032 AC-1, US-034 AC-5: the built-in values of the entry fit (G0-C8, one place). */
+export const ENTRY_BUILTINS = Object.freeze({
+  imageMinScale: 70,
+  emptyWarn: 50,
+  maxWordGap: 200,
+  narrowJustification: Object.freeze({
+    spacing: Object.freeze({min: 80, max: 150}),
+    tracking: Object.freeze({min: -0.01, max: 0.03}),
+  }),
+});
+
+/** US-034 AC-6: a column narrower than this share of the text width (percent) is narrow. */
+export const NARROW_COLUMN_SHARE = 60;
+
+/**
+ * US-034 AC-5, AC-6: the narrow-column limits in effect, as the Typst
+ * dictionary `par(justification-limits: …)` takes.
+ */
+export function narrowLimits(narrow: NarrowJustification | undefined): string {
+  const b = ENTRY_BUILTINS.narrowJustification;
+  const n = (v: number): string => String(Number(v.toFixed(4)));
+  const sp = {...b.spacing, ...narrow?.spacing};
+  const tr = {...b.tracking, ...narrow?.tracking};
+  return `(spacing: (min: ${n(sp.min)}%, max: ${n(sp.max)}%), tracking: (min: ${n(tr.min)}em, max: ${n(tr.max)}em))`;
+}
 
 /**
  * US-030 AC-8 (G0-C8): the built-in look of the statblock, in one place.

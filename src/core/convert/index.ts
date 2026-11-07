@@ -37,6 +37,7 @@ import {
 import {checkGlyphs, emitFonts, resolveFonts} from '../fonts';
 import {
   ENTRY_BUILTINS,
+  narrowLimits,
   STATBLOCK_BUILTINS,
   findGlossary,
   headingRuleTable,
@@ -307,6 +308,7 @@ function planEntryLayout(
     textHeight: page.pageHeight - page.margins.top - page.margins.bottom,
     marginTop: page.margins.top,
     minScale: settings.entries?.image?.minScale ?? ENTRY_BUILTINS.imageMinScale,
+    narrow: narrowLimits(settings.entries?.narrowJustification),
     facingPages: page.facingPages,
     fullImageHeader: settings.entries?.fullImageHeader === true,
     bodies,

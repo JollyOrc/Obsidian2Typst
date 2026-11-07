@@ -10,6 +10,7 @@ import {
 } from '../fonts/types';
 import {
   COLOR_MODES,
+  ENTRY_BUILTINS,
   HEADING_RULE_NAMES,
   STATBLOCK_FONT_ROLES,
   STATBLOCK_SIZE_ROLES,
@@ -17,6 +18,7 @@ import {
   type EntriesSettings,
   type EntryField,
   type LineStyle,
+  type NarrowJustification,
   type StatblockSettings,
   type TrackCell,
   type CalloutPresetStyle,
@@ -1058,6 +1060,68 @@ function readEntries(value: unknown, problems: Problem[]): EntriesSettings {
         path: 'entries.emptyWarn',
         message: 'entries.emptyWarn must be a whole number from 0 to 100',
       });
+  }
+  // US-034 AC-5: the word-gap scan's threshold (0 = no scan).
+  const maxWordGap = read(value, 'maxWordGap');
+  if (maxWordGap !== undefined) {
+    if (
+      typeof maxWordGap === 'number' &&
+      Number.isInteger(maxWordGap) &&
+      (maxWordGap === 0 || (maxWordGap >= 100 && maxWordGap <= 1000))
+    )
+      out.maxWordGap = maxWordGap;
+    else
+      problems.push({
+        path: 'entries.maxWordGap',
+        message:
+          'entries.maxWordGap must be 0 or a whole number from 100 to 1000',
+      });
+  }
+  // US-034 AC-5: the narrow columns' justification limits.
+  const narrow = readSubgroup(
+    value,
+    'narrowJustification',
+    'entries.narrowJustification',
+    problems,
+  );
+  if (narrow !== undefined) {
+    const limits: NarrowJustification = {};
+    let ok = true;
+    for (const part of ['spacing', 'tracking'] as const) {
+      const at = `entries.narrowJustification.${part}`;
+      const group = readSubgroup(narrow, part, at, problems);
+      if (group === undefined) continue;
+      const pair: {min?: number; max?: number} = {};
+      for (const end of ['min', 'max'] as const) {
+        const v = read(group, end);
+        if (v === undefined) continue;
+        const valid =
+          typeof v === 'number' &&
+          Number.isFinite(v) &&
+          (part === 'tracking' || v >= 0);
+        if (valid) pair[end] = v;
+        else {
+          ok = false;
+          problems.push({
+            path: `${at}.${end}`,
+            message:
+              part === 'spacing'
+                ? `${at}.${end} must be a number of percent, 0 or more`
+                : `${at}.${end} must be a number (em)`,
+          });
+        }
+      }
+      const built = ENTRY_BUILTINS.narrowJustification[part];
+      if ((pair.min ?? built.min) > (pair.max ?? built.max)) {
+        ok = false;
+        problems.push({
+          path: `${at}.min`,
+          message: `${at}.min must not be above max`,
+        });
+      }
+      limits[part] = pair;
+    }
+    if (ok) out.narrowJustification = limits;
   }
   // US-031 AC-6: a full-image page keeps its header and folio.
   const fullImageHeader = read(value, 'fullImageHeader');

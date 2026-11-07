@@ -128,6 +128,8 @@ export interface EntryLayoutEnv {
   marginTop: number;
   /** US-032 AC-4: `entries.image.minScale`. */
   minScale: number;
+  /** US-034 AC-6: the narrow columns' justification limits (a Typst dictionary). */
+  narrow: string;
   facingPages: boolean;
   fullImageHeader: boolean;
   /** The top-level blocks of the chapter entries (headings included). */
@@ -224,7 +226,7 @@ function entriesCall(
   });
   // US-033 AC-1, AC-4: the end of the section's intro, before its entries.
   const intro = run[0]?.info.opensSection != null ? '#o2t-section-end()\n' : '';
-  return `${intro}#o2t-entries((\n${entries.join('\n')}\n), next-opener: ${then.opener}, next-left: ${then.left}, closes: ${then.closes}, tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, top: ${layout.marginTop}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader}, min-scale: ${layout.minScale})`;
+  return `${intro}#o2t-entries((\n${entries.join('\n')}\n), next-opener: ${then.opener}, next-left: ${then.left}, closes: ${then.closes}, tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, top: ${layout.marginTop}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader}, min-scale: ${layout.minScale}, narrow: ${layout.narrow})`;
 }
 
 /** US-030 AC-10, AC-16: what the emitter needs to write statblocks. */

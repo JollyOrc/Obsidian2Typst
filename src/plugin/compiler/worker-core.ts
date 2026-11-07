@@ -7,6 +7,7 @@ import {
 } from '@myriaddreamin/typst.ts/dist/esm/compiler.mjs';
 import {TypstSnippet} from '@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs';
 import {loadFonts} from '@myriaddreamin/typst.ts/dist/esm/options.init.mjs';
+import {scanWordGaps, type EntryPages} from '../../core/checks/word-gaps';
 import {layoutSettled} from '../../core/compile';
 import {FIT_DECISION_LABEL, IMAGE_FACT_LABEL} from '../../core/emit/fit-label';
 import type {FaceInfo} from '../../core/fonts';
@@ -28,6 +29,15 @@ interface CompileMessage {
   file: string;
   source: string;
   files: {path: string; buf: ArrayBuffer}[];
+}
+
+/** US-034 AC-7, AC-11: scans an exported PDF for wide word gaps (no init needed). */
+interface ScanMessage {
+  type: 'scan';
+  id: string;
+  pdf: ArrayBuffer;
+  maxWordGap: number;
+  entries: EntryPages[];
 }
 
 /** US-010 AC-3: asks for the faces of font files. */
@@ -286,6 +296,15 @@ export function createWorkerCore(post: Post): {
           await compile(raw as CompileMessage);
         else if (message.type === 'font-info')
           await fontInfo(raw as FontInfoMessage);
+        else if (message.type === 'scan') {
+          // US-034 AC-7, AC-11: in the worker, never on the main thread.
+          const scan = raw as ScanMessage;
+          const {warnings} = scanWordGaps(new Uint8Array(scan.pdf), {
+            maxWordGap: scan.maxWordGap,
+            entries: scan.entries,
+          });
+          post({type: 'scan-result', id: scan.id, warnings});
+        }
       } catch (error) {
         post({type: 'failed', id: message.id, message: text(error)});
       }

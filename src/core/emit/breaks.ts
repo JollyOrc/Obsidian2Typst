@@ -5,6 +5,7 @@
 // `weak: true` adds nothing on an empty page, an added page is told from a
 // real one by the two markers around the break (`o2t-blank`, furniture.ts).
 import type {BreakLevel, BreakRule, BreakRules} from '../layout/page-setup';
+import {NARROW_COLUMN_SHARE} from '../markers/entries';
 import {IMAGE_FACT_LABEL} from './fit-label';
 
 /** US-025 AC-2: the label before every written break. */
@@ -244,7 +245,7 @@ export function entriesLayoutHelper(bandSize: string): string {
   let s = query(selector(<o2t-section-start>).before(here())).last()
   [#metadata((section: s.value.name, first: s.value.first, page: s.location().page(), introEnd: here().page())) <o2t-section>]
 }
-#let o2t-entries(es, next-opener: false, next-left: false, closes: false, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70) = context {
+#let o2t-entries(es, next-opener: false, next-left: false, closes: false, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70, narrow: none) = context {
   let lh = measure([A \\ A]).height - measure([A]).height
   let body(e) = e.blocks.join(parbreak())
   let whole(e) = { e.head; parbreak(); body(e) }
@@ -254,6 +255,9 @@ export function entriesLayoutHelper(bandSize: string): string {
   // The composed content of a page layout at a scale (measured as drawn;
   // v(1fr) measures as nothing).
   let portrait-slot(e) = (th - hgt(e.head) - 1.2em).to-absolute()
+  // US-034 AC-6: text in a column under ${NARROW_COLUMN_SHARE} % of the text width is set
+  // with the preset's justification limits.
+  let col(c, w) = if narrow != none and w < tw * ${NARROW_COLUMN_SHARE / 100} { set par(justification-limits: narrow); c } else { c }
   let page-content(e, l, s, side) = {
     if l == "page-text" { whole(e) }
     else if l == "page-landscape" { whole(e); v(1em); v(1fr); align(center, o2t-fitted(e.img, tw, th * 0.4, scale: s).body) }
@@ -262,7 +266,7 @@ export function entriesLayoutHelper(bandSize: string): string {
       parbreak()
       let f = o2t-fitted(e.img, tw * 0.55, portrait-slot(e), scale: s)
       grid(columns: if side == "left" { (f.w, 1fr) } else { (1fr, f.w) }, column-gutter: 4mm,
-        ..if side == "left" { (f.body, body(e)) } else { (body(e), f.body) })
+        ..if side == "left" { (f.body, col(body(e), tw - f.w - 4mm)) } else { (col(body(e), tw - f.w - 4mm), f.body) })
     }
   }
   // The left page of a split spread: the head and as many whole blocks as
@@ -281,7 +285,7 @@ export function entriesLayoutHelper(bandSize: string): string {
     } else if l == "spread-portrait" {
       let sp = split(e)
       let f = o2t-fitted(e.img, tw * 0.55, th, scale: s)
-      hgt(grid(columns: (1fr, f.w), column-gutter: 4mm, e.blocks.slice(sp.k).join(parbreak()), f.body)) <= th
+      hgt(grid(columns: (1fr, f.w), column-gutter: 4mm, col(e.blocks.slice(sp.k).join(parbreak()), tw - f.w - 4mm), f.body)) <= th
     } else { hgt(whole(e)) <= th }
   }
   let fits(e, l, s) = if l.starts-with("page") { hgt(page-content(e, l, s, "left")) <= th } else { spread-fits(e, l, s) }
@@ -351,7 +355,7 @@ export function entriesLayoutHelper(bandSize: string): string {
       sp.left.join(parbreak())
       pagebreak()
       let f = o2t-fitted(e.img, tw * 0.55, th, scale: s)
-      grid(columns: (1fr, f.w), column-gutter: 4mm, e.blocks.slice(sp.k).join(parbreak()), f.body)
+      grid(columns: (1fr, f.w), column-gutter: 4mm, col(e.blocks.slice(sp.k).join(parbreak()), tw - f.w - 4mm), f.body)
     }
     fin(e, l, "spread", none)
   }

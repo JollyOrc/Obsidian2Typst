@@ -1,5 +1,7 @@
 // US-007 AC-3, AC-3b, AC-4: the compile service. One worker per compile; it is
 // terminated when the compile ends, and when the plugin is unloaded.
+import type {EntryPages} from '../../core/checks/word-gaps';
+import type {Warning} from '../../core/emit/context';
 import type {FaceInfo} from '../../core/fonts';
 import {
   formatCompileError,
@@ -47,6 +49,15 @@ export interface TypstCompiler {
   fontInfo(fonts: readonly Uint8Array[]): Promise<(FaceInfo[] | null)[]>;
   /** Ends a running compile (the plugin is unloaded). */
   dispose(): void;
+  /**
+   * US-034 AC-7, AC-8, AC-11: the word-gap scan of an exported PDF, in a
+   * worker of its own; a failed worker gives one `TEXT_GAP_SCAN_FAILED`.
+   * Optional: a compiler without it scans nothing.
+   */
+  scanWordGaps?(
+    pdf: Uint8Array,
+    options: {maxWordGap: number; entries: readonly EntryPages[]},
+  ): Promise<Warning[]>;
 }
 
 /** US-012: the vector compile the preview uses (the export never does). */
@@ -83,7 +94,9 @@ let counter = 0;
 /** US-007 AC-3b: the compile service over `createWorker`. */
 export function createTypstCompiler(
   options: TypstCompilerOptions,
-): TypstCompiler & VectorCompiler {
+): TypstCompiler &
+  VectorCompiler &
+  Required<Pick<TypstCompiler, 'scanWordGaps'>> {
   const aborts = new Set<() => void>();
 
   /** One worker, one compile; `cancel` ends the worker at once. */
@@ -284,6 +297,52 @@ export function createTypstCompiler(
 
     compile(request: CompileRequest): Promise<CompileResult> {
       return run(request, 'pdf').result;
+    },
+
+    async scanWordGaps(
+      pdf: Uint8Array,
+      scan: {maxWordGap: number; entries: readonly EntryPages[]},
+    ): Promise<Warning[]> {
+      const id = `scan-${++counter}`;
+      let worker: WorkerLike | null = null;
+      const failed = (text: string): Warning[] => [
+        {
+          code: 'TEXT_GAP_SCAN_FAILED',
+          message: `The word-gap scan could not read the PDF (${text}); no line was checked`,
+          line: 0,
+        },
+      ];
+      try {
+        return await new Promise<Warning[]>((resolve) => {
+          worker = options.createWorker();
+          const current = worker;
+          current.onerror = (event) =>
+            resolve(failed(event.message ?? 'unknown error'));
+          current.onmessage = ({data}) => {
+            const message = data as {
+              type?: string;
+              id?: string;
+              message?: string;
+              warnings?: Warning[];
+            };
+            if (message.id !== id) return;
+            if (message.type === 'scan-result') resolve(message.warnings ?? []);
+            else if (message.type === 'failed')
+              resolve(failed(message.message ?? 'unknown error'));
+          };
+          current.postMessage({
+            type: 'scan',
+            id,
+            pdf: copy(pdf),
+            maxWordGap: scan.maxWordGap,
+            entries: scan.entries.map((e) => ({...e})),
+          });
+        });
+      } catch (error) {
+        return failed(error instanceof Error ? error.message : String(error));
+      } finally {
+        (worker as WorkerLike | null)?.terminate();
+      }
     },
 
     compileVector(request: CompileRequest): Promise<VectorResult> {

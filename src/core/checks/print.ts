@@ -77,3 +77,10 @@ export function imageFacts(values: readonly unknown[]): ImageFact[] {
       : [];
   });
 }
+
+export {
+  entryPages,
+  scanWordGaps,
+  type EntryPages,
+  type GapLine,
+} from './word-gaps';

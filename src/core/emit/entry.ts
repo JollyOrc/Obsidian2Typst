@@ -5,6 +5,8 @@
 // drew as `<o2t-statblock>` metadata (the test interface of US-030).
 import type {StatblockModel} from '../entries/model';
 import {
+  NARROW_COLUMN_SHARE,
+  narrowLimits,
   STATBLOCK_BUILTINS,
   type ColorMode,
   type EntriesSettings,
@@ -101,7 +103,10 @@ export const STATBLOCK_HELPER_DEF = `#let o2t-statblock(d, lede: none) = {
   let sb = block(width: 100%, breakable: false, fill: lk.fill, stroke: lk.frame.width + lk.frame.color, inset: 2mm,
     stack(spacing: 1.2mm, ..pieces.intersperse(rule)))
   [#metadata((band: d.band, boxes: count, rows: rows, cells: if d.track == none { () } else { d.track.cells.map(c => c.label) }, parts: parts)) <o2t-statblock>]
-  block(breakable: false, width: 100%, grid(columns: (1fr, ${L.width}), column-gutter: ${L.gutter}, if lede == none { [] } else { lede }, sb))
+  // US-034 AC-6 (decision 2): the lede column (100 % less the statblock's
+  // ${L.width} and the gutter) is under ${NARROW_COLUMN_SHARE} % of the text width.
+  let lede-col = if lede == none { [] } else if lk.at("narrow", default: none) == none { lede } else { set par(justification-limits: lk.narrow); lede }
+  block(breakable: false, width: 100%, grid(columns: (1fr, ${L.width}), column-gutter: ${L.gutter}, lede-col, sb))
 }`;
 
 const rgb = (hex: string): string => `rgb(${typstString(hex)})`;
@@ -145,6 +150,8 @@ export function statblockLook(
     `accent: ${rgb(frame.color)}`,
     `icon: ${typstString(frame.color)}`,
     `fonts: (${fonts === '' ? ':' : fonts})`,
+    // US-034 AC-6: the lede column's justification limits.
+    `narrow: ${narrowLimits(settings?.narrowJustification)}`,
     `sizes: (${Object.entries(sizes)
       .map(([role, size]) => `${role}: ${pt(size)}`)
       .join(', ')})`,

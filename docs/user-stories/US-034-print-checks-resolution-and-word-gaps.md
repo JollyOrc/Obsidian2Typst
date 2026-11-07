@@ -118,7 +118,10 @@ Measured (SCAR-024):
   US-030 AC-16, decision 2) is set with
   `par(justification-limits: (spacing: (min: 80%, max: 150%), tracking:
   (min: -0.01em, max: 0.03em)))` from `entries.narrowJustification`;
-  full-width text is not.
+  full-width text is not. (Noted at #133: the plugin sets no `justify` of
+  its own; the text is justified by the book's template, US-023, and the
+  limits apply where it is. Without justification no line is adjusted and
+  the scan finds none.)
 
 - **AC-7 (the scan):** After the export's last compile (US-028's settle loop
   included), in the compile worker, the plugin reads the PDF: every text line

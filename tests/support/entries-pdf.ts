@@ -94,6 +94,8 @@ export interface CompiledEntries {
   images: {file: string; widthMm: number}[];
   diagnostics: string[];
   result: ConvertResult;
+  /** US-034 AC-7 (G4 #133): the compiled PDF, for the word-gap scan. */
+  pdf: Uint8Array;
 }
 
 export interface EntriesOptions {
@@ -102,6 +104,8 @@ export interface EntriesOptions {
   /** Image files by vault path (illustrations). */
   images?: Record<string, Uint8Array>;
   book?: BookOptions;
+  /** Files beside the `.typ` (a `template.typ`, US-023; G4 #133). */
+  files?: Record<string, Uint8Array>;
 }
 
 let snippet: TypstSnippet | undefined;
@@ -135,7 +139,7 @@ export async function compileEntries(
     settings,
     assets: index,
   });
-  const files: Record<string, Uint8Array> = {...images};
+  const files: Record<string, Uint8Array> = {...images, ...options.files};
   for (const use of result.assets) {
     const bytes = images[use.from];
     if (bytes !== undefined) files[use.to] = bytes;
@@ -178,6 +182,7 @@ export async function compileEntries(
       await w.query({selector: '<o2t-image>', field: 'value'}),
     ]);
   return {
+    pdf,
     pages: readPdfPages(pdf),
     bookmarks: readPdfBookmarks(pdf),
     statblocks: parse<StatblockFact>(blocks),

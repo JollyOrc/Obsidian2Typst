@@ -13,7 +13,12 @@ import {
   type FitStep,
 } from '../core/compile';
 import type {AssetUse} from '../core/assets';
-import {imageFacts, lowDpiWarnings, pixelWidths} from '../core/checks/print';
+import {
+  entryPages,
+  imageFacts,
+  lowDpiWarnings,
+  pixelWidths,
+} from '../core/checks/print';
 import {
   FIT_HINT_LINES,
   fitDecisionWarnings,
@@ -98,6 +103,8 @@ export interface RunExportOptions {
   minDpi?: number;
   /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
   fixedImages?: readonly ImageFact[];
+  /** US-034 AC-5, AC-8: `entries.maxWordGap` (built-in 200; 0 = no scan). */
+  maxWordGap?: number;
 }
 
 /** US-028 AC-16: the note converted again without image fit. */
@@ -226,6 +233,20 @@ export async function runExport(
           options.minDpi ?? MIN_DPI_BUILTIN,
         ),
       );
+      // US-034 AC-7, AC-8, AC-11: the word-gap scan of the last compile's
+      // PDF, in a worker; export only, never stops it (decision 1).
+      const maxWordGap = options.maxWordGap ?? ENTRY_BUILTINS.maxWordGap;
+      if (maxWordGap > 0 && options.compiler.scanWordGaps !== undefined) {
+        warnings.push(
+          ...(await options.compiler.scanWordGaps(result.pdf, {
+            maxWordGap,
+            entries: entryPages(
+              (result.entryPlaces ?? []) as EntryPlaceFact[],
+              (result.entryEnds ?? []) as EntryEndFact[],
+            ),
+          })),
+        );
+      }
       return {warnings};
     };
 

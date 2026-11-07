@@ -32,6 +32,8 @@ export interface ExportRequest {
   minDpi?: number;
   /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
   fixedImages?: readonly ImageFact[];
+  /** US-034 AC-5, AC-8: `entries.maxWordGap` of the preset. */
+  maxWordGap?: number;
 }
 
 /** How the command ended when no export was run. */
@@ -133,6 +135,8 @@ export async function exportNoteAt(
     // US-034 AC-1, AC-2: the print resolution check.
     minDpi: prepared.minDpi,
     fixedImages: prepared.fixedImages,
+    // US-034 AC-8: the word-gap scan runs on export only.
+    maxWordGap: prepared.maxWordGap,
     // US-028 AC-16: the text read above, converted again without image fit.
     fallback: async () => {
       const at100 = await convertNote(deps, path, active, selected.preset, {
