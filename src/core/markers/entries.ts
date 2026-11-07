@@ -94,6 +94,18 @@ export interface EntriesSettings {
   narrowJustification?: NarrowJustification;
   /** US-034 AC-5: the widest word gap in percent before a warning (0 = no scan). */
   maxWordGap?: number;
+  /** US-036 AC-1: the sheet page in the book; the A4 file. */
+  encounterSheet?: boolean;
+  encounterSheetFile?: boolean;
+  /** US-036 AC-1: 15, 30 or 45 tick boxes a row. */
+  encounterSheetBoxes?: number;
+  /** US-036 AC-1: the sheet's texts (each over its built-in). */
+  encounterSheetText?: Partial<
+    Record<
+      'title' | 'round' | 'name' | 'attack' | 'dice' | 'rule' | 'credit',
+      string
+    >
+  >;
 }
 
 /**

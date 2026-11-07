@@ -191,6 +191,11 @@ const ENTRY_ROW_PATHS: readonly (readonly string[])[] = [
   // US-034 AC-5: the word-gap settings (shown when the preset sets them).
   ['entries', 'narrowJustification'],
   ['entries', 'maxWordGap'],
+  // US-036 AC-1: the encounter sheet.
+  ['entries', 'encounterSheet'],
+  ['entries', 'encounterSheetFile'],
+  ['entries', 'encounterSheetBoxes'],
+  ['entries', 'encounterSheetText'],
   ['colorMode'],
 ];
 

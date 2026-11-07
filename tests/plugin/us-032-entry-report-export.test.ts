@@ -127,7 +127,13 @@ describe('US-032 AC-10 the worker reads the entry facts', () => {
         }),
     };
     const facts = await readLayoutFacts(compiler, '/main.typ', false, true);
-    expect(asked).toEqual(['<o2t-entry>', '<o2t-entry-end>', '<o2t-section>']);
+    // US-036 AC-3 (#135): the sheet page's facts too.
+    expect(asked).toEqual([
+      '<o2t-entry>',
+      '<o2t-entry-end>',
+      '<o2t-section>',
+      '<o2t-sheet>',
+    ]);
     expect(facts.entryPlaces).toEqual(PLACES);
     expect(facts.entryEnds).toEqual(ENDS);
     asked.length = 0;

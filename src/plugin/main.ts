@@ -526,6 +526,8 @@ export default class Obsidian2TypstPlugin extends Plugin {
             }),
         // US-034 AC-2: the drawn widths reach the IMAGE_LOW_DPI count.
         ...(vector.images === undefined ? {} : {images: vector.images}),
+        // US-036 AC-3: the sheet page's small-boxes warning is counted.
+        ...(vector.sheets === undefined ? {} : {sheets: vector.sheets}),
       };
     })();
     return {result, cancel: () => job.cancel()};

@@ -33,6 +33,7 @@ import {
   emitUnlistedHeading,
   emitUnnumberedHeading,
 } from './glossary';
+import {bookSheetCall} from '../entries/sheet';
 import {statblockCall, type StatblockWriter} from './entry';
 import {escapeMarkup} from './escape-markup';
 import {Notes} from './footnote';
@@ -141,6 +142,11 @@ export interface EntryLayoutEnv {
   tocDepth: number;
   /** US-033 AC-9, AC-12: the quick reference; null when it is off. */
   quick: QuickReference | null;
+  /**
+   * US-036 AC-6: the encounter sheet page after each chapter (its data as a
+   * Typst dictionary, its title); null when it is off or empty.
+   */
+  sheet?: {data: string; title: string} | null;
 }
 
 /** US-033 AC-9: the columns of the quick reference. */
@@ -706,6 +712,8 @@ function openerLines(
     const lines = [
       ...(runs.covered.has(k - 1) ? [] : [CHAPTER_END_LINE]),
       quick(node),
+      // US-036 AC-6: the sheet page after the quick reference.
+      sheetPageText(node, layout),
     ].filter((line) => line !== '');
     if (lines.length === 0) return;
     if (k >= blocks.length) end = lines.join('\n');
@@ -808,6 +816,28 @@ function quickReferenceText(
     ...body.map((r) => `  ${r},`),
     ')',
     ']',
+  ]
+    .filter((line) => line !== '')
+    .join('\n');
+}
+
+/**
+ * US-036 | AC-6 (decision 1): the encounter sheet page of one entries
+ * chapter, or '' when it is off: a new page (any side, US-025's
+ * `breakLines`), the heading at the chapter's section level (in the
+ * contents; none for an empty title) given to the sheet so it is measured,
+ * and as many rows as fit the text area.
+ */
+function sheetPageText(chapter: BlockNode, layout: EntryLayoutEnv): string {
+  const sheet = layout.sheet ?? null;
+  if (sheet === null || chapter.kind !== 'heading') return '';
+  const head =
+    sheet.title === ''
+      ? ''
+      : `${'='.repeat(chapter.depth + 1)} ${escapeMarkup(sheet.title, {atBlockStart: false})}`;
+  return [
+    breakLines('page', layout.facingPages) ?? '',
+    bookSheetCall(sheet.data, layout.textWidth, layout.textHeight, head),
   ]
     .filter((line) => line !== '')
     .join('\n');

@@ -1123,6 +1123,56 @@ function readEntries(value: unknown, problems: Problem[]): EntriesSettings {
     }
     if (ok) out.narrowJustification = limits;
   }
+  // US-036 AC-1: the encounter sheet.
+  for (const key of ['encounterSheet', 'encounterSheetFile'] as const) {
+    const on = read(value, key);
+    if (on === undefined) continue;
+    if (typeof on === 'boolean') out[key] = on;
+    else
+      problems.push({
+        path: `entries.${key}`,
+        message: `entries.${key} must be true or false`,
+      });
+  }
+  const sheetBoxes = read(value, 'encounterSheetBoxes');
+  if (sheetBoxes !== undefined) {
+    if (sheetBoxes === 15 || sheetBoxes === 30 || sheetBoxes === 45)
+      out.encounterSheetBoxes = sheetBoxes;
+    else
+      problems.push({
+        path: 'entries.encounterSheetBoxes',
+        message: 'entries.encounterSheetBoxes must be 15, 30 or 45',
+      });
+  }
+  const sheetText = readSubgroup(
+    value,
+    'encounterSheetText',
+    'entries.encounterSheetText',
+    problems,
+  );
+  if (sheetText !== undefined) {
+    const texts: NonNullable<EntriesSettings['encounterSheetText']> = {};
+    for (const key of [
+      'title',
+      'round',
+      'name',
+      'attack',
+      'dice',
+      'rule',
+      'credit',
+    ] as const) {
+      const v = read(sheetText, key);
+      if (v === undefined) continue;
+      if (typeof v === 'string' || typeof v === 'number')
+        texts[key] = String(v);
+      else
+        problems.push({
+          path: `entries.encounterSheetText.${key}`,
+          message: `entries.encounterSheetText.${key} must be text`,
+        });
+    }
+    out.encounterSheetText = texts;
+  }
   // US-031 AC-6: a full-image page keeps its header and folio.
   const fullImageHeader = read(value, 'fullImageHeader');
   if (fullImageHeader !== undefined) {

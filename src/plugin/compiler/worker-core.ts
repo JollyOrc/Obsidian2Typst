@@ -96,6 +96,8 @@ export interface LayoutFacts {
   entrySections?: unknown[];
   /** US-034 AC-2: the block images' `<o2t-image>` drawn widths. */
   images?: unknown[];
+  /** US-036 AC-3: the encounter sheets' `<o2t-sheet>` facts. */
+  sheets?: unknown[];
 }
 
 /** US-031 AC-14: a document with an entries chapter writes these facts. */
@@ -141,6 +143,9 @@ export async function readLayoutFacts(
           const places = await read('o2t-entry');
           const ends = await read('o2t-entry-end');
           const sections = await read('o2t-section');
+          // US-036 AC-3: the sheet page's facts (small boxes).
+          const sheets = await read('o2t-sheet');
+          if (sheets !== null && sheets.length > 0) facts.sheets = sheets;
           if (places !== null && ends !== null) {
             facts.entryPlaces = places;
             facts.entryEnds = ends;

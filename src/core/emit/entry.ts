@@ -45,6 +45,35 @@ const L = STATBLOCK_LAYOUT;
  * hanging indent; never split (`breakable: false`). Records
  * `(band, boxes, rows, cells, parts)` as `<o2t-statblock>`.
  */
+/**
+ * US-030 AC-12, AC-13, US-036 AC-3 (SCAR-017): the marks the statblock and
+ * the encounter sheet both draw: the box size for a column width (15 a row,
+ * groups of 5), rows of boxes, a track cell with its recoloured icon at
+ * ${L.iconOpacity}.
+ */
+export const ENTRY_MARKS_DEF = `#let o2t-box-size(w) = (w - 12 * ${L.boxGap} - 2 * ${L.groupGap}) / 15
+#let o2t-box-rows(count, s, lk) = {
+  let one = box(width: s, height: s, fill: lk.box-fill, stroke: 0.5pt + lk.frame.color)
+  let lines = range(calc.ceil(count / 15)).map(r => {
+    let n = calc.min(15, count - r * 15)
+    let row = ()
+    for i in range(n) {
+      row.push(one)
+      if i < n - 1 { row.push(h(if calc.rem(i + 1, 5) == 0 { ${L.groupGap} } else { ${L.boxGap} })) }
+    }
+    row.join()
+  })
+  stack(spacing: ${L.boxGap}, ..lines)
+}
+#let o2t-icon(path, colour) = {
+  let lk = (icon: colour)
+  let svg = read(path).replace(regex("\\\\b(fill|stroke)=\\"([^\\"]*)\\""), m => if m.captures.at(1).trim() == "none" { m.text } else { m.captures.at(0) + "=\\"" + lk.icon + "\\"" })
+  image(bytes(svg.replace(regex("<svg\\\\b"), "<svg opacity=\\"${L.iconOpacity}\\"", count: 1)), format: "svg", height: 100%)
+}
+#let o2t-cell(c, lk, height: 6mm) = box(
+  width: 100%, height: height, fill: lk.box-fill, stroke: 0.5pt + lk.frame.color, inset: 0.5mm,
+  align(center + horizon, if c.icon == none { none } else { o2t-icon(c.icon, lk.icon) }))`;
+
 export const STATBLOCK_HELPER_DEF = `#let o2t-statblock(d, lede: none) = {
   let lk = d.look
   let fonted(role, body) = {
@@ -64,30 +93,12 @@ export const STATBLOCK_HELPER_DEF = `#let o2t-statblock(d, lede: none) = {
     let label-col = stack(spacing: 0.6mm,
       text(size: lk.sizes.label, fill: lk.accent, d.boxes.label),
       fonted("values", text(size: lk.sizes.value, fill: lk.accent, d.boxes.value)))
-    let field = layout(size => {
-      let s = (size.width - 12 * ${L.boxGap} - 2 * ${L.groupGap}) / 15
-      let one = box(width: s, height: s, fill: lk.box-fill, stroke: 0.5pt + lk.frame.color)
-      let lines = range(rows).map(r => {
-        let n = calc.min(15, count - r * 15)
-        let row = ()
-        for i in range(n) {
-          row.push(one)
-          if i < n - 1 { row.push(h(if calc.rem(i + 1, 5) == 0 { ${L.groupGap} } else { ${L.boxGap} })) }
-        }
-        row.join()
-      })
-      stack(spacing: ${L.boxGap}, ..lines)
-    })
+    let field = layout(size => o2t-box-rows(count, o2t-box-size(size.width), lk))
     pieces.push(grid(columns: (${L.labelColumn}, 1fr), column-gutter: 1mm, align: left + horizon, label-col, field))
   }
   if d.track != none {
     parts.push("track")
-    let cells = d.track.cells.map(c => box(
-      width: 100%, height: 6mm, fill: lk.box-fill, stroke: 0.5pt + lk.frame.color, inset: 0.5mm,
-      align(center + horizon, if c.icon == none { none } else {
-        let svg = read(c.icon).replace(regex("\\\\b(fill|stroke)=\\"([^\\"]*)\\""), m => if m.captures.at(1).trim() == "none" { m.text } else { m.captures.at(0) + "=\\"" + lk.icon + "\\"" })
-        image(bytes(svg.replace(regex("<svg\\\\b"), "<svg opacity=\\"${L.iconOpacity}\\"", count: 1)), format: "svg", height: 100%)
-      })))
+    let cells = d.track.cells.map(c => o2t-cell(c, lk))
     let head = if d.track.label == none { () } else { (text(size: lk.sizes.label, fill: lk.accent, d.track.label),) }
     pieces.push(stack(spacing: 0.6mm, ..head, grid(columns: (1fr,) * cells.len(), column-gutter: 0.8mm, ..cells)))
   }

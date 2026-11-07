@@ -181,3 +181,32 @@ export function sectionWarnings(
   }
   return out;
 }
+
+/** What `<o2t-sheet>` records (US-036 AC-3, AC-8). */
+export interface SheetFact {
+  form: 'A4' | 'book';
+  rows: number;
+  columns: number;
+  /** The tick boxes' size in mm. */
+  boxMm: number;
+}
+
+/**
+ * US-036 | AC-3 (decision 2): `ENCOUNTER_SHEET_SMALL_BOXES "<form>": <size>
+ * mm (min 2.0)` once per form whose boxes are under 2.0 mm (the size
+ * rounded to 0.1 mm), in the order the forms come.
+ */
+export function sheetWarnings(sheets: readonly SheetFact[]): Warning[] {
+  const out: Warning[] = [];
+  const seen = new Set<string>();
+  for (const s of sheets) {
+    if (seen.has(s.form) || !(s.boxMm < 2.0)) continue;
+    seen.add(s.form);
+    out.push({
+      code: 'ENCOUNTER_SHEET_SMALL_BOXES',
+      message: `"${s.form}": ${s.boxMm.toFixed(1)} mm (min 2.0)`,
+      line: 0,
+    });
+  }
+  return out;
+}

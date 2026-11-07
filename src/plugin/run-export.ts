@@ -29,9 +29,11 @@ import {MIN_DPI_BUILTIN} from '../core/layout/page-setup';
 import {
   entryLayoutWarnings,
   sectionWarnings,
+  sheetWarnings,
   type EntryEndFact,
   type EntryPlaceFact,
   type SectionFact,
+  type SheetFact,
 } from '../core/entries/report';
 import {ENTRY_BUILTINS} from '../core/markers';
 import type {TypstCompiler} from './compiler';
@@ -214,6 +216,8 @@ export async function runExport(
           (result.entryEnds ?? []) as EntryEndFact[],
           {emptyWarn: options.entryEmptyWarn ?? ENTRY_BUILTINS.emptyWarn},
         ),
+        // US-036 AC-3 (decision 2): the sheet page's small boxes.
+        ...sheetWarnings((result.sheets ?? []) as SheetFact[]),
         // US-033 AC-13: the openers' and unpaired pages' warnings.
         ...sectionWarnings(
           (result.entrySections ?? []) as SectionFact[],

@@ -28,6 +28,7 @@ export type VectorResult =
       entryEnds?: unknown[];
       entrySections?: unknown[];
       images?: unknown[];
+      sheets?: unknown[];
     }
   | Extract<CompileResult, {ok: false}>;
 
@@ -154,6 +155,7 @@ export function createTypstCompiler(
             entryEnds?: unknown;
             entrySections?: unknown;
             images?: unknown;
+            sheets?: unknown;
           };
           // US-028 AC-5: the decisions only when the worker sent a list;
           // AC-14: `settled` only when it sent a boolean.
@@ -178,6 +180,10 @@ export function createTypstCompiler(
             // US-034 AC-2: the drawn widths, when the worker sent a list.
             ...(Array.isArray(message.images)
               ? {images: message.images as unknown[]}
+              : {}),
+            // US-036 AC-3: the sheet facts, when the worker sent a list.
+            ...(Array.isArray(message.sheets)
+              ? {sheets: message.sheets as unknown[]}
               : {}),
           };
           if (message.id !== id) return;

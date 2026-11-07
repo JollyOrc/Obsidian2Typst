@@ -92,6 +92,8 @@ export interface CompiledEntries {
   ends: EntryEnd[];
   sections: SectionPlace[];
   images: {file: string; widthMm: number}[];
+  /** US-036 AC-3, AC-6 (G4 #135): the sheet pages' `<o2t-sheet>` facts. */
+  sheets: {form: string; rows: number; columns: number; boxMm: number}[];
   diagnostics: string[];
   result: ConvertResult;
   /** US-034 AC-7 (G4 #133): the compiled PDF, for the word-gap scan. */
@@ -172,7 +174,7 @@ export async function compileEntries(
       }) => Promise<T>,
     ): Promise<T>;
   };
-  const [diagnostics, blocks, places, ends, sections, drawn] =
+  const [diagnostics, blocks, places, ends, sections, drawn, sheetFacts] =
     await compiler.runWithWorld({mainFilePath: path}, async (w) => [
       (await w.compile({diagnostics: 'unix'})).diagnostics ?? [],
       await w.query({selector: '<o2t-statblock>', field: 'value'}),
@@ -180,6 +182,7 @@ export async function compileEntries(
       await w.query({selector: '<o2t-entry-end>', field: 'value'}),
       await w.query({selector: '<o2t-section>', field: 'value'}),
       await w.query({selector: '<o2t-image>', field: 'value'}),
+      await w.query({selector: '<o2t-sheet>', field: 'value'}),
     ]);
   return {
     pdf,
@@ -190,6 +193,9 @@ export async function compileEntries(
     ends: parse<EntryEnd>(ends),
     sections: parse<SectionPlace>(sections),
     images: parse<{file: string; widthMm: number}>(drawn),
+    sheets: parse<{form: string; rows: number; columns: number; boxMm: number}>(
+      sheetFacts,
+    ),
     diagnostics: diagnostics as string[],
     result,
   };

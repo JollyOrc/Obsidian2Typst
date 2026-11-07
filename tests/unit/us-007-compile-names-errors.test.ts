@@ -9,6 +9,9 @@ describe('US-007 AC-1: the names of the exported files', () => {
   it('US-007 AC-1: a note Rules is exported as Rules.typ and Rules.pdf next to template.typ', () => {
     expect(exportNames('Rules')).toEqual({
       base: 'Rules',
+      // US-036 AC-5 (#135): the A4 encounter sheet's names.
+      sheetTyp: 'Rules - Encounter Sheet.typ',
+      sheetPdf: 'Rules - Encounter Sheet.pdf',
       typ: 'Rules.typ',
       pdf: 'Rules.pdf',
       template: 'template.typ',

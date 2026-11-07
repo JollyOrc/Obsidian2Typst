@@ -98,8 +98,10 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
   column is too narrow for that, the boxes shrink to fit and the warning
   `ENCOUNTER_SHEET_SMALL_BOXES "<form>": <size> mm (min 2.0)` is given once
   per form (`book` or `A4`), with the size rounded to 0.1 mm (decision 2).
-  Example: a 60 mm text area in one column → boxes of about 1.7 mm,
-  `ENCOUNTER_SHEET_SMALL_BOXES "book": 1.7 mm (min 2.0)`.
+  Example (corrected at #135 to the rule above, measured): a 40 mm text
+  area in one column → boxes of about 1.9 mm,
+  `ENCOUNTER_SHEET_SMALL_BOXES "book": 1.9 mm (min 2.0)`; a 60 mm area keeps
+  the 55 mm box column less the padding (boxes about 3.2 mm, no warning).
 
 - **AC-4 (what is not on the sheet):** No creature data: every row is blank.
   Which cells a creature uses is shown by the quick reference's Track column

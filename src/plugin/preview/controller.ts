@@ -8,9 +8,11 @@ import {fitDecisionWarnings} from '../../core/emit';
 import {
   entryLayoutWarnings,
   sectionWarnings,
+  sheetWarnings,
   type EntryEndFact,
   type EntryPlaceFact,
   type SectionFact,
+  type SheetFact,
 } from '../../core/entries/report';
 import {MIN_DPI_BUILTIN} from '../../core/layout/page-setup';
 import {ENTRY_BUILTINS} from '../../core/markers';
@@ -48,6 +50,8 @@ export type PreviewCompile =
       entrySections?: unknown[];
       /** US-034 AC-2: the block images' drawn widths of this compile. */
       images?: unknown[];
+      /** US-036 AC-3: the encounter sheets' facts of this compile. */
+      sheets?: unknown[];
     }
   | {ok: false; error: string};
 
@@ -264,7 +268,9 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
           [...(prepared.fixedImages ?? []), ...imageFacts(result.images ?? [])],
           prepared.pixelWidths ?? {},
           prepared.minDpi ?? MIN_DPI_BUILTIN,
-        ).length,
+        ).length +
+        // US-036 AC-3 (decision 2): boxes under 2.0 mm on the sheet page.
+        sheetWarnings((result.sheets ?? []) as SheetFact[]).length,
       ...applyRange(),
     });
   };

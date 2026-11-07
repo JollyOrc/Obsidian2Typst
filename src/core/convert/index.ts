@@ -49,6 +49,14 @@ import {
 } from '../markers';
 import {indexHeadings, parse, type BlockNode} from '../parse';
 import {statblockModel, type StatblockModel} from '../entries/model';
+import {
+  SHEET_BUILTINS,
+  SHEET_EMPTY_WARNING,
+  SHEET_HELPER_DEF,
+  sheetData,
+  sheetSettings,
+} from '../entries/sheet';
+import {ENTRY_MARKS_DEF} from '../emit/entry';
 import {coverNames, planCover, resolveCover} from './cover';
 import {
   arrangeParts,
@@ -620,6 +628,37 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
             statblocksWritten += 1;
           },
         };
+  // US-036 AC-2, AC-6: the encounter sheet page after each entries chapter;
+  // a switched-on sheet with nothing to track warns once and is not made.
+  const sheetEntries = input.settings.entries;
+  const sheetOn =
+    sheetEntries?.encounterSheet === true ||
+    sheetEntries?.encounterSheetFile === true;
+  if (sheetOn && sheetSettings(sheetEntries) === null) {
+    ctx.warn(SHEET_EMPTY_WARNING.code, SHEET_EMPTY_WARNING.message, 0);
+  }
+  if (entryLayout !== undefined && sheetEntries?.encounterSheet === true) {
+    const data = sheetData(sheetEntries, input.settings.colorMode, (path) => {
+      const known = icons.get(path);
+      if (known !== undefined) return known;
+      const found = findImage(
+        {kind: 'image', src: `/${path}`, alt: '', title: null, line: 0},
+        ctx,
+        resolver,
+      );
+      icons.set(path, found);
+      return found;
+    });
+    entryLayout.sheet =
+      data === null
+        ? null
+        : {
+            data,
+            title:
+              sheetEntries.encounterSheetText?.title ??
+              SHEET_BUILTINS.text.title,
+          };
+  }
   for (const w of arranged.warnings) ctx.warn(w.code, w.message, w.line);
   // US-018 AC-2, AC-6: page numbers after links only with the switch and the
   // folios on, so the printed number exists; the rule only with a call.
@@ -740,14 +779,23 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       callouts: calloutStylesRule(styleEntries),
       glossary: glossary.hasTerms ? GLOSSARY_HELPER : null,
       // US-030 AC-15: the statblock helper, only when a statblock is drawn.
-      statblock: statblocksWritten > 0 ? STATBLOCK_HELPER_DEF : null,
+      statblock:
+        statblocksWritten > 0
+          ? `${ENTRY_MARKS_DEF}\n${STATBLOCK_HELPER_DEF}`
+          : null,
       // US-031: the entry layout, only when a chapter places an entry.
       entries:
         entryLayout === undefined
           ? null
-          : entriesLayoutHelper(
-              `${input.settings.entries?.statblock?.sizes?.band ?? STATBLOCK_BUILTINS.sizes.band}pt`,
-            ),
+          : [
+              entriesLayoutHelper(
+                `${input.settings.entries?.statblock?.sizes?.band ?? STATBLOCK_BUILTINS.sizes.band}pt`,
+              ),
+              // US-036 AC-6: the sheet's helpers with the page.
+              ...(entryLayout.sheet == null
+                ? []
+                : [ENTRY_MARKS_DEF, SHEET_HELPER_DEF]),
+            ].join('\n'),
       furniture: pageFurnitureRule(
         input.settings.pageFurniture,
         facingPages,
