@@ -53,6 +53,7 @@ import {
   SHEET_BUILTINS,
   SHEET_EMPTY_WARNING,
   SHEET_HELPER_DEF,
+  encounterSheetTyp,
   sheetData,
   sheetSettings,
 } from '../entries/sheet';
@@ -637,18 +638,29 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   if (sheetOn && sheetSettings(sheetEntries) === null) {
     ctx.warn(SHEET_EMPTY_WARNING.code, SHEET_EMPTY_WARNING.message, 0);
   }
+  // The track icons, resolved once for the statblocks and both sheets (a
+  // found icon is copied with the book's assets).
+  const iconPath = (path: string): string | null => {
+    const known = icons.get(path);
+    if (known !== undefined) return known;
+    const found = findImage(
+      {kind: 'image', src: `/${path}`, alt: '', title: null, line: 0},
+      ctx,
+      resolver,
+    );
+    icons.set(path, found);
+    return found;
+  };
+  // US-036 AC-5: the A4 file's source, written and compiled by the export.
+  const sheetTyp =
+    sheetEntries?.encounterSheetFile === true
+      ? encounterSheetTyp(sheetEntries, {
+          colorMode: input.settings.colorMode,
+          icon: iconPath,
+        }).typ
+      : null;
   if (entryLayout !== undefined && sheetEntries?.encounterSheet === true) {
-    const data = sheetData(sheetEntries, input.settings.colorMode, (path) => {
-      const known = icons.get(path);
-      if (known !== undefined) return known;
-      const found = findImage(
-        {kind: 'image', src: `/${path}`, alt: '', title: null, line: 0},
-        ctx,
-        resolver,
-      );
-      icons.set(path, found);
-      return found;
-    });
+    const data = sheetData(sheetEntries, input.settings.colorMode, iconPath);
     entryLayout.sheet =
       data === null
         ? null
@@ -840,5 +852,6 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       sourceLine: e.sourceLine,
     })),
     ...(ctx.fixedImages.length > 0 ? {images: [...ctx.fixedImages]} : {}),
+    ...(sheetTyp === null ? {} : {sheetTyp}),
   };
 }

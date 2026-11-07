@@ -102,6 +102,8 @@ export interface LayoutFacts {
 
 /** US-031 AC-14: a document with an entries chapter writes these facts. */
 const ENTRY_FACTS = 'o2t-entry-mark';
+/** US-036 AC-3: a document with an encounter sheet writes `<o2t-sheet>`. */
+const SHEET_FACTS = '<o2t-sheet>';
 
 /**
  * US-028 | AC-14, AC-5: Opens one typst.ts world on the compiled main file
@@ -253,7 +255,9 @@ export function createWorkerCore(post: Post): {
       compiler as unknown as QueryCompiler,
       main,
       message.source.includes(FIT_DECISION_LABEL),
-      message.source.includes(ENTRY_FACTS),
+      // US-036 AC-3, AC-5: the A4 sheet has its facts without entries.
+      message.source.includes(ENTRY_FACTS) ||
+        message.source.includes(SHEET_FACTS),
       message.source.includes(`<${IMAGE_FACT_LABEL}>`),
     );
     if (vector) {

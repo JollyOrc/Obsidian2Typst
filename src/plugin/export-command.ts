@@ -34,6 +34,8 @@ export interface ExportRequest {
   fixedImages?: readonly ImageFact[];
   /** US-034 AC-5, AC-8: `entries.maxWordGap` of the preset. */
   maxWordGap?: number;
+  /** US-036 AC-5: the A4 encounter sheet's source, when it is on. */
+  sheetTyp?: string | null;
 }
 
 /** How the command ended when no export was run. */
@@ -137,6 +139,8 @@ export async function exportNoteAt(
     fixedImages: prepared.fixedImages,
     // US-034 AC-8: the word-gap scan runs on export only.
     maxWordGap: prepared.maxWordGap,
+    // US-036 AC-5: the A4 encounter sheet, a second compile.
+    sheetTyp: prepared.sheetTyp,
     // US-028 AC-16: the text read above, converted again without image fit.
     fallback: async () => {
       const at100 = await convertNote(deps, path, active, selected.preset, {

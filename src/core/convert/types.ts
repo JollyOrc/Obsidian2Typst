@@ -140,4 +140,9 @@ export interface ConvertResult {
    * the compile's `<o2t-image>` facts.
    */
   images?: ImageFact[];
+  /**
+   * US-036 AC-5: the A4 encounter sheet's Typst source, when
+   * `entries.encounterSheetFile` is on and there is something to track.
+   */
+  sheetTyp?: string;
 }

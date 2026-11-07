@@ -25,6 +25,7 @@ import {
   type ImageFact,
   type Warning,
 } from '../core/emit';
+import {sheetFailedWarning} from '../core/entries/sheet';
 import {MIN_DPI_BUILTIN} from '../core/layout/page-setup';
 import {
   entryLayoutWarnings,
@@ -107,6 +108,8 @@ export interface RunExportOptions {
   fixedImages?: readonly ImageFact[];
   /** US-034 AC-5, AC-8: `entries.maxWordGap` (built-in 200; 0 = no scan). */
   maxWordGap?: number;
+  /** US-036 AC-5: the A4 encounter sheet's source; null or absent: none. */
+  sheetTyp?: string | null;
 }
 
 /** US-028 AC-16: the note converted again without image fit. */
@@ -237,6 +240,26 @@ export async function runExport(
           options.minDpi ?? MIN_DPI_BUILTIN,
         ),
       );
+      // US-036 AC-5: the A4 encounter sheet, a second compile after the
+      // book's with the same files and fonts; a failure never stops the book.
+      if (options.sheetTyp !== undefined && options.sheetTyp !== null) {
+        await host.writeExportFile(
+          `${dir}/${names.sheetTyp}`,
+          options.sheetTyp,
+        );
+        const sheet = await options.compiler.compile({
+          file: names.sheetTyp,
+          source: options.sheetTyp,
+          files,
+          fonts: options.fonts,
+        });
+        if (sheet.ok) {
+          await host.writeExportBytes(`${dir}/${names.sheetPdf}`, sheet.pdf);
+          warnings.push(...sheetWarnings((sheet.sheets ?? []) as SheetFact[]));
+        } else {
+          warnings.push(sheetFailedWarning(sheet.error));
+        }
+      }
       // US-034 AC-7, AC-8, AC-11: the word-gap scan of the last compile's
       // PDF, in a worker; export only, never stops it (decision 1).
       const maxWordGap = options.maxWordGap ?? ENTRY_BUILTINS.maxWordGap;

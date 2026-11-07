@@ -67,6 +67,16 @@ export const SHEET_EMPTY_WARNING: Warning = Object.freeze({
 });
 
 /**
+ * US-036 AC-5: the warning of an A4 sheet that did not compile (`error`, the
+ * compiler's text); the book is written as usual.
+ */
+export const sheetFailedWarning = (error: string): Warning => ({
+  code: 'ENCOUNTER_SHEET_FAILED',
+  message: `The encounter sheet did not compile; the book was written. ${error}`,
+  line: 0,
+});
+
+/**
  * US-036 | AC-3, AC-7: the row and the sheet. `o2t-sheet-row(d, w, box-col)`
  * draws one framed row (0.4 pt, 2.5 mm padding) of three lines 1.6 mm
  * apart: the name and 7 × 4.5 mm stat boxes; the tick boxes in the box

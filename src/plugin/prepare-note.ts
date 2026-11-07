@@ -60,6 +60,8 @@ export interface PreparedNote {
   minDpi: number;
   /** US-034 AC-5: `entries.maxWordGap` of the preset (or the built-in 200). */
   maxWordGap: number;
+  /** US-036 AC-5: the A4 encounter sheet's source; null without the file. */
+  sheetTyp: string | null;
   /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
   fixedImages: ImageFact[];
 }
@@ -188,6 +190,7 @@ export async function convertNote(
     minDpi: effective.settings.images?.minDpi ?? MIN_DPI_BUILTIN,
     maxWordGap:
       effective.settings.entries?.maxWordGap ?? ENTRY_BUILTINS.maxWordGap,
+    sheetTyp: converted.sheetTyp ?? null,
     fixedImages: converted.images ?? [],
     source,
   };
