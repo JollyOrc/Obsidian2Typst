@@ -235,4 +235,11 @@ export const DEFAULT_ROWS: readonly FieldRow[] = [
     kind: 'number',
     hint: '%, 10 to 100',
   },
+  // US-034 AC-1: the print resolution check; 0 turns it off.
+  {
+    label: 'Minimum print resolution',
+    path: ['images', 'minDpi'],
+    kind: 'number',
+    hint: 'dpi, 0 to 2400',
+  },
 ];

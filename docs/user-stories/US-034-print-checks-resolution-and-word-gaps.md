@@ -1,8 +1,8 @@
 # US-034 — Print checks: image resolution and word gaps
 
-**Status:** Ready (G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Implemented, manual checks M21 to M24 pending (G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-033)
-**Implemented:** —
+**Implemented:** v0.12.0, epic #121 (tickets #122 to #137, 2026-11-07); test build `0.12.0-m21.1` in the manual checks M21 to M24
 **Supersedes:** —
 
 Epic #121, fifth of seven stories (see US-030). Drafts D-15, D-16 in
@@ -61,7 +61,8 @@ Measured (SCAR-024):
   `0` = off. In preset notes and the Defaults (US-008 AC-1 precedence).
   Settings screen (US-029 AC-1, AC-2): a feature row `Print resolution`,
   description `Warns about images below this dpi; off at 0.`, with a gear
-  whose modal holds the number field — the form of the `Contents` row
+  whose modal holds the number field `Minimum print resolution` (hint
+  `dpi, 0 to 2400`; named at #132) — the form of the `Contents` row
   (`off while its depth is 0`). The row is placed after `Image fit`. Invalid
   values make the preset invalid (US-008 AC-4): `images.minDpi must be a
   whole number from 0 to 2400 (line N)`. A digital preset may set it lower.
@@ -71,10 +72,15 @@ Measured (SCAR-024):
   its pixel width divided by its drawn width in inches, after fit, shrink,
   float or an entry slot. The drawn width comes from the compile: the image
   helper records each image's file and drawn width as `metadata`, read after
-  the compile (as US-028 AC-5's decisions); the pixel width from the image
-  file's header (PNG, JPEG, WebP, GIF). SVG and other vector images are not
-  checked. An inline image (inside text) and a refused image (US-003 AC-6)
-  are not checked.
+  the compile (as US-028 AC-5's decisions); an image whose drawn width is
+  fixed by its call (a size written in the note, the cover filling the sheet)
+  is recorded by the conversion instead (refined at #132, so these calls stay
+  as before); the pixel width from the image file's header (PNG, JPEG, WebP,
+  GIF). SVG and other vector images are not checked. An image written inside
+  text is set as a block of its own (US-003) and is checked like one
+  (refined at #132: the converter draws no image inline); drawn icons
+  (callout icons, track cells) and a refused image (US-003 AC-6) are not
+  checked.
 
 - **AC-3 (the warning):** Below `images.minDpi`:
   `IMAGE_LOW_DPI "<file>": <d> dpi at <w> mm (min <m>)`, with `d` rounded to
@@ -112,7 +118,10 @@ Measured (SCAR-024):
   US-030 AC-16, decision 2) is set with
   `par(justification-limits: (spacing: (min: 80%, max: 150%), tracking:
   (min: -0.01em, max: 0.03em)))` from `entries.narrowJustification`;
-  full-width text is not.
+  full-width text is not. (Noted at #133: the plugin sets no `justify` of
+  its own; the text is justified by the book's template, US-023, and the
+  limits apply where it is. Without justification no line is adjusted and
+  the scan finds none.)
 
 - **AC-7 (the scan):** After the export's last compile (US-028's settle loop
   included), in the compile worker, the plugin reads the PDF: every text line

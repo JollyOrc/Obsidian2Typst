@@ -53,12 +53,13 @@ Pool](#tidal-basin)` is `#link(<h-tidal-basin>)[Tidal Basin]`.
   `Glossary: none` switches the built-in rule off. Invalid values make the
   preset invalid (US-008 AC-4) with the line of the field and the first of:
   `headingRules must be a group of heading texts`;
-  `headingRules.<text> must be a rule name: glossary or none`;
+  `headingRules.<text> must be a rule name: glossary, colophon, back-notes, entries or none`
+  (the rule names of US-026 and US-031 added);
   `headingRules has the heading text "<text>" twice (compared without case and trailing blanks)`.
   Examples (note starts `---`, `schemaVersion: 1`, `headingRules:` on line 3):
   `headingRules: glossary` → `headingRules must be a group of heading texts
   (line 3)`; `Glossary: index` on line 4 → `headingRules.Glossary must be a rule
-  name: glossary or none (line 4)`; `Glossary: glossary` and `glossary: none`
+  name: glossary, colophon, back-notes, entries or none (line 4)`; `Glossary: glossary` and `glossary: none`
   on lines 4 and 5 → `headingRules has the heading text "glossary" twice
   (compared without case and trailing blanks) (line 5)`. `null` is unset.
   Preset field only: the Defaults of the settings tab get no `headingRules`

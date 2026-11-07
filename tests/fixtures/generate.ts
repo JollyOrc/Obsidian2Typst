@@ -10,6 +10,7 @@
 import {mkdirSync, rmSync, writeFileSync} from 'node:fs';
 import {dirname, join, resolve} from 'node:path';
 import {deflateSync} from 'node:zlib';
+import {stringify} from 'yaml';
 
 /** US-024 AC-1: the seed of every random choice. */
 const SEED = 20261027;
@@ -1132,6 +1133,567 @@ function writeWikilinks(
  * US-024 AC-1: writes the whole sample vault below `outDir` (created when
  * missing; an existing folder is replaced, it holds generated files only).
  */
+// ---------------------------------------------------------------------------
+// US-024 AC-13 to AC-18 (amendment for epic #121, ticket #122): the entries
+// chapter `Menagerie.md`, its preset, the icons and the entry illustrations.
+// Its own seeded stream, so `Book.md` (written from SEED's stream) stays
+// byte for byte as before (AC-19).
+
+/** AC-13: the entry illustrations, name → [width, height] in pixels. */
+const ENTRY_IMAGES: Record<string, [number, number]> = {
+  'assets/entry-wide.png': [1280, 1006],
+  'assets/entry-tall.png': [358, 736],
+  'assets/entry-square.png': [600, 600],
+  'assets/entry-small.png': [272, 334],
+  'assets/entry-long.png': [2000, 500],
+  'assets/entry-slim.png': [300, 1200],
+};
+
+const ENTRY_IMAGE_KEYS = Object.keys(ENTRY_IMAGES);
+
+/** AC-13: five simple shapes, `fill="#000"` (no third-party icon). */
+const ENTRY_ICONS: [string, string][] = [
+  ['fine', '<circle cx="12" cy="12" r="9" fill="#000"/>'],
+  ['hurt', '<rect x="4" y="4" width="16" height="16" fill="#000"/>'],
+  ['down', '<path d="M12 3 21 21H3z" fill="#000"/>'],
+  [
+    'fading',
+    '<path d="M4 4 20 20M20 4 4 20" stroke="#000" stroke-width="3" fill="#000"/>',
+  ],
+  ['gone', '<rect x="3" y="10" width="18" height="4" fill="#000"/>'],
+];
+const iconSvg = (shape: string): string =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${shape}</svg>\n`;
+
+/**
+ * US-024 decision 1: a paragraph that gaps over 200 % in a 45 % column of
+ * the A5 text area (47.25 mm), found by compiling candidates
+ * (`spikes/fixture-gap/find.mjs`, 2026-11-06, Typst 0.14.2, Libertinus
+ * Serif: 4 of 8 lines over 200 %). Fixed data; US-034's test guards it.
+ */
+const GAP_PARAGRAPH =
+  'Ut pariatur nostrud cillum pariaturdosed dolor ipsum excillumin dolor veniam esse irureadipiscingipsum consequat in duis etadipiscingex ut labore exercitation minim enim reprehenderit dolore ullamco ullamco sit nostrud ut.';
+
+/** What the manifest records about one entry (AC-15). */
+interface EntryFact {
+  heading: string;
+  level: number;
+  chapter: string;
+  section: string | null;
+  line: number;
+  layout: string | null;
+  illustration: {file: string; width: number; height: number} | null;
+  boxes: unknown;
+  states: unknown;
+  tags: string[];
+  cases: string[];
+}
+
+/** A fence one backtick longer than the longest run in `body` (three at least). */
+function fenceFor(body: string): string {
+  const longest = Math.max(
+    0,
+    ...[...body.matchAll(/`+/g)].map((m) => m[0].length),
+  );
+  return '`'.repeat(Math.max(3, longest + 1));
+}
+
+function writeMenagerie(): {
+  text: string;
+  facts: EntryFact[];
+  chapters: Record<string, {sections: string[]; entries: number}>;
+} {
+  const random = seeded(SEED + 121);
+  const word = (): string =>
+    WORDS[Math.floor(random() * WORDS.length)] as string;
+  const words = (n: number): string => Array.from({length: n}, word).join(' ');
+  const sentence = (n = 8 + Math.floor(random() * 10)): string =>
+    `${capital(words(n))}.`;
+  /** About `n` words of body text in paragraphs of 40 to 70 words. */
+  const body = (n: number): string[] => {
+    const out: string[] = [];
+    let left = n;
+    while (left > 0) {
+      const k = Math.min(left, 40 + Math.floor(random() * 30));
+      const parts: string[] = [];
+      let w = k;
+      while (w > 0) {
+        const s = Math.min(w, 8 + Math.floor(random() * 10));
+        parts.push(sentence(s));
+        w -= s;
+      }
+      out.push(parts.join(' '), '');
+      left -= k;
+    }
+    return out;
+  };
+  const list = (n: number): string[] => [
+    ...Array.from({length: n}, (_, i) => `- ${capital(words(3 + (i % 4)))}`),
+    '',
+  ];
+
+  const lines: string[] = [];
+  const facts: EntryFact[] = [];
+  const chapters: Record<string, {sections: string[]; entries: number}> = {};
+  let chapter = '';
+  let section: string | null = null;
+  const push = (...ls: string[]): void => {
+    lines.push(...ls);
+  };
+  const heading = (level: number, text: string): number => {
+    push(`${'#'.repeat(level)} ${text}`);
+    if (level === 1) {
+      chapter = text;
+      section = null;
+      chapters[text] = {sections: [], entries: 0};
+    } else if (
+      level === 2 &&
+      chapters[chapter] !== undefined &&
+      chapter !== 'Glossary'
+    ) {
+      section = text;
+      chapters[chapter]?.sections.push(text);
+    }
+    return lines.length;
+  };
+  /** The block of `data` (fixed form), in a fence fitting its content. */
+  const block = (data: Record<string, unknown>, prefix = ''): void => {
+    const yaml = stringify(data, {nullStr: ''});
+    const fence = fenceFor(yaml);
+    push(
+      `${prefix}${fence}o2t-entry`,
+      ...yaml
+        .trimEnd()
+        .split('\n')
+        .map((l) => `${prefix}${l}`),
+      `${prefix}${fence}`,
+    );
+  };
+  /** An entry: heading, its block, then `rest`. */
+  const entry = (
+    level: number,
+    name: string,
+    data: Record<string, unknown>,
+    cases: string[],
+    rest: string[],
+    raw?: string,
+  ): void => {
+    const line = heading(level, name);
+    if (raw === undefined) block(data);
+    else push('```o2t-entry', ...raw.trimEnd().split('\n'), '```');
+    push(...rest);
+    const ill =
+      typeof data['illustration'] === 'string'
+        ? /assets\/(entry-[a-z]+\.png)/.exec(data['illustration'] as string)
+        : null;
+    const file = ill === null ? null : `assets/${ill[1] as string}`;
+    const size = file === null ? undefined : ENTRY_IMAGES[file];
+    facts.push({
+      heading: name,
+      level,
+      chapter,
+      section,
+      line,
+      layout:
+        typeof data['layout'] === 'string' ? (data['layout'] as string) : null,
+      illustration:
+        file === null || size === undefined
+          ? null
+          : {file, width: size[0], height: size[1]},
+      boxes: data['vigour'] ?? null,
+      states: data['states'] ?? null,
+      tags: Array.isArray(data['tags']) ? (data['tags'] as string[]) : [],
+      cases,
+    });
+    const counted = chapters[chapter];
+    if (counted !== undefined && level === 3) counted.entries++;
+  };
+  const lede = (): string[] => [sentence(14), sentence(12), ''];
+  const stats = (vigour: unknown = 11): Record<string, unknown> => ({
+    vigour,
+    might: 1 + Math.floor(random() * 6),
+    wits: 1 + Math.floor(random() * 6),
+    speed: 1 + Math.floor(random() * 6),
+  });
+
+  heading(1, 'Menagerie');
+  push('', ...body(60));
+  // ---- Beasts
+  heading(2, 'Beasts');
+  push('', ...body(50));
+  entry(
+    3,
+    'Fen Hare',
+    {
+      ...stats(11),
+      attacks: ['Kick: 2d6', '**Bite**: 1d6'],
+      tags: ['beast'],
+      layout: 'page-text',
+    },
+    [
+      'layout-page-text',
+      'length-under-1',
+      'boxes-11',
+      'states-missing',
+      'tag-mapped',
+      'attack-bold',
+      'chapter-intro',
+      'section-intro',
+      'list-10',
+      'subheadings',
+    ],
+    [
+      '',
+      ...lede(),
+      ...body(60),
+      `#### ${capital(words(2))}`,
+      '',
+      ...list(10),
+      `#### ${capital(words(2))}`,
+      '',
+      ...body(30),
+    ],
+  );
+  entry(
+    3,
+    'Marsh Owl',
+    {
+      ...stats(16),
+      attacks: ['Rake: 2d6'],
+      states: ['Fine', 'Hurt', 'Down', 'Fading', 'Gone'],
+      tags: ['beast'],
+      illustration: '![Drawn by A. Nobody](assets/entry-wide.png)',
+      layout: 'page-landscape',
+    },
+    ['layout-page-landscape', 'ratio-wide', 'boxes-16', 'states-plus-fading'],
+    ['', ...lede(), ...body(70)],
+  );
+  entry(
+    3,
+    'Cave Wyrm',
+    {
+      ...stats(45),
+      attacks: [
+        'Tail sweep across the whole front rank of its foes: 4d6',
+        'Bite: 3d6',
+      ],
+      tags: ['beast', 'magical'],
+      illustration: '![](assets/entry-long.png)',
+      layout: 'spread-landscape',
+    },
+    [
+      'layout-spread-landscape',
+      'ratio-long',
+      'boxes-45',
+      'length-over-1',
+      'attack-long',
+    ],
+    ['', ...lede(), ...body(260)],
+  );
+  entry(
+    3,
+    'Reed Cat',
+    {
+      ...stats(0),
+      attacks: ['Claw: 1d6'],
+      states: 'none',
+      illustration: '![](assets/entry-tall.png)',
+      layout: 'page-portrait',
+    },
+    [
+      'layout-page-portrait',
+      'ratio-tall',
+      'boxes-0',
+      'states-none',
+      'gap-paragraph',
+    ],
+    ['', ...lede(), GAP_PARAGRAPH, '', ...body(40)],
+  );
+  entry(
+    3,
+    'Quill Rat',
+    {...stats(46), attacks: ['Quills: 2d4'], layout: 'page-text'},
+    ['overflow-first-of-pair', 'boxes-46'],
+    ['', ...lede(), ...body(330)],
+  );
+  entry(
+    3,
+    'Sedge Mole',
+    {
+      ...stats(9),
+      attacks: ['Dig: 1d4'],
+      states: ['Fine', 'Lost'],
+      layout: 'page-text',
+    },
+    ['states-unknown'],
+    ['', ...lede(), ...body(80)],
+  );
+  entry(
+    3,
+    'Tussock Vole',
+    {...stats(7), attacks: ['Nip: 1d4'], layout: 'page-text'},
+    [],
+    ['', ...lede(), ...body(60)],
+  );
+  entry(
+    3,
+    'Moss Newt',
+    {...stats(5), attacks: ['Lick: 1d4'], layout: 'page-text'},
+    ['unpaired-at-section-end'],
+    ['', ...lede(), ...body(60)],
+  );
+  // ---- Horrors
+  heading(2, 'Horrors');
+  push('', ...body(40));
+  entry(
+    3,
+    'Bog Wight',
+    {
+      ...stats(14),
+      attacks: ['Glare: frightens', 'Grasp: 2d6'],
+      illustration: '![](assets/entry-square.png)',
+      layout: 'full-image',
+    },
+    ['layout-full-image', 'ratio-square', 'attack-no-dice'],
+    ['', ...lede(), ...body(90)],
+  );
+  entry(
+    3,
+    'Dune Lark',
+    {
+      vigour: 20,
+      might: 4,
+      wits: 8,
+      speed: 3,
+      attacks: ['Peck 1d6'],
+      layout: 'spread-text',
+    },
+    ['layout-spread-text', 'length-under-2', 'sum-mismatch', 'attack-no-colon'],
+    ['', ...lede(), ...body(380)],
+  );
+  entry(
+    3,
+    'Mire Toad',
+    {
+      ...stats(18),
+      attacks: ['Tongue: 2d6'],
+      skills: ['[[Quick Step]]', '[[Skills/Keen Nose|Keen Nose]]'],
+      illustration: '![[entry-slim.png|300]]',
+      layout: 'spread-portrait',
+    },
+    [
+      'layout-spread-portrait',
+      'ratio-slim',
+      'length-over-2',
+      'value-link-markup',
+    ],
+    ['', ...lede(), ...body(480)],
+  );
+  facts[facts.length - 1]!.illustration = {
+    file: 'assets/entry-slim.png',
+    width: 300,
+    height: 1200,
+  };
+  entry(
+    3,
+    'Ash Moth',
+    {
+      vigour: 'varies',
+      might: 2,
+      attacks: ['Dust: 1d4'],
+      states: 'Fine',
+      tags: ['beast', 'rare'],
+      illustration: '![](assets/entry-small.png)',
+      layout: 'auto',
+    },
+    [
+      'layout-auto',
+      'low-dpi',
+      'boxes-varies',
+      'states-one-word',
+      'tag-unmapped',
+    ],
+    ['', ...lede(), ...body(60)],
+  );
+  entry(
+    3,
+    'Fog Eel',
+    {...stats(8), attacks: ['Coil: 2d4'], layout: 'page-text'},
+    ['no-lede', 'list-11'],
+    ['', ...list(11), ...body(40)],
+  );
+  entry(
+    3,
+    'Gorse Imp',
+    {might: 3},
+    ['short-lede', 'value-map', 'section-ends-right'],
+    ['', 'Small and quick and mean.', '', ...body(50)],
+    'might: 3\nattacks:\n  - B: 2d6\n  - "Prick: 1d4"\nlayout: page-text\n',
+  );
+  facts[facts.length - 1]!.layout = 'page-text';
+  // ---- Spirits (a long intro)
+  heading(2, 'Spirits');
+  push('', ...body(330));
+  entry(
+    3,
+    'Lamp Wisp',
+    {},
+    ['long-section-intro', 'yaml-invalid'],
+    ['', ...lede(), ...body(60)],
+    'vigour: [11\nmight: 4\n',
+  );
+  entry(
+    3,
+    'Dew Shade',
+    {...stats(10), attacks: ['Chill: 1d6'], layout: 'page-text'},
+    ['block-twice', 'block-orphan'],
+    [],
+  );
+  block({might: 9});
+  push(...lede(), sentence(), '');
+  block({speed: 2});
+  push('', ...body(40));
+  entry(
+    3,
+    'Rime Sprite',
+    {
+      ...stats(6),
+      attacks: ['Frost: 1d6'],
+      note: 'Uses ```code``` here',
+      layout: 'page-text',
+    },
+    ['fence-four'],
+    ['', ...lede(), ...body(50)],
+  );
+  entry(
+    4,
+    'Rime Kit',
+    {might: 1, attacks: ['Nip: 1d4'], layout: 'page-text'},
+    ['nested', 'nested-layout'],
+    ['', sentence(10), ''],
+  );
+  entry(
+    3,
+    'Cinder Wraith',
+    {...stats(12), attacks: ['Burn: 2d6'], layout: 'page-text'},
+    ['block-in-callout', 'repeat-comment', 'links-to-entries'],
+    [
+      '',
+      ...lede(),
+      `See [Cave Wyrm](#cave-wyrm) and [Rime Kit](#rime-kit). ${sentence()}`,
+      '',
+      '> [!note] A boxed note',
+      '> ```o2t-entry',
+      '> might: 2',
+      '> ```',
+      '',
+      ...body(40),
+      '<!-- repeat of "Fen Hare" omitted -->',
+      '',
+    ],
+  );
+  entry(
+    3,
+    'Fen Hare',
+    {...stats(11), attacks: ['Kick: 2d6'], layout: 'page-text'},
+    ['repeated-heading'],
+    ['', ...lede(), ...body(40)],
+  );
+  // ---- a second entries chapter
+  heading(1, 'Relics');
+  push('', ...body(40));
+  heading(2, 'Rings');
+  push('', ...body(30));
+  entry(
+    3,
+    'Ember Ring',
+    {might: 2, attacks: ['Flare: 1d6'], layout: 'page-text'},
+    ['second-chapter'],
+    ['', ...lede(), ...body(40)],
+  );
+  entry(
+    3,
+    'Frost Ring',
+    {wits: 3, attacks: ['Rime: 1d6'], layout: 'page-text'},
+    ['second-chapter'],
+    ['', ...lede(), ...body(40)],
+  );
+  // ---- an entry outside every entries chapter
+  heading(1, 'Example Crypt');
+  push('', ...body(60));
+  entry(
+    3,
+    'Marsh Owl',
+    {...stats(16), attacks: ['Rake: 2d6'], layout: 'page-landscape'},
+    ['outside-chapter'],
+    ['', ...lede(), ...body(40)],
+  );
+  // ---- a glossary term holding a block
+  heading(1, 'Glossary');
+  push('');
+  entry(
+    2,
+    'Tallow',
+    {might: 1},
+    ['glossary-term-block'],
+    ['', sentence(12), ''],
+  );
+
+  // A heading written twice carries the cases of both (AC-15's lookup by heading).
+  const byName = new Map<string, Set<string>>();
+  for (const f of facts)
+    for (const c of f.cases)
+      (
+        byName.get(f.heading) ??
+        byName.set(f.heading, new Set()).get(f.heading)!
+      ).add(c);
+  for (const f of facts) f.cases = [...(byName.get(f.heading) ?? [])].sort();
+  return {
+    text: `${lines
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trimEnd()}\n`,
+    facts,
+    chapters,
+  };
+}
+
+/** AC-13: the preset of the entries chapter. */
+const ENTRIES_PRESET = [
+  '---',
+  'schemaVersion: 1',
+  'page:',
+  '  trimSize: A5',
+  '  margins: {top: 20, bottom: 25, inside: 23, outside: 20}',
+  '  facingPages: true',
+  'headingRules:',
+  '  Menagerie: entries',
+  '  Relics: entries',
+  'entries:',
+  '  statblock:',
+  '    stats: [{key: might, label: Might}, {key: wits, label: Wits}, {key: speed, label: Speed}]',
+  '    traits: [{key: move, label: Move}, {key: guard, label: Guard}]',
+  '    boxes: vigour',
+  '    track:',
+  ...ENTRY_ICONS.map(
+    ([n]) =>
+      `      - {label: ${capital(n)}, icon: "Sample/assets/icons/${n}.svg"}`,
+  ),
+  '    trackKey: states',
+  '    trackLabel: STATE',
+  '    trackDefault: [Fine, Hurt, Down, Gone]',
+  '    sum: {total: vigour, of: [might, wits, speed]}',
+  '  tagLabels: {beast: Beast, magical: Magical}',
+  '  quickReference: true',
+  '  encounterSheet: true',
+  '  encounterSheetFile: true',
+  '---',
+  '',
+  'The preset of the entries chapter (`Menagerie.md`, US-024 amendment for',
+  'epic #121): synthetic field names, five generated icon shapes.',
+  '',
+].join('\n');
+
 export function generateSample(outDir: string): void {
   const random = seeded(SEED);
   const out = writeBook(random);
@@ -1210,6 +1772,16 @@ export function generateSample(outDir: string): void {
   );
   for (const {path, bytes} of imageFiles) files.set(path, bytes);
   files.set('assets/notes.pdf', PDF);
+  // US-024 AC-13 (amendment for #121): the entries chapter and its files.
+  const menagerie = writeMenagerie();
+  files.set('Menagerie.md', menagerie.text);
+  files.set('presets/Entries.md', ENTRIES_PRESET);
+  for (const [n, shape] of ENTRY_ICONS)
+    files.set(`assets/icons/${n}.svg`, iconSvg(shape));
+  ENTRY_IMAGE_KEYS.forEach((path, i) => {
+    const [w, h] = ENTRY_IMAGES[path] as [number, number];
+    files.set(path, png(200 + i, w, h));
+  });
 
   const usedImages = [...book.imageFiles].sort();
   const sorted = (o: Counts): Counts =>
@@ -1251,6 +1823,25 @@ export function generateSample(outDir: string): void {
     },
     seed: SEED,
     sentences,
+    entries: {
+      list: menagerie.facts,
+      byCase: Object.fromEntries(
+        [...new Set(menagerie.facts.flatMap((f) => f.cases))]
+          .sort()
+          .map((c) => [
+            c,
+            [
+              ...new Set(
+                menagerie.facts
+                  .filter((f) => f.cases.includes(c))
+                  .map((f) => f.heading),
+              ),
+            ],
+          ]),
+      ),
+      chapters: menagerie.chapters,
+      icons: ENTRY_ICONS.map(([n]) => `assets/icons/${n}.svg`),
+    },
   };
   rmSync(outDir, {recursive: true, force: true});
   for (const [path, data] of files) {

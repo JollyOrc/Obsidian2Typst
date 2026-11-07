@@ -5,12 +5,19 @@ export {
   type MarkupOptions,
   type Transform,
 } from './escape-markup';
-export {emitBlocks, type BlockOptions, type BookLines} from './blocks';
+export {
+  emitBlocks,
+  type BlockOptions,
+  type BookLines,
+  type EntryLayoutEnv,
+  type EntryLayoutInfo,
+} from './blocks';
 export {
   FIT_DECISION_LABEL,
   FIT_FLOW_HELPER,
   FIT_HINT_LINES,
   FIT_IMAGE_HELPER,
+  IMAGE_FACT_LABEL,
   fitDecisionWarnings,
   imageRequest,
 } from './image';
@@ -18,7 +25,7 @@ export {headingNumberingRule} from './heading';
 export {FOOTNOTE_RESTART_RULE, type NoteEnv} from './footnote';
 export {DEFAULT_BODY_FAMILY, type FontInfo} from './tasks';
 export {CALL_TRANSFORMS, callSeparator} from './call';
-export {EmitContext, type Warning} from './context';
+export {EmitContext, type ImageFact, type Warning} from './context';
 export {
   emitInline,
   type InlineOptions,
@@ -74,3 +81,13 @@ export {
   type BreakOptions,
 } from './breaks';
 export {pageRefCall, pageRefHelper, type PageRefEnv} from './page-refs';
+export {
+  STATBLOCK_HELPER,
+  STATBLOCK_HELPER_DEF,
+  STATBLOCK_LAYOUT,
+  statblockCall,
+  statblockLook,
+  type StatblockWriter,
+} from './entry';
+export {findImage, isImageSize} from './image';
+export {entriesLayoutHelper} from './breaks';

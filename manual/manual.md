@@ -6,7 +6,7 @@ Obsidian. You write in Obsidian as usual; the plugin sets the page size,
 margins, fonts, page numbers, cover, callout boxes, glossary and book
 structure from **presets** that you keep as notes in your vault.
 
-This manual describes version 0.10.0.
+This manual describes version 0.12.0.
 
 ## Contents
 
@@ -118,6 +118,7 @@ For a note called `Book.md`, the export folder gets:
 | `template.typ` | A copy of your [Typst template](templates.md), if the preset uses one. |
 | `assets/…` | Copies of the images the note uses, in the same folder layout as next to the note. Images from outside the note's folder go to `assets/_external/`. |
 | `export-warnings.md` | The warning report of this export (`No warnings.` when there are none). |
+| `Book - Encounter Sheet.pdf`, `.typ` | The A4 encounter sheet, when the preset asks for it. See [Entries](entries.md#the-encounter-sheet). |
 
 A note called `template` is written as `template-note.typ` and
 `template-note.pdf`, so it never replaces the template copy.
@@ -241,6 +242,7 @@ allowed then shows its message as a notice.
 | Book | Signatures | gear | Pages per signature |
 | Book | Contents | gear | Contents depth, title, page numbers, dot leaders |
 | Book | Image fit | gear | Smallest image size |
+| Book | Print resolution | gear | Minimum print resolution |
 
 The built-in value of every setting:
 
@@ -272,6 +274,7 @@ The built-in value of every setting:
 | Contents title | `Contents` | Title above the table of contents. | [Book structure](book-structure.md#table-of-contents) |
 | Contents page numbers, Contents dot leaders | on | Page numbers and dots in the table of contents. | [Book structure](book-structure.md#table-of-contents) |
 | Smallest image size | 100 | How far an image may shrink to stay with its text, 10 to 100 %. | [Images and the cover](images-and-cover.md#keeping-images-with-their-text) |
+| Minimum print resolution | 300 | Images printing below this dpi are reported; 0 turns the check off. | [Entries](entries.md#print-checks) |
 
 The **Fonts** window lists the bundled fonts and the fonts in the font
 folder; under the default and body font it names the check-box glyphs the
@@ -292,7 +295,7 @@ These three settings belong to the plugin, not to a preset.
 
 | Row | Default | Meaning |
 | --- | --- | --- |
-| Strict mode | off | A switch: any conversion warning stops the export before anything is written. |
+| Strict mode | off | A switch: any conversion warning stops the export before anything is written (the warnings found after the compile never do). |
 | Presets folder | `Obsidian2Typst/presets` | Vault folder of the preset notes. If it does not exist, it is created with the two built-in presets. |
 | Warnings note folder | empty (vault root) | Where the `<note> export warnings.md` note is written. |
 
@@ -318,6 +321,7 @@ Details and the exact rules are in [Markdown support](markdown-support.md).
 | [Images and the cover](images-and-cover.md) | Image sizes, where images are found and copied, keeping images with their text, the cover page. |
 | [Callout styles](callouts.md) | Callouts as boxes, built-in styles, your own styles, icons and fonts. |
 | [Glossary and heading rules](glossary-and-heading-rules.md) | Turning a `Glossary` section into term entries; marking the colophon and the back notes. |
+| [Entries](entries.md) | Statblocks from `o2t-entry` blocks, entries chapters and their layouts, the quick reference, the encounter sheet, the print checks, the statblock in Obsidian and its API. |
 | [Book structure](book-structure.md) | Page breaks before headings, colophon and back notes, front matter and roman folios, signatures, the table of contents. |
 | [Typst templates](templates.md) | Your own `.typ` file to style the whole document. |
 | [The style panel](preview-panel.md) | The preview, its rows and the page range. |

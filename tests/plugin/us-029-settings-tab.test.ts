@@ -206,6 +206,8 @@ describe('US-029 AC-1 the sections of the tab, drawn', () => {
       'Signatures',
       'Contents',
       'Image fit',
+      // US-034 AC-1 (#132).
+      'Print resolution',
     ]);
     expect(names('Export')).toEqual([
       'Strict mode',

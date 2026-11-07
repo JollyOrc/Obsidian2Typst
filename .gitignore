@@ -12,3 +12,4 @@ tests/fixtures/compiledtext.md
 spikes/
 docs/state/
 releases/*.zip
+tests/fixtures/private-words.local.txt

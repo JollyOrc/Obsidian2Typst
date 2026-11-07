@@ -1,8 +1,8 @@
 # US-033 — Entry openers, navigation and the quick reference
 
-**Status:** Ready (G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
+**Status:** Implemented, manual checks M21 to M24 pending (G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-032)
-**Implemented:** —
+**Implemented:** v0.12.0, epic #121 (tickets #122 to #137, 2026-11-07); test build `0.12.0-m21.1` in the manual checks M21 to M24
 **Supersedes:** —
 
 Epic #121, fourth of seven stories (see US-030). Drafts D-09, D-14 in

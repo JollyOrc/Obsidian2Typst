@@ -45,6 +45,8 @@ export function pageRefCall(label: string): string {
  */
 export interface PageRefEnv {
   level: number;
+  /** US-033 AC-8: the labels of the entry headings, numbered at any level. */
+  entries?: ReadonlySet<string>;
   inExplanation: boolean;
   record: () => void;
 }

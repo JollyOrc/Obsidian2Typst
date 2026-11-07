@@ -6,7 +6,11 @@
  * `glossary-term` of US-017, `running-text` and `running-title` of US-019,
  * `page-ref` of US-018, `o2t-blank` of US-025, `o2t-part` of US-026, `fit-flow`
  * of US-028 with its labels' prefix `o2t-fit` and `o2t-fit-decision`, and
- * its hints `o2t-fit-hints` and `o2t-fit-pinned`, AC-17). The
+ * its hints `o2t-fit-hints` and `o2t-fit-pinned`, AC-17; `o2t-statblock` of
+ * US-030 AC-15; `o2t-entries`, `o2t-entry-mark`, `o2t-entry-end`, `o2t-even`,
+ * `o2t-fitted` of US-031; `o2t-continued` of US-032; `o2t-chapter-header`, `o2t-section-end` of US-033; `o2t-box-size`,
+ * `o2t-box-rows`, `o2t-icon`, `o2t-cell` shared by US-030 and US-036;
+ * `o2t-sheet`, `o2t-sheet-row` of US-036). The
  * preamble comes
  * after the template import, so these replace a template's definition of the
  * same name; `templateWarnings` reports it. A text check in the US-016 tests
@@ -19,11 +23,26 @@ export const PLUGIN_NAMES: readonly string[] = Object.freeze([
   'fit-image',
   'glossary-term',
   'o2t-blank',
+  'o2t-box-rows',
+  'o2t-box-size',
+  'o2t-cell',
+  'o2t-chapter-header',
+  'o2t-continued',
+  'o2t-entries',
+  'o2t-entry-end',
+  'o2t-entry-mark',
+  'o2t-even',
   'o2t-fit',
   'o2t-fit-decision',
   'o2t-fit-hints',
   'o2t-fit-pinned',
+  'o2t-fitted',
+  'o2t-icon',
   'o2t-part',
+  'o2t-section-end',
+  'o2t-sheet',
+  'o2t-sheet-row',
+  'o2t-statblock',
   'page-ref',
   'running-text',
   'running-title',

@@ -113,7 +113,16 @@ export const DEFAULT_TOC: Readonly<
  */
 export interface ImagesSettings {
   minScale: number;
+  /**
+   * US-034 AC-1: images printing below this resolution warn (0 to 2400;
+   * 0 = off). Passed on only when a preset or the Defaults set it, so the
+   * merged settings are as before; `MIN_DPI_BUILTIN` applies otherwise.
+   */
+  minDpi?: number;
 }
+
+/** US-034 AC-1: the built-in `images.minDpi`. */
+export const MIN_DPI_BUILTIN = 300;
 
 /** US-028 AC-1: the built-in image fit settings (100: today's output). */
 export const DEFAULT_IMAGES: Readonly<ImagesSettings> = Object.freeze({

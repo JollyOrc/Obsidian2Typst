@@ -60,9 +60,17 @@ FONT_MISSING
 A good way to work: leave strict mode off while you fix the warnings, then
 switch it on so that no future export slips through with a problem.
 
-`IMAGE_FLOATED`, `IMAGE_MOVED`, `IMAGE_FIT_OFF` and `LAYOUT_NOT_SETTLED` are
-an exception: they are known only after the compile, so they are reported but
-never stop an export.
+The warnings found after the compile are an exception: they are known only
+when the PDF exists, so they are reported but never stop an export. They are
+`IMAGE_FLOATED`, `IMAGE_MOVED`, `IMAGE_FIT_OFF`, `LAYOUT_NOT_SETTLED`, the
+entries' layout warnings (`ENTRY_AUTO`, `ENTRY_LAYOUT_CONFLICT`,
+`ENTRY_OVERFLOW`, `ENTRY_SPREAD_EMPTY`, `ENTRY_BLANK_PAGE`,
+`ENTRY_UNPAIRED`, `SECTION_INTRO_OVERFLOW`), the print checks
+(`IMAGE_LOW_DPI`, `TEXT_WIDE_GAP`, `TEXT_GAP_SCAN_FAILED`) and the encounter
+sheet's (`ENCOUNTER_SHEET_SMALL_BOXES`, `ENCOUNTER_SHEET_FAILED`). The
+warnings of the entry blocks themselves (`ENTRY_*` of the block, `STAT_*`,
+`TAG_UNMAPPED`, `ENCOUNTER_SHEET_EMPTY`) come from the conversion and do stop
+a strict export.
 
 ## Typst errors
 
@@ -119,4 +127,32 @@ report are still written. Errors usually come from a
 | `BOOK_PART_JOINED` | A second colophon or back-notes section was joined to the first. |
 | `BOOK_PART_EMPTY` | A colophon or back-notes section is empty and was left out. |
 | `TOC_HEADING_MISSING` | The heading chosen for the table of contents is not in the note. |
+| `ENTRY_YAML_INVALID` | An `o2t-entry` block is not valid YAML or not a list of keys; the entry has no statblock. |
+| `ENTRY_ORPHAN_BLOCK` | An `o2t-entry` block does not stand directly under a heading. |
+| `ENTRY_BLOCK_TWICE` | A heading has two `o2t-entry` blocks; the first is used. |
+| `ENTRY_BLOCK_IN_CONTAINER` | An `o2t-entry` block sits in a quote, callout or list; it is not an entry. |
+| `ENTRY_VALUE_NOT_TEXT` | A value of an entry is neither text, a number nor a list of them; it is left out. |
+| `ENTRY_IN_GLOSSARY` | A block under a glossary term is not an entry and is not printed. |
+| `ENTRY_TRACK_UNKNOWN` | An entry names a track cell the preset does not have. |
+| `ENTRY_NO_LEDE`, `ENTRY_LEDE_SHORT` | An entry starts with something other than a paragraph (a list, an image, …), or its opening paragraph has fewer than 10 words; it is still set beside the statblock. |
+| `STAT_BOXES_MANY`, `STAT_BOXES_NOT_NUMBER` | The box value is over 45, or not a whole number; no boxes are drawn. |
+| `TAG_UNMAPPED` | An entry's tag has no label in `entries.tagLabels`; it is left out. |
+| `STAT_SUM_MISMATCH` | The total of `entries.statblock.sum` does not equal the sum of its keys. |
+| `STAT_ATTACK_NO_DICE` | An attack names no dice (`2d6`). |
+| `ENTRY_OUTSIDE_CHAPTER` | An entry outside every entries chapter is printed as text with its statblock. |
+| `ENTRY_NESTED_LAYOUT` | An entry inside another entry has a `layout`; it is printed inline. |
+| `ENTRY_LAYOUT_UNKNOWN` | An entry's `layout` is not one of the layouts; `auto` is used. |
+| `ENTRY_LAYOUT_CONFLICT` | A layout needs an illustration the entry lacks, or of another shape; another layout is used. |
+| `ENTRY_AUTO` | The layout the automatic choice took, to copy into the block. |
+| `ENTRY_OVERFLOW` | An entry runs past its page or spread. |
+| `ENTRY_SPREAD_EMPTY` | A spread's right page stays mostly empty. |
+| `ENTRY_UNPAIRED` | A page entry has no partner; its right page stays blank. |
+| `ENTRY_BLANK_PAGE` | A blank page was added before an entry or a section opener. |
+| `SECTION_INTRO_OVERFLOW` | A section's intro runs over its opener page. |
+| `IMAGE_LOW_DPI` | An image prints below `images.minDpi`. |
+| `TEXT_WIDE_GAP` | A justified line has a word gap wider than `entries.maxWordGap`. |
+| `TEXT_GAP_SCAN_FAILED` | The word-gap scan could not read the PDF; no line was checked. |
+| `ENCOUNTER_SHEET_EMPTY` | The encounter sheet is on, but the preset has no track and no box key. |
+| `ENCOUNTER_SHEET_SMALL_BOXES` | The sheet's boxes shrank under 2.0 mm to fit the page. |
+| `ENCOUNTER_SHEET_FAILED` | The A4 encounter sheet did not compile; the book was written. |
 | `NODE_UNSUPPORTED` | An element the converter does not know; its text is kept. |

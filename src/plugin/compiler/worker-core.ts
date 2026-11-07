@@ -7,8 +7,9 @@ import {
 } from '@myriaddreamin/typst.ts/dist/esm/compiler.mjs';
 import {TypstSnippet} from '@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs';
 import {loadFonts} from '@myriaddreamin/typst.ts/dist/esm/options.init.mjs';
+import {scanWordGaps, type EntryPages} from '../../core/checks/word-gaps';
 import {layoutSettled} from '../../core/compile';
-import {FIT_DECISION_LABEL} from '../../core/emit/fit-label';
+import {FIT_DECISION_LABEL, IMAGE_FACT_LABEL} from '../../core/emit/fit-label';
 import type {FaceInfo} from '../../core/fonts';
 
 /** Sends a message to the plugin; `transfer` lists buffers that move. */
@@ -28,6 +29,15 @@ interface CompileMessage {
   file: string;
   source: string;
   files: {path: string; buf: ArrayBuffer}[];
+}
+
+/** US-034 AC-7, AC-11: scans an exported PDF for wide word gaps (no init needed). */
+interface ScanMessage {
+  type: 'scan';
+  id: string;
+  pdf: ArrayBuffer;
+  maxWordGap: number;
+  entries: EntryPages[];
 }
 
 /** US-010 AC-3: asks for the faces of font files. */
@@ -79,7 +89,21 @@ export interface LayoutFacts {
   settled?: boolean;
   /** The image fit decisions in document order. */
   fitDecisions?: unknown[];
+  /** US-032 AC-10: the entries' `<o2t-entry>` and `<o2t-entry-end>` facts. */
+  entryPlaces?: unknown[];
+  entryEnds?: unknown[];
+  /** US-033 AC-13: the section openers' `<o2t-section>` facts. */
+  entrySections?: unknown[];
+  /** US-034 AC-2: the block images' `<o2t-image>` drawn widths. */
+  images?: unknown[];
+  /** US-036 AC-3: the encounter sheets' `<o2t-sheet>` facts. */
+  sheets?: unknown[];
 }
+
+/** US-031 AC-14: a document with an entries chapter writes these facts. */
+const ENTRY_FACTS = 'o2t-entry-mark';
+/** US-036 AC-3: a document with an encounter sheet writes `<o2t-sheet>`. */
+const SHEET_FACTS = '<o2t-sheet>';
 
 /**
  * US-028 | AC-14, AC-5: Opens one typst.ts world on the compiled main file
@@ -95,6 +119,8 @@ export async function readLayoutFacts(
   compiler: QueryCompiler,
   mainFilePath: string,
   decisions: boolean,
+  entries = false,
+  images = false,
 ): Promise<LayoutFacts> {
   try {
     return await compiler.runWithWorld({mainFilePath}, async (world) => {
@@ -104,6 +130,47 @@ export async function readLayoutFacts(
       const facts: LayoutFacts = Array.isArray(diagnostics)
         ? {settled: layoutSettled(diagnostics)}
         : {};
+      // US-032 AC-10: the entries' facts, when the document places entries.
+      if (entries) {
+        try {
+          const read = async (label: string): Promise<unknown[] | null> => {
+            const out = await world.query({
+              selector: `<${label}>`,
+              field: 'value',
+            });
+            const values: unknown =
+              typeof out === 'string' ? JSON.parse(out) : out;
+            return Array.isArray(values) ? values : null;
+          };
+          const places = await read('o2t-entry');
+          const ends = await read('o2t-entry-end');
+          const sections = await read('o2t-section');
+          // US-036 AC-3: the sheet page's facts (small boxes).
+          const sheets = await read('o2t-sheet');
+          if (sheets !== null && sheets.length > 0) facts.sheets = sheets;
+          if (places !== null && ends !== null) {
+            facts.entryPlaces = places;
+            facts.entryEnds = ends;
+            facts.entrySections = sections ?? [];
+          }
+        } catch {
+          // no facts, no entry warnings
+        }
+      }
+      // US-034 AC-2: the drawn widths, when a helper that records them is in.
+      if (images) {
+        try {
+          const out = await world.query({
+            selector: `<${IMAGE_FACT_LABEL}>`,
+            field: 'value',
+          });
+          const values: unknown =
+            typeof out === 'string' ? JSON.parse(out) : out;
+          if (Array.isArray(values)) facts.images = values;
+        } catch {
+          // no facts, no IMAGE_LOW_DPI
+        }
+      }
       if (!decisions) return facts;
       try {
         const out = await world.query({
@@ -188,6 +255,10 @@ export function createWorkerCore(post: Post): {
       compiler as unknown as QueryCompiler,
       main,
       message.source.includes(FIT_DECISION_LABEL),
+      // US-036 AC-3, AC-5: the A4 sheet has its facts without entries.
+      message.source.includes(ENTRY_FACTS) ||
+        message.source.includes(SHEET_FACTS),
+      message.source.includes(`<${IMAGE_FACT_LABEL}>`),
     );
     if (vector) {
       post({type: 'vector-compiled', id: message.id, vector: buffer, ...fit}, [
@@ -234,6 +305,15 @@ export function createWorkerCore(post: Post): {
           await compile(raw as CompileMessage);
         else if (message.type === 'font-info')
           await fontInfo(raw as FontInfoMessage);
+        else if (message.type === 'scan') {
+          // US-034 AC-7, AC-11: in the worker, never on the main thread.
+          const scan = raw as ScanMessage;
+          const {warnings} = scanWordGaps(new Uint8Array(scan.pdf), {
+            maxWordGap: scan.maxWordGap,
+            entries: scan.entries,
+          });
+          post({type: 'scan-result', id: scan.id, warnings});
+        }
       } catch (error) {
         post({type: 'failed', id: message.id, message: text(error)});
       }

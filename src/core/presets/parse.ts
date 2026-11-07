@@ -9,8 +9,18 @@ import {
   type FontsPresetFields,
 } from '../fonts/types';
 import {
+  COLOR_MODES,
+  ENTRY_BUILTINS,
   HEADING_RULE_NAMES,
+  STATBLOCK_FONT_ROLES,
+  STATBLOCK_SIZE_ROLES,
   headingRuleKey,
+  type EntriesSettings,
+  type EntryField,
+  type LineStyle,
+  type NarrowJustification,
+  type StatblockSettings,
+  type TrackCell,
   type CalloutPresetStyle,
   type CalloutsSettings,
   type HeadingRule,
@@ -671,7 +681,7 @@ function readHeadingRules(
     if (name === undefined) {
       problems.push({
         path: at,
-        message: `${at} must be a rule name: glossary, colophon, back-notes or none`,
+        message: `${at} must be a rule name: glossary, colophon, back-notes, entries or none`,
       });
       continue;
     }
@@ -771,6 +781,425 @@ function readImages(value: unknown, problems: Problem[]): ImagesPresetFields {
         message: 'images.minScale must be a whole number from 10 to 100',
       });
     }
+  }
+  // US-034 AC-1: the print resolution check.
+  const minDpi = read(value, 'minDpi');
+  if (minDpi !== undefined) {
+    if (
+      typeof minDpi === 'number' &&
+      Number.isInteger(minDpi) &&
+      minDpi >= 0 &&
+      minDpi <= 2400
+    ) {
+      out.minDpi = minDpi;
+    } else {
+      problems.push({
+        path: 'images.minDpi',
+        message: 'images.minDpi must be a whole number from 0 to 2400',
+      });
+    }
+  }
+  return out;
+}
+
+/** US-030 AC-8: a key of the block: text with something in it. */
+const isKey = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim() !== '';
+
+/**
+ * US-030 | AC-8: a list of groups whose fields `names` are all text (keys
+ * non-empty), or undefined with the problem `<path> must be <shape>`.
+ */
+function readPairs(
+  group: Group,
+  key: string,
+  names: readonly [string, string],
+  path: string,
+  shape: string,
+  problems: Problem[],
+): Record<string, string>[] | undefined {
+  const value = read(group, key);
+  if (value === undefined) return undefined;
+  const ok =
+    Array.isArray(value) &&
+    value.every(
+      (item) => isGroup(item) && names.every((name) => isKey(read(item, name))),
+    );
+  if (!ok) {
+    problems.push({path, message: `${path} must be ${shape}`});
+    return undefined;
+  }
+  return (value as Group[]).map((item) =>
+    Object.fromEntries(names.map((name) => [name, String(read(item, name))])),
+  );
+}
+
+/** US-030 | AC-8: a key (`boxes`, `trackKey`), or the problem `must be a key`. */
+function readKey(
+  group: Group,
+  key: string,
+  path: string,
+  problems: Problem[],
+): string | undefined {
+  const value = read(group, key);
+  if (value === undefined) return undefined;
+  if (isKey(value)) return value;
+  problems.push({path, message: `${path} must be a key`});
+  return undefined;
+}
+
+/** US-030 | AC-8: a frame or rule line `{color, width}`, width 0 to 5 pt. */
+function readLine(
+  group: Group,
+  key: string,
+  path: string,
+  problems: Problem[],
+): LineStyle | undefined {
+  const line = readSubgroup(group, key, path, problems);
+  if (line === undefined) return undefined;
+  const out: LineStyle = {};
+  const color = readColour(line, 'color', false, `${path}.color`, problems);
+  if (color !== undefined) out.color = color;
+  const width = readPt(
+    line,
+    'width',
+    {min: 0, max: 5},
+    `${path}.width`,
+    `${path}.width must be a number of pt from 0 to 5`,
+    problems,
+  );
+  if (width !== undefined) out.width = width;
+  return out;
+}
+
+/**
+ * US-030 | AC-8: Checks `entries.statblock`. Each field has its own problem
+ * at its own line (in the form of US-016 AC-7); `null` is unset; unknown
+ * fields are ignored (as the other groups). `trackDefault` names labels of
+ * `track` only (compared without case).
+ */
+function readStatblock(value: Group, problems: Problem[]): StatblockSettings {
+  const at = 'entries.statblock';
+  const out: StatblockSettings = {};
+  const fieldList = (key: 'stats' | 'traits'): void => {
+    const list = readPairs(
+      value,
+      key,
+      ['key', 'label'],
+      `${at}.${key}`,
+      'a list of {key, label}',
+      problems,
+    );
+    if (list !== undefined) out[key] = list as unknown as EntryField[];
+  };
+  fieldList('stats');
+  fieldList('traits');
+  const boxes = readKey(value, 'boxes', `${at}.boxes`, problems);
+  if (boxes !== undefined) out.boxes = boxes;
+  const track = readPairs(
+    value,
+    'track',
+    ['label', 'icon'],
+    `${at}.track`,
+    'a list of {label, icon} (icon: the vault path of an SVG file)',
+    problems,
+  );
+  if (track !== undefined) out.track = track as unknown as TrackCell[];
+  const trackKey = readKey(value, 'trackKey', `${at}.trackKey`, problems);
+  if (trackKey !== undefined) out.trackKey = trackKey;
+  const trackLabel = read(value, 'trackLabel');
+  if (trackLabel !== undefined) {
+    if (typeof trackLabel === 'string') out.trackLabel = trackLabel;
+    else
+      problems.push({
+        path: `${at}.trackLabel`,
+        message: `${at}.trackLabel must be text`,
+      });
+  }
+  const trackDefault = read(value, 'trackDefault');
+  if (trackDefault !== undefined) {
+    const path = `${at}.trackDefault`;
+    if (!Array.isArray(trackDefault) || !trackDefault.every(isKey)) {
+      problems.push({path, message: `${path} must be a list of track labels`});
+    } else {
+      const known = new Set((track ?? []).map((c) => c.label!.toLowerCase()));
+      const unknown = trackDefault.find((l) => !known.has(l.toLowerCase()));
+      if (unknown === undefined) out.trackDefault = trackDefault;
+      else
+        problems.push({
+          path,
+          message: `${path} names "${unknown}", which is not in ${at}.track`,
+        });
+    }
+  }
+  const sum = read(value, 'sum');
+  if (sum !== undefined) {
+    const of = isGroup(sum) ? read(sum, 'of') : undefined;
+    const total = isGroup(sum) ? read(sum, 'total') : undefined;
+    if (isKey(total) && Array.isArray(of) && of.length > 0 && of.every(isKey)) {
+      out.sum = {total, of};
+    } else {
+      problems.push({
+        path: `${at}.sum`,
+        message: `${at}.sum must be {total: key, of: [keys]}`,
+      });
+    }
+  }
+  const fill = readColour(value, 'fill', true, `${at}.fill`, problems);
+  if (fill !== undefined) out.fill = fill;
+  const frame = readLine(value, 'frame', `${at}.frame`, problems);
+  if (frame !== undefined) out.frame = frame;
+  const rules = readLine(value, 'rules', `${at}.rules`, problems);
+  if (rules !== undefined) out.rules = rules;
+  const boxFill = readColour(value, 'boxFill', true, `${at}.boxFill`, problems);
+  if (boxFill !== undefined) out.boxFill = boxFill;
+  const fonts = readSubgroup(value, 'fonts', `${at}.fonts`, problems);
+  if (fonts !== undefined) {
+    out.fonts = {};
+    for (const role of STATBLOCK_FONT_ROLES) {
+      const family = readText(
+        fonts,
+        role,
+        `${at}.fonts.${role}`,
+        `${at}.fonts.${role} must be a font family name written as text`,
+        problems,
+      );
+      if (family !== undefined) out.fonts[role] = family;
+    }
+  }
+  const sizes = readSubgroup(value, 'sizes', `${at}.sizes`, problems);
+  if (sizes !== undefined) {
+    out.sizes = {};
+    for (const role of STATBLOCK_SIZE_ROLES) {
+      const size = readPt(
+        sizes,
+        role,
+        {min: 0, max: MAX_FONT_SIZE, minOpen: true},
+        `${at}.sizes.${role}`,
+        `${at}.sizes.${role} must be a number of pt greater than 0 and at most ${MAX_FONT_SIZE}`,
+        problems,
+      );
+      if (size !== undefined) out.sizes[role] = size;
+    }
+  }
+  return out;
+}
+
+/**
+ * US-030 | AC-8: Checks the `entries` group of a preset note: `statblock`
+ * and `tagLabels` (a group of tag → label, both text). Unknown fields are
+ * ignored; the later stories of epic #121 add theirs.
+ */
+function readEntries(value: unknown, problems: Problem[]): EntriesSettings {
+  const out: EntriesSettings = {};
+  if (!isGroup(value)) {
+    problems.push({
+      path: 'entries',
+      message: 'entries must be a group of settings',
+    });
+    return out;
+  }
+  const statblock = readSubgroup(
+    value,
+    'statblock',
+    'entries.statblock',
+    problems,
+  );
+  if (statblock !== undefined)
+    out.statblock = readStatblock(statblock, problems);
+  // US-033 AC-12: the quick reference.
+  const quick = read(value, 'quickReference');
+  if (quick !== undefined) {
+    if (typeof quick === 'boolean') out.quickReference = quick;
+    else
+      problems.push({
+        path: 'entries.quickReference',
+        message: 'entries.quickReference must be true or false',
+      });
+  }
+  const quickTitle = read(value, 'quickReferenceTitle');
+  if (quickTitle !== undefined) {
+    if (typeof quickTitle === 'string') out.quickReferenceTitle = quickTitle;
+    else
+      problems.push({
+        path: 'entries.quickReferenceTitle',
+        message: 'entries.quickReferenceTitle must be text',
+      });
+  }
+  // US-032 AC-1: the illustration's smallest scale and the empty-page warning.
+  const image = readSubgroup(value, 'image', 'entries.image', problems);
+  if (image !== undefined) {
+    const minScale = read(image, 'minScale');
+    if (minScale !== undefined) {
+      if (
+        typeof minScale === 'number' &&
+        Number.isInteger(minScale) &&
+        minScale >= 10 &&
+        minScale <= 100
+      )
+        out.image = {minScale};
+      else
+        problems.push({
+          path: 'entries.image.minScale',
+          message:
+            'entries.image.minScale must be a whole number from 10 to 100',
+        });
+    }
+  }
+  const emptyWarn = read(value, 'emptyWarn');
+  if (emptyWarn !== undefined) {
+    if (
+      typeof emptyWarn === 'number' &&
+      Number.isInteger(emptyWarn) &&
+      emptyWarn >= 0 &&
+      emptyWarn <= 100
+    )
+      out.emptyWarn = emptyWarn;
+    else
+      problems.push({
+        path: 'entries.emptyWarn',
+        message: 'entries.emptyWarn must be a whole number from 0 to 100',
+      });
+  }
+  // US-034 AC-5: the word-gap scan's threshold (0 = no scan).
+  const maxWordGap = read(value, 'maxWordGap');
+  if (maxWordGap !== undefined) {
+    if (
+      typeof maxWordGap === 'number' &&
+      Number.isInteger(maxWordGap) &&
+      (maxWordGap === 0 || (maxWordGap >= 100 && maxWordGap <= 1000))
+    )
+      out.maxWordGap = maxWordGap;
+    else
+      problems.push({
+        path: 'entries.maxWordGap',
+        message:
+          'entries.maxWordGap must be 0 or a whole number from 100 to 1000',
+      });
+  }
+  // US-034 AC-5: the narrow columns' justification limits.
+  const narrow = readSubgroup(
+    value,
+    'narrowJustification',
+    'entries.narrowJustification',
+    problems,
+  );
+  if (narrow !== undefined) {
+    const limits: NarrowJustification = {};
+    let ok = true;
+    for (const part of ['spacing', 'tracking'] as const) {
+      const at = `entries.narrowJustification.${part}`;
+      const group = readSubgroup(narrow, part, at, problems);
+      if (group === undefined) continue;
+      const pair: {min?: number; max?: number} = {};
+      for (const end of ['min', 'max'] as const) {
+        const v = read(group, end);
+        if (v === undefined) continue;
+        const valid =
+          typeof v === 'number' &&
+          Number.isFinite(v) &&
+          (part === 'tracking' || v >= 0);
+        if (valid) pair[end] = v;
+        else {
+          ok = false;
+          problems.push({
+            path: `${at}.${end}`,
+            message:
+              part === 'spacing'
+                ? `${at}.${end} must be a number of percent, 0 or more`
+                : `${at}.${end} must be a number (em)`,
+          });
+        }
+      }
+      const built = ENTRY_BUILTINS.narrowJustification[part];
+      if ((pair.min ?? built.min) > (pair.max ?? built.max)) {
+        ok = false;
+        problems.push({
+          path: `${at}.min`,
+          message: `${at}.min must not be above max`,
+        });
+      }
+      limits[part] = pair;
+    }
+    if (ok) out.narrowJustification = limits;
+  }
+  // US-036 AC-1: the encounter sheet.
+  for (const key of ['encounterSheet', 'encounterSheetFile'] as const) {
+    const on = read(value, key);
+    if (on === undefined) continue;
+    if (typeof on === 'boolean') out[key] = on;
+    else
+      problems.push({
+        path: `entries.${key}`,
+        message: `entries.${key} must be true or false`,
+      });
+  }
+  const sheetBoxes = read(value, 'encounterSheetBoxes');
+  if (sheetBoxes !== undefined) {
+    if (sheetBoxes === 15 || sheetBoxes === 30 || sheetBoxes === 45)
+      out.encounterSheetBoxes = sheetBoxes;
+    else
+      problems.push({
+        path: 'entries.encounterSheetBoxes',
+        message: 'entries.encounterSheetBoxes must be 15, 30 or 45',
+      });
+  }
+  const sheetText = readSubgroup(
+    value,
+    'encounterSheetText',
+    'entries.encounterSheetText',
+    problems,
+  );
+  if (sheetText !== undefined) {
+    const texts: NonNullable<EntriesSettings['encounterSheetText']> = {};
+    for (const key of [
+      'title',
+      'round',
+      'name',
+      'attack',
+      'dice',
+      'rule',
+      'credit',
+    ] as const) {
+      const v = read(sheetText, key);
+      if (v === undefined) continue;
+      if (typeof v === 'string' || typeof v === 'number')
+        texts[key] = String(v);
+      else
+        problems.push({
+          path: `entries.encounterSheetText.${key}`,
+          message: `entries.encounterSheetText.${key} must be text`,
+        });
+    }
+    out.encounterSheetText = texts;
+  }
+  // US-031 AC-6: a full-image page keeps its header and folio.
+  const fullImageHeader = read(value, 'fullImageHeader');
+  if (fullImageHeader !== undefined) {
+    if (typeof fullImageHeader === 'boolean')
+      out.fullImageHeader = fullImageHeader;
+    else
+      problems.push({
+        path: 'entries.fullImageHeader',
+        message: 'entries.fullImageHeader must be true or false',
+      });
+  }
+  const tags = readSubgroup(value, 'tagLabels', 'entries.tagLabels', problems);
+  if (tags !== undefined) {
+    const labels: Record<string, string> = {};
+    for (const tag of Object.keys(tags)) {
+      const label = read(tags, tag);
+      if (label === undefined) continue;
+      if (typeof label === 'string' || typeof label === 'number') {
+        labels[tag] = String(label);
+      } else {
+        problems.push({
+          path: `entries.tagLabels.${tag}`,
+          message: `entries.tagLabels.${tag} must be text`,
+        });
+      }
+    }
+    out.tagLabels = labels;
   }
   return out;
 }
@@ -883,6 +1312,21 @@ function readFields(
   const rulesValue = read(input, 'headingRules');
   if (fromNote && rulesValue !== undefined) {
     out.headingRules = readHeadingRules(rulesValue, problems);
+  }
+  // US-030 AC-8, AC-9 (G0-C9): preset notes only, as the heading rules.
+  const entriesValue = read(input, 'entries');
+  if (fromNote && entriesValue !== undefined) {
+    out.entries = readEntries(entriesValue, problems);
+  }
+  const colorMode = read(input, 'colorMode');
+  if (fromNote && colorMode !== undefined) {
+    const mode = COLOR_MODES.find((m) => m === colorMode);
+    if (mode === undefined)
+      problems.push({
+        path: 'colorMode',
+        message: 'colorMode must be color or grayscale',
+      });
+    else out.colorMode = mode;
   }
   // US-021 AC-1: the group exists in preset notes only, as the cover.
   if (fromNote) {

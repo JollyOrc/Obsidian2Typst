@@ -10,6 +10,12 @@ export interface Warning {
   line: number;
 }
 
+/** US-034 AC-2: a block image drawn: its path as Typst reads it, its width. */
+export interface ImageFact {
+  file: string;
+  widthMm: number;
+}
+
 /**
  * US-001 AC-9, AC-15 | US-015 AC-12: collects the warnings of one export.
  *
@@ -25,6 +31,7 @@ export class EmitContext {
   private firstCommentLine = 0;
   private fitImage = false;
   private fitFlows = 0;
+  private readonly fixed: ImageFact[] = [];
 
   /** Reports one warning. */
   warn(code: string, message: string, line: number): void {
@@ -56,6 +63,20 @@ export class EmitContext {
   nextFitLabel(): number {
     this.fitFlows += 1;
     return this.fitFlows;
+  }
+
+  /**
+   * US-034 AC-2: records an image whose drawn width is fixed by its call (a
+   * size written in the note, the cover filling the sheet); the helpers that
+   * size an image during layout record `<o2t-image>` in the compile instead.
+   */
+  fixedImage(file: string, widthMm: number): void {
+    this.fixed.push({file, widthMm});
+  }
+
+  /** US-034 AC-2: the fixed-width images, in the order they were written. */
+  get fixedImages(): readonly ImageFact[] {
+    return this.fixed;
   }
 
   /** US-028 AC-3: true when an image was written with the `fit-flow` call. */

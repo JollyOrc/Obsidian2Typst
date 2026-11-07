@@ -2,7 +2,7 @@
 // imports.
 import type {AssetUse} from '../assets';
 import type {CoverSettings} from '../cover';
-import type {FontInfo, Warning} from '../emit';
+import type {FontInfo, ImageFact, Warning} from '../emit';
 import type {FontsSettings} from '../fonts/types';
 import type {
   BookSettings,
@@ -12,7 +12,12 @@ import type {
   PageGeometry,
   TocSettings,
 } from '../layout/page-setup';
-import type {CalloutsSettings, HeadingRulesSettings} from '../markers';
+import type {
+  CalloutsSettings,
+  ColorMode,
+  EntriesSettings,
+  HeadingRulesSettings,
+} from '../markers';
 
 /**
  * US-015 AC-13: the vault as the pipeline sees it. The plugin implements it
@@ -88,6 +93,14 @@ export interface ConvertSettings {
    * (today's output).
    */
   images?: Partial<ImagesSettings>;
+  /**
+   * US-030 AC-8: the `entries` group (statblock fields, tag labels). Without
+   * it entry blocks are still read and never printed, but no statblock is
+   * written (AC-11, the built-in case).
+   */
+  entries?: EntriesSettings;
+  /** US-030 AC-8, AC-15: `grayscale` draws the statblock in gray; default `color`. */
+  colorMode?: ColorMode;
 }
 
 /** US-015 AC-1: the input of {@link convert}. */
@@ -121,4 +134,15 @@ export interface ConvertResult {
   assets: AssetUse[];
   warnings: Warning[];
   lineMap: LineMapEntry[];
+  /**
+   * US-034 AC-2: the block images whose drawn width the conversion fixes (a
+   * written size, the cover); absent when there are none. The others are
+   * the compile's `<o2t-image>` facts.
+   */
+  images?: ImageFact[];
+  /**
+   * US-036 AC-5: the A4 encounter sheet's Typst source, when
+   * `entries.encounterSheetFile` is on and there is something to track.
+   */
+  sheetTyp?: string;
 }

@@ -41,6 +41,18 @@ export type CompileResult =
        * converge; absent when the warnings could not be read.
        */
       settled?: boolean;
+      /**
+       * US-032 AC-10: the entries' `<o2t-entry>` and `<o2t-entry-end>` facts;
+       * absent when the document places no entries or the query failed.
+       */
+      entryPlaces?: unknown[];
+      entryEnds?: unknown[];
+      /** US-033 AC-13: the section openers' facts. */
+      entrySections?: unknown[];
+      /** US-034 AC-2: the block images' drawn widths (`<o2t-image>`). */
+      images?: unknown[];
+      /** US-036 AC-3: the encounter sheets' facts (`<o2t-sheet>`). */
+      sheets?: unknown[];
     }
   | {ok: false; kind: 'typst' | 'worker'; error: string};
 
@@ -50,6 +62,9 @@ export interface ExportNames {
   typ: string;
   pdf: string;
   template: string;
+  /** US-036 AC-5: the A4 encounter sheet, `<base> - Encounter Sheet.*`. */
+  sheetTyp: string;
+  sheetPdf: string;
 }
 
 /** The fixed name of the template copy (US-008). */
@@ -68,6 +83,10 @@ export function exportNames(noteName: string): ExportNames {
     typ: `${base}.typ`,
     pdf: `${base}.pdf`,
     template: TEMPLATE_FILE,
+    // US-036 AC-5: never equal to the others, also ignoring case (the
+    // suffix makes the name longer than the note's own).
+    sheetTyp: `${base} - Encounter Sheet.typ`,
+    sheetPdf: `${base} - Encounter Sheet.pdf`,
   };
 }
 

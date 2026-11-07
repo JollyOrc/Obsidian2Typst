@@ -425,7 +425,10 @@ function withPageRef(
   if (
     refs === undefined ||
     env.where === 'heading' ||
-    (depth > refs.level && !refs.inExplanation)
+    (depth > refs.level &&
+      !refs.inExplanation &&
+      // US-033 AC-8: a link to an entry is numbered at any level.
+      refs.entries?.has(label) !== true)
   ) {
     return [link];
   }

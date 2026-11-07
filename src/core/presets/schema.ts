@@ -9,7 +9,12 @@ import type {
   TocSettings,
 } from '../layout/page-setup';
 import type {FontsPresetFields} from '../fonts/types';
-import type {CalloutsSettings, HeadingRulesSettings} from '../markers';
+import type {
+  CalloutsSettings,
+  ColorMode,
+  EntriesSettings,
+  HeadingRulesSettings,
+} from '../markers';
 
 /** The version of the preset note format that this plugin writes and reads. */
 export const SCHEMA_VERSION = 1;
@@ -94,6 +99,9 @@ export interface PresetFields {
   toc?: TocPresetFields;
   /** US-028 AC-1: preset notes and the Defaults. */
   images?: ImagesPresetFields;
+  /** US-030 AC-8: preset notes only (G0-C9). */
+  entries?: EntriesSettings;
+  colorMode?: ColorMode;
 }
 
 /** The names of the preset fields. Strict mode and the warnings folder are global. */

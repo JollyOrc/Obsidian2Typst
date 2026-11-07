@@ -80,9 +80,9 @@ const BOOK = [
 ].join('\n');
 
 describe('US-026 AC-1 the rule names and the built-in mapping (decision 2)', () => {
-  it('US-026 AC-1: the rule names are glossary, colophon, back-notes and none', () => {
+  it('US-026 AC-1, US-031 AC-1: the rule names are glossary, colophon, back-notes, entries and none', () => {
     expect([...markers.HEADING_RULE_NAMES].sort()).toEqual(
-      ['back-notes', 'colophon', 'glossary', 'none'].sort(),
+      ['back-notes', 'colophon', 'entries', 'glossary', 'none'].sort(),
     );
   });
 
@@ -107,7 +107,7 @@ describe('US-026 AC-1 the rule names and the built-in mapping (decision 2)', () 
       'Notes for the table': 'back-notes',
     });
     expect(errorOf('headingRules:', '  Impressum: backnotes')).toBe(
-      'headingRules.Impressum must be a rule name: glossary, colophon, back-notes or none (line 4)',
+      'headingRules.Impressum must be a rule name: glossary, colophon, back-notes, entries or none (line 4)',
     );
   });
 });

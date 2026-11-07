@@ -85,7 +85,7 @@ heading forms (scratch probe `p027/probe.test.ts`; SCAR-024):
   printed colophon heading is listed with its number and its folio (`1
   Colophon … iii`; US-026 decision 8). Example, depth 2,
   numbering `1.1`: `1 Rules … 2`, `1.1 Combat … 2`, `2 Glossary … 2`; not
-  `1.1.1 Attacks` (depth 3), not `Boxed`, not `Grit`.
+  `1.1.1 Attacks` (depth 3), not `Boxed`, not `Tallow`.
 
 - **AC-4 (the default place):** Without `toc.heading`, the contents are front
   matter (US-026): after the colophon, on the page after it (p. 4 after a

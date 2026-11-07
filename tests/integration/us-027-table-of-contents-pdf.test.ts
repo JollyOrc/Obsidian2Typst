@@ -47,9 +47,9 @@ const NOTE = [
   '',
   '# Glossary',
   '',
-  '## Grit',
+  '## Tallow',
   '',
-  'Grit text.',
+  'Tallow text.',
 ].join('\n');
 
 const toc = (t: Record<string, unknown>, more: Record<string, unknown> = {}) =>
@@ -60,7 +60,7 @@ const contentsPage = (pages: readonly PdfPage[], title = 'Contents'): number =>
   pageOf(pages, title);
 
 describe('US-027 AC-2, AC-3 the entries (measured)', {timeout: 120_000}, () => {
-  it('US-027 AC-3: depth 2, numbering 1.1: Rules, Combat, Lore, Glossary with numbers; not Attacks, Boxed, Grit', async () => {
+  it('US-027 AC-3: depth 2, numbering 1.1: Rules, Combat, Lore, Glossary with numbers; not Attacks, Boxed, Tallow', async () => {
     const {pages} = await compileBook(NOTE, toc({depth: 2}));
     const at = contentsPage(pages);
     expect(at, layout(pages)).toBeGreaterThan(0);
@@ -68,7 +68,7 @@ describe('US-027 AC-2, AC-3 the entries (measured)', {timeout: 120_000}, () => {
     for (const entry of ['1 Rules', '1.1 Combat', '2 Lore', '3 Glossary']) {
       expect(text, entry).toContain(entry);
     }
-    for (const missing of ['Attacks', 'Boxed', 'Grit']) {
+    for (const missing of ['Attacks', 'Boxed', 'Tallow']) {
       expect(text, missing).not.toContain(missing);
     }
   });
@@ -83,7 +83,7 @@ describe('US-027 AC-2, AC-3 the entries (measured)', {timeout: 120_000}, () => {
       'Rules text.',
       'Combat text.',
       'Lore text.',
-      'Grit text.',
+      'Tallow text.',
     ]) {
       expect(targets, heading).toContain(pageOf(pages, heading) - 1);
     }
@@ -326,7 +326,7 @@ describe('US-027 AC-9 the composed book (SCAR-002)', {timeout: 300_000}, () => {
     ]) {
       expect(text, entry).toContain(entry);
     }
-    for (const missing of ['Boxed', 'Grit', 'Back notes']) {
+    for (const missing of ['Boxed', 'Tallow', 'Back notes']) {
       expect(text, missing).not.toContain(missing);
     }
     expect(
@@ -338,7 +338,7 @@ describe('US-027 AC-9 the composed book (SCAR-002)', {timeout: 300_000}, () => {
       'one target page per heading page listed',
     ).toBe(
       new Set(
-        ['Printed in 2026.', 'Rules text.', 'Lore text.', 'Grit text.'].map(
+        ['Printed in 2026.', 'Rules text.', 'Lore text.', 'Tallow text.'].map(
           (t) => pageOf(pages, t) - 1,
         ),
       ).size,

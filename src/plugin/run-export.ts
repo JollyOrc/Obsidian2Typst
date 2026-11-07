@@ -13,7 +13,30 @@ import {
   type FitStep,
 } from '../core/compile';
 import type {AssetUse} from '../core/assets';
-import {FIT_HINT_LINES, fitDecisionWarnings, type Warning} from '../core/emit';
+import {
+  entryPages,
+  imageFacts,
+  lowDpiWarnings,
+  pixelWidths,
+} from '../core/checks/print';
+import {
+  FIT_HINT_LINES,
+  fitDecisionWarnings,
+  type ImageFact,
+  type Warning,
+} from '../core/emit';
+import {sheetFailedWarning} from '../core/entries/sheet';
+import {MIN_DPI_BUILTIN} from '../core/layout/page-setup';
+import {
+  entryLayoutWarnings,
+  sectionWarnings,
+  sheetWarnings,
+  type EntryEndFact,
+  type EntryPlaceFact,
+  type SectionFact,
+  type SheetFact,
+} from '../core/entries/report';
+import {ENTRY_BUILTINS} from '../core/markers';
 import type {TypstCompiler} from './compiler';
 import {copyAssets} from './copy-assets';
 import {
@@ -77,11 +100,23 @@ export interface RunExportOptions {
   fallback?: () => Promise<FallbackNote | null>;
   /** US-028 AC-18: the most compiles before the fallback (tests only). */
   fitCompileLimit?: number;
+  /** US-032 AC-9: `entries.emptyWarn` (built-in 50). */
+  entryEmptyWarn?: number;
+  /** US-034 AC-1: `images.minDpi` (built-in 300; 0 = off). */
+  minDpi?: number;
+  /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
+  fixedImages?: readonly ImageFact[];
+  /** US-034 AC-5, AC-8: `entries.maxWordGap` (built-in 200; 0 = no scan). */
+  maxWordGap?: number;
+  /** US-036 AC-5: the A4 encounter sheet's source; null or absent: none. */
+  sheetTyp?: string | null;
 }
 
 /** US-028 AC-16: the note converted again without image fit. */
 export interface FallbackNote {
   typ: string;
+  /** US-034 AC-2: its fixed-width images (sized images lose `fit-flow`). */
+  images?: readonly ImageFact[];
 }
 
 /** How a run ended. */
@@ -132,6 +167,7 @@ export async function runExport(
         );
         files[names.template] = new TextEncoder().encode(options.template);
       }
+      let fallbackImages: readonly ImageFact[] = [];
       // US-028 AC-15, AC-16: compile until the layout settles, else fall
       // back to the note at 100 (`compileSettled`); one compile without the
       // hints lines (the rule is off) as before.
@@ -151,7 +187,11 @@ export async function runExport(
         fallback:
           options.fallback === undefined
             ? undefined
-            : async () => (await options.fallback?.())?.typ ?? null,
+            : async () => {
+                const note = await options.fallback?.();
+                fallbackImages = note?.images ?? [];
+                return note?.typ ?? null;
+              },
         limit: options.fitCompileLimit ?? FIT_COMPILE_LIMIT,
       });
       const {result} = done;
@@ -172,6 +212,68 @@ export async function runExport(
         ? [IMAGE_FIT_OFF_WARNING]
         : fitDecisionWarnings(result.fitDecisions ?? []);
       if (result.settled === false) warnings.push(LAYOUT_NOT_SETTLED_WARNING);
+      // US-032 AC-10: the entries' layout warnings, from the compile's facts.
+      warnings.push(
+        ...entryLayoutWarnings(
+          (result.entryPlaces ?? []) as EntryPlaceFact[],
+          (result.entryEnds ?? []) as EntryEndFact[],
+          {emptyWarn: options.entryEmptyWarn ?? ENTRY_BUILTINS.emptyWarn},
+        ),
+        // US-036 AC-3 (decision 2): the sheet page's small boxes.
+        ...sheetWarnings((result.sheets ?? []) as SheetFact[]),
+        // US-033 AC-13: the openers' and unpaired pages' warnings.
+        ...sectionWarnings(
+          (result.entrySections ?? []) as SectionFact[],
+          (result.entryPlaces ?? []) as EntryPlaceFact[],
+          (result.entryEnds ?? []) as EntryEndFact[],
+        ),
+      );
+      // US-034 AC-2, AC-3, decision 1: images below the print resolution
+      // (after the strict check: never stops an export).
+      warnings.push(
+        ...lowDpiWarnings(
+          [
+            ...(done.fellBack ? fallbackImages : (options.fixedImages ?? [])),
+            ...imageFacts(result.images ?? []),
+          ],
+          pixelWidths(files),
+          options.minDpi ?? MIN_DPI_BUILTIN,
+        ),
+      );
+      // US-036 AC-5: the A4 encounter sheet, a second compile after the
+      // book's with the same files and fonts; a failure never stops the book.
+      if (options.sheetTyp !== undefined && options.sheetTyp !== null) {
+        await host.writeExportFile(
+          `${dir}/${names.sheetTyp}`,
+          options.sheetTyp,
+        );
+        const sheet = await options.compiler.compile({
+          file: names.sheetTyp,
+          source: options.sheetTyp,
+          files,
+          fonts: options.fonts,
+        });
+        if (sheet.ok) {
+          await host.writeExportBytes(`${dir}/${names.sheetPdf}`, sheet.pdf);
+          warnings.push(...sheetWarnings((sheet.sheets ?? []) as SheetFact[]));
+        } else {
+          warnings.push(sheetFailedWarning(sheet.error));
+        }
+      }
+      // US-034 AC-7, AC-8, AC-11: the word-gap scan of the last compile's
+      // PDF, in a worker; export only, never stops it (decision 1).
+      const maxWordGap = options.maxWordGap ?? ENTRY_BUILTINS.maxWordGap;
+      if (maxWordGap > 0 && options.compiler.scanWordGaps !== undefined) {
+        warnings.push(
+          ...(await options.compiler.scanWordGaps(result.pdf, {
+            maxWordGap,
+            entries: entryPages(
+              (result.entryPlaces ?? []) as EntryPlaceFact[],
+              (result.entryEnds ?? []) as EntryEndFact[],
+            ),
+          })),
+        );
+      }
       return {warnings};
     };
 

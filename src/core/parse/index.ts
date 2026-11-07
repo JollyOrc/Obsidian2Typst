@@ -1,5 +1,5 @@
 // Markdown parsing (US-014). Pure: no Obsidian, Node, or I/O imports.
-export {parse} from './parse';
+export {parse, parseInline} from './parse';
 export type * from './types';
 export {
   indexHeadings,

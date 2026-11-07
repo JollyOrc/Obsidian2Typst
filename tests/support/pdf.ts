@@ -3,8 +3,16 @@
 // whose text is written with glyph numbers that the font's ToUnicode map turns
 // back into characters. Used to check content, not only page counts (SCAR-015):
 // what each page holds, its size, the text on it and the number printed in its
-// footer.
-import {inflateSync} from 'node:zlib';
+// footer. US-034 AC-9: the content-stream reader (tokens, strings, CMaps,
+// the object index, streams) is core code, `src/core/pdf/reader.ts`, where
+// its transforms are documented; this file keeps the test-side readers.
+import {
+  contentTokens,
+  hexBytes,
+  literalBytes,
+  openPdf,
+  type PdfFile,
+} from '../../src/core/pdf/reader';
 
 export interface PdfPage {
   /** Width and height in points. */
@@ -67,12 +75,12 @@ export interface PdfPage {
 }
 
 /** The base font names of the page's font resources, by resource name. */
-function baseFonts(pdf: string, dict: string): Map<string, string> {
+function baseFonts(file: PdfFile, dict: string): Map<string, string> {
   const out = new Map<string, string>();
   const block = /\/Font <<([^>]*)>>/.exec(dict);
   for (const m of (block?.[1] ?? '').matchAll(/\/(f\d+) (\d+) 0 R/g)) {
     const name = /\/BaseFont\s*\/(?:[A-Z]{6}\+)?([^\s/>]+)/.exec(
-      objectText(pdf, Number(m[2])),
+      file.object(Number(m[2])),
     );
     if (name !== null) out.set(m[1] as string, name[1] as string);
   }
@@ -102,147 +110,41 @@ function fillsOf(body: string): string[] {
   );
 }
 
-/** The text between `n 0 obj` and `endobj`, stream included (latin1). */
-function objectText(pdf: string, n: number): string {
-  const start = pdf.search(new RegExp(`(?:^|\\s)${n} 0 obj`));
-  if (start < 0) throw new Error(`PDF object ${n} not found`);
-  return pdf.slice(start, pdf.indexOf('endobj', start));
-}
-
-/** The bytes of the stream of object `n` (inflated when it is compressed). */
-function streamOf(pdf: string, n: number): string {
-  const text = objectText(pdf, n);
-  const from = text.indexOf('stream') + 'stream'.length;
-  let begin = from;
-  if (text[begin] === '\r') begin += 1;
-  if (text[begin] === '\n') begin += 1;
-  let end = text.lastIndexOf('endstream');
-  if (end < 0) end = text.length;
-  const raw = Buffer.from(text.slice(begin, end), 'latin1');
-  return /\/FlateDecode/.test(text.slice(0, from))
-    ? inflateSync(raw).toString('latin1')
-    : raw.toString('latin1');
-}
-
-/** glyph number -> text, from the `bfchar` and `bfrange` parts of a CMap. */
-function readCMap(cmap: string): Map<number, string> {
-  const map = new Map<number, string>();
-  const text = (hex: string): string =>
-    String.fromCharCode(
-      ...(hex.match(/.{4}/g) ?? []).map((h) => Number.parseInt(h, 16)),
-    );
-  for (const block of cmap.matchAll(/beginbfchar([\s\S]*?)endbfchar/g)) {
-    for (const m of (block[1] as string).matchAll(
-      /<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/g,
-    )) {
-      map.set(Number.parseInt(m[1] as string, 16), text(m[2] as string));
+/** The `[start, end)` ranges of the `/Header` artifacts of a content stream. */
+function headerParts(stream: string): [number, number][] {
+  const out: [number, number][] = [];
+  let from = stream.indexOf('/Subtype /Header');
+  while (from >= 0) {
+    const start = stream.lastIndexOf('/Artifact', from);
+    const end = artifactEnd(stream, from);
+    if (end < 0) {
+      out.push([start, stream.length]);
+      break;
     }
-  }
-  for (const block of cmap.matchAll(/beginbfrange([\s\S]*?)endbfrange/g)) {
-    for (const m of (block[1] as string).matchAll(
-      /<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/g,
-    )) {
-      const from = Number.parseInt(m[1] as string, 16);
-      const to = Number.parseInt(m[2] as string, 16);
-      const first = Number.parseInt(m[3] as string, 16);
-      for (let code = from; code <= to; code++) {
-        map.set(code, String.fromCharCode(first + code - from));
-      }
-    }
-  }
-  return map;
-}
-
-/** The bytes of a PDF literal string such as `\000\003`, escapes resolved. */
-function literalBytes(body: string): number[] {
-  const out: number[] = [];
-  for (let i = 0; i < body.length; i++) {
-    const ch = body[i] as string;
-    if (ch !== '\\') {
-      out.push(ch.charCodeAt(0));
-      continue;
-    }
-    const next = body[i + 1] as string;
-    const octal = /^[0-7]{1,3}/.exec(body.slice(i + 1));
-    if (octal !== null) {
-      out.push(Number.parseInt(octal[0], 8));
-      i += octal[0].length;
-    } else {
-      const named: Record<string, number> = {n: 10, r: 13, t: 9, b: 8, f: 12};
-      out.push(named[next] ?? next.charCodeAt(0));
-      i += 1;
-    }
+    out.push([start, end]);
+    from = stream.indexOf('/Subtype /Header', end);
   }
   return out;
 }
-
-/** The text of the `TJ` and `Tj` strings of a content stream part. */
-/** The bytes of a hex string's digits (whitespace ignored, odd digit padded). */
-function hexBytes(hex: string): number[] {
-  const digits = hex.replace(/\s+/g, '');
-  const padded = digits.length % 2 === 0 ? digits : `${digits}0`;
-  return (padded.match(/../g) ?? []).map((h) => Number.parseInt(h, 16));
-}
-
-type Token =
-  | {t: 'str'; bytes: number[]}
-  | {t: 'name' | 'op'; v: string}
-  | {t: '['}
-  | {t: ']'};
 
 /**
- * The tokens of a content stream part. A literal string may hold balanced,
- * unescaped parentheses (`(a(b)c)`, as Typst writes some glyph runs), so it is
- * read by counting them, not with a pattern.
+ * The index just after the `EMC` that closes the marked-content sequence
+ * whose `BDC` follows `from`; -1 when it is not closed.
  */
-function contentTokens(part: string): Token[] {
-  const out: Token[] = [];
-  const delimiter = /[\s()<>[\]{}/%]/;
-  let i = 0;
-  while (i < part.length) {
-    const ch = part[i] as string;
-    if (/\s/.test(ch)) {
-      i++;
-    } else if (ch === '(') {
-      let depth = 1;
-      let j = i + 1;
-      while (j < part.length && depth > 0) {
-        const c = part[j] as string;
-        if (c === '\\') j++;
-        else if (c === '(') depth++;
-        else if (c === ')') depth--;
-        j++;
-      }
-      out.push({t: 'str', bytes: literalBytes(part.slice(i + 1, j - 1))});
-      i = j;
-    } else if (ch === '<' && part[i + 1] === '<') {
-      i += 2;
-    } else if (ch === '>' && part[i + 1] === '>') {
-      i += 2;
-    } else if (ch === '<') {
-      const end = part.indexOf('>', i);
-      out.push({t: 'str', bytes: hexBytes(part.slice(i + 1, end))});
-      i = end + 1;
-    } else if (ch === '[' || ch === ']') {
-      out.push({t: ch});
-      i++;
-    } else if (ch === '/') {
-      let j = i + 1;
-      while (j < part.length && !delimiter.test(part[j] as string)) j++;
-      out.push({t: 'name', v: part.slice(i + 1, j)});
-      i = j;
-    } else if (ch === '%') {
-      while (i < part.length && part[i] !== '\n') i++;
-    } else {
-      let j = i + 1;
-      while (j < part.length && !delimiter.test(part[j] as string)) j++;
-      out.push({t: 'op', v: part.slice(i, j)});
-      i = j;
-    }
+function artifactEnd(stream: string, from: number): number {
+  const open = stream.indexOf('BDC', from);
+  if (open < 0) return -1;
+  const ops = /\b(BDC|BMC|EMC)\b/g;
+  ops.lastIndex = open + 3;
+  let depth = 1;
+  for (let m = ops.exec(stream); m !== null; m = ops.exec(stream)) {
+    depth += m[1] === 'EMC' ? -1 : 1;
+    if (depth === 0) return m.index + 3;
   }
-  return out;
+  return -1;
 }
 
+/** The text of the `TJ` and `Tj` strings of a content stream part, runs joined by a space. */
 function textOf(part: string, fonts: Map<string, Map<number, string>>): string {
   const runs: string[] = [];
   let font = new Map<number, string>();
@@ -336,7 +238,8 @@ function imagesOf(
 
 /** The pages of `bytes` in order. Throws when the structure is not found. */
 export function readPdfPages(bytes: Uint8Array): PdfPage[] {
-  const pdf = Buffer.from(bytes).toString('latin1');
+  const file = openPdf(bytes);
+  const pdf = file.text;
   const tree = /\/Type \/Pages[^>]*\/Kids \[([^\]]*)\]/.exec(pdf);
   if (tree === null) throw new Error('PDF page tree not found');
   const kids = [...(tree[1] as string).matchAll(/(\d+) 0 R/g)].map((m) =>
@@ -350,11 +253,11 @@ export function readPdfPages(bytes: Uint8Array): PdfPage[] {
   const nums =
     labelsRef === null
       ? null
-      : /\/Nums \[([^\]]*)\]/.exec(objectText(pdf, Number(labelsRef[1])));
+      : /\/Nums \[([^\]]*)\]/.exec(file.object(Number(labelsRef[1])));
   const runs: {start: number; first: number; shown: boolean}[] = [];
   if (nums !== null) {
     for (const m of (nums[1] as string).matchAll(/(\d+) (\d+) 0 R/g)) {
-      const dict = objectText(pdf, Number(m[2]));
+      const dict = file.object(Number(m[2]));
       runs.push({
         start: Number(m[1]),
         first: Number(/\/St (\d+)/.exec(dict)?.[1] ?? 1),
@@ -370,35 +273,37 @@ export function readPdfPages(bytes: Uint8Array): PdfPage[] {
   };
 
   return kids.map((id, index) => {
-    const dict = objectText(pdf, id);
+    const dict = file.object(id);
     const box = /\/MediaBox \[0 0 ([\d.]+) ([\d.]+)\]/.exec(dict);
     if (box === null) throw new Error(`PDF page ${index + 1} has no MediaBox`);
     const fonts = new Map<string, Map<number, string>>();
     const fontBlock = /\/Font <<([^>]*)>>/.exec(dict);
     for (const m of (fontBlock?.[1] ?? '').matchAll(/\/(f\d+) (\d+) 0 R/g)) {
-      const unicode = /\/ToUnicode (\d+) 0 R/.exec(
-        objectText(pdf, Number(m[2])),
-      );
-      if (unicode !== null) {
-        fonts.set(m[1] as string, readCMap(streamOf(pdf, Number(unicode[1]))));
-      }
+      fonts.set(m[1] as string, file.toUnicode(Number(m[2])));
     }
     const contents = /\/Contents (\d+) 0 R/.exec(dict);
-    const stream = contents === null ? '' : streamOf(pdf, Number(contents[1]));
+    const stream = contents === null ? '' : file.stream(Number(contents[1]));
     const at = stream.indexOf('/Subtype /Footer');
     const upper = at < 0 ? stream : stream.slice(0, at);
     const footer = at < 0 ? '' : stream.slice(at);
-    // US-019: the header artifact runs to the first tagged body span.
-    const top = upper.indexOf('/Subtype /Header');
-    const headerEnd = top < 0 ? -1 : upper.indexOf('/Span <<', top);
-    const headerPart =
-      top < 0 ? '' : upper.slice(top, headerEnd < 0 ? undefined : headerEnd);
-    const body =
-      top < 0
-        ? upper
-        : upper.slice(0, top) + (headerEnd < 0 ? '' : upper.slice(headerEnd));
+    // US-019: the header is every `/Header` artifact (Typst writes one per
+    // styled run), each from its `BDC` to the `EMC` that closes it; the rest
+    // is the body. US-033 AC-11 (G4 #130): measured up to the first tagged
+    // span before, which also took a table's repeated header row (an
+    // untagged `/Artifact` standing between them) for the running header.
+    const parts = headerParts(upper);
+    const headerPart = parts
+      .map(([from, to]) => upper.slice(from, to))
+      .join(' ');
+    let body = '';
+    let next = 0;
+    for (const [from, to] of parts) {
+      body += upper.slice(next, from);
+      next = to;
+    }
+    body += upper.slice(next);
     const text = textOf(body, fonts);
-    const names = baseFonts(pdf, dict);
+    const names = baseFonts(file, dict);
     const head = firstFont(headerPart, names);
     const main = firstFont(body, names);
     const footerCm = /1 0 0 -1 ([\d.-]+) [\d.-]+ cm/.exec(footer);
@@ -433,13 +338,8 @@ export const mm = (points: number): number =>
 /** A PDF text string (`(…)` literal or `<…>` hex), UTF-16BE when it has a BOM. */
 function pdfString(token: string): string {
   const bytes = token.startsWith('<')
-    ? (
-        token
-          .slice(1, -1)
-          .replace(/\s+/g, '')
-          .match(/.{1,2}/g) ?? []
-      ).map((h) => Number.parseInt(h.padEnd(2, '0'), 16))
-    : literalBytes(token.slice(1, -1));
+    ? hexBytes(token.slice(1, -1))
+    : literalBytes(token);
   if (bytes[0] === 0xfe && bytes[1] === 0xff) {
     let out = '';
     for (let i = 2; i + 1 < bytes.length; i += 2) {
@@ -467,16 +367,16 @@ function pageIds(pdf: string): number[] {
  * catalog's `/Names << /Dests << /Names [(name) n 0 R …] >> >>` (Typst writes
  * a name for a link to a label, measured 2026-10-19).
  */
-function destPage(pdf: string, dict: string, pages: number[]): number | null {
+function destPage(file: PdfFile, dict: string, pages: number[]): number | null {
   const named = /\/Dest (\((?:\\.|[^\\)])*\))/.exec(dict);
   if (named !== null) {
-    const names = /\/Dests\s*<<\s*\/Names \[([^\]]*)\]/.exec(pdf);
+    const names = /\/Dests\s*<<\s*\/Names \[([^\]]*)\]/.exec(file.text);
     const wanted = pdfString(named[1] as string);
     for (const m of (names?.[1] ?? '').matchAll(
       /(\((?:\\.|[^\\)])*\))\s*(\d+) 0 R/g,
     )) {
       if (pdfString(m[1] as string) === wanted) {
-        return destPage(pdf, `/Dest ${m[2]} 0 R`, pages);
+        return destPage(file, `/Dest ${m[2]} 0 R`, pages);
       }
     }
     return null;
@@ -485,9 +385,7 @@ function destPage(pdf: string, dict: string, pages: number[]): number | null {
   const array =
     ref === null
       ? /\/Dest \[(\d+) 0 R/.exec(dict)
-      : /^\s*\[(\d+) 0 R/.exec(
-          objectText(pdf, Number(ref[1])).replace(/^\s*\d+ 0 obj/, ''),
-        );
+      : /^\s*\[(\d+) 0 R/.exec(file.object(Number(ref[1])));
   if (array === null) return null;
   const index = pages.indexOf(Number(array[1]));
   return index < 0 ? null : index;
@@ -510,19 +408,20 @@ export interface PdfBookmark {
  * list when the PDF has no outline.
  */
 export function readPdfBookmarks(bytes: Uint8Array): PdfBookmark[] {
-  const pdf = Buffer.from(bytes).toString('latin1');
+  const file = openPdf(bytes);
+  const pdf = file.text;
   const pages = pageIds(pdf);
   const root = /\/Type \/Outlines[^>]*?\/First (\d+) 0 R/.exec(pdf);
   if (root === null) return [];
   const out: PdfBookmark[] = [];
   const walk = (first: number, depth: number): void => {
     for (let id: number | null = first; id !== null;) {
-      const dict = objectText(pdf, id);
+      const dict = file.object(id);
       const title = /\/Title (\((?:\\.|[^\\)])*\)|<[0-9a-fA-F\s]*>)/.exec(dict);
       out.push({
         title: title === null ? '' : pdfString(title[1] as string),
         depth,
-        page: destPage(pdf, dict, pages),
+        page: destPage(file, dict, pages),
       });
       const child = /\/First (\d+) 0 R/.exec(dict);
       if (child !== null) walk(Number(child[1]), depth + 1);
@@ -551,19 +450,19 @@ export interface PdfLink {
  * `/A << /S /URI /URI (…) >>`; a footnote adds a link to its note and back.
  */
 export function readPdfLinks(bytes: Uint8Array): PdfLink[] {
-  const pdf = Buffer.from(bytes).toString('latin1');
-  const pages = pageIds(pdf);
+  const file = openPdf(bytes);
+  const pages = pageIds(file.text);
   return pages.flatMap((id, page) => {
-    const annots = /\/Annots \[([^\]]*)\]/.exec(objectText(pdf, id));
+    const annots = /\/Annots \[([^\]]*)\]/.exec(file.object(id));
     if (annots === null) return [];
     return [...(annots[1] as string).matchAll(/(\d+) 0 R/g)].flatMap((m) => {
-      const dict = objectText(pdf, Number(m[1]));
+      const dict = file.object(Number(m[1]));
       if (!/\/Subtype \/Link/.test(dict)) return [];
       const uri = /\/URI (\((?:\\.|[^\\)])*\))/.exec(dict);
       return [
         {
           page,
-          target: destPage(pdf, dict, pages),
+          target: destPage(file, dict, pages),
           uri: uri === null ? null : pdfString(uri[1] as string),
         },
       ];

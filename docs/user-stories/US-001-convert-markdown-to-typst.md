@@ -303,7 +303,7 @@ Notation: `md` is the input Markdown, `typ` the expected Typst output.
   output body and does not produce text.
 
 - **AC-11 (validity gate):** For every note of the sample vault
-  `tests/fixtures/sample/` (US-024: `Book.md`, `Other.md`), the generated
+  `tests/fixtures/sample/` (US-024: `Book.md`, `Menagerie.md`, `Other.md`), the generated
   `.typ` compiles with zero errors using the bundled compiler (US-007).
 
 - **AC-12 (determinism):** Converting the same input twice with the same

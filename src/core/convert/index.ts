@@ -1,7 +1,7 @@
 // US-015: the conversion pipeline. One note in, the Typst text, the assets to
 // copy, the warnings and the line map out. Pure: no Obsidian, Node, or I/O
 // imports; the vault is only read through the injected `AssetIndex`.
-import {createAssetResolver} from '../assets';
+import {createAssetResolver, extensionOf, readImageSize} from '../assets';
 import {
   EmitContext,
   GLOSSARY_HELPER,
@@ -13,7 +13,11 @@ import {
   createCalloutRecorder,
   contentsLines,
   emitBlocks,
+  STATBLOCK_HELPER_DEF,
+  entriesLayoutHelper,
   escapeMarkup,
+  findImage,
+  statblockLook,
   paddingEndLines,
   pageRefHelper,
   bodyContentsLines,
@@ -21,6 +25,8 @@ import {
   partStartLine,
   type BookLines,
   type CalloutStyleEntry,
+  type EntryLayoutEnv,
+  type EntryLayoutInfo,
 } from '../emit';
 import {
   DEFAULT_BOOK,
@@ -29,8 +35,29 @@ import {
   type BookSettings,
 } from '../layout/page-setup';
 import {checkGlyphs, emitFonts, resolveFonts} from '../fonts';
-import {findGlossary, headingRuleTable} from '../markers';
+import {
+  ENTRY_BUILTINS,
+  narrowLimits,
+  STATBLOCK_BUILTINS,
+  findGlossary,
+  headingRuleTable,
+  type EntryData,
+  placeEntries,
+  planEntries,
+  readEntryBlock,
+  scanEntryBlocks,
+} from '../markers';
 import {indexHeadings, parse, type BlockNode} from '../parse';
+import {statblockModel, type StatblockModel} from '../entries/model';
+import {
+  SHEET_BUILTINS,
+  SHEET_EMPTY_WARNING,
+  SHEET_HELPER_DEF,
+  encounterSheetTyp,
+  sheetData,
+  sheetSettings,
+} from '../entries/sheet';
+import {ENTRY_MARKS_DEF} from '../emit/entry';
 import {coverNames, planCover, resolveCover} from './cover';
 import {
   arrangeParts,
@@ -149,12 +176,21 @@ function bookLines(
  * US-028 | AC-1, AC-2, AC-3, AC-10 (decisions 1, 7): the image fit of the
  * body, or undefined at `images.minScale` 100 (the built-in; the output is
  * then as before). `min` is the percentage as a fraction (`0.7`); the blocks
- * of the back notes, from their first block to the end, never float.
+ * of the back notes, from their first block to the end, never float; the
+ * blocks of `plain` (US-031 AC-13: entry bodies) are written without fit.
  */
 function imageFit(
   settings: ConvertSettings,
   arranged: ArrangedParts,
-): {min: number; sides: boolean; noFloat: ReadonlySet<BlockNode>} | undefined {
+  plain: ReadonlySet<BlockNode>,
+):
+  | {
+      min: number;
+      sides: boolean;
+      noFloat: ReadonlySet<BlockNode>;
+      plain: ReadonlySet<BlockNode>;
+    }
+  | undefined {
   const {minScale} = {...DEFAULT_IMAGES, ...settings.images};
   if (minScale >= 100) return undefined;
   const start =
@@ -165,6 +201,152 @@ function imageFit(
     min: minScale / 100,
     sides: settings.page.facingPages,
     noFloat: new Set(arranged.blocks.slice(start)),
+    // US-031 AC-13 (G0-C5): the entries' bodies are written without fit.
+    plain,
+  };
+}
+
+/**
+ * US-033 | AC-10: the Track column: '' for the default cells, `+ <cell>` for
+ * the default plus one cell, `− <cell>` for the default less one, `none` for
+ * no cells, else the cells (labels compared without case). Read from the
+ * story's table: its "any other set" example (Fine, Gone) is the default
+ * less two cells and is listed.
+ */
+function trackShort(
+  cells: readonly string[],
+  defaults: readonly string[],
+): string {
+  if (cells.length === 0) return 'none';
+  const low = (xs: readonly string[]): string[] =>
+    xs.map((x) => x.toLowerCase());
+  const has = new Set(low(cells));
+  const def = new Set(low(defaults));
+  const added = cells.filter((c) => !def.has(c.toLowerCase()));
+  const removed = defaults.filter((d) => !has.has(d.toLowerCase()));
+  if (added.length === 0 && removed.length === 0) return '';
+  if (removed.length === 0 && added.length === 1) return `+ ${added[0]}`;
+  if (added.length === 0 && removed.length === 1) return `− ${removed[0]}`;
+  return cells.join(', ');
+}
+
+/** US-031 AC-4: the layouts that need an illustration, by orientation. */
+const LANDSCAPE = new Set(['spread-landscape', 'page-landscape']);
+const PORTRAIT = new Set(['spread-portrait', 'page-portrait']);
+
+/**
+ * US-031 | AC-1 to AC-4, AC-7: the entry layout of the note, or undefined
+ * when no entries chapter places an entry. A layout that needs an
+ * illustration is replaced by `auto` when there is none (`no illustration`)
+ * or it has the other orientation (`image is portrait` / `image is
+ * landscape`; width = height counts as landscape).
+ */
+function planEntryLayout(
+  entries: ReadonlyMap<BlockNode, EntryData>,
+  placed: {
+    bodies: ReadonlySet<BlockNode>;
+    chapters: ReadonlySet<BlockNode>;
+    sections: ReadonlySet<BlockNode>;
+  },
+  tocDepth: number,
+  settings: ConvertSettings,
+  sizeOf: (path: string) => {width: number; height: number} | null,
+): EntryLayoutEnv | undefined {
+  const all = [...entries.values()];
+  if (!all.some((e) => e.place?.chapter != null && !e.place.nested))
+    return undefined;
+  const {bodies, chapters, sections} = placed;
+  const infos = new Map<BlockNode, EntryLayoutInfo>();
+  // US-033 AC-1: the first entry of each section closes its intro.
+  const opened = new Set<string>();
+  for (const entry of all) {
+    const place = entry.place;
+    const inline =
+      place === undefined || place.chapter === null || place.nested;
+    const ill = entry.illustration;
+    const size = ill?.path === undefined ? null : sizeOf(ill.path);
+    const image =
+      ill?.path === undefined || size === null
+        ? null
+        : {
+            path: ill.path,
+            width: size.width,
+            height: size.height,
+            credit: ill.credit,
+          };
+    let layout: string = place?.layout ?? 'auto';
+    let asked: string | null = null;
+    let reason: string | null = null;
+    const needs =
+      layout === 'full-image' || LANDSCAPE.has(layout) || PORTRAIT.has(layout);
+    if (!inline && needs) {
+      if (image === null) reason = 'no illustration';
+      else if (LANDSCAPE.has(layout) && image.width < image.height)
+        reason = 'image is portrait';
+      else if (PORTRAIT.has(layout) && image.width >= image.height)
+        reason = 'image is landscape';
+      if (reason !== null) {
+        asked = layout;
+        layout = 'auto';
+      }
+    }
+    infos.set(entry.heading, {
+      text: entry.text,
+      inline,
+      layout,
+      asked,
+      reason,
+      auto: layout === 'auto',
+      line: entry.line,
+      chapter: inline ? null : (place?.chapterHeading ?? null),
+      quick: null,
+      opensSection: (() => {
+        const name = place?.section ?? null;
+        if (inline || name === null || opened.has(`${place?.chapter}/${name}`))
+          return null;
+        opened.add(`${place?.chapter}/${name}`);
+        return name;
+      })(),
+      image,
+    });
+  }
+  const page = settings.page;
+  return {
+    entries: infos,
+    textWidth: page.pageWidth - page.margins.inside - page.margins.outside,
+    textHeight: page.pageHeight - page.margins.top - page.margins.bottom,
+    marginTop: page.margins.top,
+    minScale: settings.entries?.image?.minScale ?? ENTRY_BUILTINS.imageMinScale,
+    narrow: narrowLimits(settings.entries?.narrowJustification),
+    facingPages: page.facingPages,
+    fullImageHeader: settings.entries?.fullImageHeader === true,
+    bodies,
+    chapters,
+    sections,
+    tocDepth,
+    // US-033 AC-9, AC-12: the quick reference's columns, when it is on.
+    quick:
+      settings.entries?.quickReference !== true
+        ? null
+        : {
+            title: settings.entries.quickReferenceTitle ?? 'Quick Reference',
+            boxLabel:
+              settings.entries.statblock?.boxes === undefined
+                ? null
+                : (settings.entries.statblock.stats?.find(
+                    (f) =>
+                      f.key.toLowerCase() ===
+                      settings.entries?.statblock?.boxes?.toLowerCase(),
+                  )?.label ?? settings.entries.statblock.boxes),
+            statLabels: (settings.entries.statblock?.stats ?? [])
+              .filter(
+                (f) =>
+                  f.key.toLowerCase() !==
+                  settings.entries?.statblock?.boxes?.toLowerCase(),
+              )
+              .map((f) => f.label),
+            track: (settings.entries.statblock?.track ?? []).length > 0,
+          },
   };
 }
 
@@ -220,20 +402,44 @@ function trimLines(lines: readonly string[]): string[] {
 export async function convert(input: ConvertInput): Promise<ConvertResult> {
   checkSettings(input.settings);
   const parsed = parse(input.source);
+  // US-030 AC-1, AC-4 (SCAR-034): the entry blocks leave the tree before any
+  // other step reads it; they are data, never printed.
+  const scan = scanEntryBlocks(parsed.root);
+  const reads = scan.found.map((found) =>
+    readEntryBlock(found, input.settings.entries),
+  );
   // US-011: the image in first position is taken out of the body first.
-  const plan = planCover(parsed.root, input.settings.cover);
+  const plan = planCover(scan.root, input.settings.cover);
   const {root} = plan;
   const coverFile = coverNames(plan.target);
 
   const callouts = input.settings.callouts ?? {};
+  // US-031 AC-4, AC-7: the illustrations' sizes are read like the cover's.
+  const illustrations = referencedImageNames([
+    {
+      kind: 'paragraph',
+      line: 0,
+      children: reads.flatMap((read) =>
+        read.data?.illustration == null ? [] : [read.data.illustration.node],
+      ),
+    },
+  ]);
   const heads = await readHeads(
     input.assets,
     new Set([
       ...referencedImageNames(root),
+      // US-030 AC-13: the track icons of the preset.
+      ...(reads.length === 0
+        ? []
+        : (input.settings.entries?.statblock?.track ?? []).map((cell) =>
+            cell.icon.slice(cell.icon.lastIndexOf('/') + 1).normalize('NFC'),
+          )),
+      // US-030 AC-7: the entries' illustrations.
+      ...illustrations,
       ...coverFile,
       ...calloutIconNames(root, callouts),
     ]),
-    coverFile,
+    new Set([...coverFile, ...illustrations]),
   );
   const none = new Uint8Array(0);
   const resolver = createAssetResolver({
@@ -311,6 +517,160 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   const marks = createLineMarks(input.source);
   const recorder = createCalloutRecorder(callouts);
   for (const w of glossary.warnings) ctx.warn(w.code, w.message, w.line);
+  // US-030 AC-3 to AC-5, AC-21: the entries; a block under a glossary term
+  // is not one (decision 3).
+  const entryPlan = planEntries(reads, (heading) =>
+    glossary.roles.has(heading),
+  );
+  // US-031 AC-1 to AC-3: the entries chapters, sections, nested entries and
+  // the layout values.
+  const placed = placeEntries(
+    root,
+    entryPlan.entries,
+    headingRuleTable(input.settings.headingRules),
+  );
+  for (const w of [
+    ...scan.warnings,
+    ...entryPlan.warnings,
+    ...placed.warnings,
+  ]) {
+    ctx.warn(w.code, w.message, w.line);
+  }
+  // US-030 AC-7: an illustration that is not found counts as none.
+  for (const entry of entryPlan.entries.values()) {
+    const ill = entry.illustration;
+    if (ill === null) continue;
+    const path = findImage(ill.node, ctx, resolver);
+    entry.illustration = path === null ? null : {...ill, path};
+  }
+  // US-031 AC-1 to AC-4, AC-7: the layout of each entry, written only when a
+  // chapter places one (else the output is as before).
+  const entryLayout = planEntryLayout(
+    entryPlan.entries,
+    placed,
+    contents === null ? 0 : toc.depth,
+    input.settings,
+    (path) => {
+      const from = resolver.uses().find((use) => use.to === path)?.from;
+      const head = from === undefined ? undefined : heads.get(from);
+      return from === undefined || head === undefined
+        ? null
+        : readImageSize(extensionOf(from), head);
+    },
+  );
+  // US-033 AC-6 (decision 3): with an entries chapter the outline lists
+  // every heading not unlisted.
+  if (contents !== null && entryLayout !== undefined) {
+    contents.text = contentsLines(toc, true);
+  }
+  // US-030 AC-10 to AC-14, AC-18: the statblock of each entry and its data
+  // checks, once per entry (SCAR-038), at the block's line.
+  const models = new Map<BlockNode, StatblockModel & {line: number}>();
+  for (const entry of entryPlan.entries.values()) {
+    const model = statblockModel(
+      Object.fromEntries(entry.fields),
+      input.settings.entries,
+      {heading: entry.text, fileName: input.noteName, missing: 'omit'},
+    );
+    if (model === null) continue;
+    models.set(entry.heading, {...model, line: entry.line});
+    for (const check of model.checks) {
+      ctx.warn(
+        check.code,
+        check.detail === null
+          ? `"${entry.text}"`
+          : `"${entry.text}": ${check.detail}`,
+        entry.line,
+      );
+    }
+  }
+  // US-033 AC-9, AC-10: each chapter entry's row of the quick reference.
+  if (entryLayout?.quick != null) {
+    const sb = input.settings.entries?.statblock ?? {};
+    const boxesKey = sb.boxes?.toLowerCase();
+    const defaults = sb.trackDefault ?? (sb.track ?? []).map((c) => c.label);
+    for (const entry of entryPlan.entries.values()) {
+      const info = entryLayout.entries.get(entry.heading);
+      if (info === undefined || info.inline) continue;
+      const model = models.get(entry.heading);
+      info.quick = {
+        section: entry.place?.section ?? null,
+        box:
+          boxesKey === undefined ? null : (entry.single.get(boxesKey) ?? null),
+        stats: (sb.stats ?? [])
+          .filter((f) => f.key.toLowerCase() !== boxesKey)
+          .map((f) => entry.single.get(f.key.toLowerCase()) ?? null),
+        track: trackShort(model?.cells.map((c) => c.label) ?? [], defaults),
+      };
+    }
+  }
+  // US-030 AC-13: each track icon resolved once; a missing one warns once
+  // (at the first entry that draws it) and its cell is drawn empty.
+  const icons = new Map<string, string | null>();
+  let statblocksWritten = 0;
+  const statblocks =
+    models.size === 0
+      ? undefined
+      : {
+          models,
+          look: statblockLook(input.settings.entries, input.settings.colorMode),
+          icon: (path: string, line: number): string | null => {
+            const known = icons.get(path);
+            if (known !== undefined) return known;
+            const found = findImage(
+              {kind: 'image', src: `/${path}`, alt: '', title: null, line},
+              ctx,
+              resolver,
+            );
+            icons.set(path, found);
+            return found;
+          },
+          written: () => {
+            statblocksWritten += 1;
+          },
+        };
+  // US-036 AC-2, AC-6: the encounter sheet page after each entries chapter;
+  // a switched-on sheet with nothing to track warns once and is not made.
+  const sheetEntries = input.settings.entries;
+  const sheetOn =
+    sheetEntries?.encounterSheet === true ||
+    sheetEntries?.encounterSheetFile === true;
+  if (sheetOn && sheetSettings(sheetEntries) === null) {
+    ctx.warn(SHEET_EMPTY_WARNING.code, SHEET_EMPTY_WARNING.message, 0);
+  }
+  // The track icons, resolved once for the statblocks and both sheets (a
+  // found icon is copied with the book's assets).
+  const iconPath = (path: string): string | null => {
+    const known = icons.get(path);
+    if (known !== undefined) return known;
+    const found = findImage(
+      {kind: 'image', src: `/${path}`, alt: '', title: null, line: 0},
+      ctx,
+      resolver,
+    );
+    icons.set(path, found);
+    return found;
+  };
+  // US-036 AC-5: the A4 file's source, written and compiled by the export.
+  const sheetTyp =
+    sheetEntries?.encounterSheetFile === true
+      ? encounterSheetTyp(sheetEntries, {
+          colorMode: input.settings.colorMode,
+          icon: iconPath,
+        }).typ
+      : null;
+  if (entryLayout !== undefined && sheetEntries?.encounterSheet === true) {
+    const data = sheetData(sheetEntries, input.settings.colorMode, iconPath);
+    entryLayout.sheet =
+      data === null
+        ? null
+        : {
+            data,
+            title:
+              sheetEntries.encounterSheetText?.title ??
+              SHEET_BUILTINS.text.title,
+          };
+  }
   for (const w of arranged.warnings) ctx.warn(w.code, w.message, w.line);
   // US-018 AC-2, AC-6: page numbers after links only with the switch and the
   // folios on, so the printed number exists; the rule only with a call.
@@ -319,6 +679,13 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     input.settings.linkPageNumbers === true && folios
       ? {
           level: input.settings.linkPageLevel ?? 2,
+          // US-033 AC-8: links to entries are numbered at any level.
+          entries: new Set(
+            [...entryPlan.entries.values()].flatMap((entry) => {
+              const label = headings.byNode.get(entry.heading)?.label;
+              return label === undefined ? [] : [label];
+            }),
+          ),
           record: () => {
             pageRefCalls += 1;
           },
@@ -352,7 +719,9 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     breaks,
     book: pageLines,
     unlistNested: contents !== null,
-    fit: imageFit(input.settings, arranged),
+    fit: imageFit(input.settings, arranged, placed.bodies),
+    statblocks,
+    entryLayout,
   });
   // US-010 AC-5: characters of the source that their family lacks.
   if (resolved !== null && fontInfo !== undefined) {
@@ -421,12 +790,32 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       fonts: resolved === null ? null : emitFonts(resolved.fonts),
       callouts: calloutStylesRule(styleEntries),
       glossary: glossary.hasTerms ? GLOSSARY_HELPER : null,
+      // US-030 AC-15: the statblock helper, only when a statblock is drawn.
+      statblock:
+        statblocksWritten > 0
+          ? `${ENTRY_MARKS_DEF}\n${STATBLOCK_HELPER_DEF}`
+          : null,
+      // US-031: the entry layout, only when a chapter places an entry.
+      entries:
+        entryLayout === undefined
+          ? null
+          : [
+              entriesLayoutHelper(
+                `${input.settings.entries?.statblock?.sizes?.band ?? STATBLOCK_BUILTINS.sizes.band}pt`,
+              ),
+              // US-036 AC-6: the sheet's helpers with the page.
+              ...(entryLayout.sheet == null
+                ? []
+                : [ENTRY_MARKS_DEF, SHEET_HELPER_DEF]),
+            ].join('\n'),
       furniture: pageFurnitureRule(
         input.settings.pageFurniture,
         facingPages,
         // US-026 AC-6: the first chapter's break and the padding before the
         // back notes write the US-025 markers too.
         breaks !== undefined ||
+          // US-031 AC-5: the entry layout adds pages with the same markers.
+          entryLayout !== undefined ||
           frontMatter ||
           (book.signature > 0 && arranged.backNotes !== null),
         {
@@ -434,6 +823,8 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
           // the contents.
           parts: pageLines !== undefined,
           front: !frontMatter ? null : book.romanFrontMatter ? 'roman' : 'none',
+          // US-032 AC-8: the "(continued)" line of overflowing entries.
+          continued: entryLayout !== undefined,
         },
       ),
       // US-018 AC-3: the word follows ` (` inside a content block.
@@ -460,5 +851,7 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       typLine: e.typLine + offset,
       sourceLine: e.sourceLine,
     })),
+    ...(ctx.fixedImages.length > 0 ? {images: [...ctx.fixedImages]} : {}),
+    ...(sheetTyp === null ? {} : {sheetTyp}),
   };
 }

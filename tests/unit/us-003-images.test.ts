@@ -71,9 +71,9 @@ function typ2(md: string): string {
 
 describe('US-003 AC-1b pipe in the alt text', () => {
   it('US-003 AC-1b: uses the part before the first pipe as the caption (the title written twice)', () => {
-    expect(
-      typ2('![Limb Regeneration|Limb Regeneration ](assets/limb.png)'),
-    ).toBe(fig('assets/limb.png', 'Limb Regeneration'));
+    expect(typ2('![Moss Lantern|Moss Lantern ](assets/lantern.png)')).toBe(
+      fig('assets/lantern.png', 'Moss Lantern'),
+    );
   });
 
   it('US-003 AC-1b: reads a numeric part after the pipe as the size', () => {
@@ -282,7 +282,10 @@ describe('US-003 AC-2b the fit-image helper', () => {
         '  let m = measure(image(path))',
         '  let w = calc.min(m.width, size.width)',
         '  let h = m.height * (w / m.width)',
-        '  image(path, width: w * calc.min(1, size.height / h))',
+        // US-034 AC-2 (#132): the drawn width is computed once and recorded.
+        '  let dw = w * calc.min(1, size.height / h)',
+        '  [#metadata((file: path, widthMm: dw / 1mm)) <o2t-image>]',
+        '  image(path, width: dw)',
         '})',
       ].join('\n'),
     );

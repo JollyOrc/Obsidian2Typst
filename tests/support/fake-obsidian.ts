@@ -83,14 +83,38 @@ export class FakeEl {
   empty(): void {
     this.children = [];
   }
-  createEl(tag: string, options?: {text?: string; cls?: string}): FakeEl {
+  createEl(
+    tag: string,
+    options?: {text?: string; cls?: string; attr?: Record<string, string>},
+  ): FakeEl {
     const el = new FakeEl();
     el.tag = tag;
     el.parentElement = this;
     el.text = options?.text ?? '';
-    if (options?.cls !== undefined) el.classes.add(options.cls);
+    if (options?.cls !== undefined) {
+      for (const c of options.cls.split(' ')) if (c !== '') el.classes.add(c);
+    }
+    Object.assign(el.attrs, options?.attr ?? {});
     this.children.push(el);
     return el;
+  }
+  /** US-035: attributes set with `createEl({attr})` or `setAttr`. */
+  attrs: Record<string, string> = {};
+  setAttr(name: string, value: string): void {
+    this.attrs[name] = value;
+  }
+  /** US-035 AC-3: Obsidian's `setCssProps` (custom properties). */
+  cssProps: Record<string, string> = {};
+  setCssProps(props: Record<string, string>): void {
+    Object.assign(this.cssProps, props);
+  }
+  /** US-035 AC-6: how many listeners of `type` the element has. */
+  listenerCount(type: string): number {
+    return this.listeners.get(type)?.length ?? 0;
+  }
+  /** Every descendant, depth first (US-035). */
+  descendants(): FakeEl[] {
+    return this.children.flatMap((c) => [c, ...c.descendants()]);
   }
   createDiv(options?: {cls?: string}): FakeEl {
     return this.createEl('div', options);

@@ -142,6 +142,12 @@ const BOOK: LayoutSection = {
       desc: 'Images shrink to stay with their text; off at 100 %.',
       rows: ['Smallest image size'],
     },
+    {
+      kind: 'feature',
+      name: 'Print resolution',
+      desc: 'Warns about images below this dpi; off at 0.',
+      rows: ['Minimum print resolution'],
+    },
   ],
 };
 
@@ -157,7 +163,7 @@ export const TAB_LAYOUT: readonly LayoutSection[] = [
       {
         kind: 'feature',
         name: 'Strict mode',
-        desc: 'Any warning aborts the export.',
+        desc: 'Conversion warnings abort the export.',
         toggle: 'strictMode',
         rows: [],
       },

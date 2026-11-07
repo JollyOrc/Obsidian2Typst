@@ -14,8 +14,8 @@ describe('US-001 validity of the generated Typst', () => {
     (f) => f.endsWith('.md') && !f.includes('/'),
   );
 
-  it('US-001 AC-11: the sample vault has its two notes, Book.md and Other.md', () => {
-    expect(notes).toEqual(['Book.md', 'Other.md']);
+  it('US-001 AC-11: the sample vault has its three notes, Book.md, Menagerie.md and Other.md', () => {
+    expect(notes).toEqual(['Book.md', 'Menagerie.md', 'Other.md']);
   });
 
   for (const file of notes) {

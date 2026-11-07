@@ -105,6 +105,11 @@ export class TreeBuilder {
     return this.blocks(0, this.tokens.length, 1);
   }
 
+  /** US-030 AC-6: the inline nodes of `parseInline`'s one token, at `line`. */
+  inlineRoot(line: number): InlineNode[] {
+    return this.inline(this.tokens[0], line);
+  }
+
   private blocks(from: number, to: number, fallback: number): BlockNode[] {
     const out: BlockNode[] = [];
     let i = from;

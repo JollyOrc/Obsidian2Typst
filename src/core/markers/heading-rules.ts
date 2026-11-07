@@ -8,7 +8,8 @@
  * US-017 AC-1, US-026 AC-1: the rule a heading text maps to: a glossary
  * section, the colophon, the back notes; `none` switches it off.
  */
-export type HeadingRule = 'glossary' | 'colophon' | 'back-notes' | 'none';
+export type HeadingRule =
+  'glossary' | 'colophon' | 'back-notes' | 'entries' | 'none';
 
 /** US-017 AC-1: heading texts mapped to rules, as written in the preset. */
 export type HeadingRulesSettings = Readonly<Record<string, HeadingRule>>;
@@ -18,6 +19,8 @@ export const HEADING_RULE_NAMES: readonly HeadingRule[] = Object.freeze([
   'glossary',
   'colophon',
   'back-notes',
+  // US-031 AC-1: an entries chapter (no built-in key, G0-C1).
+  'entries',
   'none',
 ]);
 

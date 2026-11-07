@@ -82,7 +82,8 @@ furniture (scratch probe `p026/probe.test.ts`; SCAR-024):
   inside a glossary section, a callout or another part does not mark a part
   (US-017: rules are not looked at there). A value that is not a rule name now
   reads `headingRules.Impressum must be a rule name: glossary, colophon,
-  back-notes or none (line 4)`.
+  back-notes or none (line 4)` (since US-031: `… back-notes, entries or
+  none`).
 
   Changed behaviour: a note with a top-level heading `Colophon` or `Back
   notes` exports differently once this story ships (the section moves to its

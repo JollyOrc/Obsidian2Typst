@@ -1,6 +1,6 @@
 # Draft tickets — Entry layouts (epic #121)
 
-**Status:** Draft, 2026-11-05. **Not filed yet.** Amended 2026-11-05 with the G0 decisions (C1 to C14, the block contract A1 to A9) and the statblock tracks (D48 to D56: tick boxes, a state track, an encounter sheet). Each amended draft cites its decision as G0-xx or Dnn. The behaviour spec is "Bestiary Layout User Stories" (BL-C1 to BL-C15) in the private spec repository; the stories written at G1 restate it in generic terms.
+**Status:** Draft, 2026-11-05. **Not filed yet.** Amended 2026-11-05 with the G0 decisions (C1 to C14, the block contract A1 to A9) and the statblock tracks (D48 to D56: tick boxes, a state track, an encounter sheet). Each amended draft cites its decision as G0-xx or Dnn. The behaviour spec is the layout user stories (BL-C1 to BL-C15) in the private spec repository; the stories written at G1 restate it in generic terms.
 
 These drafts become `ticket` issues (form `.github/ISSUE_TEMPLATE/ticket.yml`, label `ticket` plus `US-NNN`) only after these steps, each with its gate:
 1. step 0 / G0: SCAR review (done 2026-11-05, 27 gaps; questions answered)

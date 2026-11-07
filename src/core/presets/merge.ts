@@ -2,7 +2,12 @@
 // `convert`. Pure core: no Obsidian, Node, or I/O imports.
 import {DEFAULT_COVER, type CoverSettings} from '../cover/types';
 import {mergeFonts, type FontsSettings} from '../fonts/types';
-import type {CalloutsSettings, HeadingRulesSettings} from '../markers';
+import type {
+  CalloutsSettings,
+  ColorMode,
+  EntriesSettings,
+  HeadingRulesSettings,
+} from '../markers';
 import {
   BREAK_LEVELS,
   DEFAULT_BOOK,
@@ -170,6 +175,9 @@ export function resolveFields(
       preset.images?.[key] ?? defaults.images?.[key] ?? DEFAULT_IMAGES[key],
     ]),
   ) as unknown as ImagesSettings;
+  // US-034 AC-1: passed on only when set (the built-in is read where used).
+  const minDpi = preset.images?.minDpi ?? defaults.images?.minDpi;
+  if (minDpi !== undefined) images.minDpi = minDpi;
   overlayPage(page, defaults.page);
   overlayPage(page, preset.page);
   return {
@@ -235,6 +243,9 @@ export interface EffectiveSettings {
   callouts: CalloutsSettings;
   /** US-017 AC-1: from the preset note only; the Defaults have none. */
   headingRules: HeadingRulesSettings;
+  /** US-030 AC-8: from the preset note only (G0-C9); absent when unset. */
+  entries?: EntriesSettings;
+  colorMode?: ColorMode;
 }
 
 export type EffectiveResult =
@@ -296,6 +307,14 @@ export function effectiveSettings(
       fonts: mergeFonts(preset.fields.fonts, defaults.fonts),
       callouts: preset.fields.callouts ?? {},
       headingRules: preset.fields.headingRules ?? {},
+      // US-030 AC-8: only when the note sets them, so a preset without them
+      // gives the settings it gave before.
+      ...(preset.fields.entries === undefined
+        ? {}
+        : {entries: preset.fields.entries}),
+      ...(preset.fields.colorMode === undefined
+        ? {}
+        : {colorMode: preset.fields.colorMode}),
     },
     template: path === null ? null : {path, exists},
   };

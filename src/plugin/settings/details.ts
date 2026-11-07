@@ -164,8 +164,67 @@ export function detailRows(fields: unknown, defaults: unknown): DetailRow[] {
     summaryRow('Callout styles', callouts, '—'),
     summaryRow('Heading rules', rules, pairs(BUILTIN_HEADING_RULES)),
     summaryRow('Contents place', place, 'default'),
+    ...entryRows(own),
   );
   return rows;
+}
+
+/** US-030 AC-9: the `entries.*` fields in the order of the story's table. */
+const ENTRY_ROW_PATHS: readonly (readonly string[])[] = [
+  ...[
+    'stats',
+    'traits',
+    'boxes',
+    'track',
+    'trackKey',
+    'trackLabel',
+    'trackDefault',
+    'sum',
+    'fill',
+    'frame',
+    'rules',
+    'boxFill',
+    'fonts',
+    'sizes',
+  ].map((key) => ['entries', 'statblock', key]),
+  ['entries', 'tagLabels'],
+  // US-034 AC-5: the word-gap settings (shown when the preset sets them).
+  ['entries', 'narrowJustification'],
+  ['entries', 'maxWordGap'],
+  // US-036 AC-1: the encounter sheet.
+  ['entries', 'encounterSheet'],
+  ['entries', 'encounterSheetFile'],
+  ['entries', 'encounterSheetBoxes'],
+  ['entries', 'encounterSheetText'],
+  ['colorMode'],
+];
+
+/** US-030 AC-9: a set value as one line (`might: Might, wits: Wits`). */
+function entryText(value: unknown): string {
+  if (Array.isArray(value)) return value.map(entryText).join(', ');
+  if (typeof value === 'object' && value !== null) {
+    const parts = Object.entries(value).map(
+      ([key, item]) =>
+        `${key}: ${Array.isArray(item) ? `[${entryText(item)}]` : entryText(item)}`,
+    );
+    return parts.length === 0 ? '' : parts.join(', ');
+  }
+  return String(value);
+}
+
+/**
+ * US-030 | AC-9 (G0-C9): one row per `entries.*` field and `colorMode` the
+ * preset note sets, labelled with its path, in the order of the table, with
+ * the source `preset` (the fields exist in preset notes only); nothing when
+ * the note sets none of them.
+ */
+function entryRows(own: PresetFields): DetailRow[] {
+  return ENTRY_ROW_PATHS.flatMap((path): DetailRow[] => {
+    const value = valueAt(own, path);
+    if (value === undefined || value === null) return [];
+    const shown = entryText(value);
+    return [{label: path.join('.'), own: shown, used: shown, source: 'preset'}];
+  });
 }
 
 /**

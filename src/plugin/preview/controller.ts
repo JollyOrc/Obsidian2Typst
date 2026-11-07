@@ -2,8 +2,20 @@
 // which note is shown, when a compile starts, which result is shown, and who has
 // priority; it draws nothing and imports nothing from Obsidian. Timers, the
 // preparation and the compile are injected.
+import {imageFacts, lowDpiWarnings} from '../../core/checks/print';
 import type {CompileRequest} from '../../core/compile';
 import {fitDecisionWarnings} from '../../core/emit';
+import {
+  entryLayoutWarnings,
+  sectionWarnings,
+  sheetWarnings,
+  type EntryEndFact,
+  type EntryPlaceFact,
+  type SectionFact,
+  type SheetFact,
+} from '../../core/entries/report';
+import {MIN_DPI_BUILTIN} from '../../core/layout/page-setup';
+import {ENTRY_BUILTINS} from '../../core/markers';
 import {aspectOf} from '../../core/preview/canvas';
 import {
   RANGE_MESSAGE,
@@ -12,6 +24,7 @@ import {
   type PageRange,
 } from '../../core/preview/range';
 import type {StatusState} from '../../core/preview/status';
+import type {PreviewChecks} from './request';
 
 /** US-012 AC-5: the delay after the last style change. */
 export const PREVIEW_DELAY_MS = 500;
@@ -31,6 +44,14 @@ export type PreviewCompile =
       fitDecisions?: unknown[];
       /** US-028 AC-14: false when Typst's layout did not settle. */
       settled?: boolean;
+      /** US-032 AC-10: the entries' facts of this compile, if any. */
+      entryPlaces?: unknown[];
+      entryEnds?: unknown[];
+      entrySections?: unknown[];
+      /** US-034 AC-2: the block images' drawn widths of this compile. */
+      images?: unknown[];
+      /** US-036 AC-3: the encounter sheets' facts of this compile. */
+      sheets?: unknown[];
     }
   | {ok: false; error: string};
 
@@ -42,7 +63,11 @@ export interface CompileJob {
 
 /** What the preparation gives: the request and the warning count, or a message. */
 export type PreparedPreview =
-  | {ok: true; request: CompileRequest; warnings: number}
+  | ({
+      ok: true;
+      request: CompileRequest;
+      warnings: number;
+    } & Partial<PreviewChecks>)
   | {ok: false; error: string};
 
 export interface PreviewDeps {
@@ -226,7 +251,26 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
       warnings:
         prepared.warnings +
         fitDecisionWarnings(result.fitDecisions ?? []).length +
-        (result.settled === false ? 1 : 0),
+        (result.settled === false ? 1 : 0) +
+        // US-032 AC-10: the entries' layout warnings of this compile.
+        entryLayoutWarnings(
+          (result.entryPlaces ?? []) as EntryPlaceFact[],
+          (result.entryEnds ?? []) as EntryEndFact[],
+          {emptyWarn: prepared.emptyWarn ?? ENTRY_BUILTINS.emptyWarn},
+        ).length +
+        sectionWarnings(
+          (result.entrySections ?? []) as SectionFact[],
+          (result.entryPlaces ?? []) as EntryPlaceFact[],
+          (result.entryEnds ?? []) as EntryEndFact[],
+        ).length +
+        // US-034 AC-4: images below the print resolution, as in the export.
+        lowDpiWarnings(
+          [...(prepared.fixedImages ?? []), ...imageFacts(result.images ?? [])],
+          prepared.pixelWidths ?? {},
+          prepared.minDpi ?? MIN_DPI_BUILTIN,
+        ).length +
+        // US-036 AC-3 (decision 2): boxes under 2.0 mm on the sheet page.
+        sheetWarnings((result.sheets ?? []) as SheetFact[]).length,
       ...applyRange(),
     });
   };

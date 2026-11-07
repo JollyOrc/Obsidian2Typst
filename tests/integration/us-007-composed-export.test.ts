@@ -75,6 +75,10 @@ const PRESET = [
   '  folder: "Layouting/Fonts"',
   '  heading:',
   `    family: "${VAULT_FAMILY}"`,
+  // US-034 AC-1 (#132): the fixture's images are tiny on purpose; the print
+  // resolution check (built-in 300 dpi) has its own tests.
+  'images:',
+  '  minDpi: 0',
   '---',
   '',
 ].join('\n');

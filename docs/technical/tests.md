@@ -69,7 +69,7 @@ fixture. No test reads the author's private vault.
 These cover what only a real Obsidian can show. The automated plugin tests use
 fakes and do not replace them.
 
-Procedures that need more than a few steps are manual checks, one file per check in [manual-checks/](manual-checks/) (`M01.md` to `M18.md`), listed with what each covers in the index [manual-checks.md](manual-checks.md) (split 2026-10-29, SCAR-029).
+Procedures that need more than a few steps are manual checks, one file per check in [manual-checks/](manual-checks/) (`M01.md` to `M24.md`), listed with what each covers in the index [manual-checks.md](manual-checks.md) (split 2026-10-29, SCAR-029).
 
 ### §1 — Clickable warning line (US-006 AC-2b)
 
@@ -428,6 +428,114 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-10 | TICKET-074 | tests/tooling/us-024-public.test.ts | ✅ green (TICKET-074, 2026-10-27) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-11 | TICKET-074 | tests/tooling/us-024-public.test.ts, manual (ticket procedure) | ✅ green (TICKET-074, 2026-10-27); the clean-copy gate green (1822 passed, 4 skipped, 1 todo; 389 passed, 1 skipped) |
 | [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-12 | TICKET-072 | manual (ticket procedure) | ✅ done (TICKET-072, 2026-10-27; scan results in the ticket) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-13 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122; the preset check since #126 added the `entries` heading rule) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-14 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-15 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-16 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) — the local-list check ran with a 205-word list built from the vault's note names; it skips without the git-ignored list |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-17 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-18 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) (with AC-16's local-list check) |
+| [US-024](../user-stories/US-024-synthetic-public-fixture.md) | AC-19 | #122 | tests/tooling/us-024-entries.test.ts | 🟢 green (G4 2026-11-06, #122) — `Book.md`, `Other.md`, `presets/Sample.md` byte for byte unchanged |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-1 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-2 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-3 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-4 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-5 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-6 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-7 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) — only the missing image here; the credit is read by US-031's caption tests |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-8 | #124 | tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #124) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-9 | #124 | tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #124) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-10 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-11 | #125 | tests/unit/us-030-statblock.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-12 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-13 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-14 | #125 | tests/unit/us-030-statblock.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-15 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-16 | #125 | tests/unit/us-030-statblock.test.ts, tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-17 | #125 | tests/integration/us-030-statblock-pdf.test.ts | 🟢 green (G4 2026-11-06, #125) — the hanging indent of long attack names is not asserted (manual check at 100 %) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-18 | #125 | tests/unit/us-030-statblock.test.ts | 🟢 green (G4 2026-11-06, #125) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-19 | #123, #125 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123 and #125; all 14 codes in warning-codes.md). Strict mode (decision 4 revised 2026-11-06): the entry codes abort like every code, covered by US-006 AC-4's test over `warning-codes.md` |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-20 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-21 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-22 | #123 | tests/unit/us-030-entry-block.test.ts | 🟢 green (G4 2026-11-06, #123) |
+| [US-030](../user-stories/US-030-entry-data-and-statblock.md) | AC-23 | #125 | tests/integration/us-030-statblock-pdf.test.ts, tests/unit/us-030-entry-settings.test.ts | 🟢 green (G4 2026-11-06, #125) — inline notes; the run on the generated fixture follows when the generator exists (US-024 AC-13) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-1 | #126 | tests/unit/us-031-layouts.test.ts | 🟢 green (G4 2026-11-06, #126) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-2 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #126 and #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-3 | #126, #127, #128 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #126 to #128; the interim test retitled to US-032 AC-2) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-4 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-5 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-6 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-7 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-8 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-9 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-10 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-11 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-12 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-13 | #126 | tests/unit/us-031-layouts.test.ts | 🟢 green (G4 2026-11-06, #126) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-14 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-15 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-16 | #127 | tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) — US-027 depth and a cover before the chapter are covered with US-033's tests |
+| [US-031](../user-stories/US-031-entry-layouts-on-facing-pages.md) | AC-17 | #126, #127 | tests/unit/us-031-layouts.test.ts, tests/integration/us-031-layouts-pdf.test.ts | 🟢 green (G4 2026-11-06, #127) — the story's test list; image ratios 1:4 to 4:1, runs of 1 to 4 pairs partly (1 and 2) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-1 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-2 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-3 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) — the choice is per entry (AC-2's table); an unpaired result left alone is checked with US-033's sections |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-4 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-5 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-6 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-7 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-8 | #128 | tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-9 | #128 | tests/unit/us-032-fit.test.ts | 🟢 green (G4 2026-11-06, #128) — from the facts; the real right-page fill of a spread is measured with the fixture |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-10 | #128 | tests/unit/us-032-fit.test.ts, tests/plugin/us-032-entry-report-export.test.ts (added at G4), tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-11 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) — the opener after an overflow goes with US-033's tests |
+| [US-032](../user-stories/US-032-entry-fit-overflow-and-auto-layout.md) | AC-12 | #128 | tests/unit/us-032-fit.test.ts, tests/integration/us-032-fit-pdf.test.ts | 🟢 green (G4 2026-11-06, #128) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-1 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-2 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-3 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-4 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-5 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-6 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-7 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-8 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-9 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #130) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-10 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #130) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-11 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #130) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-12 | #130 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #130) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-13 | #129 | tests/unit/us-033-openers.test.ts | 🟢 green (G4 2026-11-06, #129) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-14 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129 and #130) — a TOC before the chapter and the glossary after are not yet tested |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-15 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129 and #130) — intros of 0.3 and 1.0 pages and linkPageLevel 2 and 6 not yet |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-1 | #132 | tests/unit/us-034-print-checks.test.ts, tests/plugin/us-034-print-export.test.ts, tests/plugin/us-029-layout.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-2 | #132 | tests/unit/us-034-print-checks.test.ts, tests/integration/us-034-print-pdf.test.ts, tests/integration/us-034-fixed-images-pdf.test.ts, tests/plugin/us-034-print-export.test.ts | 🟢 green (G4 2026-11-07) — the G2 "inline image" input repaired (SCAR-023): an image in text is a block |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-3 | #132 | tests/unit/us-034-print-checks.test.ts, tests/plugin/us-034-print-export.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-4 | #132 | tests/plugin/us-034-print-export.test.ts | 🟢 green (G4 2026-11-07) — export never stops in strict mode; the preview counts it (pixel widths before its smaller copies) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-5 | #133 | tests/unit/us-034-print-checks.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-6 | #133 | tests/integration/us-034-print-pdf.test.ts, tests/integration/us-034-gap-fixture-pdf.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-7 | #133 | tests/integration/us-034-print-pdf.test.ts, tests/plugin/us-034-print-export.test.ts | 🟢 green (G4 2026-11-07) — the G2 "Go to" input repaired (SCAR-023): a 60 mm column, the whole line quoted |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-8 | #133 | tests/unit/us-034-print-checks.test.ts, tests/plugin/us-034-print-export.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-9 | #131 | tests/unit/us-034-print-checks.test.ts, tests/unit/us-034-pdf-reader.test.ts; guard: every test reading PDFs through tests/support/pdf.ts | 🟢 green (G4 2026-11-07) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-10 | #133 | tests/integration/us-034-print-pdf.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-11 | #133 | tests/integration/us-034-print-pdf.test.ts, tests/plugin/us-034-print-export.test.ts | 🟢 green (G4 2026-11-07) — in the worker, no compiler init |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-12 | #133 | tests/integration/us-034-print-pdf.test.ts | 🟢 green (G4 2026-11-07) — full-width text tested; callouts, tables (cells 10 pt apart, measured), footnotes and floats not tested |
+| [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-13 | #133 | tests/unit/us-034-print-checks.test.ts, tests/integration/us-034-print-pdf.test.ts, tests/integration/us-034-gap-fixture-pdf.test.ts | 🟢 green (G4 2026-11-07) — the fixture's gap paragraph guarded (with a justifying template) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-1 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts, tests/plugin/us-035-preview-cases.test.ts | 🟢 green (G4 2026-11-07, #134) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-2 | #125, #134 | tests/unit/us-035-model.test.ts, tests/integration/us-035-model-vs-pdf.test.ts, tests/plugin/us-035-preview-cases.test.ts | 🟢 green (G4 2026-11-07, #134) — the preview draws the model's parts in order |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-3 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts, tests/plugin/us-035-preview-cases.test.ts | 🟢 green (G4 2026-11-07, #134) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-4 | #125, #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts | 🟢 green (G4 2026-11-07, #134) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-5 | #134 | tests/plugin/us-035-preview.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-6 | #134 | tests/plugin/us-035-preview.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-7 | #134 | tests/plugin/us-035-preview.test.ts | 🟢 green (G4 2026-11-07) — the live-preview rebuild after a preset change: manual check (not measured, #137) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-8 | #134 | tests/plugin/us-035-preview.test.ts | 🟢 green (G4 2026-11-07) — the real time: manual check (#137) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-9 | #134 | tests/plugin/us-035-preview.test.ts, tests/plugin/us-035-preview-cases.test.ts | 🟢 green (G4 2026-11-07) |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-10 | #134 | tests/unit/us-035-model.test.ts, tests/plugin/us-035-preview.test.ts, tests/integration/us-035-model-vs-pdf.test.ts, tests/plugin/us-035-preview-cases.test.ts | 🟢 green (G4 2026-11-07) — the M-file is #137's |
+| [US-035](../user-stories/US-035-entry-block-preview-in-obsidian.md) | AC-11 | #134 | tests/plugin/us-035-preview.test.ts | 🟢 green (G4 2026-11-07) — a call from a Dataview script: manual check (not measured, #137); contract in docs/technical/entry-block.md |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-1 | #135 | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts | 🟢 green (G4 2026-11-07, #135) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-2 | #135 | tests/unit/us-036-sheet.test.ts | 🟢 green (G4 2026-11-07, #135) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-3 | #135 | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts, tests/integration/us-036-sheet-book-pdf.test.ts | 🟢 green (G4 2026-11-07, #135) — the small-boxes case measured on a 40 mm area (the AC example corrected) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-4 | #135 | tests/integration/us-036-sheet-pdf.test.ts | 🟢 green (G4 2026-11-07, #135) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-5 | #135, #136 | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts, tests/plugin/us-036-export-sheet.test.ts (G2 addendum, #136), tests/integration/us-036-sheet-compile.test.ts | 🟢 green (G4 2026-11-07, #135, #136) — the A4 compile measured at 216 ms; the manual export into a scratch folder is #137's |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-6 | #135 | tests/integration/us-036-sheet-pdf.test.ts, tests/integration/us-036-sheet-book-pdf.test.ts | 🟢 green (G4 2026-11-07, #135) — two across in a wide text area |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-7 | #135 | tests/integration/us-036-sheet-pdf.test.ts | 🟢 green (G4 2026-11-07, #135) |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-8 | #135 | tests/integration/us-036-sheet-pdf.test.ts, tests/integration/us-036-sheet-book-pdf.test.ts | 🟢 green (G4 2026-11-07, #135) — A4 16, A5 5, measured |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-9 | #135 | tests/integration/us-036-sheet-pdf.test.ts, tests/integration/us-036-sheet-book-pdf.test.ts | 🟢 green (G4 2026-11-07, #135) — facing pages off and two chapters tested; a 7-cell track not tested |
+| [US-036](../user-stories/US-036-encounter-sheet.md) | AC-10 | #135 | tests/unit/us-036-sheet.test.ts, tests/integration/us-036-sheet-pdf.test.ts, tests/integration/us-036-sheet-book-pdf.test.ts | 🟢 green (G4 2026-11-07, #135) — the print check at 100 % is a manual check (#137) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-1 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-1: (the field: six keys, four values, messages with lines, unknown keys, the Defaults, merge key by key) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-2 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts, tests/integration/us-025-page-breaks-pdf.test.ts | US-025 AC-2: (the three lines per side, facing pages off; the four page rows (the third re-measured at G2); guard: none = today) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-3 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-3: (no break for terms, in-term headings, callout, quote, list item, empty headings; the glossary heading breaks) | ✅ green (TICKET-075, 2026-10-28) |
