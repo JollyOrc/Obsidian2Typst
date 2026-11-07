@@ -102,6 +102,40 @@ function fillsOf(body: string): string[] {
   );
 }
 
+/** The `[start, end)` ranges of the `/Header` artifacts of a content stream. */
+function headerParts(stream: string): [number, number][] {
+  const out: [number, number][] = [];
+  let from = stream.indexOf('/Subtype /Header');
+  while (from >= 0) {
+    const start = stream.lastIndexOf('/Artifact', from);
+    const end = artifactEnd(stream, from);
+    if (end < 0) {
+      out.push([start, stream.length]);
+      break;
+    }
+    out.push([start, end]);
+    from = stream.indexOf('/Subtype /Header', end);
+  }
+  return out;
+}
+
+/**
+ * The index just after the `EMC` that closes the marked-content sequence
+ * whose `BDC` follows `from`; -1 when it is not closed.
+ */
+function artifactEnd(stream: string, from: number): number {
+  const open = stream.indexOf('BDC', from);
+  if (open < 0) return -1;
+  const ops = /\b(BDC|BMC|EMC)\b/g;
+  ops.lastIndex = open + 3;
+  let depth = 1;
+  for (let m = ops.exec(stream); m !== null; m = ops.exec(stream)) {
+    depth += m[1] === 'EMC' ? -1 : 1;
+    if (depth === 0) return m.index + 3;
+  }
+  return -1;
+}
+
 /** The text between `n 0 obj` and `endobj`, stream included (latin1). */
 function objectText(pdf: string, n: number): string {
   const start = pdf.search(new RegExp(`(?:^|\\s)${n} 0 obj`));
@@ -388,15 +422,22 @@ export function readPdfPages(bytes: Uint8Array): PdfPage[] {
     const at = stream.indexOf('/Subtype /Footer');
     const upper = at < 0 ? stream : stream.slice(0, at);
     const footer = at < 0 ? '' : stream.slice(at);
-    // US-019: the header artifact runs to the first tagged body span.
-    const top = upper.indexOf('/Subtype /Header');
-    const headerEnd = top < 0 ? -1 : upper.indexOf('/Span <<', top);
-    const headerPart =
-      top < 0 ? '' : upper.slice(top, headerEnd < 0 ? undefined : headerEnd);
-    const body =
-      top < 0
-        ? upper
-        : upper.slice(0, top) + (headerEnd < 0 ? '' : upper.slice(headerEnd));
+    // US-019: the header is every `/Header` artifact (Typst writes one per
+    // styled run), each from its `BDC` to the `EMC` that closes it; the rest
+    // is the body. US-033 AC-11 (G4 #130): measured up to the first tagged
+    // span before, which also took a table's repeated header row (an
+    // untagged `/Artifact` standing between them) for the running header.
+    const parts = headerParts(upper);
+    const headerPart = parts
+      .map(([from, to]) => upper.slice(from, to))
+      .join(' ');
+    let body = '';
+    let next = 0;
+    for (const [from, to] of parts) {
+      body += upper.slice(next, from);
+      next = to;
+    }
+    body += upper.slice(next);
     const text = textOf(body, fonts);
     const names = baseFonts(pdf, dict);
     const head = firstFont(headerPart, names);

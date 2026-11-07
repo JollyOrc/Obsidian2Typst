@@ -242,7 +242,7 @@ export function entriesLayoutHelper(bandSize: string): string {
   let s = query(selector(<o2t-section-start>).before(here())).last()
   [#metadata((section: s.value.name, first: s.value.first, page: s.location().page(), introEnd: here().page())) <o2t-section>]
 }
-#let o2t-entries(es, next-opener: false, closes: false, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70) = context {
+#let o2t-entries(es, next-opener: false, next-left: false, closes: false, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70) = context {
   let lh = measure([A \\ A]).height - measure([A]).height
   let body(e) = e.blocks.join(parbreak())
   let whole(e) = { e.head; parbreak(); body(e) }
@@ -377,7 +377,8 @@ export function entriesLayoutHelper(bandSize: string): string {
   // takes the facing right page; else that page stays blank (US-031 AC-10).
   // With an opener next, its own break follows the content, so a page it
   // adds lies between its markers (US-025's o2t-blank, AC-3's blank page).
-  if facing and last-left { if next-opener { pagebreak() } else { o2t-even() } }
-  else if not next-opener { pagebreak(weak: true) }
+  // US-033 AC-9: the quick reference after the run opens its own left page.
+  if facing and last-left { if next-opener and not next-left { pagebreak() } else { o2t-even() } }
+  else if not next-opener and not next-left { pagebreak(weak: true) }
 }`;
 }

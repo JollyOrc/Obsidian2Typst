@@ -102,6 +102,10 @@ export interface EntryLayoutInfo {
   reason: string | null;
   /** US-033 AC-1: the section this entry is the first entry of, or null. */
   opensSection: string | null;
+  /** US-033 AC-9: the entries chapter's heading; null outside chapters. */
+  chapter: BlockNode | null;
+  /** US-033 AC-9 to AC-11: the entry's row of the quick reference. */
+  quick: QuickRow | null;
   /** US-032 AC-2: the layout is chosen in the compile (`auto` or replaced). */
   auto: boolean;
   /** The block's line (the warnings made from the facts). */
@@ -133,6 +137,28 @@ export interface EntryLayoutEnv {
   sections: ReadonlySet<BlockNode>;
   /** US-033 AC-6: `toc.depth` when a contents is written, else 0. */
   tocDepth: number;
+  /** US-033 AC-9, AC-12: the quick reference; null when it is off. */
+  quick: QuickReference | null;
+}
+
+/** US-033 AC-9: the columns of the quick reference. */
+export interface QuickReference {
+  /** The heading text (built-in `Quick Reference`); '' → no heading. */
+  title: string;
+  /** The box column's label (the stats label, else the key); null without boxes. */
+  boxLabel: string | null;
+  statLabels: string[];
+  /** A Track column (`entries.statblock.track` set). */
+  track: boolean;
+}
+
+/** US-033 AC-9, AC-10: one entry's row (values as written; null → —). */
+export interface QuickRow {
+  section: string | null;
+  box: string | null;
+  stats: (string | null)[];
+  /** AC-10: '' for the default, `+ …`, `− …`, `none` or the cells. */
+  track: string;
 }
 
 /** US-031 AC-12: lists of up to this many items are never broken (D26). */
@@ -168,7 +194,7 @@ function keptList(items: readonly string[]): string {
 function entriesCall(
   run: readonly {info: EntryLayoutInfo; head: string; body: string[]}[],
   layout: EntryLayoutEnv,
-  then: {opener: boolean; closes: boolean},
+  then: {opener: boolean; left: boolean; closes: boolean},
 ): string {
   const content = (text: string): string =>
     text === '' ? '[]' : `[\n${indent(text, 4)}\n  ]`;
@@ -198,7 +224,7 @@ function entriesCall(
   });
   // US-033 AC-1, AC-4: the end of the section's intro, before its entries.
   const intro = run[0]?.info.opensSection != null ? '#o2t-section-end()\n' : '';
-  return `${intro}#o2t-entries((\n${entries.join('\n')}\n), next-opener: ${then.opener}, closes: ${then.closes}, tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, top: ${layout.marginTop}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader}, min-scale: ${layout.minScale})`;
+  return `${intro}#o2t-entries((\n${entries.join('\n')}\n), next-opener: ${then.opener}, next-left: ${then.left}, closes: ${then.closes}, tw: ${layout.textWidth}mm, th: ${layout.textHeight}mm, top: ${layout.marginTop}mm, facing: ${layout.facingPages}, full-header: ${layout.fullImageHeader}, min-scale: ${layout.minScale})`;
 }
 
 /** US-030 AC-10, AC-16: what the emitter needs to write statblocks. */
@@ -613,6 +639,7 @@ function entryRuns(
     // US-033 AC-3: a section opener after the run reuses a free right page;
     // AC-7: the run that ends the chapter closes its pages.
     const next = blocks[i];
+    const closes = chapterEndsAt(blocks, i, layout);
     at.set(
       start,
       entriesCall(run, layout, {
@@ -620,7 +647,9 @@ function entryRuns(
         opener:
           next !== undefined &&
           (layout.sections.has(next) || layout.chapters.has(next)),
-        closes: chapterEndsAt(blocks, i, layout),
+        // US-033 AC-9: the quick reference after the chapter's last run.
+        left: closes && layout.quick !== null,
+        closes,
       }),
     );
   }
@@ -660,36 +689,126 @@ function openerLines(
   blocks: readonly BlockNode[],
   env: BlockEnv,
   runs: {at: Map<number, string>; covered: Set<number>},
+  quick: (chapter: BlockNode) => string,
 ): {before: Map<number, string>; end: string | null} {
   const before = new Map<number, string>();
   let end: string | null = null;
   const layout = env.entryLayout;
   if (layout === undefined) return {before, end};
   const open = breakLines('right', layout.facingPages) ?? '';
-  let chapter: {depth: number; firstSection: boolean} | null = null;
-  const close = (k: number): void => {
-    // A run that ends the chapter writes its own end marker.
-    if (runs.covered.has(k - 1)) return;
-    if (k >= blocks.length) end = CHAPTER_END_LINE;
-    else before.set(k, CHAPTER_END_LINE);
+  let chapter: {depth: number; firstSection: boolean; node: BlockNode} | null =
+    null;
+  const close = (k: number, node: BlockNode): void => {
+    // A run that ends the chapter writes its own end marker; US-033 AC-9:
+    // the quick reference follows it.
+    const lines = [
+      ...(runs.covered.has(k - 1) ? [] : [CHAPTER_END_LINE]),
+      quick(node),
+    ].filter((line) => line !== '');
+    if (lines.length === 0) return;
+    if (k >= blocks.length) end = lines.join('\n');
+    else add(k, lines.join('\n'));
+  };
+  // Lines meeting at one block (a chapter's end, the next chapter's opener)
+  // are kept in that order.
+  const add = (k: number, lines: string): void => {
+    const known = before.get(k);
+    before.set(k, known === undefined ? lines : `${known}\n${lines}`);
   };
   blocks.forEach((block, k) => {
     if (block.kind !== 'heading') return;
     if (chapter !== null && block.depth <= chapter.depth) {
-      close(k);
+      close(k, chapter.node);
       chapter = null;
     }
     if (layout.chapters.has(block)) {
-      chapter = {depth: block.depth, firstSection: true};
-      before.set(k, `${open}\n${CHAPTER_START_LINE}`);
+      chapter = {depth: block.depth, firstSection: true, node: block};
+      add(k, `${open}\n${CHAPTER_START_LINE}`);
     } else if (layout.sections.has(block) && chapter !== null) {
       const marker = `#metadata((name: ${typstString(headingText(block))}, first: ${chapter.firstSection})) <${SECTION_START_LABEL}>`;
-      before.set(k, chapter.firstSection ? marker : `${open}\n${marker}`);
+      add(k, chapter.firstSection ? marker : `${open}\n${marker}`);
       chapter.firstSection = false;
     }
   });
-  if (chapter !== null) close(blocks.length);
+  const last = chapter as {node: BlockNode} | null;
+  if (last !== null) close(blocks.length, last.node);
   return {before, end};
+}
+
+/**
+ * US-033 | AC-9 to AC-12: the quick reference of one entries chapter, or ''
+ * when it is off or the chapter has no entry: a new left page (US-025's
+ * `breakLines`), the heading at the chapter's section level (in the
+ * contents; none for an empty title), and a table with a repeated header
+ * row — Entry, Section, the box key's label, the stats, Track, Page — one
+ * row per entry in the note's order, nested entries left out and a repeated
+ * heading once; a missing value is `—`; the page is the entry's first page.
+ */
+function quickReferenceText(
+  chapter: BlockNode,
+  env: BlockEnv,
+  content: (value: string) => string,
+): string {
+  const layout = env.entryLayout;
+  const quick = layout?.quick ?? null;
+  if (layout === undefined || quick === null || chapter.kind !== 'heading')
+    return '';
+  const seen = new Set<string>();
+  const rows: {info: EntryLayoutInfo; row: QuickRow; label: string}[] = [];
+  for (const [node, info] of layout.entries) {
+    if (info.chapter !== chapter || info.inline || info.quick === null)
+      continue;
+    if (seen.has(info.text)) continue;
+    seen.add(info.text);
+    const label = env.headings.byNode.get(
+      node as Extract<BlockNode, {kind: 'heading'}>,
+    )?.label;
+    if (label === undefined) continue;
+    rows.push({info, row: info.quick, label});
+  }
+  if (rows.length === 0) return '';
+  const plain = (text: string): string =>
+    `[${escapeMarkup(text, {atBlockStart: true})}]`;
+  const cell = (value: string | null): string =>
+    value === null ? '[—]' : `[${content(value)}]`;
+  const head = [
+    'Entry',
+    'Section',
+    ...(quick.boxLabel === null ? [] : [quick.boxLabel]),
+    ...quick.statLabels,
+    ...(quick.track ? ['Track'] : []),
+    'Page',
+  ];
+  const body = rows.map(({info, row, label}) =>
+    [
+      plain(info.text),
+      row.section === null ? '[—]' : plain(row.section),
+      ...(quick.boxLabel === null ? [] : [cell(row.box)]),
+      ...row.stats.map(cell),
+      ...(quick.track ? [plain(row.track)] : []),
+      `context numbering("1", ..counter(page).at(<${label}>))`,
+    ].join(', '),
+  );
+  const heading =
+    quick.title === ''
+      ? []
+      : [
+          `${'='.repeat(chapter.depth + 1)} ${escapeMarkup(quick.title, {atBlockStart: false})}`,
+        ];
+  return [
+    breakLines('left', layout.facingPages) ?? '',
+    ...heading,
+    // Set a little smaller, as reference tables are, so the columns fit.
+    '#block[',
+    '#set text(size: 0.85em)',
+    `#table(columns: ${head.length}, align: left,`,
+    `  table.header(repeat: true, ${head.map((h) => `[*${escapeMarkup(h, {atBlockStart: true})}*]`).join(', ')}),`,
+    ...body.map((r) => `  ${r},`),
+    ')',
+    ']',
+  ]
+    .filter((line) => line !== '')
+    .join('\n');
 }
 
 const CHAPTER_START_LINE = '#metadata(none) <o2t-chapter-start>';
@@ -1057,7 +1176,15 @@ function renderPieces(
   });
   // US-033 AC-1 to AC-3, AC-7: the openers of the entries chapters.
   if (!nested && outer.where === 'body' && outer.entryHeading === null) {
-    const openers = openerLines(blocks, outer, runs);
+    const openers = openerLines(blocks, outer, runs, (chapter) =>
+      quickReferenceText(chapter, outer, (value) =>
+        emitInline(flattenLinks(parseInline(value, 0)), ctx, {
+          ...inlineOf(outer),
+          atBlockStart: true,
+          breaks: 'space',
+        }),
+      ),
+    );
     pieces.forEach((piece, i) => {
       const lines = openers.before.get(i);
       if (lines === undefined) return;

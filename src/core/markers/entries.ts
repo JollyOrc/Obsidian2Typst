@@ -271,6 +271,8 @@ export type EntryLayout = (typeof ENTRY_LAYOUTS)[number] | 'auto';
 export interface EntryPlace {
   /** The entries chapter's heading text; null outside every chapter (AC-2). */
   chapter: string | null;
+  /** US-033 AC-9: the chapter's heading node; null outside. */
+  chapterHeading?: BlockNode | null;
   /** The section heading (a non-entry heading holding entries) or null. */
   section: string | null;
   /** An entry inside another entry (AC-1, decision 3): inline, no page. */
@@ -639,6 +641,7 @@ export function placeEntries(
     if (section !== null) sections.add(section.node);
     entry.place = {
       chapter: chapter.text,
+      chapterHeading: chapter.node,
       section: open.length === 0 ? (headingsAbove.at(-1)?.text ?? null) : null,
       nested: open.length > 0,
       layout: 'auto',

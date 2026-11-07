@@ -439,6 +439,9 @@ describe('US-019 AC-11 the sample note', () => {
     const headers = new Set(
       pages.map((p) => p.header.replace(/\s+/g, ' ').trim()).filter((h) => h),
     );
-    expect(headers.size).toBeGreaterThan(30);
+    // 27 distinct ## titles, measured 2026-11-06 (G4 #130) once the reader
+    // stopped taking body artifacts for the header ("Cras Ac posuere velit
+    // non" was "Cras Ac" plus body text); the old reader counted 32.
+    expect(headers.size).toBeGreaterThanOrEqual(27);
   }, 180_000);
 });

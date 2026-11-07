@@ -196,6 +196,30 @@ function imageFit(
   };
 }
 
+/**
+ * US-033 | AC-10: the Track column: '' for the default cells, `+ <cell>` for
+ * the default plus one cell, `− <cell>` for the default less one, `none` for
+ * no cells, else the cells (labels compared without case). Read from the
+ * story's table: its "any other set" example (Fine, Gone) is the default
+ * less two cells and is listed.
+ */
+function trackShort(
+  cells: readonly string[],
+  defaults: readonly string[],
+): string {
+  if (cells.length === 0) return 'none';
+  const low = (xs: readonly string[]): string[] =>
+    xs.map((x) => x.toLowerCase());
+  const has = new Set(low(cells));
+  const def = new Set(low(defaults));
+  const added = cells.filter((c) => !def.has(c.toLowerCase()));
+  const removed = defaults.filter((d) => !has.has(d.toLowerCase()));
+  if (added.length === 0 && removed.length === 0) return '';
+  if (removed.length === 0 && added.length === 1) return `+ ${added[0]}`;
+  if (added.length === 0 && removed.length === 1) return `− ${removed[0]}`;
+  return cells.join(', ');
+}
+
 /** US-031 AC-4: the layouts that need an illustration, by orientation. */
 const LANDSCAPE = new Set(['spread-landscape', 'page-landscape']);
 const PORTRAIT = new Set(['spread-portrait', 'page-portrait']);
@@ -264,6 +288,8 @@ function planEntryLayout(
       reason,
       auto: layout === 'auto',
       line: entry.line,
+      chapter: inline ? null : (place?.chapterHeading ?? null),
+      quick: null,
       opensSection: (() => {
         const name = place?.section ?? null;
         if (inline || name === null || opened.has(`${place?.chapter}/${name}`))
@@ -287,6 +313,29 @@ function planEntryLayout(
     chapters,
     sections,
     tocDepth,
+    // US-033 AC-9, AC-12: the quick reference's columns, when it is on.
+    quick:
+      settings.entries?.quickReference !== true
+        ? null
+        : {
+            title: settings.entries.quickReferenceTitle ?? 'Quick Reference',
+            boxLabel:
+              settings.entries.statblock?.boxes === undefined
+                ? null
+                : (settings.entries.statblock.stats?.find(
+                    (f) =>
+                      f.key.toLowerCase() ===
+                      settings.entries?.statblock?.boxes?.toLowerCase(),
+                  )?.label ?? settings.entries.statblock.boxes),
+            statLabels: (settings.entries.statblock?.stats ?? [])
+              .filter(
+                (f) =>
+                  f.key.toLowerCase() !==
+                  settings.entries?.statblock?.boxes?.toLowerCase(),
+              )
+              .map((f) => f.label),
+            track: (settings.entries.statblock?.track ?? []).length > 0,
+          },
   };
 }
 
@@ -522,6 +571,26 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
           : `"${entry.text}": ${check.detail}`,
         entry.line,
       );
+    }
+  }
+  // US-033 AC-9, AC-10: each chapter entry's row of the quick reference.
+  if (entryLayout?.quick != null) {
+    const sb = input.settings.entries?.statblock ?? {};
+    const boxesKey = sb.boxes?.toLowerCase();
+    const defaults = sb.trackDefault ?? (sb.track ?? []).map((c) => c.label);
+    for (const entry of entryPlan.entries.values()) {
+      const info = entryLayout.entries.get(entry.heading);
+      if (info === undefined || info.inline) continue;
+      const model = models.get(entry.heading);
+      info.quick = {
+        section: entry.place?.section ?? null,
+        box:
+          boxesKey === undefined ? null : (entry.single.get(boxesKey) ?? null),
+        stats: (sb.stats ?? [])
+          .filter((f) => f.key.toLowerCase() !== boxesKey)
+          .map((f) => entry.single.get(f.key.toLowerCase()) ?? null),
+        track: trackShort(model?.cells.map((c) => c.label) ?? [], defaults),
+      };
     }
   }
   // US-030 AC-13: each track icon resolved once; a missing one warns once

@@ -495,13 +495,13 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-6 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
 | [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-7 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
 | [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-8 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-9 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-10 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-11 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-12 | #130 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🔴 red (G2 2026-11-06) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-9 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #130) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-10 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #130) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-11 | #130 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #130) |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-12 | #130 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #130) |
 | [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-13 | #129 | tests/unit/us-033-openers.test.ts | 🟢 green (G4 2026-11-06, #129) |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-14 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟡 openers green (G4 2026-11-06, #129); the quick reference parts wait for #130 — a TOC before the chapter and the glossary after are not yet tested |
-| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-15 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🟡 openers green (G4 2026-11-06, #129); the quick reference parts wait for #130 — intros of 0.3 and 1.0 pages and linkPageLevel 2 and 6 not yet |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-14 | #129 | tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129 and #130) — a TOC before the chapter and the glossary after are not yet tested |
+| [US-033](../user-stories/US-033-entry-openers-navigation-quick-reference.md) | AC-15 | #129 | tests/unit/us-033-openers.test.ts, tests/integration/us-033-openers-pdf.test.ts | 🟢 green (G4 2026-11-06, #129 and #130) — intros of 0.3 and 1.0 pages and linkPageLevel 2 and 6 not yet |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-1 | #132 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-2 | #132 | tests/unit/us-034-print-checks.test.ts, tests/integration/us-034-print-pdf.test.ts | 🔴 red (G2 2026-11-06) |
 | [US-034](../user-stories/US-034-print-checks-resolution-and-word-gaps.md) | AC-3 | #132 | tests/unit/us-034-print-checks.test.ts | 🔴 red (G2 2026-11-06) |
