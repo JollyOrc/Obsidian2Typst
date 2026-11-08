@@ -1,8 +1,8 @@
 # US-035 — Statblock preview of entry blocks in Obsidian
 
-**Status:** Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
+**Status:** Done (amendment 2026-11-08: AC-12, the box row inside the frame, for 0.12.1; M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-034)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups)
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); AC-12 in v0.12.1 (ticket #138)
 **Supersedes:** —
 
 Epic #121, sixth of seven stories (see US-030). Draft D-20 in
@@ -131,6 +131,29 @@ Examples use US-030's preset and `Fen Hare` block, with that preset active
   time (Dataview runs view scripts with `app` in scope, by its docs); the
   manual check calls it from a DataviewJS block.
 
+- **AC-12 (the box row stays inside the frame; amendment 2026-11-08):**
+  The tick boxes are drawn in rows of 15, in three groups of five (as in the
+  PDF), and no box reaches past the statblock's frame at any width at which
+  the box label and the fixed gaps fit. `styles.css` gives the box row the
+  columns `auto minmax(0, 1fr)` and the boxes 17 columns: three groups of
+  `repeat(5, minmax(0, 1fr))` with a `0.2em` column between them; a box has
+  `min-width: 0`; the 6th and 11th box of each row of 15 are placed in
+  columns 7 and 13; no box has a margin. Examples, label `VIGOUR`, text at
+  16 px, measured in WebKit (a plain page with the plugin's `styles.css`):
+  - 15 boxes at a 620 px page: the last box ends at the content edge
+    (538.6 px; before the amendment 550 px, 11.4 px past it, through the
+    margins of boxes 5 and 10 on `1fr` columns); at 330 px: 303.4 (before
+    314.7); at 200 px: 173.4 (before 175.7).
+  - 1, 5 and 6 boxes: one row from the left; box 6 starts after the group
+    gap (8 px between boxes 5 and 6, 2.4 px between the others).
+  - 16 boxes: two rows, box 16 under box 1; 45 boxes: three rows whose 15
+    boxes stand at the same positions.
+  - Below a 190 px page the label and the fixed gaps no longer fit (boxes at
+    their 2 px minimum) and the row may overflow; the state track does so
+    below 170 px. Not a goal.
+  Not measured: Obsidian itself (Chromium) by program; the user checked the
+  same rules there by eye on 2026-11-08, and M22 has a step for it.
+
 - **AC-10 (tests, SCAR-019, SCAR-015):** The HTML for three data sets (full,
   partial, empty) compared part by part with US-030's emitter; colour and
   grayscale; box values 0, 11, 16, 45, 46, `varies`; tracks default, full,
@@ -162,3 +185,6 @@ Examples use US-030's preset and `Fen Hare` block, with that preset active
 ## Related tickets
 
 <!-- Filled in at step 3. Draft: D-20. -->
+
+- #134 (AC-1 to AC-11), with #125 for the shared model; #137 for M22.
+- #138 (AC-12, amendment 2026-11-08): the box row inside the frame.
