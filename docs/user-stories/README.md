@@ -56,6 +56,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-035](US-035-entry-block-preview-in-obsidian.md) | Statblock preview of entry blocks in Obsidian (epic #121) | Done (0.12.0, 2026-11-07; M21 to M24 passed; amendment AC-12 2026-11-08, 0.12.1) | epic #121, #122 to #137; #138 |
 | [US-036](US-036-encounter-sheet.md) | The encounter sheet: A4 file and book page (epic #121) | Done (0.12.0, 2026-11-07; M21 to M24 passed); amendment for #139 Done 2026-11-09, M25 passed (AC-6; 0.13.0) | epic #121, #122 to #137; epic #139 |
 | [US-037](US-037-facing-pages-open-as-spreads.md) | Facing pages open as spreads in a PDF viewer (`/PageLayout /TwoPageRight`) | Done (0.13.1, 2026-11-09; M26 passed) | epic #147, #148 to #150 |
+| [US-038](US-038-detail-rows.md) | Detail rows: note properties drawn as a row of icon badges under a heading (`o2t-details`, preset group `details`, `api.renderDetails`) | Ready (G1 2026-11-09) | epic #152 |
 
 ### Backlog
 
