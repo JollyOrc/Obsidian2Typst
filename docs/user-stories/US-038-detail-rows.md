@@ -157,8 +157,16 @@ and a note whose block sits under `###### Reed Weaving`.
   unique without regard to case), and optional `icon` (text: the vault path
   of an SVG file), `icons` (a map value → path), `label` (text), `labels`
   (a map value → text). A wrong type or a repeated key is a problem at its
-  own line, in the form of US-016 AC-7 (`details.items[2].labels must be a
-  map of value → text`); unknown fields are ignored; `null` is unset. A
+  own line, in the form of US-016 AC-7. The messages: `details must be a
+  group of settings`; `details.items must be a list of items {key, icon,
+  icons, label, labels}`; `details.items[1].key must be a key`;
+  `details.items[1].icon must be text` (also `label`);
+  `details.items[2].labels must be a map of value → text`;
+  `details.items[1].icons must be a map of value → path`;
+  `details.items[2].key "pace" is listed twice`;
+  `details.color must be a colour written #rrggbb`; `details.size must be a
+  number of pt greater than 0 and at most 200` (the number is the item's
+  position, from 1); unknown fields are ignored; `null` is unset. A
   preset without the group, or with an empty `items`, draws **no row for any
   block, without a warning** (the block is read and dropped). The settings
   screen's details pop-up (US-021, US-029) lists `details.items`,
