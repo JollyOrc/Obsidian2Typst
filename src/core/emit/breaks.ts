@@ -317,12 +317,18 @@ export function entriesLayoutHelper(bandSize: string): string {
   let scls = es.zip(lays).map(((e, l)) => scale-of(e, l))
   let kinds = lays.map(l => if l.starts-with("page") { "page" } else { "spread" })
   let over = es.zip(lays, scls).map(((e, l, s)) => not fits(e, l, if s == none { 100 } else { s }))
+  // US-031 AC-7a (#139): the state a grown slot sets when the free space is
+  // smaller than its slot (one per entry, by its line).
+  let grow-key(e) = "o2t-grow-" + str(e.line)
   let mark(e, l, size, s) = {
     let d = (heading: e.heading, layout: l, size: size, line: e.line)
     if e.chosen { d.insert("auto", true) }
     if e.asked != none { d.insert("asked", e.asked); d.insert("reason", e.reason) }
     if s != none { d.insert("scale", s) }
-    o2t-entry-mark(d)
+    // The fact reads the grow decision where it fell (a read, no layout).
+    if l in ("page-landscape", "spread-landscape") {
+      context [#metadata(d + (page: here().page(), grown: not state(grow-key(e), false).final())) <o2t-entry>]
+    } else { o2t-entry-mark(d) }
   }
   // The end fact, from the real position: overflow lines, the right page's
   // unused share, the moved partner (US-032 AC-5, AC-7, AC-9).
@@ -338,21 +344,49 @@ export function entriesLayoutHelper(bandSize: string): string {
     if partner != none { d.insert("partnerMoved", partner) }
     [#metadata(d) <o2t-entry-end>]
   }
+  // US-031 AC-7a (#139): the illustration directly under the text, grown
+  // into the free space (read where it is drawn: block(height: 1fr) and
+  // layout()), centred when it does not fill it; when the free space is
+  // smaller than its slot, the block draws nothing and sets a state, and the
+  // picture follows at the slot's size (today's rule: the next page). The
+  // end fact goes right after the picture, so the space below it counts as
+  // unused (US-032 AC-9). Measured as approach S, spike-entry-wrap.md.
+  let grow(e, slot, end, gap) = {
+    if gap { v(1em) }
+    let flag = state(grow-key(e), false)
+    block(height: 1fr, width: 100%, above: 0pt, below: 0pt, layout(size => {
+      if size.height >= slot.h {
+        let g = o2t-fitted(e.img, tw, size.height)
+        v((size.height - g.h) / 2)
+        align(center, g.body)
+        end
+      } else { flag.update(true) }
+    }))
+    context if flag.get() { align(center, slot.body); end }
+  }
   let draw-page(e, l, s, side, partner) = {
     mark(e, l, "page", s)
-    page-content(e, l, if s == none { 100 } else { s }, side)
-    fin(e, l, "page", partner)
+    let sc = if s == none { 100 } else { s }
+    if l == "page-landscape" {
+      whole(e)
+      grow(e, o2t-fitted(e.img, tw, th * 0.4, scale: sc), fin(e, l, "page", partner), true)
+    } else {
+      page-content(e, l, sc, side)
+      fin(e, l, "page", partner)
+    }
   }
   let draw-spread(e, l, s) = {
     mark(e, l, "spread", s)
     let ended = false
     if l == "spread-text" { whole(e) }
     else if l == "spread-landscape" {
+      // With all text on the left page the right page's whole text area is
+      // the free space (no gap above it).
+      let alone = hgt(whole(e)) <= th
       whole(e)
-      if hgt(whole(e)) <= th { pagebreak() }
-      v(1em)
-      v(1fr)
-      align(center, o2t-fitted(e.img, tw, th / 2, scale: s).body)
+      if alone { pagebreak() }
+      grow(e, o2t-fitted(e.img, tw, th / 2, scale: s), fin(e, l, "spread", none), not alone)
+      ended = true
     } else if l == "full-image" {
       // US-032 AC-6: never shrunk; text that does not fit the left page
       // runs on after the image page.

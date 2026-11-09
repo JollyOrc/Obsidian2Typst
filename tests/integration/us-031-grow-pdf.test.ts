@@ -145,7 +145,10 @@ describe('US-031 AC-7a the landscape illustration under the text, grown', () => 
         const slot = Math.min(TEXT_W, TEXT_H / 2) * ((p.scale ?? 100) / 100);
         if (p.grown === true) {
           grown++;
-          const img = imageOn(c, p.page + 1);
+          // Under the text: on the entry's last page (the right page, or
+          // the page after it when the text itself runs past the spread).
+          const last = c.ends.find((x) => x.heading === name)?.page ?? 0;
+          const img = imageOn(c, last);
           expect(img, name).toBeDefined();
           expect(mm(img?.width ?? 0)).toBeGreaterThanOrEqual(slot - 0.2);
           // Inside the text area; centred: the gap below equals the gap above
