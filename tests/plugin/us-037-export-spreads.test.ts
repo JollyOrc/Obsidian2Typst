@@ -237,7 +237,9 @@ describe('US-037 AC-9 when the update cannot be made', () => {
     expect((await run()).status).toBe('exported');
     expect(host.bytes.get('/out/run1/Rules.pdf')).toBe(odd);
     const log = report(host);
-    expect(log.match(/PDF_PAGE_LAYOUT_FAILED/g)).toHaveLength(1);
+    // Once: the summary row counts 1 and one detail row follows (US-006 AC-8).
+    expect(log).toContain('| PDF_PAGE_LAYOUT_FAILED | 1 |');
+    expect(log.match(/\| PDF_PAGE_LAYOUT_FAILED \| The PDF/g)).toHaveLength(1);
     expect(log).toContain(
       '| PDF_PAGE_LAYOUT_FAILED | The PDF could not be set to open as spreads (no xref table); it is written as compiled |',
     );

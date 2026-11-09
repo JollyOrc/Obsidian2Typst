@@ -28,6 +28,10 @@ import {
 import {sheetFailedWarning} from '../core/entries/sheet';
 import {MIN_DPI_BUILTIN} from '../core/layout/page-setup';
 import {
+  pageLayoutFailedWarning,
+  withTwoPageRight,
+} from '../core/pdf/page-layout';
+import {
   entryLayoutWarnings,
   sectionWarnings,
   sheetWarnings,
@@ -110,6 +114,11 @@ export interface RunExportOptions {
   maxWordGap?: number;
   /** US-036 AC-5: the A4 encounter sheet's source; null or absent: none. */
   sheetTyp?: string | null;
+  /**
+   * US-037 AC-4: the effective `page.facingPages`; on, the book's PDF is
+   * written to open as spreads. Absent: as compiled.
+   */
+  facingPages?: boolean;
 }
 
 /** US-028 AC-16: the note converted again without image fit. */
@@ -204,7 +213,13 @@ export async function runExport(
       if (done.source !== options.typ) {
         await host.writeExportFile(`${dir}/${names.typ}`, done.source);
       }
-      await host.writeExportBytes(`${dir}/${names.pdf}`, result.pdf);
+      // US-037 AC-4 to AC-10: the book's PDF opens as spreads when it has
+      // facing pages; the sheet below is written as compiled (AC-5). The
+      // scan reads the bytes written (AC-8).
+      const spreads =
+        options.facingPages === true ? withTwoPageRight(result.pdf) : null;
+      const bookPdf = spreads?.pdf ?? result.pdf;
+      await host.writeExportBytes(`${dir}/${names.pdf}`, bookPdf);
       // US-028 AC-5: the image fit warnings of the result; AC-16: none after
       // the fallback, which reports IMAGE_FIT_OFF; AC-14: a layout that did
       // not settle.
@@ -212,6 +227,9 @@ export async function runExport(
         ? [IMAGE_FIT_OFF_WARNING]
         : fitDecisionWarnings(result.fitDecisions ?? []);
       if (result.settled === false) warnings.push(LAYOUT_NOT_SETTLED_WARNING);
+      if (spreads?.status === 'failed') {
+        warnings.push(pageLayoutFailedWarning(spreads.reason));
+      }
       // US-032 AC-10: the entries' layout warnings, from the compile's facts.
       warnings.push(
         ...entryLayoutWarnings(
@@ -265,7 +283,7 @@ export async function runExport(
       const maxWordGap = options.maxWordGap ?? ENTRY_BUILTINS.maxWordGap;
       if (maxWordGap > 0 && options.compiler.scanWordGaps !== undefined) {
         warnings.push(
-          ...(await options.compiler.scanWordGaps(result.pdf, {
+          ...(await options.compiler.scanWordGaps(bookPdf, {
             maxWordGap,
             entries: entryPages(
               (result.entryPlaces ?? []) as EntryPlaceFact[],

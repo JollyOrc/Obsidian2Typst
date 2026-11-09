@@ -36,6 +36,8 @@ export interface ExportRequest {
   maxWordGap?: number;
   /** US-036 AC-5: the A4 encounter sheet's source, when it is on. */
   sheetTyp?: string | null;
+  /** US-037 AC-4: the effective `page.facingPages` of the preset. */
+  facingPages?: boolean;
 }
 
 /** How the command ended when no export was run. */
@@ -141,6 +143,8 @@ export async function exportNoteAt(
     maxWordGap: prepared.maxWordGap,
     // US-036 AC-5: the A4 encounter sheet, a second compile.
     sheetTyp: prepared.sheetTyp,
+    // US-037 AC-4: facing pages decide whether the PDF opens as spreads.
+    facingPages: prepared.facingPages,
     // US-028 AC-16: the text read above, converted again without image fit.
     fallback: async () => {
       const at100 = await convertNote(deps, path, active, selected.preset, {
