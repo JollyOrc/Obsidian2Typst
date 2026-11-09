@@ -1,6 +1,6 @@
 # US-038 — Detail rows: note properties drawn as a row of icon badges under a heading
 
-**Status:** Ready (G1 2026-11-09; G2 and G3 follow)
+**Status:** Ready (G1, G2, G3 2026-11-09; tickets #153 to #156)
 **Introduced:** v0.14.0
 **Implemented:** —
 **Supersedes:** —
@@ -331,4 +331,7 @@ and a note whose block sits under `###### Reed Weaving`.
 
 ## Related tickets
 
-<!-- Filled in at G3. -->
+- [#153](https://github.com/JollyOrc/Obsidian2Typst/issues/153) — the block reader, the details model and the preset group (AC-1 to AC-5, AC-12, AC-16)
+- [#154](https://github.com/JollyOrc/Obsidian2Typst/issues/154) — the row in the PDF (AC-6 to AC-13)
+- [#155](https://github.com/JollyOrc/Obsidian2Typst/issues/155) — the Obsidian preview and the drawing API (AC-14 to AC-16)
+- [#156](https://github.com/JollyOrc/Obsidian2Typst/issues/156) — documents, manual check M27 and the test build `0.14.0-m27.1` (AC-17)
