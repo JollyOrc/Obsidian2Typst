@@ -1,8 +1,8 @@
 # US-030 — Entry data and the statblock
 
-**Status:** Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
+**Status:** Done; amendment for #139 Ready, decision 5 provisional (2026-11-09: AC-16 and AC-17, the text wraps around the statblock; G0 and G1 measurements 2026-11-08, the user's answers the same day). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
 **Introduced:** v0.12.0 (planned; a new feature bumps the minor version)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups)
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
 **Supersedes:** —
 
 Epic #121 (entry layouts). First of seven stories: US-030 entry data and the
@@ -19,7 +19,8 @@ encounter sheet. Drafts D-01, D-02, D-04, D-05, D-17, D-19 in
 **As an** author of a catalogue chapter (creatures, items, spells),
 **I want** each entry's data, written by the Obsidian Vault Compiler as an
 `o2t-entry` block under the entry's heading, typeset as a framed statblock
-beside the entry's first paragraph, with tick boxes and a state track the
+with the entry's text wrapped around it (amended for #139: before, beside the
+entry's first paragraph only), with tick boxes and a state track the
 reader can mark in pencil,
 **so that** a reader sees an entry's numbers at a glance and can track it in
 play, without the author laying out each entry by hand.
@@ -319,29 +320,106 @@ They gather at dusk.
   that defines one gets `TEMPLATE_NAME_TAKEN` and the plugin's definition is
   used (US-016 AC-11, `PLUGIN_NAMES`; SCAR-017).
 
-- **AC-16 (position, the opening paragraph, D28):** The statblock sits at
-  the top right of the entry, 55 % of the text width, beside the entry's
-  first paragraph in the remaining 45 % (4 mm gutter); the rest of the body
-  starts full width below whichever of the two is taller. The first
-  paragraph is the first block after the `o2t-entry` block, read on the
-  parsed tree:
+- **AC-16 (position, the opening paragraph, D28; amended for #139,
+  2026-11-09):** The statblock sits at the top right of the entry, 55 % of
+  the width it is placed in (the text width; a nested entry's or an entry's
+  outside the chapter: the same width), with a 4 mm gutter. The entry's text
+  **wraps around it** (AC-16a): it fills the column beside the statblock
+  (the remaining 45 % less the gutter: 43.25 mm on an A5 text width of
+  105 mm) until the statblock ends, then runs at full width. Before #139 the
+  first block alone stood beside the statblock and the body started below the
+  taller of the two; a first paragraph taller than the page then lost its
+  text below the page's foot (found 2026-11-08: 3 of 400 synthetic entries,
+  no warning). The first paragraph is the first block after the `o2t-entry`
+  block, read on the parsed tree, for the two warnings (unchanged):
   - a plain paragraph → it is the opening paragraph;
   - anything else (a list, an image, a callout, a quote, a heading, a table,
-    code) → no opening paragraph: that block and what follows start beside
-    the statblock, `ENTRY_NO_LEDE "<heading>": starts with <list|image|
-    callout|quote|heading|table|code>`;
+    code) → `ENTRY_NO_LEDE "<heading>": starts with <list|image|callout|
+    quote|heading|table|code>`; that block and what follows wrap around the
+    statblock by AC-16a like any other blocks;
   - an opening paragraph of fewer than 10 words → used as normal,
     `ENTRY_LEDE_SHORT "<heading>": <n> words`.
 
-  Examples: the example's opening paragraph (17 words) is beside the
-  statblock and `#### Habits` is below it; an entry whose body starts with
-  `- Fast` → `ENTRY_NO_LEDE "Fen Hare": starts with list`.
+- **AC-16a (the wrap, #139; G0 answers 1 to 6, 2026-11-08):** The entry's
+  body is a list of blocks in the note's order. Each block goes into the
+  column while the column, with it, stays no taller than the statblock; the
+  first block that does not fit ends the column, and it and every block after
+  it are set at full width below the statblock:
+  - **a paragraph** that does not fit whole is split at a word boundary: the
+    column holds the most words that still fit (found by measuring inside the
+    compile, `measure()`), its last line set to the column's edge as the
+    paragraph's other lines are (justified when the template justifies,
+    `linebreak(justify: par.justify)`; ragged otherwise); the rest of the
+    paragraph continues at full width directly below the statblock, its first
+    line not indented, followed by the other blocks. There is no minimum of
+    lines on either side of the cut (one line beside, one line below is
+    allowed), and no hyphenation across the cut (the word after the cut
+    starts the full-width part). Inline pieces are never cut through: bold,
+    italic, a link with its page number (US-018), a footnote call, an inline
+    image, inline code and a quoted phrase stay whole on one side. When not
+    even the first word fits, the whole paragraph goes below;
+  - **a sub-heading** (US-031 AC-11) goes into the column only when the first
+    two lines of what follows it fit there too (one line, when what follows
+    is one line long; the whole block when what follows is not a paragraph);
+    otherwise it starts the full-width part;
+  - **a block that is not split** — an image, a table, code, a callout, a
+    quote, a thematic break, a list of any length (only paragraphs are split
+    at the statblock's edge; provisional, decision 5) — goes into the column
+    when it fits whole, else it starts the full-width part, and the column
+    may stay empty (an entry that starts with an image taller than the room
+    beside the statblock: column empty, the image full width below);
+  - **a nested entry** (AC-20; its heading, statblock and body) is never set
+    in the column: it starts the full-width part;
+  - the full-width part starts directly below the statblock with the normal
+    space between paragraphs (`par.spacing`) and no first-line indent; a
+    statblock taller than all of the text leaves nothing below it.
 
-- **AC-17 (never split, tall blocks, D42):** The statblock is never broken
-  across pages or columns (`breakable: false`) and stays at 55 % however
-  tall it is (vigour 45 gives three box rows, eight attacks eight lines). An
-  attack whose name is too long for the line wraps with a hanging indent of
-  1 em and its dice stay on its first line.
+  Text in the column is set with US-034's narrow-column justification limits
+  (US-034 AC-6), in measuring and drawing alike. The wrap reads only
+  `measure()` and `layout()` (no `query`, `locate` or state), so it is
+  decided in one compile and the same note gives the same PDF.
+  Examples (A5, 105 mm text width, 10.5 pt, the example entry):
+  - the example (statblock about 60 mm high): `Fen hares are quick …` (17
+    words) stands in the column, `#### Habits` follows it there because
+    `They gather at dusk.` fits under it, and nothing is below the statblock;
+  - an opening paragraph of 150 words beside a statblock 50 mm high: the
+    column holds the words that fill 50 mm (its last line ends at the column's
+    edge); the next word starts the first full-width line below the
+    statblock, at the left edge, not indented; every one of the 150 words is
+    printed once, in order;
+  - an opening paragraph of 200 words beside a statblock 40 mm high on a
+    page: all 200 words are printed (before #139 the words below the page's
+    foot were lost);
+  - a short paragraph (12 words), then a list of 4 items, then a paragraph of
+    80 words, beside a statblock 70 mm high: the paragraph and the list in
+    the column; the 80-word paragraph split at the statblock's lower edge;
+  - an entry whose body is `- Fast` alone: `ENTRY_NO_LEDE "Fen Hare": starts
+    with list`, the list in the column.
+
+  Test interface: each wrap records `<o2t-wrap>` metadata `(heading, beside,
+  split, column, statblock)`: the number of blocks wholly in the column, the
+  split as `(block, words, of)` or `none`, the column's and the statblock's
+  heights in mm.
+
+- **AC-16b (where the wrap reaches, #139):** The wrap is the same for an
+  entry in an entries chapter, a nested entry and an entry outside the
+  chapters (G0 answer 5). Its blocks are the entry's body up to a nested
+  entry's heading or the end of the entry (US-030 AC-20). Outside an entries
+  chapter (where the body is in the document's flow), the blocks also end
+  before a heading that US-025 breaks the page for, and, with US-028's image
+  fit on, before a paragraph with an image (US-028 places that image in the
+  flow; it starts below the statblock, as a block that is not split would).
+  In an entries chapter, US-031 places what comes after the column (the left
+  page's text, the right page, the illustration).
+
+- **AC-17 (never split, tall blocks, D42; amended for #139):** The
+  statblock is never broken across pages or columns (`breakable: false`) and
+  stays at 55 % however tall it is (vigour 45 gives three box rows, eight
+  attacks eight lines). The statblock and its column are one block that is
+  never broken across pages: near a page's foot both move to the next page
+  together (the full-width part after them breaks as normal text). An attack
+  whose name is too long for the line wraps with a hanging indent of 1 em
+  and its dice stay on its first line.
 
 ### Checks
 
@@ -400,7 +478,18 @@ They gather at dusk.
   order, the number and size of boxes and cells, the icon count and the
   fills from the PDF (SCAR-015), on a generated fixture note with invented
   entries (US-024 amendment, draft D-03). A rendered check at 100 % (SCAR-025)
-  is part of the story's manual check.
+  is part of the story's manual check. For the wrap (#139): every entry's body
+  text read from the PDF in reading order equals the note's text (nothing
+  lost, doubled or reordered, SCAR-015); no glyph inside the statblock's
+  area; at a split the column's last line ends at the column's edge, does not
+  end with a hyphen, and the first full-width line starts at the left edge;
+  a sub-heading in the column has two lines after it; a first paragraph of
+  200 words beside a 40 mm statblock; a statblock taller than all the text;
+  an image first; a list at the edge; a nested entry; an entry outside the
+  chapter; a template that does not justify and one with a first-line
+  indent (US-023); `linkPageNumbers` on and off (US-018); the converter's
+  real paragraph output (escapes, emphasis, links, footnotes) through the
+  split.
 
 ---
 
@@ -415,6 +504,13 @@ They gather at dusk.
 4. **Strict mode:** ~~no entry warning stops the export~~ — revised by
    the user 2026-11-06 at #123's G4: entry warnings abort a strict-mode
    export like every conversion warning (US-006 AC-4 unchanged; AC-19).
+5. **A list at the statblock's edge (#139; provisional, put to the user
+   2026-11-09):** only paragraphs are split at the statblock's edge; a list
+   (also one of more than 10 items, which US-031 AC-12 lets break across a
+   page) that does not fit whole beside the statblock goes whole into the
+   full-width part, where US-031 AC-12 applies as before. The G0 answer named
+   lists of up to 10 items as blocks that are not split; longer lists were
+   not asked about.
 
 ---
 

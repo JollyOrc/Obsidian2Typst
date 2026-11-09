@@ -1,8 +1,8 @@
 # US-036 — The encounter sheet
 
-**Status:** Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Done; amendment for #139 Ready (2026-11-09: AC-6 — the running header of the sheet page in the book). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-035)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups)
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
 **Supersedes:** —
 
 Epic #121, last of seven stories (see US-030). Draft D-21 in
@@ -137,6 +137,14 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
   across, like the A4 file, when the text width allows two rows of at least
   88 mm with a 4 mm gap. As many rows as fit on that one page (5 on the A5
   of the example). The preview shows it (US-012 AC-13: preview = export).
+  Amended for #139: the page's running header shows the sheet's title
+  (`encounterSheetText.title`; empty title → empty header) at every
+  `page.runningHeaderLevel`, never the name of an entry or of the quick
+  reference before it (US-033 AC-7 as amended: one rule for the pages an
+  entries chapter writes after its last entry). Example: with
+  `runningHeaderLevel: 3`, the sheet page after a chapter whose last entry
+  is `Bog Wight` shows `Encounter Sheet`, not `Bog Wight` or `Quick
+  Reference`.
 
 - **AC-7 (header and key):** Both forms start with the title (no round line
   since M23, 2026-11-07), then a key line: each track cell's icon

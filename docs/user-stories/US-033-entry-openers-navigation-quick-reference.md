@@ -1,8 +1,8 @@
 # US-033 — Entry openers, navigation and the quick reference
 
-**Status:** Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
+**Status:** Done; amendment for #139 Ready (2026-11-09: AC-7, AC-9, AC-11, AC-12, AC-15 — the header of the quick reference's pages, the box column's label, section rows, entry names as links). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-032)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups)
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
 **Supersedes:** —
 
 Epic #121, fourth of seven stories (see US-030). Drafts D-09, D-14 in
@@ -131,6 +131,25 @@ entries}`, A5, facing pages, folios and running header on with
 
   Outside entries chapters the header is US-019's, unchanged.
 
+  Amended for #139 (a defect found 2026-11-08: the quick reference's first
+  page showed the last entry's name at `page.runningHeaderLevel` 3 and 4, the
+  chapter's name at 1): **every page an entries chapter writes after its last
+  entry** — the quick reference (AC-9) and the encounter sheet page (US-036
+  AC-6), and any page a later story adds there — shows that page's own title
+  in the running header, whatever `page.runningHeaderLevel` is (1 to 6):
+  `entries.quickReferenceTitle` on the quick reference's pages,
+  `encounterSheetText.title` on the sheet page; with an empty title, an
+  empty header (G0 answer 16). A page where an H1 starts still has none
+  (US-019), a blank page none (US-025 AC-6); the folio stays. The page after
+  them is US-019's again. One rule for the whole class (SCAR-017), written by
+  the furniture's header (`src/core/emit/furniture.ts`), not per page.
+
+  | Page | Header, at any `runningHeaderLevel` |
+  |---|---|
+  | quick reference, every page | `Quick Reference` |
+  | quick reference with `quickReferenceTitle: ''` | — (empty) |
+  | encounter sheet page | `Encounter Sheet` (its title) |
+
 - **AC-8 (links to entries, G0-C4):** A link to an entry gets the page
   number of the entry's first page when US-018 AC-2's conditions 1 and 2
   hold, whatever `linkPageLevel` is (condition 3 is met by any link whose
@@ -143,13 +162,34 @@ entries}`, A5, facing pages, folios and running header on with
 - **AC-9 (the table, D35):** With `entries.quickReference: true`, a table
   follows each entries chapter's last entry, starting on a new left page
   under a heading `entries.quickReferenceTitle` (built-in `Quick Reference`)
-  at the chapter's section level; the heading is in the contents. Columns:
-  Entry, Section, the `entries.statblock.boxes` key's label (when set), one
-  column per `entries.statblock.stats` label, Track (when `track` is set),
-  Page. One row per entry of the chapter (nested entries excluded), in the
-  order the entries stand in the note (decision 2, revised 2026-11-06: the
-  compiled note already lists them in the author's order; no further
-  sorting). A missing value is `—`. Page is the entry's first page (as AC-8).
+  at the chapter's section level; the heading is in the contents. Columns
+  (amended for #139: no Section column): Entry, the
+  `entries.statblock.boxes` key's label (when set), one column per
+  `entries.statblock.stats` label, Track (when `track` is set), Page. One
+  row per entry of the chapter (nested entries excluded), in the order the
+  entries stand in the note (decision 2, revised 2026-11-06: the compiled
+  note already lists them in the author's order; no further sorting). A
+  missing value is `—`. Page is the entry's first page (as AC-8).
+  Amended for #139:
+  - **the box column's label:** the label of the `stats` field with the box
+    key, if there is one; otherwise the key with its first character in
+    upper case and the rest as written (G0 answer 14): `vigour` → `Vigour`,
+    `hit_points` → `Hit_points`, `xVigour` → `XVigour`. Never the raw key.
+    The statblock's own box row keeps its upper-case label (US-030 AC-12,
+    `VIGOUR`); the label is made in one place for both (SCAR-017);
+  - **section rows:** each section's entries are preceded by a row spanning
+    every column with the section's name in bold. When the table breaks
+    across pages, the repeated header row is followed by the current
+    section's row again on a page that starts inside a section (Typst's
+    leveled table headers, `table.header(level: 2, …)`; measured in the CLI
+    and the bundled WASM compiler, `spike-entry-wrap.md`, "G1 measurements"
+    4). A section row is never the last row of a page (measured: 17 tables,
+    no page ended with one). A chapter without sections has no section rows
+    (G0 answer 17); entries before a chapter's first section stand before
+    the first section row, without one;
+  - **entry names are links:** each name in the Entry column links to the
+    entry's first page, with no page number after it (G0 answer 15; the
+    Page column has the number).
 
 - **AC-10 (the Track column):** Compared with `trackDefault` (US-030 AC-13):
 
@@ -167,14 +207,18 @@ entries}`, A5, facing pages, folios and running header on with
 - **AC-11 (layout and repeats):** The table may break across pages; its
   header row repeats on each page. An entry heading that appears twice in the
   chapter (a repeat the writer missed) has one row, for its first
-  occurrence. Example with the outline above: 5 rows — Fen Hare, Marsh Owl,
-  Cave Wyrm, Reed Cat, Bog Wight (the note's order); columns Entry, Section, vigour (the key, no stats label; US-030 AC-12), Might, Wits,
-  Speed, Track, Page.
+  occurrence. Example with the outline above (amended for #139): rows
+  `Beasts` (section row), Fen Hare, Marsh Owl, Cave Wyrm, Reed Cat, `Horrors`
+  (section row), Bog Wight (the note's order); columns Entry, Vigour (the key
+  with a capital first letter, no stats label; before #139 the raw key
+  `vigour`), Might, Wits, Speed, Track, Page; `Fen Hare` links to Fen Hare's
+  first page.
 
 - **AC-12 (settings):** Two `entries` fields (US-030 AC-8's messages and
   Details view): `entries.quickReference` (switch, built-in `false`) and
   `entries.quickReferenceTitle` (text, built-in `Quick Reference`; empty →
-  no heading, then the table is not in the contents).
+  no heading, then the table is not in the contents, and its pages have an
+  empty header, AC-7 as amended for #139).
 
 ### Warnings, composed cases, tests
 
@@ -198,7 +242,15 @@ entries}`, A5, facing pages, folios and running header on with
   ending left and right; intros of 0.3, 1.0 and 1.3 pages; `toc.depth` 0, 1,
   2, 6; `linkPageLevel` 1, 2, 6; `page.runningHeaderLevel` 1, 2, 3; the
   quick reference on and off, with and without `boxes` and `track`; one and
-  two entries chapters. The PDF tests read page parity, header text per page,
+  two entries chapters. For #139: the header of every quick-reference page
+  and of the sheet page at `runningHeaderLevel` 1 to 6, with the sheet on
+  and off, with an empty title, with the chapter at level 1 and 2; the box
+  column's label with and without a stats label, for `vigour`, `hit_points`
+  and a one-letter key; section rows with one and two sections, a chapter
+  without sections, a table that breaks inside a section (the row repeated)
+  and a section starting near a page's foot; the entry links' targets (the
+  PDF's link annotations point to the entry's first page) and no page
+  number in the Entry column. The PDF tests read page parity, header text per page,
   the outline entries (bookmarks and contents text), link texts with page
   numbers and the table's rows and page numbers (SCAR-015), on the generated
   fixture (D-03).

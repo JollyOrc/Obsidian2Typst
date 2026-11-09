@@ -1,8 +1,8 @@
 # US-031 — Entry layouts on facing pages
 
-**Status:** Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
+**Status:** Done; amendment for #139 Ready (2026-11-09: AC-6, AC-7a, AC-7b, AC-9, AC-14, AC-15, AC-17 — the landscape illustration under the text, grown; the larger of two portrait forms; the wrap of US-030 AC-16a on the left page). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups)
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
 **Supersedes:** —
 
 Epic #121, second of seven stories (see US-030). Drafts D-06, D-07, D-08,
@@ -137,14 +137,15 @@ brackets):
   `ENTRY_BLANK_PAGE "<heading>"`, unless US-033 places a section opener
   there. The next entry starts after the spread (AC-8, AC-5).
 
-- **AC-6 (the four spread layouts):** The left page holds the heading, the
-  opening paragraph beside the statblock (US-030 AC-16) and the body. Then:
+- **AC-6 (the four spread layouts; amended for #139):** The left page holds
+  the heading, the statblock with the text wrapped around it (US-030 AC-16a)
+  and the body. Then:
 
   | Layout | Right page |
   |---|---|
   | `full-image` | only the illustration, fitted inside the margins, centred, no running header and no folio (`entries.fullImageHeader: false`, built-in); the page counts in the numbering; all text must fit the left page (US-032 otherwise) |
-  | `spread-landscape` | the rest of the body, then the illustration at full text width in the lower half (at most half the text height) |
-  | `spread-portrait` | two columns: the rest of the body in 45 %, the illustration in 55 % at full text height on the outer (right) edge |
+  | `spread-landscape` | the rest of the body, then the illustration directly under the text, grown into the free space (AC-7a); never smaller than its slot (full text width, at most half the text height) |
+  | `spread-portrait` | the rest of the body and the illustration in the larger of two forms (AC-7b): two columns (the text in 45 %, the illustration in 55 % at full text height on the outer, right edge) or stacked (the text at full width, the illustration below it, centred) |
   | `spread-text` | the rest of the body, no illustration |
 
   With `entries.fullImageHeader: true` a `full-image` page keeps its header
@@ -169,6 +170,85 @@ brackets):
   template's caption style; its height is part of the slot. No credit → no
   caption.
 
+- **AC-7a (a landscape illustration under the text, grown; #139, G0 answers
+  7 to 10, G1 answer 3):** In `spread-landscape` (right page) and
+  `page-landscape`, the illustration follows the text directly: after the
+  last line of text and a gap of 1 em, the rest of the page down to the
+  text area's foot is the **free space**, measured inside the compile where
+  it is drawn (`block(height: 1fr)` with `layout()`). Then:
+  - when the free space holds the illustration's slot at the scale US-032
+    AC-4 decided (the slot of AC-7: full text width, at most half the text
+    height for `spread-landscape`, 40 % for `page-landscape`, with its
+    caption), the illustration is fitted into the free space instead
+    (text width × free height, caption included, aspect ratio kept, never
+    cropped) — so it is never smaller than its slot — and is centred
+    vertically in the free space when it does not fill its height (a
+    picture limited by the text width; G0 answer 8, G1 answer 3), centred
+    horizontally when it does not fill the width;
+  - when the free space is smaller than that slot, today's rule applies: the
+    illustration is drawn at the slot's size after the text, so it moves to
+    the next page and the entry overflows (US-032 AC-5, G0 answer 7);
+  - with no text on the right page (`spread-landscape` whose text ends on the
+    left page), the free space is the whole text area of the right page.
+
+  The text never moves to make room: the growth uses only the space the text
+  leaves. No cap by `images.minDpi` (G0 answer 10): a grown picture that
+  prints below it gives `IMAGE_LOW_DPI` (US-034 AC-3), with the grown width.
+  Examples (A5, text area 105 × 165 mm, no credit, a gap of 1 em ≈ 3.7 mm):
+  - `spread-landscape`, 40 mm of text on the right page, free space ≈ 121.3
+    mm: a 3:2 image is already at full width in its slot (105 × 70 mm) and
+    cannot grow; it is drawn 105 × 70 mm, about 25.6 mm below the gap
+    (centred); a 1:1 image (slot 82.5 × 82.5 mm) grows to 105 × 105 mm,
+    centred (about 8.1 mm above and below); a 5:4 image (slot 103.1 × 82.5
+    mm) grows to 105 × 84 mm, centred (about 18.6 mm above and below);
+  - `spread-landscape` with all text on the left page: a 1:1 image is drawn
+    105 × 105 mm, centred in the right page's 165 mm text height;
+  - `page-landscape`, free space 50 mm, slot at 100 % 66 mm high: the slot
+    does not fit; the scale steps of US-032 AC-4 decide (at 75 % the slot is
+    49.5 mm high: drawn grown into the 50 mm, no smaller than 49.5 mm), and
+    below `minScale` the entry overflows as before.
+
+- **AC-7b (the portrait forms, the larger illustration wins; #139, G0
+  answers 11 to 13, G1 answers 1 and 2):** In `spread-portrait` (the right
+  page: the blocks that did not fit the left page) and `page-portrait` (the
+  page below the statblock and its column), the text left for that space is
+  laid out in two forms, both measured inside the compile:
+  - **columns:** the text in a column beside the illustration, which is
+    fitted into 55 % of the text width × the space's height at the largest
+    scale step of US-032 AC-4 at which the text fits (AC-7's portrait
+    column; on the outer edge, D22; the text column widens when the
+    picture narrows);
+  - **stacked:** the text at full width, a gap of 1 em, then the
+    illustration fitted into the free space below (text width × free
+    height, caption included), centred horizontally and vertically, its
+    caption under it (G0 answer 12; D22 does not apply).
+
+  The stacked form **fits** only when its illustration is at least as large
+  as the columns form's illustration at `entries.image.minScale` (G1 answer
+  1; the same picture, so its width decides). The form used:
+
+  | Text left | Columns fit (some scale ≥ `minScale`) | Stacked fits | Used |
+  |---|---|---|---|
+  | none | — | — | stacked: the illustration fitted into the whole space, centred (also when both forms give the same size; G1 answer 2) |
+  | some | yes | yes | the one with the larger illustration (by area); on a tie, columns |
+  | some | yes | no | columns |
+  | some | no | yes | stacked |
+  | some | no | no | columns at `minScale`; the text overflows (US-032 AC-5) |
+
+  Examples (A5, text area 105 × 165 mm, `spread-portrait` right page, no
+  credit, `minScale` 70; the column at 100 % is 57.75 mm wide):
+  - no text left, a 1:2 image: stacked 82.5 × 165 mm, centred (columns would
+    be 57.75 × 115.5 mm); a 1:4 image: both forms 41.25 × 165 mm, so a tie:
+    centred in the text area, not at the outer edge;
+  - 60 mm of text at full width, a 1:2 image whose column text fits at
+    100 %: stacked ≈ 50.6 × 101.3 mm, columns 57.75 × 115.5 mm → columns;
+  - 20 mm of text at full width, a 1:1 image: stacked 105 × 105 mm (limited
+    by the width, centred in the ≈ 141.3 mm free height), columns 57.75 ×
+    57.75 mm → stacked;
+  - text whose column overflows at every scale but that takes 120 mm at full
+    width, a 1:2 image: stacked ≈ 20.6 × 41.3 mm; the columns picture at
+    70 % is 40.4 × 80.85 mm, so stacked does not fit → columns at 70 %, the
+    entry overflows (before G1 answer 1 the stamp-sized stacked form won).
 ### Page-sized entries
 
 - **AC-8 (pairing, D16, D27):** Page-sized entries take one page each.
@@ -187,12 +267,15 @@ brackets):
 
 - **AC-9 (the three page layouts):**
   - `page-text`: heading, opening paragraph beside the statblock, body;
-  - `page-landscape`: as `page-text`, the illustration at full text width on
-    the lower part of the page, at most 40 % of the text height (fitted as
-    AC-7);
-  - `page-portrait`: below the statblock row, the body in a 45 % column and
-    the illustration in a 55 % column on the outer edge — left on a left
-    page, right on a right page (D22); fitted as AC-7.
+  - `page-landscape` (amended for #139): as `page-text`, the illustration
+    directly under the text, grown into the free space (AC-7a); never
+    smaller than its slot (full text width, at most 40 % of the text height,
+    fitted as AC-7);
+  - `page-portrait` (amended for #139): below the statblock and its column
+    (US-030 AC-16a), the rest of the body and the illustration in the larger
+    of the two forms of AC-7b; in the columns form the body is in a 45 %
+    column and the illustration in a 55 % column on the outer edge — left on
+    a left page, right on a right page (D22); fitted as AC-7.
 
 - **AC-10 (unpaired, BL-C4 AC-5):** A page-sized entry without a partner
   takes a left page; its right page is blank (folio only) with
@@ -222,7 +305,18 @@ brackets):
 
 - **AC-14 (one compile, measured):** The size of each entry is decided inside
   the compile with `measure()` at the entry's width; entries are placed with
-  parity page breaks only; no read-back loop runs for entries. The real
+  parity page breaks only; no read-back loop runs for entries. Amended for
+  #139 (measured 2026-11-08, `docs/technical/spike-entry-wrap.md`, "G1
+  measurements" 2 and 3): the free space of AC-7a and of the stacked form
+  is read where it is drawn (`block(height: 1fr)` with `layout()`); when
+  it is smaller than the slot, the block draws nothing and sets a state,
+  and the illustration follows the block at its slot size (600 right pages:
+  every chapter settled, today's fallback exactly). A position probe after
+  the text (`here()`) is not used: it did not settle (10 of 10 chapters,
+  SCAR-021). The portrait choice uses `measure()` only. The left page of a
+  split spread (`spread-portrait`, `full-image`) holds the heading, the
+  statblock with its column (US-030 AC-16a) and as many whole blocks of the
+  full-width part as fit. The real
   first and last page of each entry are recorded (`metadata`) and read after
   the compile for the warnings of this story and US-032.
 
@@ -231,7 +325,8 @@ brackets):
   - a spread-sized entry takes two consecutive pages with the same left and
     right content; no left-page start, no blank page, no `ENTRY_BLANK_PAGE`;
   - page-sized entries still pair as two consecutive pages;
-  - a `page-portrait` illustration is on the right (no outer edge);
+  - a `page-portrait` illustration in the columns form is on the right (no
+    outer edge); the stacked form is centred as on facing pages;
   - a `full-image` page still has no header and no folio (AC-6).
 
   Example: the outline above gives 6 consecutive pages (Fen Hare, Marsh Owl,
@@ -258,7 +353,15 @@ brackets):
   page end; pairing runs of 1, 2, 3 and 4 page-sized entries; a chapter with
   two sections. The PDF tests read page parity, each page's images (count,
   drawn size and position), header and footer text, and the body text per
-  page (SCAR-015), on the generated fixture (US-024 amendment, D-03).
+  page (SCAR-015), on the generated fixture (US-024 amendment, D-03). For
+  #139: AC-7a with ratios 3:2, 1:1, 1:2, 4:1 at right-page text lengths that
+  leave the slot room and that do not (the fallback), with no text on the
+  right page, and across the page edge (one compile settles, SCAR-021); the
+  drawn picture never smaller than its slot and centred vertically in the
+  free space when limited by the width; AC-7b's table rows each, the tie
+  with no text, the stacked picture just above and just below the columns
+  picture at `minScale` (10, 70, 100), on left and right pages and with
+  facing pages off.
 
 ---
 
