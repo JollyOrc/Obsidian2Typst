@@ -216,3 +216,41 @@
   color: var(--text-muted);
   font-size: var(--font-ui-small);
 }
+
+/* US-038 AC-14: the detail row — one row of badges (an icon and a label each)
+   that wraps. The colour and the size come from the preset as custom
+   properties (1 pt = 1/10.5 em, as the statblock); the icon is 0.95 em and
+   sits 0.15 em below the baseline, the gap between badges is 1.1 em. An item
+   may shrink (min-width: 0) and its text breaks anywhere when a word is
+   longer than the line, so the row never passes its container (SCAR-025). */
+.o2t-dt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1.1em;
+  row-gap: 0.2em;
+  margin: 0 0 0.45em;
+  color: var(--o2t-dt-color);
+  font-size: var(--o2t-dt-size);
+}
+.o2t-dt-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  min-width: 0;
+  max-width: 100%;
+}
+.o2t-dt-icon {
+  width: 0.95em;
+  height: 0.95em;
+  flex: none;
+  position: relative;
+  top: 0.15em;
+}
+.o2t-dt-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.o2t-dt a {
+  color: inherit;
+}

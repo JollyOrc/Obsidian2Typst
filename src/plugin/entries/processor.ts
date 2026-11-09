@@ -14,7 +14,12 @@ import {
   statblockLookValues,
   type StatblockLookValues,
 } from '../../core/emit/entry';
-import {flattenLinks, type ColorMode} from '../../core/markers';
+import {
+  flattenLinks,
+  keepLinks,
+  linkShown,
+  type ColorMode,
+} from '../../core/markers';
 import type {EntriesSettings} from '../../core/markers/entries';
 import {parseInline, visibleText, type InlineNode} from '../../core/parse';
 
@@ -51,14 +56,22 @@ export const NO_STATS = 'No statblock: no stats or attacks.';
 const PT_PER_EM = 10.5;
 const em = (pt: number): string => `${Number((pt / PT_PER_EM).toFixed(4))}em`;
 
-/** The raw block and its notice above it (AC-4, AC-5, AC-9). */
-function raw(el: DrawEl, source: string, notice: string): void {
+/**
+ * The raw block and its notice above it (US-035 AC-4, AC-5, AC-9; US-038
+ * AC-14 draws the same notices for its block).
+ */
+export function raw(el: DrawEl, source: string, notice: string): void {
   el.createDiv({cls: 'o2t-sb-notice'}).createEl('span', {text: notice});
   el.createEl('pre', {cls: 'o2t-sb-raw'}).createEl('code', {text: source});
 }
 
-/** US-035 AC-2: a value as the PDF reads it: links as their text, bold, italic. */
-function inline(el: DrawEl, value: string): void {
+/**
+ * US-035 AC-2: a value as the PDF reads it: links as their text, bold,
+ * italic. US-038 AC-9, AC-14: with `links` a link stays one (a wikilink an
+ * Obsidian internal link, `a.internal-link` with `data-href`; a Markdown
+ * link an external one) and images and embeds are their text (`keepLinks`).
+ */
+export function inline(el: DrawEl, value: string, links = false): void {
   const walk = (parent: DrawEl, nodes: readonly InlineNode[]): void => {
     for (const node of nodes) {
       switch (node.kind) {
@@ -81,8 +94,27 @@ function inline(el: DrawEl, value: string): void {
           parent.createEl('code', {text: node.value});
           break;
         case 'link':
-          walk(parent, node.children);
+          if (links)
+            walk(
+              parent.createEl('a', {
+                cls: 'external-link',
+                attr: {href: node.href},
+              }),
+              node.children,
+            );
+          else walk(parent, node.children);
           break;
+        case 'wikilink': {
+          // only with `links`: `flattenLinks` leaves none
+          const target =
+            node.file + (node.anchor === null ? '' : `#${node.anchor}`);
+          parent.createEl('a', {
+            cls: 'internal-link',
+            text: linkShown(node),
+            attr: {'data-href': target, href: target},
+          });
+          break;
+        }
         case 'softbreak':
         case 'break':
           parent.createEl('span', {text: ' '});
@@ -92,7 +124,12 @@ function inline(el: DrawEl, value: string): void {
       }
     }
   };
-  walk(el, flattenLinks(parseInline(value, 0)));
+  walk(
+    el,
+    links
+      ? keepLinks(parseInline(value, 0))
+      : flattenLinks(parseInline(value, 0)),
+  );
 }
 
 /** True when `value` has no markup: it is drawn as one text. */
@@ -141,8 +178,8 @@ function lookProps(look: StatblockLookValues): Record<string, string> {
   return props;
 }
 
-/** Icons read once per path until the cache is cleared (AC-8). */
-function iconCache(read: (path: string) => Promise<string | null>) {
+/** Icons read once per path until the cache is cleared (AC-8; US-038 AC-14 too). */
+export function iconCache(read: (path: string) => Promise<string | null>) {
   const cache = new Map<string, Promise<string | null>>();
   return {
     get(path: string): Promise<string | null> {

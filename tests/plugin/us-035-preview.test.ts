@@ -272,8 +272,13 @@ describe('US-035 AC-1, AC-3, AC-7, AC-11 the wiring', () => {
     expect(main).toMatch(/previewMode\.rerender\(true\)/);
     expect(main).toMatch(/clearIconCache\(\)/);
   });
-  it('US-035 AC-11: main.ts exposes the API as `api`', () => {
-    expect(main).toMatch(/this\.api\s*=\s*createEntriesApi\(/);
+  // US-038 AC-15: the one `api` object also carries `renderDetails`, so it is
+  // composed from the statblock API (the criterion is unchanged: `renderStatblock`
+  // stays on `api`).
+  it('US-035 AC-11: main.ts exposes the API as `api`, composed from the statblock API', () => {
+    expect(main).toMatch(
+      /this\.api\s*=\s*composeApi\(\s*createEntriesApi\(this\.entryDeps\)/,
+    );
   });
   it('US-035 AC-3: styles.css styles the o2t-sb- classes and loads nothing from the network', () => {
     const css = readFileSync('styles.css', 'utf8');

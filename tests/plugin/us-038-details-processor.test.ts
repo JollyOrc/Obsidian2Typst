@@ -8,6 +8,7 @@
 import {readFileSync} from 'node:fs';
 import {describe, expect, it} from 'vitest';
 import {DETAILS_E} from '../support/details';
+import {ENTRIES} from '../support/entries';
 import {FakeEl} from '../support/fake-obsidian';
 
 const PROCESSOR = '../../src/plugin/details/processor';
@@ -112,6 +113,17 @@ describe('US-038 AC-14 the processor draws the row', () => {
     expect(Object.values(root.cssProps)).toEqual(
       expect.arrayContaining(['#336699', '1em']),
     );
+    // 1 pt = 1/10.5 em: other sizes are scaled, not fixed
+    for (const [pt, em] of [
+      [14, '1.3333em'],
+      [6, '0.5714em'],
+    ] as const) {
+      set({details: {...DETAILS_E, size: pt}});
+      const sized = new FakeEl();
+      await p.handler(SOURCE, sized, {});
+      const rootSized = withClass(sized, 'o2t-dt')[0] ?? sized;
+      expect(Object.values(rootSized.cssProps), `${pt} pt`).toContain(em);
+    }
     expect([...new Set(calls.icons)].sort()).toEqual([
       'Icons/brisk.svg',
       'Icons/kind.svg',
@@ -144,8 +156,8 @@ describe('US-038 AC-14 the processor draws the row', () => {
     const links = el.descendants().filter((x) => x.tag === 'a');
     expect(
       links.map((a) => [
-        a.text,
-        a.attrs['data-href'] ?? a.attrs['href'],
+        textOf(a).trim(),
+        a.classes.has('internal-link') ? a.attrs['data-href'] : a.attrs['href'],
         a.classes.has('internal-link'),
       ]),
     ).toEqual([
@@ -153,7 +165,9 @@ describe('US-038 AC-14 the processor draws the row', () => {
       ['site', 'https://example.org', false],
     ]);
     expect(
-      el.descendants().some((x) => x.tag === 'strong' && x.text === 'firm'),
+      el
+        .descendants()
+        .some((x) => x.tag === 'strong' && textOf(x).trim() === 'firm'),
     ).toBe(true);
   });
 
@@ -211,9 +225,14 @@ describe('US-038 AC-14 notices instead of a row', () => {
   it('US-038 AC-14: invalid YAML → the raw block with the code and the line', async () => {
     const {createDetailsProcessor} = await load();
     const el = new FakeEl();
-    await createDetailsProcessor(deps().d).handler('a: 1\nb: [2\n', el, {});
-    expect(textOf(el)).toMatch(/DETAIL_YAML_INVALID \(line \d+\)/);
-    expect(textOf(el)).toContain('b: [2');
+    await createDetailsProcessor(deps().d).handler(
+      'a: 1\nb: 2\n  c: 3\n',
+      el,
+      {},
+    );
+    // the `yaml` package reports the second line for this block
+    expect(textOf(el)).toContain('DETAIL_YAML_INVALID (line 2)');
+    expect(textOf(el)).toContain('c: 3');
   });
 
   it('US-038 AC-14: a block in a quote or callout → the raw block with DETAIL_BLOCK_IN_CONTAINER', async () => {
@@ -256,6 +275,29 @@ describe('US-038 AC-14 the preset is read each time a block is drawn', () => {
     const el = new FakeEl();
     await createDetailsProcessor(deps().d).handler(SOURCE, el, {});
     for (const x of el.descendants()) expect(x.listenerCount('click')).toBe(0);
+  });
+});
+
+describe('US-038 AC-9 the shared walker keeps the statblock as it was', () => {
+  it('US-035 AC-2 (US-038 AC-9): a statblock value still shows a link as its text, never as a link', async () => {
+    const {createEntryProcessor} =
+      await import('../../src/plugin/entries/processor');
+    const el = new FakeEl();
+    const sb = createEntryProcessor({
+      settings: async () => ({entries: ENTRIES}),
+      readIcon: async () => null,
+      heading: () => 'Fen Hare',
+      fileName: () => 'Rules',
+      inContainer: () => false,
+    });
+    await sb.handler(
+      // bold makes the skills line go through the walker (a plain line is one text)
+      'might: 4\nskills:\n  - "**[[Quick Step]]**"\n  - "**[x](https://example.org)**"\n',
+      el,
+      {},
+    );
+    expect(el.descendants().filter((x) => x.tag === 'a')).toEqual([]);
+    expect(textOf(el)).toContain('Quick Step');
   });
 });
 
@@ -303,6 +345,18 @@ describe('US-038 AC-15 the API', () => {
     expect(textOf(el2)).toContain('Reed Weaving');
   });
 
+  it('US-038 AC-15: the API reads each icon once until the cache is cleared', async () => {
+    const {createDetailsApi} = await load();
+    const {d, calls} = deps();
+    const api = createDetailsApi(d);
+    await api.renderDetails(new FakeEl(), {pace: 'brisk', kind: 'craft'});
+    await api.renderDetails(new FakeEl(), {pace: 'brisk', kind: 'craft'});
+    expect(calls.icons).toHaveLength(2);
+    api.clearIconCache();
+    await api.renderDetails(new FakeEl(), {pace: 'brisk'});
+    expect(calls.icons).toHaveLength(3);
+  });
+
   it('US-038 AC-15: one api object: version 1, renderStatblock kept, renderDetails added, clearIconCache clears both', async () => {
     const {composeApi} = await load();
     let cleared = 0;
@@ -336,12 +390,24 @@ describe('US-038 AC-14, AC-16 the wiring', () => {
     expect(main).not.toContain('renderDetails(');
   });
 
+  it('US-038 AC-14: the details settings are those of the active preset: its details group and its colorMode', () => {
+    expect(main).toContain(
+      'return {details: view.fields.details, colorMode: view.fields.colorMode};',
+    );
+    expect(main).toContain('...this.entryDeps,');
+  });
+
+  it('US-038 AC-14: a preset change redraws open notes that hold a details block too', () => {
+    expect(main).toContain("text.includes('```o2t-details')");
+  });
+
   it('US-038 AC-14: the styles name the row, its items and icons; the items wrap and the icon is 0.95em', () => {
     for (const cls of ['.o2t-dt ', '.o2t-dt-item', '.o2t-dt-icon']) {
       expect(css, cls).toContain(cls);
     }
     expect(css).toMatch(/\.o2t-dt\s*\{[^}]*flex-wrap:\s*wrap/);
-    expect(css).toMatch(/\.o2t-dt-icon\s*\{[^}]*0\.95em/);
+    expect(css).toMatch(/\.o2t-dt-icon\s*\{[^}]*width:\s*0\.95em/);
+    expect(css).toMatch(/\.o2t-dt-icon\s*\{[^}]*height:\s*0\.95em/);
     expect(css).toMatch(/\.o2t-dt\s*\{[^}]*column-gap:\s*1\.1em/);
   });
 });
