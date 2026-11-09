@@ -3,8 +3,9 @@
 // now reads its pages through it; the word-gap scan (#133) uses it too, so
 // the tests and the product share one reader (SCAR-017).
 //
-// Scope: the PDFs Typst 0.14.2 writes (no object streams, no incremental
-// updates, no encryption). Transforms, documented here (SCAR-001):
+// Scope: the PDFs Typst 0.14.2 writes (no object streams, no encryption)
+// and the one incremental update `page-layout.ts` appends (US-037): a number
+// defined twice keeps the last definition, which is the new catalog. Transforms, documented here (SCAR-001):
 // - The file is read as latin1: one character per byte, so offsets in the
 //   text are offsets in the bytes and stream data survives the round trip.
 // - `objectIndex`: one pass over the file; each `n 0 obj` records the offset

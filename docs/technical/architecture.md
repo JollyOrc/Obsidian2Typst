@@ -13,7 +13,7 @@ The plugin is split into a **pure core** and a thin **Obsidian shell**.
 | `src/core/emit` | Document tree plus settings to Typst source, including escaping | none |
 | `src/core/entries` | Epic #121: the statblock model shared by the PDF and the Obsidian preview (`model.ts`), the layout and sheet warnings made from the compile's facts (`report.ts`), the encounter sheet (`sheet.ts`) | none |
 | `src/core/checks` | Epic #121, US-034: the print checks — low resolution from the drawn widths (`print.ts`), the word-gap scan of a PDF (`word-gaps.ts`, small so the worker can load it) | none |
-| `src/core/pdf` | Epic #121, US-034 AC-9: the PDF reader on bytes (`reader.ts`: object index, strings, CMaps, streams), FlateDecode (`inflate.ts`), the text runs with positions (`text.ts`); the tests read PDFs through it too | none |
+| `src/core/pdf` | Epic #121, US-034 AC-9: the PDF reader on bytes (`reader.ts`: object index, strings, CMaps, streams), FlateDecode (`inflate.ts`), the text runs with positions (`text.ts`); the tests read PDFs through it too; US-037 (`page-layout.ts`): the one incremental update that makes a facing-pages PDF open as spreads, called only by `plugin/run-export.ts` | none |
 | `src/core/settings` | Typed settings model, defaults, and validation (fonts, decoration, cover, print) | none |
 | `src/plugin` | Obsidian API: commands, settings UI, side-panel view, vault file reading, writing output | file I/O, UI |
 | `src/plugin/entries` | Epic #121, US-035: the `o2t-entry` code-block processor and the drawing API (`processor.ts`) | DOM (Obsidian's element helpers) |

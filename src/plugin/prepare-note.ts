@@ -64,6 +64,8 @@ export interface PreparedNote {
   sheetTyp: string | null;
   /** US-034 AC-2: the block images whose drawn width the conversion fixes. */
   fixedImages: ImageFact[];
+  /** US-037 AC-4: the effective `page.facingPages`. */
+  facingPages: boolean;
 }
 
 /** US-028 AC-16: how `convertNote` converts a second time. */
@@ -192,6 +194,7 @@ export async function convertNote(
       effective.settings.entries?.maxWordGap ?? ENTRY_BUILTINS.maxWordGap,
     sheetTyp: converted.sheetTyp ?? null,
     fixedImages: converted.images ?? [],
+    facingPages: effective.settings.page.facingPages,
     source,
   };
 }

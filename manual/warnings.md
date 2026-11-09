@@ -66,7 +66,8 @@ when the PDF exists, so they are reported but never stop an export. They are
 entries' layout warnings (`ENTRY_AUTO`, `ENTRY_LAYOUT_CONFLICT`,
 `ENTRY_OVERFLOW`, `ENTRY_SPREAD_EMPTY`, `ENTRY_BLANK_PAGE`,
 `ENTRY_UNPAIRED`, `SECTION_INTRO_OVERFLOW`), the print checks
-(`IMAGE_LOW_DPI`, `TEXT_WIDE_GAP`, `TEXT_GAP_SCAN_FAILED`) and the encounter
+(`IMAGE_LOW_DPI`, `TEXT_WIDE_GAP`, `TEXT_GAP_SCAN_FAILED`), the page-layout
+warning of the PDF (`PDF_PAGE_LAYOUT_FAILED`) and the encounter
 sheet's (`ENCOUNTER_SHEET_SMALL_BOXES`, `ENCOUNTER_SHEET_FAILED`). The
 warnings of the entry blocks themselves (`ENTRY_*` of the block, `STAT_*`,
 `TAG_UNMAPPED`, `ENCOUNTER_SHEET_EMPTY`) come from the conversion and do stop
@@ -152,6 +153,7 @@ report are still written. Errors usually come from a
 | `IMAGE_LOW_DPI` | An image prints below `images.minDpi`. |
 | `TEXT_WIDE_GAP` | A justified line has a word gap wider than `entries.maxWordGap`. |
 | `TEXT_GAP_SCAN_FAILED` | The word-gap scan could not read the PDF; no line was checked. |
+| `PDF_PAGE_LAYOUT_FAILED` | A facing-pages PDF could not be set to open as spreads; it was written as compiled. |
 | `ENCOUNTER_SHEET_EMPTY` | The encounter sheet is on, but the preset has no track and no box key. |
 | `ENCOUNTER_SHEET_SMALL_BOXES` | The sheet's boxes shrank under 2.0 mm to fit the page. |
 | `ENCOUNTER_SHEET_FAILED` | The A4 encounter sheet did not compile; the book was written. |
