@@ -247,4 +247,6 @@ spike; Typst 0.14.2, macOS 27.0.1):
 
 ## Related tickets
 
-<!-- Filled in at G3. -->
+- #148 — the catalog revision as an incremental update (AC-1, AC-2 form, AC-3, AC-9, AC-10)
+- #149 — the export writes facing-pages PDFs to open as spreads (AC-2 book, AC-4 to AC-10 in the export, AC-12)
+- #150 — manual check M26, documents and the test build
