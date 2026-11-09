@@ -56,7 +56,7 @@ describe('US-037 AC-1 the bytes appended', () => {
     expect(
       text(withTwoPageRight(bytes(plain)).pdf).slice(
         plain.length,
-        plain.length + 10,
+        plain.length + 11,
       ),
     ).toBe('\n\n2 0 obj\n<');
     const withEol = typstPdf(AC1_CATALOG, undefined, '\n');
@@ -150,21 +150,13 @@ describe('US-037 AC-9 other PDF forms', () => {
       AC1_TYPST.replace('  /Size 3\n', '  /Size 3\n  /Encrypt 1 0 R\n'),
       'encrypted',
     ],
-    [
-      'a file already updated',
-      AC1_TYPST + AC1_UPDATE.replace('/PageLayout /TwoPageRight\n  ', ''),
-      'already updated',
-    ],
+    ['a file already updated', AC1_TYPST + AC1_UPDATE, 'already updated'],
     [
       'a /Root that names no object',
       AC1_TYPST.replace('/Root 2 0 R', '/Root 9 0 R'),
       'no catalog',
     ],
-    [
-      'a catalog that is not a dictionary',
-      AC1_TYPST.replace(AC1_CATALOG, '[1 2 3]'),
-      'no catalog',
-    ],
+    ['a catalog that is not a dictionary', typstPdf('[1 2 3]'), 'no catalog'],
   ];
   for (const [name, input, reason] of cases) {
     it(`US-037 AC-9: ${name} → "${reason}", the bytes unchanged`, () => {
