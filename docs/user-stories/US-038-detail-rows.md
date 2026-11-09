@@ -1,8 +1,8 @@
 # US-038 — Detail rows: note properties drawn as a row of icon badges under a heading
 
-**Status:** Ready (G1, G2, G3 2026-11-09; tickets #153 to #156)
+**Status:** Code done (2026-11-09; #153 to #155 committed, #156 the documents and test build `0.14.0-m27.1`); waiting for manual check M27
 **Introduced:** v0.14.0
-**Implemented:** —
+**Implemented:** v0.14.0 (not released); tickets #153 to #156, test build `0.14.0-m27.1` (M27)
 **Supersedes:** —
 
 Epic #152 (the Vault Compiler's epic: ObsidianVaultCompiler#118). The format

@@ -127,7 +127,9 @@ describe('US-038 AC-17 documentation', () => {
 
   it('US-038 AC-17: the test map names the story and the contract names its owner', () => {
     expect(read('docs/technical/tests.md')).toContain('US-038');
-    expect(read('docs/technical/details-block.md')).toContain('US-038');
+    expect(read('docs/technical/details-block.md')).toMatch(
+      /Owned by \[US-038\]\(\.\.\/user-stories\/US-038-detail-rows\.md\)/,
+    );
     expect(read('docs/technical/architecture.md')).toContain('core/details');
   });
 });

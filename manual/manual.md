@@ -322,6 +322,7 @@ Details and the exact rules are in [Markdown support](markdown-support.md).
 | [Callout styles](callouts.md) | Callouts as boxes, built-in styles, your own styles, icons and fonts. |
 | [Glossary and heading rules](glossary-and-heading-rules.md) | Turning a `Glossary` section into term entries; marking the colophon and the back notes. |
 | [Entries](entries.md) | Statblocks from `o2t-entry` blocks, entries chapters and their layouts, the quick reference, the encounter sheet, the print checks, the statblock in Obsidian and its API. |
+| [Detail rows](details.md) | A row of icon badges under a heading from `o2t-details` blocks and the preset's `details` group, in the PDF and in Obsidian, and `api.renderDetails`. |
 | [Book structure](book-structure.md) | Page breaks before headings, colophon and back notes, front matter and roman folios, signatures, the table of contents. |
 | [Typst templates](templates.md) | Your own `.typ` file to style the whole document. |
 | [The style panel](preview-panel.md) | The preview, its rows and the page range. |

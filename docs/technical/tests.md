@@ -69,7 +69,7 @@ fixture. No test reads the author's private vault.
 These cover what only a real Obsidian can show. The automated plugin tests use
 fakes and do not replace them.
 
-Procedures that need more than a few steps are manual checks, one file per check in [manual-checks/](manual-checks/) (`M01.md` to `M24.md`), listed with what each covers in the index [manual-checks.md](manual-checks.md) (split 2026-10-29, SCAR-029).
+Procedures that need more than a few steps are manual checks, one file per check in [manual-checks/](manual-checks/) (`M01.md` to `M27.md`), listed with what each covers in the index [manual-checks.md](manual-checks.md) (split 2026-10-29, SCAR-029).
 
 ### §1 — Clickable warning line (US-006 AC-2b)
 
@@ -575,7 +575,7 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 | [US-038](../user-stories/US-038-detail-rows.md) | AC-14 | #155 | tests/plugin/us-038-details-processor.test.ts | 🟢 green (G4 2026-11-09, #155) — the row, look, grayscale, links, notices, preset read at each draw, no click handlers, the wiring in main.ts and styles.css |
 | [US-038](../user-stories/US-038-detail-rows.md) | AC-15 | #155 | tests/plugin/us-038-details-processor.test.ts | 🟢 green (G4 2026-11-09, #155) — renderDetails, the notice without a group, version 1, one api object |
 | [US-038](../user-stories/US-038-detail-rows.md) | AC-16 | #153, #154, #155 | tests/tooling/us-038-one-place.test.ts | 🟢 green (G4 2026-11-09, #155) — one language name, one scan reader, one model with three callers, main.ts hands over, plugin names |
-| [US-038](../user-stories/US-038-detail-rows.md) | AC-17 | #156 | tests/tooling/us-038-one-place.test.ts | 🔴 red (G2 2026-11-09) — the contract, the manual page, the warning rows, the map, the architecture page |
+| [US-038](../user-stories/US-038-detail-rows.md) | AC-17 | #156 | tests/tooling/us-038-one-place.test.ts | 🟢 green (G4 2026-11-09, #156) — the contract, the manual page, the warning rows, the map, the architecture page |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-1 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-1: (the field: six keys, four values, messages with lines, unknown keys, the Defaults, merge key by key) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-2 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts, tests/integration/us-025-page-breaks-pdf.test.ts | US-025 AC-2: (the three lines per side, facing pages off; the four page rows (the third re-measured at G2); guard: none = today) | ✅ green (TICKET-075, 2026-10-28) |
 | [US-025](../user-stories/US-025-page-breaks-by-heading.md) | AC-3 | TICKET-075 | tests/unit/us-025-page-breaks.test.ts | US-025 AC-3: (no break for terms, in-term headings, callout, quote, list item, empty headings; the glossary heading breaks) | ✅ green (TICKET-075, 2026-10-28) |

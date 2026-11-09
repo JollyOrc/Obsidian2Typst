@@ -301,6 +301,13 @@ toc:
 # Images
 images:
   minScale: 100                  # 10 to 100 (%)
+
+# Detail rows (preset notes only)
+details:
+  color: "#7a4a2e"
+  size: 9.5
+  items:
+    - {key: pace, icon: Icons/pace.svg, labels: {slow: Slow, brisk: Brisk}}
 ---
 ```
 
@@ -322,4 +329,5 @@ images:
 | `book.*` | signature 0, roman off, first chapter `left`, both headings `hidden` | see guide | [Book structure](book-structure.md) |
 | `toc.*` | depth 0, title `Contents`, page numbers and dot leaders on | see guide | [Book structure](book-structure.md#table-of-contents) |
 | `images.minScale` | `100` | whole number 10 to 100 | [Images and the cover](images-and-cover.md#keeping-images-with-their-text) |
+| `details.*` | no group: no row; colour `#7a4a2e`, 9.5 pt | `items` (a list of `{key, icon, icons, label, labels}`), `color` `#rrggbb`, `size` in pt | [Detail rows](details.md) |
 | `group` | none | text | [Groups](#groups) |

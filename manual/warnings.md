@@ -134,6 +134,14 @@ report are still written. Errors usually come from a
 | `ENTRY_BLOCK_IN_CONTAINER` | An `o2t-entry` block sits in a quote, callout or list; it is not an entry. |
 | `ENTRY_VALUE_NOT_TEXT` | A value of an entry is neither text, a number nor a list of them; it is left out. |
 | `ENTRY_IN_GLOSSARY` | A block under a glossary term is not an entry and is not printed. |
+| `DETAIL_YAML_INVALID` | An `o2t-details` block is not valid YAML or not a list of keys; no row. |
+| `DETAIL_ORPHAN_BLOCK` | An `o2t-details` block does not stand directly under a heading. |
+| `DETAIL_BLOCK_TWICE` | A heading has two `o2t-details` blocks; the first is used. |
+| `DETAIL_BLOCK_IN_CONTAINER` | An `o2t-details` block sits in a quote or callout; it is not read. |
+| `DETAIL_IN_GLOSSARY` | An `o2t-details` block under a glossary term is not read and not printed. |
+| `DETAIL_BLOCK_WITH_ENTRY` | A heading has an `o2t-entry` block and an `o2t-details` block; the entry is read, the details block is dropped. |
+| `DETAIL_VALUE_NOT_TEXT` | A value of a detail is a list or a map; it is left out. |
+| `DETAIL_VALUE_UNMAPPED` | A value is not in the item's `labels` or `icons`; it is printed as written. |
 | `ENTRY_TRACK_UNKNOWN` | An entry names a track cell the preset does not have. |
 | `ENTRY_NO_LEDE`, `ENTRY_LEDE_SHORT` | An entry starts with something other than a paragraph (a list, an image, …), or its opening paragraph has fewer than 10 words; it is still set beside the statblock. |
 | `STAT_BOXES_MANY`, `STAT_BOXES_NOT_NUMBER` | The box value is over 45, or not a whole number; no boxes are drawn. |
