@@ -238,11 +238,14 @@ describe('US-030 AC-16a sub-headings', () => {
         if (w === undefined) throw new Error('no <o2t-wrap>');
         if (w.beside >= 2) {
           beside++;
-          // The heading (block 1) is beside: block 2 split with >= 2 lines
-          // (a 43 mm column holds at least 4 such words a line).
-          if (w.split !== null) {
-            expect(w.split.block).toBe(2);
-            expect(w.split.words).toBeGreaterThanOrEqual(8);
+          // The heading (block 1) is beside: block 2 is beside whole, or
+          // split with >= 2 lines in the column (a 43 mm column holds at
+          // least 4 such words a line); never the heading alone at the
+          // column's foot (G4 of #140: a mutant that always set the heading
+          // beside survived the weaker check).
+          if (w.beside === 2) {
+            expect(w.split?.block, `n=${n}`).toBe(2);
+            expect(w.split?.words ?? 0, `n=${n}`).toBeGreaterThanOrEqual(8);
           }
         } else {
           below++;
@@ -262,15 +265,24 @@ describe('US-030 AC-16b where the wrap reaches', () => {
   it(
     'US-030 AC-16b, AC-20: a nested entry is never set in the column',
     async () => {
+      // A statblock tall enough that the nested entry would fit beside it
+      // (G4 of #140: with a shorter one a mutant that let it in survived).
       const source = [
-        entry('### Fen Hare', yaml(6), [words(10, 'a')]),
+        entry('### Fen Hare', yaml(24), [words(10, 'a')]),
         '',
         entry('#### Hare Kit', ['might: 1'], [words(10, 'c')]),
       ].join('\n');
-      const c = await compile(source);
-      const outer = c.wraps.find((w) => w.band === 'Fen Hare');
-      expect(outer?.beside).toBe(1);
-      expect(c.wraps.some((w) => w.band === 'Hare Kit')).toBe(true);
+      // Outside a chapter the converter ends the blocks before the nested
+      // entry; in a chapter the layout's wrap meets it and must stop.
+      for (const chapter of [false, true]) {
+        const c = await compile(
+          chapter ? `# Menagerie\n\n${source}` : source,
+          chapter ? {headingRules: {Menagerie: 'entries'}} : {},
+        );
+        const outer = c.wraps.find((w) => w.band === 'Fen Hare');
+        expect(outer?.beside, `chapter ${chapter}`).toBe(1);
+        expect(c.wraps.some((w) => w.band === 'Hare Kit')).toBe(true);
+      }
     },
     SLOW,
   );

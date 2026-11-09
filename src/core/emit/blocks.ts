@@ -34,7 +34,13 @@ import {
   emitUnnumberedHeading,
 } from './glossary';
 import {bookSheetCall} from '../entries/sheet';
-import {statblockCall, type StatblockWriter} from './entry';
+import {
+  statblockCall,
+  statblockData,
+  wrapBlocks,
+  type StatblockWriter,
+  type WrapBlock,
+} from './entry';
 import {escapeMarkup} from './escape-markup';
 import {Notes} from './footnote';
 import type {PageRefEnv} from './page-refs';
@@ -200,7 +206,12 @@ function keptList(items: readonly string[]): string {
  * the body's top-level blocks (the portrait split).
  */
 function entriesCall(
-  run: readonly {info: EntryLayoutInfo; head: string; body: string[]}[],
+  run: readonly {
+    info: EntryLayoutInfo;
+    head: string;
+    sb: string | null;
+    body: WrapBlock[];
+  }[],
   layout: EntryLayoutEnv,
   then: {opener: boolean; left: boolean; closes: boolean},
 ): string {
@@ -208,7 +219,7 @@ function entriesCall(
     text === '' ? '[]' : `[\n${indent(text, 4)}\n  ]`;
   const str = (v: string | null): string =>
     v === null ? 'none' : typstString(v);
-  const entries = run.map(({info, head, body}) => {
+  const entries = run.map(({info, head, sb, body}) => {
     const img =
       info.image === null
         ? 'none'
@@ -217,7 +228,6 @@ function entriesCall(
               ? 'none'
               : `[${escapeMarkup(info.image.credit, {atBlockStart: true})}]`
           })`;
-    const blocks = body.map(content);
     return [
       `  (heading: ${typstString(info.text)}, layout: ${typstString(info.layout)}, chosen: ${info.auto}, line: ${info.line}, asked: ${str(info.asked)}, reason: ${str(info.reason)}, img: ${img}, orient: ${
         info.image === null
@@ -227,7 +237,10 @@ function entriesCall(
             : '"portrait"'
       },`,
       `  head: ${content(head)},`,
-      `  blocks: ${blocks.length === 1 ? `(${blocks[0]},)` : `(${blocks.join(', ')})`}),`,
+      // US-030 AC-16a (#139): the statblock and the body as blocks with
+      // kinds; the layout wraps the body around the statblock.
+      `  sb: ${sb ?? 'none'},`,
+      `  blocks: ${wrapBlocks(body)}),`,
     ].join('\n');
   });
   // US-033 AC-1, AC-4: the end of the section's intro, before its entries.
@@ -282,6 +295,20 @@ function ledeKind(block: BlockNode): string | null {
     default:
       return 'html';
   }
+}
+
+/**
+ * US-030 | AC-16a (#139): what the wrap may do with a block of an entry's
+ * body: a plain paragraph may be split (`par`; one of images only is a
+ * `block`), a heading is sticky (`heading`), a nested entry's heading is
+ * never set beside the statblock (`entry`), anything else is kept whole.
+ */
+function wrapKind(block: BlockNode, env: BlockEnv): WrapBlock['kind'] {
+  if (block.kind === 'paragraph')
+    return ledeKind(block) === null ? 'par' : 'block';
+  if (block.kind === 'heading')
+    return env.statblocks?.models.has(block) === true ? 'entry' : 'heading';
+  return 'block';
 }
 
 /** US-028 AC-3, AC-6: a reserve with its pt and em parts kept apart. */
@@ -411,6 +438,11 @@ type Kind = 'paragraph' | 'list' | 'other';
 interface Piece {
   text: string;
   kind: Kind;
+  /**
+   * US-030 AC-16a (#139): the statblock data of a chapter entry's heading,
+   * handed to the layout (`o2t-entries`), which wraps the body around it.
+   */
+  sb?: string;
 }
 
 /** Indents every non-empty line by `n` blanks; empty lines stay empty. */
@@ -618,7 +650,12 @@ function entryRuns(
       continue;
     }
     const start = i;
-    const run: {info: EntryLayoutInfo; head: string; body: string[]}[] = [];
+    const run: {
+      info: EntryLayoutInfo;
+      head: string;
+      sb: string | null;
+      body: WrapBlock[];
+    }[] = [];
     while (isChapterEntry(blocks[i])) {
       const heading = blocks[i] as Extract<BlockNode, {kind: 'heading'}>;
       let j = i + 1;
@@ -636,10 +673,17 @@ function entryRuns(
         fit: undefined,
       });
       const [head, ...rest] = pieces;
+      const nodes = blocks.slice(i + 1, j);
       run.push({
         info: layout.entries.get(heading) as EntryLayoutInfo,
         head: head?.text ?? '',
-        body: rest.map((p) => p.text).filter((t) => t !== ''),
+        sb: head?.sb ?? null,
+        body: rest
+          .map((p, k) => ({
+            kind: wrapKind(nodes[k] as BlockNode, env),
+            body: p.text,
+          }))
+          .filter((b) => b.body !== ''),
       });
       for (let k = i; k < j; k++) covered.add(k);
       i = j;
@@ -1019,10 +1063,11 @@ function renderPieces(
             .filter((part) => part !== '')
             .join(' ');
         }
-        // US-030 AC-10, AC-16: an entry's statblock right after its heading,
-        // with the opening paragraph (or the first block) beside it.
+        // US-030 AC-10, AC-16, AC-16a (#139): an entry's statblock right
+        // after its heading, the body wrapped around it.
         const model = env.statblocks?.models.get(block);
         let call: string | null = null;
+        let sb: string | undefined;
         if (model !== undefined && env.statblocks !== undefined) {
           const sbEnv = env.statblocks;
           let next = position + 1;
@@ -1034,7 +1079,6 @@ function renderPieces(
           const first = blocks[next];
           const nested =
             first?.kind === 'heading' && env.statblocks.models.has(first);
-          let lede: string | null = null;
           if (first !== undefined && !nested) {
             const kind = ledeKind(first);
             const name = `"${model.band}"`;
@@ -1055,10 +1099,6 @@ function renderPieces(
                   model.line,
                 );
             }
-            if (kind !== 'heading') {
-              lede = renderBlocks([first], ctx, true, within(env, NO_RESERVE));
-              beside.add(next);
-            }
           }
           const writer: StatblockWriter = {
             content: (value) =>
@@ -1069,7 +1109,38 @@ function renderPieces(
               }),
             icon: (path) => sbEnv.icon(path, model.line),
           };
-          call = statblockCall(model, sbEnv.look, writer, lede);
+          if (env.entryHeading === block) {
+            // A chapter entry: the layout wraps its body (o2t-entries).
+            sb = statblockData(model, sbEnv.look, writer);
+          } else {
+            // AC-16b: an entry outside the chapters or nested wraps its body
+            // in the flow, up to a nested entry or a heading of its level or
+            // higher; outside a chapter also up to a block with a written
+            // page break (US-025, US-026) and, with US-028's fit on, up to a
+            // paragraph with an image (US-028 places it in the flow).
+            const gathered: WrapBlock[] = [];
+            for (let k = position + 1; k < blocks.length; k++) {
+              const b = blocks[k] as BlockNode;
+              if (
+                b.kind === 'heading' &&
+                (b.depth <= block.depth || sbEnv.models.has(b))
+              )
+                break;
+              if (top !== null && top.before[k] !== undefined) break;
+              if (
+                !nested &&
+                env.fit !== undefined &&
+                b.kind === 'paragraph' &&
+                b.children.some((n) => isImageNode(n))
+              )
+                break;
+              const text = renderPieces([b], ctx, nested, env)[0]?.text ?? '';
+              beside.add(k);
+              if (text !== '')
+                gathered.push({kind: wrapKind(b, env), body: text});
+            }
+            call = statblockCall(model, sbEnv.look, writer, gathered);
+          }
           sbEnv.written();
         }
         // US-031 AC-1, AC-2: an entry outside the chapters, or nested, is
@@ -1080,6 +1151,7 @@ function renderPieces(
             ? `#o2t-entry-mark((heading: ${typstString(layoutInfo.text)}, layout: ${typstString(layoutInfo.layout)}, size: "inline"))`
             : null;
         return {
+          ...(sb === undefined ? {} : {sb}),
           // US-017 AC-8: images of a term follow its run-in paragraph.
           text: [
             marked(env, block.line, line),

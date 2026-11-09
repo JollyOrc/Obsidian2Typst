@@ -225,6 +225,9 @@ export function paddingEndLines(signature: number): string {
  * - `spread-portrait` splits the body between the pages at block boundaries
  *   (as many blocks as fit the left page; Typst cannot flow a page into a
  *   narrower column on the next one).
+ * Each entry's body is first wrapped around its statblock (`o2t-wrap`, US-030
+ * AC-16a, #139); the layouts place the head (heading, statblock and column)
+ * and the full-width blocks after it.
  * Each entry records `<o2t-entry>` (heading, layout, size, page, asked and
  * reason when replaced) and `<o2t-entry-end>` (heading, page). Sub-headings
  * inside entries (`outlined: false, bookmarked: false`) are set small and
@@ -247,6 +250,13 @@ export function entriesLayoutHelper(bandSize: string): string {
 }
 #let o2t-entries(es, next-opener: false, next-left: false, closes: false, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70, narrow: none) = context {
   let lh = measure([A \\ A]).height - measure([A]).height
+  // US-030 AC-16a (#139): each entry's body wrapped around its statblock at
+  // the text width; what follows the column (the full-width part) is what
+  // the layouts below place: blocks of the left page, the right page.
+  let es = es.map(e => if e.sb == none { e + (blocks: e.blocks.map(b => b.body)) } else {
+    let w = o2t-wrap(o2t-sb-box(e.sb), e.blocks, tw, narrow: narrow, band: e.sb.band)
+    e + (head: { e.head; parbreak(); w.top }, blocks: w.rest)
+  })
   let body(e) = e.blocks.join(parbreak())
   let whole(e) = { e.head; parbreak(); body(e) }
   let hgt(c) = measure(block(width: tw, c)).height

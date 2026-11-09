@@ -23,7 +23,7 @@ export interface EntryPages {
 /**
  * US-034 AC-7: runs on one baseline whose ends are further apart than this
  * share of the font size are different lines (two columns, a table's cells,
- * the lede beside the statblock). Within a line Typst's runs touch: a run
+ * the column beside the statblock). Within a line Typst's runs touch: a run
  * ends with its space glyph and its adjustment. Measured 2026-11-07 on a
  * justified 11 pt line with bold, italic, a link and code: at most 0.73 pt
  * between runs; a table's cells 10 pt apart (two 5 pt insets).
