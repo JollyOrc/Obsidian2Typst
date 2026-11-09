@@ -252,7 +252,9 @@ and a note whose block sits under `###### Reed Weaving`.
 - **AC-13 (no change without the group):** A note without `o2t-details`
   blocks, or with them and a preset without the group, converts to the same
   Typst as 0.13.1 would for the note with the blocks removed (byte for
-  byte); the preamble holds no details helper.
+  byte); the preamble holds no details helper. The warnings about the place
+  and the YAML of a block (AC-2, AC-3) do not depend on the preset: they are
+  reported with or without the group.
 
 ### Obsidian
 

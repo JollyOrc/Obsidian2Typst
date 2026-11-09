@@ -140,6 +140,51 @@ describe('US-038 AC-7 the row in the PDF', () => {
   );
 });
 
+describe("US-038 AC-6 the icons are recoloured to the row's colour", () => {
+  const svg = (inner: string): Uint8Array =>
+    new TextEncoder().encode(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">${inner}</svg>`,
+    );
+  const withIcon = (inner: string) =>
+    compileEntries(details('### Reed Weaving', ['needs: Basket Knots']), {
+      over: {
+        details: {
+          color: '#336699',
+          items: [{key: 'needs', icon: 'Icons/lock.svg'}],
+        },
+      },
+      images: {...DETAIL_ICON_BYTES, 'Icons/lock.svg': svg(inner)},
+    });
+  const count = (c: CompiledEntries, colour: string): number =>
+    (c.pages[0]?.fills ?? []).filter((f) => f === colour).length;
+
+  it(
+    'US-038 AC-6: a red-filled icon is drawn in the row colour; its own red is not in the page',
+    async () => {
+      const c = await withIcon('<path d="M3 3h4v6H3z" fill="#ff0000"/>');
+      expect(c.pages[0]?.fills).not.toContain('#ff0000');
+      expect(c.details).toEqual([{page: 1, badges: 1}]);
+      const none = await withIcon('');
+      // the icon's own fill is one more fill of the row's colour
+      expect(count(c, '#336699')).toBe(count(none, '#336699') + 1);
+    },
+    SLOW,
+  );
+
+  it(
+    'US-038 AC-6: a fill of none stays none (only its stroke takes the colour): no extra fill',
+    async () => {
+      const c = await withIcon(
+        '<rect x="2" y="2" width="6" height="6" fill="none" stroke="#00ff00"/>',
+      );
+      const none = await withIcon('');
+      expect(count(c, '#336699')).toBe(count(none, '#336699'));
+      expect(c.pages[0]?.fills).not.toContain('#00ff00');
+    },
+    SLOW,
+  );
+});
+
 describe('US-038 AC-8 one row that wraps; a value longer than a page', () => {
   it(
     'US-038 AC-8: a row with the 57-character requirement wraps to a second line inside the row and keeps every word',
@@ -266,16 +311,20 @@ describe('US-038 AC-8 guard: the icon-to-word join, measured with the compiler',
             runWithWorld<T>(
               o: {mainFilePath: string},
               cb: (x: {
+                compile(o: {diagnostics: 'unix'}): Promise<unknown>;
                 query(o: {selector: string; field: string}): Promise<unknown>;
               }) => Promise<T>,
             ): Promise<T>;
           };
           const [a, b] = await compiler.runWithWorld(
             {mainFilePath: path},
-            async (x) => [
-              await x.query({selector: '<a>', field: 'value'}),
-              await x.query({selector: '<b>', field: 'value'}),
-            ],
+            async (x) => {
+              await x.compile({diagnostics: 'unix'});
+              return [
+                await x.query({selector: '<a>', field: 'value'}),
+                await x.query({selector: '<b>', field: 'value'}),
+              ];
+            },
           );
           const A = (typeof a === 'string' ? JSON.parse(a) : a) as string[];
           const B = (typeof b === 'string' ? JSON.parse(b) : b) as string[];
@@ -323,7 +372,7 @@ describe('US-038 AC-9 links in the PDF', () => {
       );
       expect(links.length).toBeGreaterThanOrEqual(1);
       expect(
-        inOrder(c.pages[row]?.text ?? '', ['Basket Knots', 'p. ', 'You weave']),
+        inOrder(c.pages[row]?.text ?? '', ['Basket Knots', 'p.', 'You weave']),
       ).toBe(true);
       const off = await compile(NOTE, {linkPageNumbers: false});
       expect(off.pages[row]?.text).not.toMatch(/Basket Knots\s*\(p\./);
@@ -507,7 +556,7 @@ describe('US-038 AC-11 composed, in the PDF', () => {
             details('###### Reed Weaving', ALL),
             '',
           ].join('\n'),
-          {breakBefore: {2: 'page'}},
+          {breakBefore: {h2: 'page'}},
         );
         void facingPages;
         const h = pageOf(c.pages, 'Reed Weaving');
@@ -526,7 +575,7 @@ describe('US-038 AC-11 composed, in the PDF', () => {
       );
       const c = await compile(
         details('###### Reed Weaving', ALL),
-        {template: true},
+        {template: true, templateHook: true},
         {'template.typ': template},
       );
       expect(c.pages[0]?.fills).toContain('#7a4a2e');
@@ -544,7 +593,7 @@ describe('US-038 AC-11 composed, in the PDF', () => {
       const c = await compile(
         details('###### Reed Weaving', ['needs: "- a **firm** hand"']),
       );
-      expect(c.pages[0]?.text).toContain('- a firm hand');
+      expect(c.pages[0]?.text.replace(/\s+/g, ' ')).toContain('- a firm hand');
       expect(c.details).toEqual([{page: 1, badges: 1}]);
     },
     SLOW,

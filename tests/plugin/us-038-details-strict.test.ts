@@ -64,7 +64,8 @@ describe('US-038 AC-12 strict mode', () => {
     const report = host.files.get('/out/export-warnings.md') ?? '';
     expect(report).toContain('DETAIL_VALUE_UNMAPPED');
     expect(report).toContain('DETAIL_VALUE_NOT_TEXT');
-    expect(report.split('DETAIL_VALUE_UNMAPPED').length - 1).toBe(1);
-    expect(report.split('DETAIL_VALUE_NOT_TEXT').length - 1).toBe(1);
+    // the summary row counts the code too (US-006 AC-8); the detail row has the text
+    expect(report.split('"Reed Weaving": pace: soon').length - 1).toBe(1);
+    expect(report.split('"Reed Weaving": kind').length - 1).toBe(1);
   });
 });

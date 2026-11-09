@@ -83,7 +83,7 @@ describe('US-038 AC-7 the call and its place', () => {
     const value = 'a_b #c *d* [e]';
     const {typ} = await runDetails(details(HEAD, [`needs: "${value}"`]));
     // a value is typeset: `*d*` is emphasis, the rest is escaped as at a block start
-    const body = /body: \[([^\n]*)\]\)\)\)\)$/m.exec(
+    const body = /body: \[([^\n]*)\]\),?\)\)\)$/m.exec(
       detailsCalls(typ)[0] ?? '',
     )?.[1];
     expect(body).toContain('a\\_b \\#c');
@@ -107,6 +107,49 @@ describe('US-038 AC-7 the call and its place', () => {
     const missing = warnings.filter((w) => w.code === 'ASSET_MISSING');
     expect(missing).toHaveLength(1);
     expect(missing[0]?.message).toContain('brisk.svg');
+  });
+});
+
+describe('US-038 AC-7 a badge with nothing to show is left out', () => {
+  it('US-038 AC-7: a flag with only an icon whose file is missing draws no row and warns once', async () => {
+    const {typ, warnings} = await runDetails(
+      details(HEAD, ['starter: true']),
+      {details: {items: [{key: 'starter', icon: 'Icons/nofile.svg'}]}},
+      ['Sample/Rules.md'],
+    );
+    expect(detailsCalls(typ)).toEqual([]);
+    expect(typ).not.toContain('o2t-detail-icon');
+    expect(warnings.filter((w) => w.code === 'ASSET_MISSING')).toHaveLength(1);
+  });
+
+  it('US-038 AC-7: the other badges of the row stay when one is empty', async () => {
+    const {typ} = await runDetails(
+      details(HEAD, ['starter: true', 'pace: brisk']),
+      {
+        details: {
+          items: [
+            {key: 'starter', icon: 'Icons/nofile.svg'},
+            {key: 'pace', labels: {brisk: 'Brisk'}},
+          ],
+        },
+      },
+      ['Sample/Rules.md'],
+    );
+    const call = detailsCalls(typ)[0] ?? '';
+    expect(call).toContain('items: ((icon: none, body: [Brisk]),)');
+  });
+});
+
+describe('US-038 AC-7 an icon file that is missing warns once per file', () => {
+  it('US-038 AC-7: two rows that name the same missing icon give one ASSET_MISSING', async () => {
+    const source = [
+      details('### First', ['pace: brisk']),
+      '',
+      details('### Second', ['pace: brisk']),
+    ].join('\n');
+    const {typ, warnings} = await runDetails(source, {}, ['Sample/Rules.md']);
+    expect(detailsCalls(typ)).toHaveLength(2);
+    expect(warnings.filter((w) => w.code === 'ASSET_MISSING')).toHaveLength(1);
   });
 });
 
@@ -207,7 +250,7 @@ describe('US-038 AC-9 links in values', () => {
     const md = await runDetails(
       NOTE.replace(
         'needs: "[[#Basket Knots|Basket Knots]]"',
-        'needs: "[Knots](#Basket Knots)"',
+        'needs: "[Knots](#Basket%20Knots)"',
       ),
     );
     expect(detailsCalls(md.typ)[0]).toContain('#link(<h-basket-knots>)[Knots]');
@@ -263,7 +306,7 @@ describe('US-038 AC-11 what the row joins (Typst text)', () => {
       const source = details(HEAD, ['pace: slow'], lines);
       const {typ} = await runDetails(source);
       const out = after(typ);
-      expect(out[2]).toMatch(/^#o2t-details\(.*\)\)\)\)$/);
+      expect(out[2]).toMatch(/^#o2t-details\(.*\)\)\)$/);
       expect(out[3]).toBe('');
       expect(out.slice(4).join('\n')).not.toContain('o2t-details(');
       expect(out.slice(4).join('\n').length).toBeGreaterThan(0);

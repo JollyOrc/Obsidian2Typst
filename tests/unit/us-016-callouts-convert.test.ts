@@ -476,7 +476,7 @@ describe('US-016 AC-11 the preamble rule callouts', () => {
 });
 
 describe('US-016 AC-11 names the plugin defines (template)', () => {
-  it('US-016 AC-11, US-017 AC-6, US-019 AC-3, US-018 AC-3, US-025 AC-6, US-026 AC-6, US-028 AC-3, AC-17, US-030 AC-15, AC-16a, US-031, US-032, US-033, US-036: PLUGIN_NAMES are fit-flow, fit-image, callout, callout-styles, glossary-term, o2t-atoms, o2t-blank, o2t-box-rows, o2t-box-size, o2t-cell, o2t-chapter-header, o2t-continued, o2t-entries, o2t-entry-end, o2t-entry-mark, o2t-even, o2t-fit, o2t-fit-decision, o2t-fit-hints, o2t-fit-pinned, o2t-fitted, o2t-icon, o2t-part, o2t-sb-box, o2t-section-end, o2t-sheet, o2t-sheet-row, o2t-statblock, o2t-tail-header, o2t-wrap, page-ref, running-text and running-title', () => {
+  it('US-016 AC-11, US-017 AC-6, US-019 AC-3, US-018 AC-3, US-025 AC-6, US-026 AC-6, US-028 AC-3, AC-17, US-030 AC-15, AC-16a, US-031, US-032, US-033, US-036, US-038: PLUGIN_NAMES are fit-flow, fit-image, callout, callout-styles, glossary-term, o2t-atoms, o2t-blank, o2t-box-rows, o2t-box-size, o2t-cell, o2t-chapter-header, o2t-continued, o2t-detail-icon, o2t-details, o2t-entries, o2t-entry-end, o2t-entry-mark, o2t-even, o2t-fit, o2t-fit-decision, o2t-fit-hints, o2t-fit-pinned, o2t-fitted, o2t-icon, o2t-part, o2t-sb-box, o2t-section-end, o2t-sheet, o2t-sheet-row, o2t-statblock, o2t-tail-header, o2t-wrap, page-ref, running-text and running-title', () => {
     expect([...PLUGIN_NAMES].sort()).toEqual([
       'callout',
       'callout-styles',
@@ -491,6 +491,8 @@ describe('US-016 AC-11 names the plugin defines (template)', () => {
       'o2t-cell',
       'o2t-chapter-header',
       'o2t-continued',
+      'o2t-detail-icon',
+      'o2t-details',
       'o2t-entries',
       'o2t-entry-end',
       'o2t-entry-mark',

@@ -14,6 +14,8 @@ import {
   contentsLines,
   emitBlocks,
   STATBLOCK_HELPER_DEF,
+  DETAILS_HELPER_DEF,
+  detailsLookValues,
   entriesLayoutHelper,
   escapeMarkup,
   findImage,
@@ -41,12 +43,17 @@ import {
   STATBLOCK_BUILTINS,
   findGlossary,
   headingRuleTable,
+  type DetailsSettings,
   type EntryData,
   placeEntries,
+  planDetails,
   planEntries,
+  readDetailsBlock,
   readEntryBlock,
+  scanDetailsBlocks,
   scanEntryBlocks,
 } from '../markers';
+import {detailsModel, type DetailsModel} from '../details/model';
 import {indexHeadings, parse, type BlockNode} from '../parse';
 import {
   boxColumnLabel,
@@ -393,6 +400,21 @@ function trimLines(lines: readonly string[]): string[] {
 }
 
 /**
+ * US-038 AC-7: the file names of every icon the `details` group names, as
+ * the lookup of heads reads them (the last path part, NFC), like the track
+ * icons of the statblock.
+ */
+function detailIconNames(settings: DetailsSettings | undefined): string[] {
+  const paths = (settings?.items ?? []).flatMap((item) => [
+    ...(item.icon === undefined ? [] : [item.icon]),
+    ...Object.values(item.icons ?? {}),
+  ]);
+  return paths.map((path) =>
+    path.slice(path.lastIndexOf('/') + 1).normalize('NFC'),
+  );
+}
+
+/**
  * US-015 AC-1 to AC-13: converts one note.
  *
  * Reads the vault only through `input.assets`: first the heads of the files
@@ -405,7 +427,11 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   const parsed = parse(input.source);
   // US-030 AC-1, AC-4 (SCAR-034): the entry blocks leave the tree before any
   // other step reads it; they are data, never printed.
-  const scan = scanEntryBlocks(parsed.root);
+  // US-038 AC-1: the details blocks leave the tree first (an entry block next
+  // to one does not move its place), then the entry blocks.
+  const detailsScan = scanDetailsBlocks(parsed.root);
+  const detailReads = detailsScan.found.map(readDetailsBlock);
+  const scan = scanEntryBlocks(detailsScan.root);
   const reads = scan.found.map((found) =>
     readEntryBlock(found, input.settings.entries),
   );
@@ -437,6 +463,10 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
           )),
       // US-030 AC-7: the entries' illustrations.
       ...illustrations,
+      // US-038 AC-7: the icons of the detail row (when a block exists).
+      ...(detailReads.length === 0
+        ? []
+        : detailIconNames(input.settings.details)),
       ...coverFile,
       ...calloutIconNames(root, callouts),
     ]),
@@ -530,8 +560,17 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     entryPlan.entries,
     headingRuleTable(input.settings.headingRules),
   );
+  // US-038 AC-3: a details block under a heading that also has an entry
+  // block, or under a glossary term, is dropped.
+  const entryHeadings = new Set<BlockNode>(scan.found.map((f) => f.heading));
+  const detailPlan = planDetails(detailReads, {
+    hasEntry: (heading) => entryHeadings.has(heading),
+    inGlossary: (heading) => glossary.roles.has(heading),
+  });
   for (const w of [
+    ...detailsScan.warnings,
     ...scan.warnings,
+    ...detailPlan.warnings,
     ...entryPlan.warnings,
     ...placed.warnings,
   ]) {
@@ -608,6 +647,18 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   // US-030 AC-13: each track icon resolved once; a missing one warns once
   // (at the first entry that draws it) and its cell is drawn empty.
   const icons = new Map<string, string | null>();
+  /** One lookup of an icon file for the statblock's cells and the detail rows. */
+  const iconFile = (path: string, line: number): string | null => {
+    const known = icons.get(path);
+    if (known !== undefined) return known;
+    const found = findImage(
+      {kind: 'image', src: `/${path}`, alt: '', title: null, line},
+      ctx,
+      resolver,
+    );
+    icons.set(path, found);
+    return found;
+  };
   let statblocksWritten = 0;
   const statblocks =
     models.size === 0
@@ -615,19 +666,38 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       : {
           models,
           look: statblockLook(input.settings.entries, input.settings.colorMode),
-          icon: (path: string, line: number): string | null => {
-            const known = icons.get(path);
-            if (known !== undefined) return known;
-            const found = findImage(
-              {kind: 'image', src: `/${path}`, alt: '', title: null, line},
-              ctx,
-              resolver,
-            );
-            icons.set(path, found);
-            return found;
-          },
+          icon: iconFile,
           written: () => {
             statblocksWritten += 1;
+          },
+        };
+  // US-038 AC-4, AC-7, AC-12: the detail rows, one model per block; the data
+  // checks are reported once per block at its line (SCAR-038). Without a
+  // `details` group or without items no row is made and no check runs.
+  const detailRows = new Map<BlockNode, DetailsModel & {line: number}>();
+  for (const data of detailPlan.rows.values()) {
+    const model = detailsModel(
+      Object.fromEntries(data.fields),
+      input.settings.details,
+    );
+    if (model === null) continue;
+    detailRows.set(data.heading, {...model, line: data.line});
+    for (const check of model.checks)
+      ctx.warn(check.code, `"${data.text}": ${check.detail}`, data.line);
+  }
+  let detailsWritten = 0;
+  const details =
+    detailRows.size === 0
+      ? undefined
+      : {
+          rows: detailRows,
+          look: detailsLookValues(
+            input.settings.details,
+            input.settings.colorMode,
+          ),
+          icon: iconFile,
+          written: () => {
+            detailsWritten += 1;
           },
         };
   // US-036 AC-2, AC-6: the encounter sheet page after each entries chapter;
@@ -722,6 +792,7 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     unlistNested: contents !== null,
     fit: imageFit(input.settings, arranged, placed.bodies),
     statblocks,
+    details,
     entryLayout,
   });
   // US-010 AC-5: characters of the source that their family lacks.
@@ -798,6 +869,8 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
         statblocksWritten > 0 || entryLayout !== undefined
           ? `${ENTRY_MARKS_DEF}\n${WRAP_HELPER_DEF}\n${STATBLOCK_HELPER_DEF}`
           : null,
+      // US-038: the detail row helpers, only when a row is drawn.
+      details: detailsWritten > 0 ? DETAILS_HELPER_DEF : null,
       // US-031: the entry layout, only when a chapter places an entry.
       entries:
         entryLayout === undefined

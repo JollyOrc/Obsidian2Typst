@@ -10,7 +10,8 @@
  * US-030 AC-15; `o2t-wrap`, `o2t-atoms` of US-030 AC-16a (#139); `o2t-entries`, `o2t-entry-mark`, `o2t-entry-end`, `o2t-even`,
  * `o2t-fitted` of US-031; `o2t-continued` of US-032; `o2t-chapter-header`, `o2t-section-end`, `o2t-tail-header` (#139) of US-033; `o2t-box-size`,
  * `o2t-box-rows`, `o2t-icon`, `o2t-cell` shared by US-030 and US-036;
- * `o2t-sheet`, `o2t-sheet-row` of US-036). The
+ * `o2t-sheet`, `o2t-sheet-row` of US-036; `o2t-details`, `o2t-detail-icon`
+ * of US-038). The
  * preamble comes
  * after the template import, so these replace a template's definition of the
  * same name; `templateWarnings` reports it. A text check in the US-016 tests
@@ -29,6 +30,8 @@ export const PLUGIN_NAMES: readonly string[] = Object.freeze([
   'o2t-cell',
   'o2t-chapter-header',
   'o2t-continued',
+  'o2t-detail-icon',
+  'o2t-details',
   'o2t-entries',
   'o2t-entry-end',
   'o2t-entry-mark',
