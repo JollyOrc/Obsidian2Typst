@@ -117,7 +117,11 @@ export const US030_CODES = [
  */
 export const STATBLOCK_HELPER = 'o2t-statblock';
 export const statblockCalls = (typ: string): number =>
-  typ.split(`#${STATBLOCK_HELPER}(`).length - 1;
+  typ.split(`#${STATBLOCK_HELPER}(`).length -
+  1 +
+  // US-030 AC-16a (#139): an entry of an entries chapter hands its statblock
+  // to the layout (`sb: (band: …)` in `o2t-entries`), which wraps it there.
+  (typ.split('sb: (band: ').length - 1);
 
 /**
  * What the statblock helper records about each statblock it drew, as

@@ -1,8 +1,8 @@
 # US-032 — Entry fit, overflow and the automatic layout
 
-**Status:** Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Done; amendment for #139 Ready (2026-11-09: AC-2, AC-4, AC-9, AC-12 — the portrait forms in the automatic choice and the fit, the grown landscape illustration, the space below it). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 and US-031)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups)
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
 **Supersedes:** US-031 AC-3's interim `auto` rule (decision 1 of US-031)
 
 Epic #121, third of seven stories (see US-030). Drafts D-11, D-12, D-13 in
@@ -87,7 +87,13 @@ facing pages, `headingRules: {Menagerie: entries}`) with
   | portrait | no | `spread-portrait` |
 
   "Fits one page" is decided by AC-4's measurement for the page layout of
-  that row. `full-image` is never chosen. This replaces US-031 AC-3's interim
+  that row. For a portrait illustration (amended for #139, G0 answer 11) the
+  page layout fits when either of US-031 AC-7b's two forms fits: the columns
+  form at some scale ≥ `minScale`, or the stacked form (its illustration at
+  least as large as the columns illustration at `minScale`). Example: a 1:2
+  illustration whose text overflows the 45 % column at every scale but fits
+  one page at full width with a stacked picture larger than the columns
+  picture at 70 % → `page-portrait` (before #139: `spread-portrait`). `full-image` is never chosen. This replaces US-031 AC-3's interim
   rule. Each choice gives `ENTRY_AUTO "<heading>": <layout>` (the author
   copies it into the note to fix it). Example: an entry with a 3:2
   illustration whose text and illustration fit one page at 85 % →
@@ -114,6 +120,14 @@ facing pages, `headingRules: {Menagerie: entries}`) with
   | fits only at 60 % | 70 | 70 %, overflows (AC-5) |
   | fits only at 60 % | 10 | 60 %, one page |
   | any length | 100 | 100 %; no shrinking |
+
+  Amended for #139: the scale found here is the smallest size the
+  illustration is drawn at; in `page-landscape` and `spread-landscape` it
+  then grows into the free space below the text (US-031 AC-7a), so the
+  measured fit is unchanged and the drawn picture is never smaller. In
+  `page-portrait` and `spread-portrait` the steps apply to the columns form;
+  the stacked form has no steps (its picture fills the free space) and is
+  compared by US-031 AC-7b.
 
 - **AC-5 (overflow):** An entry that does not fit at `minScale` (or a
   text-only entry that does not fit its pages) runs on to the next page(s)
@@ -151,7 +165,10 @@ facing pages, `headingRules: {Menagerie: entries}`) with
   "<heading>": <layout>, right page <P> % empty – consider an illustration or
   trimming`, whether the layout was chosen or set. "Unused" is the text
   height below the entry's last element (text or illustration) on the right
-  page, from the real end position. Examples: a `spread-text` entry of one
+  page, from the real end position. Amended for #139 (G0 answer 9): with a
+  grown or stacked illustration centred in the free space, the space below
+  the illustration counts as unused (the end position is the illustration's
+  lower edge, caption included), the space above it does not. Examples: a `spread-text` entry of one
   page and 6 lines (right page about 85 % empty) → warning at 50, also at 80,
   none at 90; `emptyWarn: 0` → no warning ever.
 
@@ -183,7 +200,11 @@ facing pages, `headingRules: {Menagerie: entries}`) with
   `entries.emptyWarn` at 0, 1, 50, 90, 100; illustration ratios 1:4, 1:2,
   1:1, 3:2, 4:1 in each slot; text lengths just under and just over each
   boundary (one page, two pages); an overflowing entry in each layout, as the
-  first and the second of a pair, and as the last of a section. The PDF
+  first and the second of a pair, and as the last of a section. For #139:
+  the automatic choice for a portrait illustration whose text overflows the
+  column but fits stacked (above and below the `minScale` limit of US-031
+  AC-7b); `ENTRY_SPREAD_EMPTY` for a `spread-landscape` right page with a
+  centred picture (the space below it counted) at `emptyWarn` 0, 1, 50. The PDF
   tests read each entry's pages, the drawn size of each illustration, the
   header text of each page (the "(continued)" line) and the warnings as an
   exact list (SCAR-015, SCAR-038), on the generated fixture (US-024
@@ -211,3 +232,4 @@ facing pages, `headingRules: {Menagerie: entries}`) with
 ## Related tickets
 
 <!-- Filled in at step 3. Drafts: D-11, D-12, D-13. -->
+- #141 (AC-4, AC-9), #142 (AC-2, AC-4), #145; amendment for #139.

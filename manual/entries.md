@@ -4,7 +4,7 @@
 
 An **entry** is a creature, an item or anything else with numbers: a heading,
 a block of data under it, and its text. The plugin prints the data as a
-**statblock** beside the entry's opening paragraph and, inside an **entries
+**statblock** with the entry's text wrapped around it and, inside an **entries
 chapter**, gives every entry a page or a spread of its own, with its
 illustration. Obsidian shows the same statblock in reading view. A quick
 reference table and a printable encounter sheet can follow each chapter.
@@ -120,8 +120,14 @@ black-and-white printing.
 | `boxFill` | `#ffffff` |
 | `sizes` | band 11.5, value 11, label 5.5, text 7, attacks 7.5, skills 9 |
 
-The statblock is never split across pages; it sits beside the entry's
-opening paragraph.
+The statblock is never split across pages. The entry's text **wraps around
+it**: it fills the column beside the statblock until the statblock ends,
+then runs at full width. A paragraph that reaches the statblock's lower edge
+is split there at a word (the rest continues below, not indented); a
+sub-heading goes into the column only when two lines of what follows fit
+there too; a picture, table, list, quote or callout goes beside the
+statblock only when it fits whole, otherwise it starts below it. The same
+holds for nested entries and entries outside an entries chapter.
 
 ## The entries chapter
 
@@ -146,12 +152,12 @@ up on facing pages. **Spread layouts** take a left and a right page.
 
 | Layout | What it looks like |
 | --- | --- |
-| `page-text` | heading, statblock beside the opening paragraph, text |
-| `page-landscape` | as `page-text`, the illustration at full width at the foot, at most 40 % of the page |
-| `page-portrait` | the text in a 45 % column, the illustration in a 55 % column on the outer edge |
+| `page-text` | heading, statblock with the text wrapped around it, text |
+| `page-landscape` | as `page-text`, the illustration directly under the text, grown into the space left on the page (at least full width × 40 % of the page) |
+| `page-portrait` | below the statblock, the text and the illustration in the better of two forms (below) |
 | `spread-text` | the text over two pages |
-| `spread-landscape` | the text, then the illustration in the lower half of the right page |
-| `spread-portrait` | the right page in two columns: text 45 %, illustration 55 % on the outer edge |
+| `spread-landscape` | the text, then the illustration directly under it on the right page, grown into the space left (at least the lower half's size) |
+| `spread-portrait` | the right page in the better of two forms (below) |
 | `full-image` | the text on the left page, the illustration alone on the right page (no header or folio unless `entries.fullImageHeader: true`) |
 | `auto` | chosen for you (see below) |
 
@@ -160,6 +166,19 @@ up on facing pages. **Spread layouts** take a left and a right page.
 fits one page, else the spread layout of the same kind. `full-image` is never
 chosen. The plugin tells you what it chose (`ENTRY_AUTO "Marsh Owl":
 page-landscape`), so you can write it into the block.
+
+A **landscape illustration** follows the text and is enlarged into the space
+left below it, up to the text width; when it reaches the text width before it
+fills that space (a wide picture), it is centred in the space. When the space
+is smaller than its usual slot, it goes to the next page at that slot's size,
+as before.
+
+A **portrait illustration** is laid out two ways and the one that shows it
+larger is used: **columns** (the text in a 45 % column, the picture in 55 %
+on the outer edge) or **stacked** (the text at full width, the picture
+below it, centred). The stacked form only counts when its picture is at
+least as large as the column picture at `entries.image.minScale`; with no
+text left, the picture fills the page, centred.
 
 An illustration is scaled to fit its place and never cropped. To make an
 entry fit, it may shrink down to `entries.image.minScale` (built-in 70 %).
@@ -190,8 +209,13 @@ links on).
 ## The quick reference
 
 With `entries.quickReference: true`, a table follows each entries chapter on
-a new left page: Entry, Section, the box value, each stat, Track (when a
-track is set) and Page, one row per entry in the note's order. Its heading is
+a new left page: Entry, the box value (headed with the stats label of the box
+key, or the key with a capital first letter), each stat, Track (when a track
+is set) and Page, one row per entry in the note's order. A row with the
+section's name starts each section's entries and is repeated at the top of a
+page that starts inside a section. Each entry name links to the entry. The
+pages of the quick reference and of the encounter sheet show their own
+title in the running header. Its heading is
 `entries.quickReferenceTitle` (built-in `Quick Reference`; empty for none),
 at the level of the chapter's sections and in the contents. The Track column
 reads `+ Fading` or `− Down` for one cell more or less than `trackDefault`,
@@ -238,7 +262,7 @@ strict mode:
   `IMAGE_LOW_DPI "assets/map.png": 138 dpi at 50.0 mm (min 300)`. Vector
   images are not checked. The preview checks this too.
 - **Word gaps:** when your template justifies the text, narrow columns (the
-  portrait columns and the opening paragraph beside the statblock) are set
+  portrait text column and the column beside the statblock) are set
   with `entries.narrowJustification` (built-in spacing 80 to 150 %, tracking
   −0.01 to 0.03 em). After the export, the PDF is scanned for justified lines
   whose widest gap is over `entries.maxWordGap` (built-in 200 %; 0 turns the

@@ -155,8 +155,9 @@ export function statblockModel(
   let boxValue: string | null = null;
   if (boxesKey !== null && single.has(boxesKey)) {
     boxValue = single.get(boxesKey) ?? null;
-    const field = statFields.find((f) => lower(f.key) === boxesKey);
-    boxLabel = (field?.label ?? sb.boxes ?? '').toUpperCase();
+    // US-033 AC-9 (#139, SCAR-017): the label made in one place; the box
+    // row prints it in upper case.
+    boxLabel = (boxColumnLabel(sb.boxes, statFields) ?? '').toUpperCase();
     const n = boxValue === null ? null : asNumber(boxValue);
     if (n === null || !Number.isInteger(n) || n < 0) {
       checks.push({code: 'STAT_BOXES_NOT_NUMBER', detail: null});
@@ -286,4 +287,23 @@ export function statblockModel(
       ),
     ],
   };
+}
+
+/**
+ * US-033 | AC-9 (amended for #139, G0 answer 14): the quick reference's box
+ * column label: the label of the `stats` field whose key is the box key
+ * (compared in lowercase), else the key with its first character in upper
+ * case and the rest as written (`vigour` → `Vigour`, `hit_points` →
+ * `Hit_points`), never the raw key; null without a box key. The one place
+ * the table's label is made (SCAR-017); the statblock's own box row keeps
+ * its upper-case label (`boxLabel` above, US-030 AC-12).
+ */
+export function boxColumnLabel(
+  boxes: string | undefined,
+  stats: readonly {key: string; label: string}[] | undefined,
+): string | null {
+  if (boxes === undefined) return null;
+  const field = stats?.find((f) => f.key.toLowerCase() === boxes.toLowerCase());
+  if (field !== undefined) return field.label;
+  return boxes.charAt(0).toUpperCase() + boxes.slice(1);
 }

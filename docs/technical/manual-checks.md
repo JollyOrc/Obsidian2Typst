@@ -36,3 +36,4 @@ steps and how it is recorded. A new check gets the next number, a file
 | [M22](manual-checks/M22.md) | The statblock in Obsidian and its API | US-035 AC-1 to AC-9, AC-11 |
 | [M23](manual-checks/M23.md) | The encounter sheet printed at 100 % | US-036 AC-3, AC-5 to AC-8, AC-10 |
 | [M24](manual-checks/M24.md) | The print checks: low resolution and wide word gaps | US-034 AC-1 to AC-8 |
+| [M25](manual-checks/M25.md) | Entry layouts, second round: the wrap, grown and stacked illustrations, the quick reference | US-030 AC-16, AC-16a, AC-16b, AC-17; US-031 AC-7a, AC-7b, AC-9; US-032 AC-2, AC-4; US-033 AC-7, AC-9, AC-11; US-036 AC-6 (#139) |

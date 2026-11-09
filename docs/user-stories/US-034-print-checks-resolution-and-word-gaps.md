@@ -1,8 +1,8 @@
 # US-034 — Print checks: image resolution and word gaps
 
-**Status:** Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Done; amendment for #139 Ready (2026-11-09: AC-2, AC-6, AC-13 — the column beside the statblock with the wrap, the portrait columns form only, the grown illustration's drawn width). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-033)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups)
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
 **Supersedes:** —
 
 Epic #121, fifth of seven stories (see US-030). Drafts D-15, D-16 in
@@ -80,7 +80,12 @@ Measured (SCAR-024):
   text is set as a block of its own (US-003) and is checked like one
   (refined at #132: the converter draws no image inline); drawn icons
   (callout icons, track cells) and a refused image (US-003 AC-6) are not
-  checked.
+  checked. Amended for #139: an entry illustration grown into the free
+  space or drawn in the stacked portrait form (US-031 AC-7a, AC-7b) is
+  checked at its drawn, grown width; the growth is not capped by
+  `images.minDpi` (G0 answer 10). Example: a 1 200 px wide 1:1 image grown
+  from 82.5 to 105 mm → `IMAGE_LOW_DPI "assets/hare.png": 290 dpi at 105.0
+  mm (min 300)` (at 82.5 mm it had 369 dpi and no warning).
 
 - **AC-3 (the warning):** Below `images.minDpi`:
   `IMAGE_LOW_DPI "<file>": <d> dpi at <w> mm (min <m>)`, with `d` rounded to
@@ -113,9 +118,11 @@ Measured (SCAR-024):
   whole number from 100 to 1000 (line 4)`.
 
 - **AC-6 (narrow columns):** Text in a column narrower than 60 % of the text
-  width (a named constant; today the 45 % columns of `page-portrait` and
-  `spread-portrait`, US-031, and the 45 % lede column beside the statblock,
-  US-030 AC-16, decision 2) is set with
+  width (a named constant; today the 45 % text column of `page-portrait` and
+  `spread-portrait` in their columns form, US-031 AC-7b, and the 45 % column
+  beside the statblock, US-030 AC-16a, decision 2; amended for #139: the
+  stacked form's text and the wrap's full-width part are full width and get
+  no limits) is set with
   `par(justification-limits: (spacing: (min: 80%, max: 150%), tracking:
   (min: -0.01em, max: 0.03em)))` from `entries.narrowJustification`;
   full-width text is not. (Noted at #133: the plugin sets no `justify` of
@@ -175,6 +182,9 @@ Measured (SCAR-024):
   `entries.maxWordGap` 0, 100, 200, 1000; `narrowJustification` built-in and
   one other; the calibration pin; a generated narrow-column line known to gap
   (invented words, D-03) warns, full-width fixture text does not at 200 %;
+  for #139 the column beside the statblock carries the limits in measuring
+  and drawing, the full-width part after it and the stacked form's text
+  none;
   two columns on one baseline never joined; the warnings as an exact list
   (SCAR-038), on the generated fixture.
 
@@ -199,3 +209,4 @@ Measured (SCAR-024):
 ## Related tickets
 
 <!-- Filled in at step 3. Drafts: D-15, D-16. -->
+- #140 (AC-6, the column beside the statblock), #141 (AC-2), #142 (AC-6, the columns form), #145; amendment for #139.

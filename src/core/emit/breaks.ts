@@ -225,6 +225,9 @@ export function paddingEndLines(signature: number): string {
  * - `spread-portrait` splits the body between the pages at block boundaries
  *   (as many blocks as fit the left page; Typst cannot flow a page into a
  *   narrower column on the next one).
+ * Each entry's body is first wrapped around its statblock (`o2t-wrap`, US-030
+ * AC-16a, #139); the layouts place the head (heading, statblock and column)
+ * and the full-width blocks after it.
  * Each entry records `<o2t-entry>` (heading, layout, size, page, asked and
  * reason when replaced) and `<o2t-entry-end>` (heading, page). Sub-headings
  * inside entries (`outlined: false, bookmarked: false`) are set small and
@@ -247,6 +250,13 @@ export function entriesLayoutHelper(bandSize: string): string {
 }
 #let o2t-entries(es, next-opener: false, next-left: false, closes: false, tw: 0pt, th: 0pt, top: 0pt, facing: true, full-header: false, min-scale: 70, narrow: none) = context {
   let lh = measure([A \\ A]).height - measure([A]).height
+  // US-030 AC-16a (#139): each entry's body wrapped around its statblock at
+  // the text width; what follows the column (the full-width part) is what
+  // the layouts below place: blocks of the left page, the right page.
+  let es = es.map(e => if e.sb == none { e + (blocks: e.blocks.map(b => b.body)) } else {
+    let w = o2t-wrap(o2t-sb-box(e.sb), e.blocks, tw, narrow: narrow, band: e.sb.band)
+    e + (head: { e.head; parbreak(); w.top }, blocks: w.rest)
+  })
   let body(e) = e.blocks.join(parbreak())
   let whole(e) = { e.head; parbreak(); body(e) }
   let hgt(c) = measure(block(width: tw, c)).height
@@ -277,21 +287,54 @@ export function entriesLayoutHelper(bandSize: string): string {
     while k < e.blocks.len() and hgt((..left, e.blocks.at(k)).join(parbreak())) <= th { left.push(e.blocks.at(k)); k += 1 }
     (left: left, k: k)
   }
+  // US-031 AC-7b (#139): the two portrait forms of the text left for a space
+  // of height hh, from measure() only: columns (the picture in 55 % at the
+  // largest scale step at which the column text fits) or stacked (the text
+  // at full width, 1 em, the picture fitted into the free height). Stacked
+  // fits when its picture is at least the columns picture at min-scale (G1
+  // answer 1); no text → stacked (G1 answer 2); both fit → the larger, a tie
+  // → columns; neither → columns at min-scale, over.
+  let pform(e, rest, hh) = {
+    let text = rest.len() > 0
+    let h = hh.to-absolute()
+    let cf(s) = o2t-fitted(e.img, tw * 0.55, h, scale: s)
+    let col-h(s) = { let f = cf(s); hgt(grid(columns: (1fr, f.w), column-gutter: 4mm, col(rest.join(parbreak()), tw - f.w - 4mm), f.body)) }
+    let sc = if text { scales.find(s => col-h(s) <= h) } else { 100 }
+    let min-w = cf(min-scale).w
+    let free = if text { h - hgt(rest.join(parbreak())) - 1em.to-absolute() } else { h }
+    let stack-w = if free > 0pt { o2t-fitted(e.img, tw, free).w } else { 0pt }
+    let col-w = cf(if sc == none { min-scale } else { sc }).w
+    let stack-fits = stack-w >= min-w
+    let form = if not text { "stacked" } else if sc != none and stack-fits { if stack-w > col-w { "stacked" } else { "columns" } } else if stack-fits { "stacked" } else { "columns" }
+    (form: form, scale: if sc == none { min-scale } else { sc }, over: form == "columns" and sc == none, colW: col-w / 1mm, stackW: stack-w / 1mm, minW: min-w / 1mm, colFits: sc != none, text: text)
+  }
+  let es = es.map(e => if e.orient == "portrait" and e.layout in ("auto", "page-portrait", "spread-portrait") {
+    e + (pp: (page: pform(e, e.blocks, portrait-slot(e)), spread: pform(e, e.blocks.slice(split(e).k), th)))
+  } else { e })
+  let pp(e, l) = if l == "page-portrait" { e.pp.page } else { e.pp.spread }
+  // The stacked form drawn: the text at full width, 1 em, the picture fitted
+  // into the free height (read where it is drawn) and centred, the end fact
+  // right after it (the space below counts, US-032 AC-9).
+  let stacked(e, rest, end) = {
+    if rest.len() > 0 { block(above: 0pt, below: 0pt, width: 100%, rest.join(parbreak())); v(1em) }
+    block(height: 1fr, width: 100%, above: 0pt, below: 0pt, layout(size => {
+      let g = o2t-fitted(e.img, tw, size.height)
+      v((size.height - g.h) / 2)
+      align(center, g.body)
+      end
+    }))
+  }
   let spread-fits(e, l, s) = {
     if l == "spread-text" { hgt(whole(e)) <= 2 * th }
     else if l == "spread-landscape" {
       let t = hgt(whole(e))
       t <= th or t - th + 1em.to-absolute() + o2t-fitted(e.img, tw, th / 2, scale: s).h <= th
-    } else if l == "spread-portrait" {
-      let sp = split(e)
-      let f = o2t-fitted(e.img, tw * 0.55, th, scale: s)
-      hgt(grid(columns: (1fr, f.w), column-gutter: 4mm, col(e.blocks.slice(sp.k).join(parbreak()), tw - f.w - 4mm), f.body)) <= th
     } else { hgt(whole(e)) <= th }
   }
-  let fits(e, l, s) = if l.starts-with("page") { hgt(page-content(e, l, s, "left")) <= th } else { spread-fits(e, l, s) }
+  let fits(e, l, s) = if l.ends-with("portrait") { not pp(e, l).over } else if l.starts-with("page") { hgt(page-content(e, l, s, "left")) <= th } else { spread-fits(e, l, s) }
   let slot(l) = l in ("page-landscape", "page-portrait", "spread-landscape", "spread-portrait")
   // The scale: the largest step at which the entry fits; min-scale when none.
-  let scale-of(e, l) = if not slot(l) { none } else {
+  let scale-of(e, l) = if not slot(l) { none } else if l.ends-with("portrait") { let p = pp(e, l); if p.form == "columns" { p.scale } else { none } } else {
     let found = scales.find(s => fits(e, l, s))
     if found == none { min-scale } else { found }
   }
@@ -307,12 +350,20 @@ export function entriesLayoutHelper(bandSize: string): string {
   let scls = es.zip(lays).map(((e, l)) => scale-of(e, l))
   let kinds = lays.map(l => if l.starts-with("page") { "page" } else { "spread" })
   let over = es.zip(lays, scls).map(((e, l, s)) => not fits(e, l, if s == none { 100 } else { s }))
+  // US-031 AC-7a (#139): the state a grown slot sets when the free space is
+  // smaller than its slot (one per entry, by its line).
+  let grow-key(e) = "o2t-grow-" + str(e.line)
   let mark(e, l, size, s) = {
     let d = (heading: e.heading, layout: l, size: size, line: e.line)
     if e.chosen { d.insert("auto", true) }
     if e.asked != none { d.insert("asked", e.asked); d.insert("reason", e.reason) }
     if s != none { d.insert("scale", s) }
-    o2t-entry-mark(d)
+    // US-031 AC-7b: the portrait form and what it was chosen from (mm).
+    if l.ends-with("portrait") { let p = pp(e, l); for k in ("form", "colW", "stackW", "minW", "colFits", "text") { d.insert(k, p.at(k)) } }
+    // The fact reads the grow decision where it fell (a read, no layout).
+    if l in ("page-landscape", "spread-landscape") {
+      context [#metadata(d + (page: here().page(), grown: not state(grow-key(e), false).final())) <o2t-entry>]
+    } else { o2t-entry-mark(d) }
   }
   // The end fact, from the real position: overflow lines, the right page's
   // unused share, the moved partner (US-032 AC-5, AC-7, AC-9).
@@ -328,21 +379,53 @@ export function entriesLayoutHelper(bandSize: string): string {
     if partner != none { d.insert("partnerMoved", partner) }
     [#metadata(d) <o2t-entry-end>]
   }
+  // US-031 AC-7a (#139): the illustration directly under the text, grown
+  // into the free space (read where it is drawn: block(height: 1fr) and
+  // layout()), centred when it does not fill it; when the free space is
+  // smaller than its slot, the block draws nothing and sets a state, and the
+  // picture follows at the slot's size (today's rule: the next page). The
+  // end fact goes right after the picture, so the space below it counts as
+  // unused (US-032 AC-9). Measured as approach S, spike-entry-wrap.md.
+  let grow(e, slot, end, gap) = {
+    if gap { v(1em) }
+    let flag = state(grow-key(e), false)
+    block(height: 1fr, width: 100%, above: 0pt, below: 0pt, layout(size => {
+      if size.height >= slot.h {
+        let g = o2t-fitted(e.img, tw, size.height)
+        v((size.height - g.h) / 2)
+        align(center, g.body)
+        end
+      } else { flag.update(true) }
+    }))
+    context if flag.get() { align(center, slot.body); end }
+  }
   let draw-page(e, l, s, side, partner) = {
     mark(e, l, "page", s)
-    page-content(e, l, if s == none { 100 } else { s }, side)
-    fin(e, l, "page", partner)
+    let sc = if s == none { 100 } else { s }
+    if l == "page-landscape" {
+      whole(e)
+      grow(e, o2t-fitted(e.img, tw, th * 0.4, scale: sc), fin(e, l, "page", partner), true)
+    } else if l == "page-portrait" and pp(e, l).form == "stacked" {
+      e.head
+      parbreak()
+      stacked(e, e.blocks, fin(e, l, "page", partner))
+    } else {
+      page-content(e, l, sc, side)
+      fin(e, l, "page", partner)
+    }
   }
   let draw-spread(e, l, s) = {
     mark(e, l, "spread", s)
     let ended = false
     if l == "spread-text" { whole(e) }
     else if l == "spread-landscape" {
+      // With all text on the left page the right page's whole text area is
+      // the free space (no gap above it).
+      let alone = hgt(whole(e)) <= th
       whole(e)
-      if hgt(whole(e)) <= th { pagebreak() }
-      v(1em)
-      v(1fr)
-      align(center, o2t-fitted(e.img, tw, th / 2, scale: s).body)
+      if alone { pagebreak() }
+      grow(e, o2t-fitted(e.img, tw, th / 2, scale: s), fin(e, l, "spread", none), not alone)
+      ended = true
     } else if l == "full-image" {
       // US-032 AC-6: never shrunk; text that does not fit the left page
       // runs on after the image page.
@@ -360,8 +443,15 @@ export function entriesLayoutHelper(bandSize: string): string {
       let sp = split(e)
       sp.left.join(parbreak())
       pagebreak()
-      let f = o2t-fitted(e.img, tw * 0.55, th, scale: s)
-      grid(columns: (1fr, f.w), column-gutter: 4mm, col(e.blocks.slice(sp.k).join(parbreak()), tw - f.w - 4mm), f.body)
+      let rest = e.blocks.slice(sp.k)
+      let p = pp(e, l)
+      if p.form == "stacked" {
+        stacked(e, rest, fin(e, l, "spread", none))
+        ended = true
+      } else {
+        let f = o2t-fitted(e.img, tw * 0.55, th, scale: p.scale)
+        grid(columns: (1fr, f.w), column-gutter: 4mm, col(rest.join(parbreak()), tw - f.w - 4mm), f.body)
+      }
     }
     if not ended { fin(e, l, "spread", none) }
   }

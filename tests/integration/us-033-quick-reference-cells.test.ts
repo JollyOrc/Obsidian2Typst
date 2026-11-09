@@ -1,7 +1,8 @@
 // US-033 AC-9, AC-11 — the quick reference's texts stay inside their cells:
 // on A5 the narrow columns (the box value, the stats, the page) take the
-// width of their content and Entry, Section and Track share the rest, so a
-// word such as "Section", "Horrors" or "Tussock" never runs into the next
+// width of their content and Entry and Track share the rest (the Section
+// column became section rows for #139), so a word such as "Horrors" or
+// "Tussock" never runs into the next
 // cell. Found in M21 (2026-11-07): the table's eight columns were of equal
 // width and long words overran them.
 // Source of truth: docs/user-stories/US-033-entry-openers-navigation-quick-reference.md.

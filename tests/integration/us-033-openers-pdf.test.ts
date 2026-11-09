@@ -402,7 +402,8 @@ describe('US-033 AC-9 to AC-11 the quick reference', () => {
       .slice(start)
       .filter((p) => p.text.includes('Beast '));
     expect(tablePages.length).toBeGreaterThanOrEqual(2);
-    for (const p of tablePages) expect(p.text).toMatch(/Entry\s+Section/);
+    // Amended for #139 (AC-9): no Section column; the box label follows Entry.
+    for (const p of tablePages) expect(p.text).toMatch(/Entry\s+Vigour/);
   });
 });
 

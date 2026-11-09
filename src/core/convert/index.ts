@@ -48,7 +48,11 @@ import {
   scanEntryBlocks,
 } from '../markers';
 import {indexHeadings, parse, type BlockNode} from '../parse';
-import {statblockModel, type StatblockModel} from '../entries/model';
+import {
+  boxColumnLabel,
+  statblockModel,
+  type StatblockModel,
+} from '../entries/model';
 import {
   SHEET_BUILTINS,
   SHEET_EMPTY_WARNING,
@@ -57,7 +61,7 @@ import {
   sheetData,
   sheetSettings,
 } from '../entries/sheet';
-import {ENTRY_MARKS_DEF} from '../emit/entry';
+import {ENTRY_MARKS_DEF, WRAP_HELPER_DEF} from '../emit/entry';
 import {coverNames, planCover, resolveCover} from './cover';
 import {
   arrangeParts,
@@ -330,14 +334,11 @@ function planEntryLayout(
         ? null
         : {
             title: settings.entries.quickReferenceTitle ?? 'Quick Reference',
-            boxLabel:
-              settings.entries.statblock?.boxes === undefined
-                ? null
-                : (settings.entries.statblock.stats?.find(
-                    (f) =>
-                      f.key.toLowerCase() ===
-                      settings.entries?.statblock?.boxes?.toLowerCase(),
-                  )?.label ?? settings.entries.statblock.boxes),
+            // US-033 AC-9 (amended for #139): a label, never the raw key.
+            boxLabel: boxColumnLabel(
+              settings.entries.statblock?.boxes,
+              settings.entries.statblock?.stats,
+            ),
             statLabels: (settings.entries.statblock?.stats ?? [])
               .filter(
                 (f) =>
@@ -791,9 +792,11 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       callouts: calloutStylesRule(styleEntries),
       glossary: glossary.hasTerms ? GLOSSARY_HELPER : null,
       // US-030 AC-15: the statblock helper, only when a statblock is drawn.
+      // US-030 AC-16a (#139): also with an entries chapter, whose layout
+      // refers to the wrap and the statblock box.
       statblock:
-        statblocksWritten > 0
-          ? `${ENTRY_MARKS_DEF}\n${STATBLOCK_HELPER_DEF}`
+        statblocksWritten > 0 || entryLayout !== undefined
+          ? `${ENTRY_MARKS_DEF}\n${WRAP_HELPER_DEF}\n${STATBLOCK_HELPER_DEF}`
           : null,
       // US-031: the entry layout, only when a chapter places an entry.
       entries:

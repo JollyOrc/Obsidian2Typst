@@ -37,8 +37,8 @@ const L = STATBLOCK_LAYOUT;
 
 /**
  * US-030 | AC-10 to AC-17: the helper. `d` is the statblock (band, look,
- * boxes, track, attributes, traits, attacks, skills, tags), `lede` the
- * opening paragraph (or the first block) set beside it. Draws the parts that
+ * boxes, track, attributes, traits, attacks, skills, tags); the body is
+ * wrapped around it by `o2t-wrap` (#139, below). Draws the parts that
  * are present, separated by rules; 15 boxes per row in groups of 5, the box
  * size from the width; equal track cells with the SVG icon read, recoloured
  * (every fill and stroke but `none`) and drawn at 75 %; attacks with a 1 em
@@ -74,7 +74,102 @@ export const ENTRY_MARKS_DEF = `#let o2t-box-size(w) = (w - 12 * ${L.boxGap} - 2
   width: 100%, height: height, fill: lk.box-fill, stroke: 0.5pt + lk.frame.color, inset: 0.5mm,
   align(center + horizon, if c.icon == none { none } else { o2t-icon(c.icon, lk.icon) }))`;
 
-export const STATBLOCK_HELPER_DEF = `#let o2t-statblock(d, lede: none) = {
+/**
+ * US-030 | AC-16a, AC-16b, AC-17 (#139): the wrap. `o2t-wrap(sb, blocks,
+ * width)` measures the statblock `sb` at 55 % of `width` and fills the column
+ * beside it (the rest less the gutter) with `blocks` — `(kind, body)` with
+ * kind `par` (may be split), `heading` (sticky), `block` (whole) or
+ * `entry` (a nested entry, never beside) — while the column stays no taller
+ * than the statblock. The first paragraph that does not fit is split at the
+ * most words that fit (binary search with `measure()`; atoms: top-level
+ * children, `text` split at spaces, leading and trailing spaces dropped),
+ * its column part ended by `linebreak(justify: par.justify)`, the rest set
+ * with no first-line indent. A heading goes beside only when two lines of
+ * the paragraph after it (or all of a shorter one, or the whole block after
+ * it) fit too. Returns `(top, rest)`: the unbreakable statblock-and-column
+ * block (`below: par.spacing`) and the full-width blocks. Records
+ * `<o2t-wrap>`. Reads only `measure()` and the context (no query, locate or
+ * state), so it settles in one compile (spike-entry-wrap.md). Must be called
+ * in a context. `narrow`: US-034 AC-6's limits for the column.
+ */
+export const WRAP_HELPER_DEF = `#let o2t-atoms(c) = {
+  let kids = if c.func() == [].func() { c.children } else { (c,) }
+  let out = ()
+  for k in kids {
+    if k.func() == text and k.fields().keys() == ("text",) {
+      for (i, w) in k.text.split(" ").enumerate() {
+        if i > 0 { out.push((space: true, c: [ ])) }
+        if w != "" { out.push((space: false, c: text(w))) }
+      }
+    } else if k == [ ] { out.push((space: true, c: k)) }
+    else { out.push((space: false, c: k)) }
+  }
+  while out.len() > 0 and out.first().space { let _ = out.remove(0) }
+  while out.len() > 0 and out.last().space { let _ = out.pop() }
+  out
+}
+#let o2t-wrap(sb, blocks, width, narrow: none, band: "") = {
+  let nar(c) = if narrow == none { c } else { set par(justification-limits: narrow); c }
+  let sbw = width * ${L.width}
+  let cw = width - sbw - ${L.gutter}
+  let sh = measure(block(width: sbw, sb)).height
+  let hcol(items) = if items.len() == 0 { 0pt } else { measure(block(width: cw, nar(items.join(parbreak())))).height }
+  let col = ()
+  let rest = ()
+  let split = none
+  let beside = 0
+  let i = 0
+  while i < blocks.len() {
+    let b = blocks.at(i)
+    if b.kind == "entry" { break }
+    if hcol((..col, b.body)) <= sh {
+      if b.kind == "heading" and i + 1 < blocks.len() {
+        let nb = blocks.at(i + 1)
+        let need = if nb.kind == "par" and hcol((nb.body,)) > hcol(([A \\ A],)) { [A \\ A] } else { nb.body }
+        if nb.kind == "entry" or hcol((..col, b.body, need)) > sh { break }
+      }
+      col.push(b.body); beside += 1; i += 1; continue
+    }
+    if b.kind == "par" {
+      let atoms = o2t-atoms(b.body)
+      let cuts = atoms.enumerate().filter(((j, a)) => a.space).map(((j, a)) => j)
+      let words = cuts.len() + if atoms.len() > 0 { 1 } else { 0 }
+      let first(n) = atoms.slice(0, if n < words { cuts.at(n - 1) } else { atoms.len() }).map(a => a.c).join() + linebreak(justify: par.justify)
+      let lo = 0
+      let hi = words - 1
+      while lo < hi {
+        let mid = calc.div-euclid(lo + hi + 1, 2)
+        if hcol((..col, first(mid))) <= sh { lo = mid } else { hi = mid - 1 }
+      }
+      if lo > 0 {
+        col.push(first(lo))
+        let r = atoms.slice(cuts.at(lo - 1) + 1).map(a => a.c).join()
+        rest.push({ set par(first-line-indent: 0pt); r })
+        split = (block: i, words: lo, of: words)
+        i += 1
+      }
+    }
+    break
+  }
+  while i < blocks.len() { rest.push(blocks.at(i).body); i += 1 }
+  let hc = hcol(col)
+  let colc = if col.len() == 0 { [] } else { nar(col.join(parbreak())) }
+  let top = block(breakable: false, width: 100%, below: par.spacing, {
+    context [#metadata((band: band, beside: beside, split: split, column: hc / 1mm, statblock: sh / 1mm, page: here().page(), y: here().position().y / 1mm)) <o2t-wrap>]
+    grid(columns: (1fr, sbw), column-gutter: ${L.gutter}, colc, sb)
+  })
+  (top: top, rest: rest)
+}`;
+
+/**
+ * US-030 | AC-10 to AC-17: the statblock helpers. `o2t-sb-box(d)` draws the
+ * framed statblock (the parts present, separated by rules) and records
+ * `<o2t-statblock>`; `o2t-statblock(d, blocks: ())` places it in the flow
+ * with the entry's body wrapped around it (`o2t-wrap`, #139) at the width
+ * of the container. An entry of an entries chapter hands `d` to
+ * `o2t-entries` instead (breaks.ts), which wraps it at the text width.
+ */
+export const STATBLOCK_HELPER_DEF = `#let o2t-sb-box(d) = {
   let lk = d.look
   let fonted(role, body) = {
     let f = lk.fonts.at(role, default: none)
@@ -111,14 +206,17 @@ export const STATBLOCK_HELPER_DEF = `#let o2t-statblock(d, lede: none) = {
   }
   if d.skills != none { parts.push("skills"); pieces.push(fonted("skills", text(size: lk.sizes.skills)[#emph[Skills:]#h(0.3em)#d.skills])) }
   if d.tags != none { parts.push("tags"); pieces.push(align(center, fonted("tags", text(size: lk.sizes.text, fill: lk.accent, d.tags)))) }
-  let sb = block(width: 100%, breakable: false, fill: lk.fill, stroke: lk.frame.width + lk.frame.color, inset: 2mm,
-    stack(spacing: 1.2mm, ..pieces.intersperse(rule)))
   [#metadata((band: d.band, boxes: count, rows: rows, cells: if d.track == none { () } else { d.track.cells.map(c => c.label) }, parts: parts)) <o2t-statblock>]
-  // US-034 AC-6 (decision 2): the lede column (100 % less the statblock's
-  // ${L.width} and the gutter) is under ${NARROW_COLUMN_SHARE} % of the text width.
-  let lede-col = if lede == none { [] } else if lk.at("narrow", default: none) == none { lede } else { set par(justification-limits: lk.narrow); lede }
-  block(breakable: false, width: 100%, grid(columns: (1fr, ${L.width}), column-gutter: ${L.gutter}, lede-col, sb))
-}`;
+  block(width: 100%, breakable: false, fill: lk.fill, stroke: lk.frame.width + lk.frame.color, inset: 2mm,
+    stack(spacing: 1.2mm, ..pieces.intersperse(rule)))
+}
+// US-034 AC-6 (decision 2): the column beside the statblock (100 % less the
+// statblock's ${L.width} and the gutter) is under ${NARROW_COLUMN_SHARE} % of the width.
+#let o2t-statblock(d, blocks: ()) = layout(size => {
+  let w = o2t-wrap(o2t-sb-box(d), blocks, size.width, narrow: d.look.at("narrow", default: none), band: d.band)
+  w.top
+  w.rest.join(parbreak())
+})`;
 
 const rgb = (hex: string): string => `rgb(${typstString(hex)})`;
 const colourOr = (value: string): string =>
@@ -178,7 +276,7 @@ export function statblockLookValues(
 
 /**
  * US-030 | AC-15: the look as a Typst dictionary (`statblockLookValues`),
- * with the lede column's justification limits (US-034 AC-6).
+ * with the justification limits of the column beside it (US-034 AC-6).
  */
 export function statblockLook(
   settings: EntriesSettings | undefined,
@@ -199,7 +297,7 @@ export function statblockLook(
     `sizes: (${Object.entries(v.sizes)
       .map(([role, size]) => `${role}: ${pt(size)}`)
       .join(', ')})`,
-    // US-034 AC-6: the lede column's justification limits.
+    // US-034 AC-6: the limits of the column beside the statblock (#139).
     `narrow: ${narrowLimits(settings?.narrowJustification)}`,
   ].join(', ')})`;
 }
@@ -220,18 +318,53 @@ export interface StatblockWriter {
   icon: (path: string) => string | null;
 }
 
+/** US-030 AC-16a (#139): one block of an entry's body, as the wrap reads it. */
+export interface WrapBlock {
+  /** `par` may be split, `heading` is sticky, `block` whole, `entry` a nested entry. */
+  kind: 'par' | 'heading' | 'block' | 'entry';
+  /** The block's Typst. */
+  body: string;
+}
+
 /**
- * US-030 | AC-10 to AC-16, AC-22: `#o2t-statblock((…), lede: […])` for one
- * entry's model. Values go through `writer.content`, labels through the one
- * escaping function; the order is the model's (the preset's), so the same
- * data gives the same text byte for byte. `lede` is the Typst of the block
- * set beside the statblock, or null.
+ * US-030 | AC-16a (#139): the blocks as a Typst array of `(kind, body)`
+ * dictionaries (a side channel to the wrap, not markers in the text,
+ * SCAR-039); `()` for none, a trailing comma for one.
+ */
+export function wrapBlocks(blocks: readonly WrapBlock[]): string {
+  return array(
+    blocks.map((b) => `(kind: ${typstString(b.kind)}, body: [\n${b.body}\n])`),
+  );
+}
+
+/**
+ * US-030 | AC-10 to AC-16a, AC-22: `#o2t-statblock((…), blocks: (…))` for one
+ * entry's model, the body wrapped around it in the flow (an entry outside
+ * the chapters or nested, AC-16b). Values go through `writer.content`,
+ * labels through the one escaping function; the order is the model's (the
+ * preset's), so the same data gives the same text byte for byte.
  */
 export function statblockCall(
   model: StatblockModel,
   look: string,
   writer: StatblockWriter,
-  lede: string | null,
+  blocks: readonly WrapBlock[],
+): string {
+  const data = statblockData(model, look, writer);
+  return blocks.length === 0
+    ? `#${STATBLOCK_HELPER}(${data})`
+    : `#${STATBLOCK_HELPER}(${data}, blocks: ${wrapBlocks(blocks)})`;
+}
+
+/**
+ * US-030 | AC-10 to AC-15, AC-22: the statblock's data dictionary `(band: …,
+ * look: …, …)` — what `o2t-sb-box` draws. An entry of an entries chapter
+ * hands it to `o2t-entries` as `sb:` (AC-16a, #139).
+ */
+export function statblockData(
+  model: StatblockModel,
+  look: string,
+  writer: StatblockWriter,
 ): string {
   const {content} = writer;
   const line = (
@@ -272,6 +405,5 @@ export function statblockCall(
     `skills: ${model.skillItems.length === 0 ? 'none' : `[${model.skillItems.map(content).join(', ')}]`}`,
     `tags: ${model.tagLabels.length === 0 ? 'none' : `[${model.tagLabels.map((t) => escapeMarkup(t, {atBlockStart: false})).join(' · ')}]`}`,
   ];
-  const leded = lede === null ? '' : `, lede: [\n${lede}\n]`;
-  return `#${STATBLOCK_HELPER}((${fields.join(', ')})${leded})`;
+  return `(${fields.join(', ')})`;
 }
