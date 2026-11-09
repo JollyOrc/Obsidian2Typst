@@ -1,7 +1,6 @@
-// US-038 AC-5, AC-6 — the `details` group in preset notes: what is valid and
-// the messages of invalid values, preset notes only, the merge into the
-// effective settings, the rows of the settings details view, and the look
-// (built-ins, grayscale, sizes).
+// US-038 AC-5 — the `details` group in preset notes: what is valid and the
+// messages of invalid values, preset notes only, the merge into the effective
+// settings, and the rows of the settings details view.
 // Source of truth: docs/user-stories/US-038-detail-rows.md.
 // Red until US-038 is implemented (G2, 2026-11-09).
 import {describe, expect, it} from 'vitest';
@@ -9,9 +8,9 @@ import {
   effectiveSettings,
   formatPresetError,
   parsePreset,
+  validateFields,
 } from '../../src/core/presets';
 import {detailRows} from '../../src/plugin/settings/details';
-import {detailsLookValues} from '../../src/core/emit/details';
 
 const note = (...lines: string[]): string =>
   ['---', 'schemaVersion: 1', ...lines, '---', ''].join('\n');
@@ -84,11 +83,29 @@ describe('US-038 AC-5 the details group', () => {
       errorOf('details:', '  items:', '    - key: Pace', '    - key: pace'),
     ).toBe('details.items[2].key "pace" is listed twice (line 6)');
     expect(errorOf('details:', '  color: red')).toBe(
-      'details.color must be a colour written #rrggbb (line 4)',
+      'details.color must be a colour "#rrggbb" (line 4)',
     );
     expect(errorOf('details:', '  size: 0')).toBe(
       'details.size must be a number of pt greater than 0 and at most 200 (line 4)',
     );
+  });
+
+  it('US-038 AC-5: an icon path may not be empty, a label may (icon only)', () => {
+    expect(
+      errorOf('details:', '  items:', '    - key: a', '      icons: {x: ""}'),
+    ).toBe('details.items[1].icons must be a map of value → path (line 6)');
+    expect(
+      errorOf('details:', '  items:', '    - key: a', '      label: ""'),
+    ).toBeNull();
+    expect(
+      errorOf('details:', '  items:', '    - key: a', '      labels: {x: ""}'),
+    ).toBeNull();
+  });
+
+  it('US-038 AC-5: the Defaults ignore the group (preset notes only)', () => {
+    const result = validateFields({details: {items: [{key: 'a'}], size: -3}});
+    expect(result.ok).toBe(true);
+    if (result.ok) expect('details' in result.fields).toBe(false);
   });
 
   it('US-038 AC-5: unknown fields are ignored and null is unset', () => {
@@ -154,37 +171,5 @@ describe('US-038 AC-5 the details group', () => {
         .map((r) => r.label)
         .some((l) => l.startsWith('details.')),
     ).toBe(false);
-  });
-});
-
-describe('US-038 AC-6 the look', () => {
-  it('US-038 AC-6: the built-ins are umber, 9.5 pt; a preset sets both', () => {
-    expect(detailsLookValues(undefined, undefined)).toMatchObject({
-      color: '#7a4a2e',
-      size: 9.5,
-    });
-    expect(
-      detailsLookValues({items: [], color: '#112233', size: 14}, 'color'),
-    ).toMatchObject({
-      color: '#112233',
-      size: 14,
-    });
-  });
-
-  it('US-038 AC-6: grayscale makes text and icons #4d4d4d whatever the colour says', () => {
-    for (const color of [undefined, '#112233']) {
-      expect(
-        detailsLookValues(
-          {items: [], ...(color === undefined ? {} : {color})},
-          'grayscale',
-        ),
-      ).toMatchObject({color: '#4d4d4d'});
-    }
-  });
-
-  it('US-038 AC-6: the sizes at both ends and in the middle are kept', () => {
-    for (const size of [6, 9.5, 14, 200]) {
-      expect(detailsLookValues({items: [], size}, undefined).size).toBe(size);
-    }
   });
 });

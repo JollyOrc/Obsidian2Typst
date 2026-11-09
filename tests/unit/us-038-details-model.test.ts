@@ -69,6 +69,25 @@ describe('US-038 AC-4 the table of the story, through the model', () => {
     ]);
   });
 
+  it("US-038 AC-4: the keys of the item's maps are compared without case and spaces too; an item key may have capitals", () => {
+    const spaced = {
+      items: [{key: 'Pace', labels: {' Brisk ': 'B', SLOW: 'S'}}],
+    };
+    expect(badges({pace: 'brisk'}, spaced).badges).toEqual(['-|B']);
+    expect(badges({PACE: ' slow'}, spaced)).toEqual({
+      badges: ['-|S'],
+      checks: [],
+    });
+  });
+
+  it('US-038 AC-4: a badge with a label has no value; one without a label has its value (trimmed)', () => {
+    const model = detailsModel({pace: ' brisk ', needs: ' Basket '}, DETAILS_E);
+    expect(model?.badges.map((b) => [b.label, b.value])).toEqual([
+      ['Brisk', null],
+      [null, 'Basket'],
+    ]);
+  });
+
   it('US-038 AC-4: not set values show nothing: false, null, empty, blank, no key', () => {
     for (const data of [
       {starter: false},

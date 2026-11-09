@@ -53,6 +53,7 @@ export {
   ENTRY_LIST_KEYS,
   entryKeys,
   flattenLinks,
+  linkShown,
   illustrationOf,
   lowerKeys,
   readEntryValues,
@@ -68,3 +69,19 @@ export {
   type EntryWarning,
   type FoundEntryBlock,
 } from './entries';
+export {
+  DETAILS_BLOCK_LANG,
+  DETAILS_BUILTINS,
+  keepLinks,
+  planDetails,
+  readDetailsBlock,
+  scanDetailsBlocks,
+  type DetailItem,
+  type DetailWarning,
+  type DetailsBlockScan,
+  type DetailsData,
+  type DetailsPlan,
+  type DetailsRead,
+  type DetailsSettings,
+  type FoundDetailsBlock,
+} from './details';

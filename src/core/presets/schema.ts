@@ -12,6 +12,7 @@ import type {FontsPresetFields} from '../fonts/types';
 import type {
   CalloutsSettings,
   ColorMode,
+  DetailsSettings,
   EntriesSettings,
   HeadingRulesSettings,
 } from '../markers';
@@ -101,6 +102,8 @@ export interface PresetFields {
   images?: ImagesPresetFields;
   /** US-030 AC-8: preset notes only (G0-C9). */
   entries?: EntriesSettings;
+  /** US-038 AC-5: the detail row; preset notes only. */
+  details?: DetailsSettings;
   colorMode?: ColorMode;
 }
 

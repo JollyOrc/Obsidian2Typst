@@ -1,7 +1,7 @@
 // US-008 AC-2, AC-4, AC-13: reads a preset note (YAML frontmatter) and checks
 // every field. The `yaml` package gives the lines of errors (decided by the
 // user on 2026-10-17). Pure core: the parser does no I/O.
-import {LineCounter, isMap, isScalar, parseDocument} from 'yaml';
+import {LineCounter, isMap, isNode, isScalar, isSeq, parseDocument} from 'yaml';
 import {
   FONT_ROLES,
   MAX_FONT_SIZE,
@@ -15,6 +15,8 @@ import {
   STATBLOCK_FONT_ROLES,
   STATBLOCK_SIZE_ROLES,
   headingRuleKey,
+  type DetailItem,
+  type DetailsSettings,
   type EntriesSettings,
   type EntryField,
   type LineStyle,
@@ -1203,6 +1205,135 @@ function readEntries(value: unknown, problems: Problem[]): EntriesSettings {
   return out;
 }
 
+/**
+ * US-038 | AC-5: a map of value → text whose values are all text (`path`
+ * names it), or the problem `<path> must be a map of value → <what>`.
+ * `blank` is false for icon paths, which cannot be empty.
+ */
+function readValueMap(
+  item: Group,
+  key: string,
+  path: string,
+  what: string,
+  blank: boolean,
+  problems: Problem[],
+): Record<string, string> | undefined {
+  const value = read(item, key);
+  if (value === undefined) return undefined;
+  const ok =
+    isGroup(value) &&
+    Object.values(value).every(
+      (v) => typeof v === 'string' && (blank || v.trim() !== ''),
+    );
+  if (!ok) {
+    problems.push({path, message: `${path} must be a map of value → ${what}`});
+    return undefined;
+  }
+  return Object.fromEntries(
+    Object.entries(value as Group).map(([k, v]) => [k, String(v)]),
+  );
+}
+
+/**
+ * US-038 | AC-5: checks the `details` group of a preset note: `items` (a
+ * list of `{key, icon, icons, label, labels}`; keys unique without regard to
+ * case), `color` (`#rrggbb`) and `size` (pt, above 0 up to the font-size
+ * limit). Each problem is at its own line (the items are counted from 1).
+ * Unknown fields are ignored; `null` is unset.
+ */
+function readDetails(value: unknown, problems: Problem[]): DetailsSettings {
+  const out: DetailsSettings = {};
+  if (!isGroup(value)) {
+    problems.push({
+      path: 'details',
+      message: 'details must be a group of settings',
+    });
+    return out;
+  }
+  const color = readColour(value, 'color', false, 'details.color', problems);
+  if (color !== undefined) out.color = color;
+  const size = readPt(
+    value,
+    'size',
+    {min: 0, max: MAX_FONT_SIZE, minOpen: true},
+    'details.size',
+    `details.size must be a number of pt greater than 0 and at most ${MAX_FONT_SIZE}`,
+    problems,
+  );
+  if (size !== undefined) out.size = size;
+  const items = read(value, 'items');
+  if (items === undefined) return out;
+  if (!Array.isArray(items)) {
+    problems.push({
+      path: 'details.items',
+      message:
+        'details.items must be a list of items {key, icon, icons, label, labels}',
+    });
+    return out;
+  }
+  const seen = new Set<string>();
+  const list: DetailItem[] = [];
+  items.forEach((raw: unknown, index) => {
+    const at = `details.items[${index + 1}]`;
+    if (!isGroup(raw)) {
+      problems.push({path: at, message: `${at} must be a group of settings`});
+      return;
+    }
+    const key = read(raw, 'key');
+    if (!isKey(key)) {
+      problems.push({path: `${at}.key`, message: `${at}.key must be a key`});
+      return;
+    }
+    if (seen.has(key.trim().toLowerCase())) {
+      problems.push({
+        path: `${at}.key`,
+        message: `${at}.key "${key.trim()}" is listed twice`,
+      });
+      return;
+    }
+    seen.add(key.trim().toLowerCase());
+    const item: DetailItem = {key: key.trim()};
+    const icon = readText(
+      raw,
+      'icon',
+      `${at}.icon`,
+      `${at}.icon must be text`,
+      problems,
+    );
+    if (icon !== undefined) item.icon = icon;
+    const label = read(raw, 'label');
+    if (label !== undefined) {
+      if (typeof label === 'string') item.label = label;
+      else
+        problems.push({
+          path: `${at}.label`,
+          message: `${at}.label must be text`,
+        });
+    }
+    const icons = readValueMap(
+      raw,
+      'icons',
+      `${at}.icons`,
+      'path',
+      false,
+      problems,
+    );
+    if (icons !== undefined) item.icons = icons;
+    const labels = readValueMap(
+      raw,
+      'labels',
+      `${at}.labels`,
+      'text',
+      true,
+      problems,
+    );
+    if (labels !== undefined) item.labels = labels;
+    list.push(item);
+  });
+  out.items = list;
+  return out;
+}
+
 /** Checks the preset fields of `input`; unknown fields are ignored. */
 function readFields(
   input: Group,
@@ -1316,6 +1447,11 @@ function readFields(
   const entriesValue = read(input, 'entries');
   if (fromNote && entriesValue !== undefined) {
     out.entries = readEntries(entriesValue, problems);
+  }
+  // US-038 AC-5: preset notes only, as `entries`.
+  const detailsValue = read(input, 'details');
+  if (fromNote && detailsValue !== undefined) {
+    out.details = readDetails(detailsValue, problems);
   }
   const colorMode = read(input, 'colorMode');
   if (fromNote && colorMode !== undefined) {
@@ -1453,6 +1589,17 @@ function collectLines(
   lineOf: (offset: number) => number,
   out: Map<string, number>,
 ): void {
+  // US-038 AC-5: the items of a list get a path `list[n]` (n from 1), so a
+  // problem inside an item is reported at its own line.
+  if (isSeq(node)) {
+    node.items.forEach((item, i) => {
+      const range = isNode(item) ? item.range : null;
+      const path = `${prefix}[${i + 1}]`;
+      if (range != null) out.set(path, lineOf(range[0]));
+      collectLines(item, path, lineOf, out);
+    });
+    return;
+  }
   if (!isMap(node)) return;
   for (const pair of node.items) {
     if (!isScalar(pair.key) || pair.key.range == null) continue;
@@ -1462,6 +1609,27 @@ function collectLines(
         : `${prefix}.${String(pair.key.value)}`;
     out.set(path, lineOf(pair.key.range[0]));
     collectLines(pair.value, path, lineOf, out);
+  }
+}
+
+/**
+ * US-038 AC-5: the line of a problem's path; a path through a list item
+ * (`details.items[2].key`) that has no line of its own (a field the item
+ * lacks) takes the line of the nearest enclosing item or key. Other paths
+ * are looked up as they are (null when missing), as before.
+ */
+function lineOfPath(
+  lines: Readonly<Record<string, number>>,
+  path: string,
+): number | null {
+  let at = path;
+  while (true) {
+    const found = lines[at];
+    if (found !== undefined) return found;
+    if (!path.includes('[')) return null;
+    const cut = Math.max(at.lastIndexOf('.'), at.lastIndexOf('['));
+    if (cut < 0) return null;
+    at = at.slice(0, cut);
   }
 }
 
@@ -1543,11 +1711,11 @@ function parse(text: string): ParseResult {
   const fields = readFields(value, problems, notices, true);
   if (problems.length > 0) {
     const line = (p: Problem): number =>
-      lines[p.path] ?? Number.MAX_SAFE_INTEGER;
+      lineOfPath(lines, p.path) ?? Number.MAX_SAFE_INTEGER;
     const first = problems.reduce((a, b) => (line(b) < line(a) ? b : a));
     return {
       ok: false,
-      error: {message: first.message, line: lines[first.path] ?? null},
+      error: {message: first.message, line: lineOfPath(lines, first.path)},
     };
   }
   return {ok: true, fields, lines, notices: notices.map((n) => n.message)};

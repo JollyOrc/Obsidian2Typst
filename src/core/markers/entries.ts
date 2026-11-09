@@ -568,6 +568,22 @@ export function planEntries(
 }
 
 /**
+ * US-030 AC-6, US-038 AC-9: the text a wikilink or an embed shows: its alias,
+ * else its target as written (`File`, `File > Anchor`, or the anchor alone).
+ * The one place of this rule (SCAR-017): `flattenLinks` and `keepLinks`.
+ */
+export function linkShown(node: WikilinkNode): string {
+  return (
+    node.alias ??
+    (node.anchor === null
+      ? node.file
+      : node.file === ''
+        ? node.anchor
+        : `${node.file} > ${node.anchor}`)
+  );
+}
+
+/**
  * US-030 | AC-6: link markup in a value prints its display text: a link its
  * text, a wikilink its alias (else the target as written), an image its alt
  * text; never a link, never a page number.
@@ -578,16 +594,8 @@ export function flattenLinks(nodes: readonly InlineNode[]): InlineNode[] {
       case 'link':
         return flattenLinks(node.children);
       case 'wikilink':
-      case 'embed': {
-        const shown =
-          node.alias ??
-          (node.anchor === null
-            ? node.file
-            : node.file === ''
-              ? node.anchor
-              : `${node.file} > ${node.anchor}`);
-        return [{kind: 'text', value: shown, line: node.line}];
-      }
+      case 'embed':
+        return [{kind: 'text', value: linkShown(node), line: node.line}];
       case 'image':
         return [{kind: 'text', value: node.alt, line: node.line}];
       case 'strong':

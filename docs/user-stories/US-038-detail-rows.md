@@ -164,7 +164,7 @@ and a note whose block sits under `###### Reed Weaving`.
   `details.items[2].labels must be a map of value → text`;
   `details.items[1].icons must be a map of value → path`;
   `details.items[2].key "pace" is listed twice`;
-  `details.color must be a colour written #rrggbb`; `details.size must be a
+  `details.color must be a colour "#rrggbb"`; `details.size must be a
   number of pt greater than 0 and at most 200` (the number is the item's
   position, from 1); unknown fields are ignored; `null` is unset. A
   preset without the group, or with an empty `items`, draws **no row for any
