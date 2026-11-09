@@ -1,8 +1,8 @@
 # US-038 — Detail rows: note properties drawn as a row of icon badges under a heading
 
-**Status:** Code done (2026-11-09; #153 to #155 committed, #156 the documents and test build `0.14.0-m27.1`); waiting for manual check M27
+**Status:** Done (0.14.0, released 2026-11-09; M27 passed 2026-11-09; code #153 to #156 committed 2026-11-09)
 **Introduced:** v0.14.0
-**Implemented:** v0.14.0 (not released); tickets #153 to #156, test build `0.14.0-m27.1` (M27)
+**Implemented:** v0.14.0 (released 2026-11-09); tickets #153 to #156, test build `0.14.0-m27.1` (M27)
 **Supersedes:** —
 
 Epic #152 (the Vault Compiler's epic: ObsidianVaultCompiler#118). The format
@@ -314,8 +314,8 @@ and a note whose block sits under `###### Reed Weaving`.
   unmapped and not-text; (6) no icon credit (the book's own credits);
   (7) API and processor; (8) the vault view is vault-side; (9) edge cases;
   (10) Obsidian2Typst first.
-- **Decisions made while writing (for the author to confirm at the manual
-  check):** a flag with neither label nor icon shows nothing; `false` and
+- **Decisions made while writing (decided by the author 2026-11-09, after
+  M27: all four proposals confirmed):** a flag with neither label nor icon shows nothing; `false` and
   empty values show nothing and give no warning; **no group = no row and no
   warning** (the block is dropped silently, so one book can be compiled with
   a preset that has no row); the row is not justified; a link in a value
