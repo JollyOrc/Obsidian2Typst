@@ -232,3 +232,4 @@ facing pages, `headingRules: {Menagerie: entries}`) with
 ## Related tickets
 
 <!-- Filled in at step 3. Drafts: D-11, D-12, D-13. -->
+- #141 (AC-4, AC-9), #142 (AC-2, AC-4), #145; amendment for #139.

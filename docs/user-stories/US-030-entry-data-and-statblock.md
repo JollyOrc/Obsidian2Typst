@@ -526,3 +526,4 @@ They gather at dusk.
 ## Related tickets
 
 <!-- Filled in at step 3. Drafts: D-01, D-02, D-04, D-05, D-17, D-19. -->
+- #140 (AC-16, AC-16a, AC-16b, AC-17, amendment for #139), #145 (AC-23: the manual check).

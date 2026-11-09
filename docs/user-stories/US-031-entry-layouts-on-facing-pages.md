@@ -386,3 +386,4 @@ brackets):
 ## Related tickets
 
 <!-- Filled in at step 3. Drafts: D-06, D-07, D-08, D-10. -->
+- #140 (the wrap on the left page), #141 (AC-7a, AC-9, AC-14), #142 (AC-7b, AC-9, AC-15), #145 (AC-17: the manual check); amendment for #139.

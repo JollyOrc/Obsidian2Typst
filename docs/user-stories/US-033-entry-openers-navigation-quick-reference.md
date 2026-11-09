@@ -283,3 +283,4 @@ entries}`, A5, facing pages, folios and running header on with
 ## Related tickets
 
 <!-- Filled in at step 3. Drafts: D-09, D-14. -->
+- #143 (AC-7, AC-12), #144 (AC-9, AC-11), #145; amendment for #139.

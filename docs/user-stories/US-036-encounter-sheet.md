@@ -203,3 +203,4 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
 ## Related tickets
 
 <!-- Filled in at step 3. Draft: D-21. -->
+- #143 (AC-6), #145; amendment for #139.

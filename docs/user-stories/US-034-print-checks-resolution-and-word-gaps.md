@@ -209,3 +209,4 @@ Measured (SCAR-024):
 ## Related tickets
 
 <!-- Filled in at step 3. Drafts: D-15, D-16. -->
+- #140 (AC-6, the column beside the statblock), #141 (AC-2), #142 (AC-6, the columns form), #145; amendment for #139.
