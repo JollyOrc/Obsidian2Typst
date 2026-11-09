@@ -830,9 +830,9 @@ function quickReferenceText(
     `[${escapeMarkup(text, {atBlockStart: true})}]`;
   const cell = (value: string | null): string =>
     value === null ? '[—]' : `[${content(value)}]`;
+  // US-033 AC-9 (amended for #139): no Section column; section rows.
   const head = [
     'Entry',
-    'Section',
     ...(quick.boxLabel === null ? [] : [quick.boxLabel]),
     ...quick.statLabels,
     ...(quick.track ? ['Track'] : []),
@@ -840,22 +840,34 @@ function quickReferenceText(
   ];
   const columns = [
     '1.5fr',
-    '1.2fr',
     ...(quick.boxLabel === null ? [] : ['auto']),
     ...quick.statLabels.map(() => 'auto'),
     ...(quick.track ? ['1fr'] : []),
     'auto',
   ];
-  const body = rows.map(({info, row, label}) =>
-    [
-      plain(info.text),
-      row.section === null ? '[—]' : plain(row.section),
-      ...(quick.boxLabel === null ? [] : [cell(row.box)]),
-      ...row.stats.map(cell),
-      ...(quick.track ? [plain(row.track)] : []),
-      `context numbering("1", ..counter(page).at(<${label}>))`,
-    ].join(', '),
-  );
+  // US-033 AC-9 (amended for #139): the name links to the entry (no page
+  // number; the Page column has it); a row spanning the columns with the
+  // section's name before each section's entries, repeated after the header
+  // row on a page that starts inside the section (a leveled table header).
+  const body: string[] = [];
+  let current: string | null = null;
+  for (const {info, row, label} of rows) {
+    if (row.section !== null && row.section !== current) {
+      current = row.section;
+      body.push(
+        `table.header(level: 2, repeat: true, table.cell(colspan: ${head.length})[*${escapeMarkup(row.section, {atBlockStart: true})}*])`,
+      );
+    }
+    body.push(
+      [
+        `link(<${label}>)[${escapeMarkup(info.text, {atBlockStart: true})}]`,
+        ...(quick.boxLabel === null ? [] : [cell(row.box)]),
+        ...row.stats.map(cell),
+        ...(quick.track ? [plain(row.track)] : []),
+        `context numbering("1", ..counter(page).at(<${label}>))`,
+      ].join(', '),
+    );
+  }
   const heading =
     quick.title === ''
       ? []

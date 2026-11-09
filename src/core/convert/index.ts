@@ -48,7 +48,11 @@ import {
   scanEntryBlocks,
 } from '../markers';
 import {indexHeadings, parse, type BlockNode} from '../parse';
-import {statblockModel, type StatblockModel} from '../entries/model';
+import {
+  boxColumnLabel,
+  statblockModel,
+  type StatblockModel,
+} from '../entries/model';
 import {
   SHEET_BUILTINS,
   SHEET_EMPTY_WARNING,
@@ -330,14 +334,11 @@ function planEntryLayout(
         ? null
         : {
             title: settings.entries.quickReferenceTitle ?? 'Quick Reference',
-            boxLabel:
-              settings.entries.statblock?.boxes === undefined
-                ? null
-                : (settings.entries.statblock.stats?.find(
-                    (f) =>
-                      f.key.toLowerCase() ===
-                      settings.entries?.statblock?.boxes?.toLowerCase(),
-                  )?.label ?? settings.entries.statblock.boxes),
+            // US-033 AC-9 (amended for #139): a label, never the raw key.
+            boxLabel: boxColumnLabel(
+              settings.entries.statblock?.boxes,
+              settings.entries.statblock?.stats,
+            ),
             statLabels: (settings.entries.statblock?.stats ?? [])
               .filter(
                 (f) =>
