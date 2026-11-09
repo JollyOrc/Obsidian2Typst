@@ -47,9 +47,15 @@ import {
   createEntryProcessor,
   headingAbove,
   inQuote,
-  type EntriesApi,
   type PreviewDeps,
 } from './entries/processor';
+import {
+  composeApi,
+  createDetailsApi,
+  createDetailsProcessor,
+  type DetailsDeps,
+  type PluginApi,
+} from './details/processor';
 import {createFontSet} from './fonts';
 import {createExportHost} from './obsidian/export-host';
 import {chooseExportFolder} from './obsidian/folder-dialog';
@@ -180,10 +186,26 @@ export default class Obsidian2TypstPlugin extends Plugin {
   private readonly entryProcessor = createEntryProcessor(this.entryDeps);
 
   /**
+   * US-038 AC-14: what the details preview reads: the same readers as the
+   * statblock's, and the active preset's `details` group.
+   */
+  private readonly detailsDeps: DetailsDeps = {
+    ...this.entryDeps,
+    settings: async () => {
+      const view = this.activeView();
+      if (!view.valid || view.fields === null) return null;
+      return {details: view.fields.details, colorMode: view.fields.colorMode};
+    },
+  };
+
+  /** US-038 AC-14: the processor of details blocks. */
+  private readonly detailsProcessor = createDetailsProcessor(this.detailsDeps);
+
+  /**
    * US-035 AC-11 (decision 1): the drawing API for the author's vault views,
    * `app.plugins.plugins["obsidian2typst"].api` (documented in the manual).
    */
-  api: EntriesApi | null = null;
+  api: PluginApi | null = null;
 
   /** US-020 AC-1: what the actions are built over. */
   private readonly actionDeps: ActionDeps = {
@@ -250,7 +272,14 @@ export default class Obsidian2TypstPlugin extends Plugin {
     this.registerMarkdownCodeBlockProcessor('o2t-entry', (source, el, ctx) =>
       this.entryProcessor.handler(source, el, {ctx, el}),
     );
-    this.api = createEntriesApi(this.entryDeps);
+    // US-038 AC-14, AC-15: the details block's preview and `renderDetails`.
+    this.registerMarkdownCodeBlockProcessor('o2t-details', (source, el, ctx) =>
+      this.detailsProcessor.handler(source, el, {ctx, el}),
+    );
+    this.api = composeApi(
+      createEntriesApi(this.entryDeps),
+      createDetailsApi(this.detailsDeps),
+    );
     // US-035 AC-7 (decision 2): a change of the active preset, or of its
     // note, redraws the open previews at once.
     this.register(
@@ -374,11 +403,14 @@ export default class Obsidian2TypstPlugin extends Plugin {
    */
   private redrawEntries(): void {
     this.entryProcessor.clearIconCache();
+    this.detailsProcessor.clearIconCache();
     this.api?.clearIconCache();
     for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
       const view = leaf.view;
       if (!(view instanceof MarkdownView)) continue;
-      if (!view.getViewData().includes('```o2t-entry')) continue;
+      const text = view.getViewData();
+      if (!text.includes('```o2t-entry') && !text.includes('```o2t-details'))
+        continue;
       view.previewMode.rerender(true);
     }
     this.app.workspace.updateOptions();

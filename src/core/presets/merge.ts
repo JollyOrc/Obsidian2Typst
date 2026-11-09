@@ -5,6 +5,7 @@ import {mergeFonts, type FontsSettings} from '../fonts/types';
 import type {
   CalloutsSettings,
   ColorMode,
+  DetailsSettings,
   EntriesSettings,
   HeadingRulesSettings,
 } from '../markers';
@@ -245,6 +246,8 @@ export interface EffectiveSettings {
   headingRules: HeadingRulesSettings;
   /** US-030 AC-8: from the preset note only (G0-C9); absent when unset. */
   entries?: EntriesSettings;
+  /** US-038 AC-5: from the preset note only; absent when unset. */
+  details?: DetailsSettings;
   colorMode?: ColorMode;
 }
 
@@ -312,6 +315,10 @@ export function effectiveSettings(
       ...(preset.fields.entries === undefined
         ? {}
         : {entries: preset.fields.entries}),
+      // US-038 AC-5: as `entries`, only when the note sets the group.
+      ...(preset.fields.details === undefined
+        ? {}
+        : {details: preset.fields.details}),
       ...(preset.fields.colorMode === undefined
         ? {}
         : {colorMode: preset.fields.colorMode}),

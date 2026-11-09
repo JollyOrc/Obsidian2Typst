@@ -176,6 +176,8 @@ describe('US-015 AC-2 skeleton and fixed order', () => {
       ['statblock', 87],
       // US-031 (G4 #127): the entry layout.
       ['entries', 88],
+      // US-038 (#154): the detail row helpers.
+      ['details', 89],
       ['cover', 90],
     ]);
   });

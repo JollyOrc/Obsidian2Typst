@@ -12,11 +12,13 @@ The plugin is split into a **pure core** and a thin **Obsidian shell**.
 | `src/core/layout` | Apply image-placement and page-break rules to the tree | none |
 | `src/core/emit` | Document tree plus settings to Typst source, including escaping | none |
 | `src/core/entries` | Epic #121: the statblock model shared by the PDF and the Obsidian preview (`model.ts`), the layout and sheet warnings made from the compile's facts (`report.ts`), the encounter sheet (`sheet.ts`) | none |
+| `src/core/details` | Epic #152, US-038: the detail row's drawing model shared by the PDF and the Obsidian preview and API (`model.ts`: `detailsModel`, the one place of key and value matching and of the unmapped and not-text checks) | none |
 | `src/core/checks` | Epic #121, US-034: the print checks — low resolution from the drawn widths (`print.ts`), the word-gap scan of a PDF (`word-gaps.ts`, small so the worker can load it) | none |
 | `src/core/pdf` | Epic #121, US-034 AC-9: the PDF reader on bytes (`reader.ts`: object index, strings, CMaps, streams), FlateDecode (`inflate.ts`), the text runs with positions (`text.ts`); the tests read PDFs through it too; US-037 (`page-layout.ts`): the one incremental update that makes a facing-pages PDF open as spreads, called only by `plugin/run-export.ts` | none |
 | `src/core/settings` | Typed settings model, defaults, and validation (fonts, decoration, cover, print) | none |
 | `src/plugin` | Obsidian API: commands, settings UI, side-panel view, vault file reading, writing output | file I/O, UI |
 | `src/plugin/entries` | Epic #121, US-035: the `o2t-entry` code-block processor and the drawing API (`processor.ts`) | DOM (Obsidian's element helpers) |
+| `src/plugin/details` | Epic #152, US-038: the details code-block processor, `api.renderDetails` and the one `api` object (`processor.ts`; the walker, the raw notice and the icon cache are those of `plugin/entries`) | DOM (Obsidian's element helpers) |
 | `src/plugin/engine` | Loads the WASM compiler in a Web Worker; compile and render requests | worker, memory |
 
 Invariants:
@@ -36,6 +38,7 @@ Invariants:
   back by the worker after the compile; `core/entries/report.ts` and
   `core/checks/print.ts` turn them into warnings. These never stop a strict
   export (they exist only after the PDF does).
+- The detail row (US-038) is read by one scan (`core/markers/details.ts`, before the entry scan), modelled by one function (`core/details/model.ts`) and drawn by the emitter (`core/emit/details.ts`) and by `plugin/details/processor.ts`; `emit` imports the model like it imports the statblock's.
 - `core/entries` and `core/emit` draw with the same Typst helpers: the
   statblock and the encounter sheet share `ENTRY_MARKS_DEF` (boxes, cells,
   icons); the preview shares the model and `statblockLookValues`.

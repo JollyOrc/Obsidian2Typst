@@ -10,6 +10,8 @@
 //   <o2t-image>      each block image drawn (US-034 AC-2): file, drawn width (mm)
 //   <o2t-wrap>       each statblock's wrap (US-030 AC-16a, #139): band, blocks
 //                    beside, the split, column and statblock heights, page, top
+//   <o2t-details>    each detail row drawn (US-038): the page it starts on and
+//                    its badge count
 // Source of truth: docs/user-stories/US-030-…, US-031-….
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -108,6 +110,12 @@ export interface WrapFact {
   y: number;
 }
 
+/** US-038: what one detail row recorded: its first page and badges. */
+export interface DetailsFact {
+  page: number;
+  badges: number;
+}
+
 /** A section opener (US-033 AC-1 to AC-4). */
 export interface SectionPlace {
   section: string;
@@ -124,6 +132,8 @@ export interface CompiledEntries {
   sections: SectionPlace[];
   /** US-030 AC-16a (#139): the wraps, in document order. */
   wraps: WrapFact[];
+  /** US-038: the detail rows, in document order. */
+  details: DetailsFact[];
   images: {file: string; widthMm: number}[];
   /** US-036 AC-3, AC-6 (G4 #135): the sheet pages' `<o2t-sheet>` facts. */
   sheets: {form: string; rows: number; columns: number; boxMm: number}[];
@@ -216,6 +226,7 @@ export async function compileEntries(
     drawn,
     sheetFacts,
     wraps,
+    rows,
   ] = await compiler.runWithWorld({mainFilePath: path}, async (w) => [
     (await w.compile({diagnostics: 'unix'})).diagnostics ?? [],
     await w.query({selector: '<o2t-statblock>', field: 'value'}),
@@ -225,6 +236,7 @@ export async function compileEntries(
     await w.query({selector: '<o2t-image>', field: 'value'}),
     await w.query({selector: '<o2t-sheet>', field: 'value'}),
     await w.query({selector: '<o2t-wrap>', field: 'value'}),
+    await w.query({selector: '<o2t-details>', field: 'value'}),
   ]);
   return {
     pdf,
@@ -235,6 +247,7 @@ export async function compileEntries(
     ends: parse<EntryEnd>(ends),
     sections: parse<SectionPlace>(sections),
     wraps: parse<WrapFact>(wraps),
+    details: parse<DetailsFact>(rows),
     images: parse<{file: string; widthMm: number}>(drawn),
     sheets: parse<{form: string; rows: number; columns: number; boxMm: number}>(
       sheetFacts,

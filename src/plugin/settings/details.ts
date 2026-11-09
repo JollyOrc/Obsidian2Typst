@@ -169,7 +169,7 @@ export function detailRows(fields: unknown, defaults: unknown): DetailRow[] {
   return rows;
 }
 
-/** US-030 AC-9: the `entries.*` fields in the order of the story's table. */
+/** US-030 AC-9, US-038 AC-5: the `entries.*` and `details.*` fields in the order of the story's table. */
 const ENTRY_ROW_PATHS: readonly (readonly string[])[] = [
   ...[
     'stats',
@@ -203,6 +203,10 @@ const ENTRY_ROW_PATHS: readonly (readonly string[])[] = [
   ['entries', 'encounterSheetFile'],
   ['entries', 'encounterSheetBoxes'],
   ['entries', 'encounterSheetText'],
+  // US-038 AC-5: the detail row's group.
+  ['details', 'items'],
+  ['details', 'color'],
+  ['details', 'size'],
   ['colorMode'],
 ];
 

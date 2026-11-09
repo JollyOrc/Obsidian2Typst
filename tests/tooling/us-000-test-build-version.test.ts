@@ -37,16 +37,17 @@ describe('TICKET-026 version of a test build', () => {
     expect(tab).toContain('Obsidian2Typst ');
   });
 
-  it('SCAR-012: M2, M3, M6 to M26 name where they run and the version to expect, and M3, M6 to M26 name the current one', () => {
+  it('SCAR-012: M2, M3, M6 to M27 name where they run and the version to expect, and M3, M6 to M27 name the current one', () => {
     // SCAR-029: each check is a file of its own, so each is read on its own
     // (before the split a section ran to the end of the one file).
     const ids = [
       'M2',
       'M3',
-      ...Array.from({length: 21}, (_, i) => `M${i + 6}`),
+      ...Array.from({length: 22}, (_, i) => `M${i + 6}`),
     ];
-    // #137: M21 to M24 of epic #121; #145: M25 of epic #139; #150: M26 of epic #147.
-    expect(ids.at(-1)).toBe('M26');
+    // #137: M21 to M24 of epic #121; #145: M25 of epic #139; #150: M26 of epic #147;
+    // #156: M27 of epic #152.
+    expect(ids.at(-1)).toBe('M27');
     for (const id of ids) {
       const section = readCheck(id).replace(/\s+/g, ' ');
       expect(section, id).toContain('Expected version');

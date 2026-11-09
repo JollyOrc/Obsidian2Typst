@@ -91,3 +91,11 @@ export {
 } from './entry';
 export {findImage, isImageSize} from './image';
 export {entriesLayoutHelper} from './breaks';
+export {
+  DETAILS_HELPER,
+  DETAILS_HELPER_DEF,
+  detailsCall,
+  detailsLookValues,
+  type DetailsLookValues,
+  type DetailsWriter,
+} from './details';

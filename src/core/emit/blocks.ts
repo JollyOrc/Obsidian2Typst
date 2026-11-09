@@ -12,11 +12,13 @@
 // Transforms used (shared-utility register): rawBlock; escapeMarkup, wrapEmphasis,
 // rawInline and callSeparator through emitInline.
 import type {AssetResolver} from '../assets';
+import type {DetailsModel} from '../details/model';
 import type {StatblockModel} from '../entries/model';
 import {
   EMPTY_GLOSSARY_PLAN,
   findCallout,
   flattenLinks,
+  keepLinks,
   type GlossaryPlan,
 } from '../markers';
 import {indexHeadings, parseInline, visibleText} from '../parse';
@@ -41,6 +43,11 @@ import {
   type StatblockWriter,
   type WrapBlock,
 } from './entry';
+import {
+  detailsCall,
+  type DetailsLookValues,
+  type DetailsWriter,
+} from './details';
 import {escapeMarkup} from './escape-markup';
 import {Notes} from './footnote';
 import type {PageRefEnv} from './page-refs';
@@ -90,6 +97,8 @@ interface BlockEnv {
   fit: BlockFit | undefined;
   /** US-030: the statblocks of the entry headings; undefined without any. */
   statblocks: StatblockEnv | undefined;
+  /** US-038: the detail rows of the headings; undefined without any. */
+  details: DetailsEnv | undefined;
   /** US-031: the entry layout; undefined when no chapter places an entry. */
   entryLayout: EntryLayoutEnv | undefined;
   /** US-031 AC-11, AC-12: the heading of the chapter entry being written. */
@@ -257,6 +266,18 @@ export interface StatblockEnv {
   /** The Typst path of a track icon, or null when it is missing. */
   icon: (path: string, line: number) => string | null;
   /** Called for every call written (the prelude gets the helper). */
+  written: () => void;
+}
+
+/** US-038 AC-7: what the emitter needs to write detail rows. */
+export interface DetailsEnv {
+  /** The model of each heading that gets a row (`text`: the heading's text). */
+  rows: ReadonlyMap<BlockNode, DetailsModel & {line: number}>;
+  /** The look (`detailsLookValues`). */
+  look: DetailsLookValues;
+  /** The Typst path of an icon, or null when it is missing. */
+  icon: (path: string, line: number) => string | null;
+  /** Called for every row written (the prelude gets the helpers). */
   written: () => void;
 }
 
@@ -1174,6 +1195,25 @@ function renderPieces(
           layoutInfo?.inline === true
             ? `#o2t-entry-mark((heading: ${typstString(layoutInfo.text)}, layout: ${typstString(layoutInfo.layout)}, size: "inline"))`
             : null;
+        // US-038 AC-7: the detail row after the heading's figures; a heading
+        // that is a term, an entry or a hidden part has none (the plan drops
+        // those blocks).
+        const detail = env.details?.rows.get(block);
+        let row: string | null = null;
+        if (detail !== undefined && env.details !== undefined) {
+          const detailsEnv = env.details;
+          const writer: DetailsWriter = {
+            content: (value) =>
+              emitInline(keepLinks(parseInline(value, detail.line)), ctx, {
+                ...inlineOf(env),
+                atBlockStart: true,
+                breaks: 'space',
+              }),
+            icon: (path) => detailsEnv.icon(path, detail.line),
+          };
+          row = detailsCall(detail, detailsEnv.look, writer);
+          if (row !== null) detailsEnv.written();
+        }
         return {
           ...(sb === undefined ? {} : {sb}),
           // US-017 AC-8: images of a term follow its run-in paragraph.
@@ -1182,6 +1222,7 @@ function renderPieces(
             ...(inlineMark === null ? [] : [inlineMark]),
             ...(call === null ? [] : [call]),
             ...figures,
+            ...(row === null ? [] : [row]),
           ].join('\n\n'),
           kind:
             role?.kind === 'term' && role.runIn !== null
@@ -1520,6 +1561,8 @@ export interface BlockOptions {
    * heading is followed by its statblock call. Default: none.
    */
   statblocks?: StatblockEnv;
+  /** US-038 AC-7: the detail rows of the headings. Default: none. */
+  details?: DetailsEnv;
   /** US-031: the entry layout of the entries chapters. Default: none. */
   entryLayout?: EntryLayoutEnv;
   /**
@@ -1571,6 +1614,7 @@ export function emitBlocks(
     book: options.book,
     unlistNested: options.unlistNested ?? false,
     statblocks: options.statblocks,
+    details: options.details,
     entryLayout: options.entryLayout,
     entryHeading: null,
   };

@@ -15,6 +15,7 @@ import type {
 import type {
   CalloutsSettings,
   ColorMode,
+  DetailsSettings,
   EntriesSettings,
   HeadingRulesSettings,
 } from '../markers';
@@ -99,6 +100,11 @@ export interface ConvertSettings {
    * written (AC-11, the built-in case).
    */
   entries?: EntriesSettings;
+  /**
+   * US-038 AC-5: the `details` group (the badges of the row). Without it, or
+   * with no item, a details block is read and dropped: no row, no warning.
+   */
+  details?: DetailsSettings;
   /** US-030 AC-8, AC-15: `grayscale` draws the statblock in gray; default `color`. */
   colorMode?: ColorMode;
 }
