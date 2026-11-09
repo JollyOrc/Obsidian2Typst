@@ -1,8 +1,8 @@
 # US-037 — Facing pages open as spreads in a PDF viewer
 
-**Status:** Implemented, waiting for the user's manual check M26 (code #148, #149 committed 2026-11-09)
-**Introduced:** v0.13.1 (planned)
-**Implemented:** v0.13.1 (planned); tickets #148 to #150, test build `0.13.1-m26.1` (M26)
+**Status:** Done (0.13.1, released 2026-11-09; M26 passed 2026-11-09; code #148, #149 committed 2026-11-09)
+**Introduced:** v0.13.1
+**Implemented:** v0.13.1 (released 2026-11-09); tickets #148 to #150, test build `0.13.1-m26.1` (M26)
 **Supersedes:** —
 
 Epic #147. Spike: [`spike-page-layout.md`](../technical/spike-page-layout.md).
@@ -215,7 +215,7 @@ spike; Typst 0.14.2, macOS 27.0.1):
 
 ## Notes
 
-- **Decisions of this story (provisional, for the user at M26):**
+- **Decisions of this story (decided by the user 2026-11-09, after M26):**
   (1) a PDF that cannot be updated is written as compiled with
   `PDF_PAGE_LAYOUT_FAILED` and never stops the export, also in strict mode
   (AC-9); (2) a `/PageLayout` already in the catalog is kept (AC-10);
