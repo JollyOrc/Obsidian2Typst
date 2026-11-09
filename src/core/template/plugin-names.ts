@@ -8,7 +8,7 @@
  * of US-028 with its labels' prefix `o2t-fit` and `o2t-fit-decision`, and
  * its hints `o2t-fit-hints` and `o2t-fit-pinned`, AC-17; `o2t-statblock`, `o2t-sb-box` of
  * US-030 AC-15; `o2t-wrap`, `o2t-atoms` of US-030 AC-16a (#139); `o2t-entries`, `o2t-entry-mark`, `o2t-entry-end`, `o2t-even`,
- * `o2t-fitted` of US-031; `o2t-continued` of US-032; `o2t-chapter-header`, `o2t-section-end` of US-033; `o2t-box-size`,
+ * `o2t-fitted` of US-031; `o2t-continued` of US-032; `o2t-chapter-header`, `o2t-section-end`, `o2t-tail-header` (#139) of US-033; `o2t-box-size`,
  * `o2t-box-rows`, `o2t-icon`, `o2t-cell` shared by US-030 and US-036;
  * `o2t-sheet`, `o2t-sheet-row` of US-036). The
  * preamble comes
@@ -45,6 +45,7 @@ export const PLUGIN_NAMES: readonly string[] = Object.freeze([
   'o2t-sheet',
   'o2t-sheet-row',
   'o2t-statblock',
+  'o2t-tail-header',
   'o2t-wrap',
   'page-ref',
   'running-text',

@@ -144,6 +144,28 @@ export const O2T_CHAPTER_HEADER_HELPER = [
 ].join('\n');
 
 /**
+ * US-033 | AC-7 (amended for #139), US-036 AC-6: the header of page `p` when
+ * it holds a page an entries chapter writes after its last entry (the quick
+ * reference, the encounter sheet page, anything later written there): the
+ * title of the last `<o2t-tail>` marker on or before `p`, while the first
+ * `<o2t-tail-end>` after that marker is on `p` or later; "" for an empty
+ * title; none on a page where a level-1 heading starts (US-019) and on any
+ * other page. One rule for the class (SCAR-017). Reads where the markers
+ * fell and changes no layout (SCAR-021).
+ */
+export const O2T_TAIL_HEADER_HELPER = [
+  '#let o2t-tail-header(p) = {',
+  '  let tails = query(<o2t-tail>).filter(m => m.location().page() <= p)',
+  '  if tails.len() == 0 { return none }',
+  '  let t = tails.last()',
+  '  let ends = query(selector(<o2t-tail-end>).after(t.location()))',
+  '  if ends.len() == 0 or ends.first().location().page() < p { return none }',
+  '  if query(heading.where(level: 1)).any(h => h.location().page() == p) { return none }',
+  '  t.value.title',
+  '}',
+].join('\n');
+
+/**
  * US-019 | AC-3, AC-4, AC-5, AC-8: The preamble rule `page-furniture`, or null
  * when both parts are off or the settings are missing (the output then is
  * exactly as before, AC-8).
@@ -191,10 +213,13 @@ export function pageFurnitureRule(
       tests.length > 0 ? `if ${tests.join(' and ')} { ${title} }` : title;
     // US-033 AC-7: inside an entries chapter the section's title, none on
     // the opener page; blank pages stay without a header.
-    const chapterHeader =
-      `let h = o2t-chapter-header(here().page()); if h == none { ${header} } else if h != ""` +
+    // US-033 AC-7 (amended for #139): after the chapter's last entry, the
+    // title of the page written there (quick reference, sheet page).
+    const own = (v: string): string =>
+      `${v} != ""` +
       (tests.length > 0 ? ` and ${tests.join(' and ')}` : '') +
-      ` { set text(size: 0.9em); align(center, h) }`;
+      ` { set text(size: 0.9em); align(center, ${v}) }`;
+    const chapterHeader = `let h = o2t-chapter-header(here().page()); if h == none { let t = o2t-tail-header(here().page()); if t == none { ${header} } else if ${own('t')} } else if ${own('h')}`;
     // US-032 AC-8 (decision 1): on an entry's overflow page the line
     // "<heading> (continued)" replaces the running header; the folio stays.
     parts.push(
@@ -219,6 +244,10 @@ export function pageFurnitureRule(
   if (blank) helpers.push(O2T_BLANK_HELPER);
   if (part) helpers.push(O2T_PART_HELPER);
   if (book.continued === true)
-    helpers.push(O2T_CONTINUED_HELPER, O2T_CHAPTER_HEADER_HELPER);
+    helpers.push(
+      O2T_CONTINUED_HELPER,
+      O2T_CHAPTER_HEADER_HELPER,
+      O2T_TAIL_HEADER_HELPER,
+    );
   return [...helpers, line].join('\n');
 }

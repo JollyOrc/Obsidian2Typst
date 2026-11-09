@@ -147,6 +147,42 @@ describe('US-033 AC-7 (amended) the header of the pages after the last entry', (
   );
 });
 
+describe('US-033 AC-7 (amended) the pages after them', () => {
+  it(
+    "US-033 AC-7: the page after the quick reference is US-019's again (G4 of #143: a mutant that ignored the end of the quick reference survived)",
+    async () => {
+      const source = [
+        '# Players',
+        '',
+        '## Menagerie',
+        '',
+        'Chapter intro.',
+        '',
+        section('Beasts', 3, e('Fen Hare', 4), e('Marsh Owl', 4)),
+        '## Rules',
+        '',
+        filler(40, 'Rules'),
+      ].join('\n');
+      const c = await compile(source, {}, {runningHeaderLevel: 2});
+      const qrLast = c.pages.reduce(
+        (last, p, i) =>
+          p.text.includes('Marsh Owl') && p.text.includes('Page') ? i : last,
+        -1,
+      );
+      expect(qrLast).toBeGreaterThan(0);
+      const after = c.pages
+        .slice(qrLast + 1)
+        .filter((p) => p.text.includes('Rules 3'));
+      expect(after.length).toBeGreaterThan(0);
+      for (const p of c.pages
+        .slice(qrLast + 1)
+        .filter((x) => x.text.includes('lorem')))
+        expect(p.header).toBe('Rules');
+    },
+    SLOW,
+  );
+});
+
 describe('US-033 AC-9 (amended) the box label, section rows and links', () => {
   it(
     "US-033 AC-9, AC-11 (G0 answer 14): the box column is headed with the key's first character in upper case; no Section column",

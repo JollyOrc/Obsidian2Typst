@@ -753,12 +753,17 @@ function openerLines(
   const close = (k: number, node: BlockNode): void => {
     // A run that ends the chapter writes its own end marker; US-033 AC-9:
     // the quick reference follows it.
-    const lines = [
-      ...(runs.covered.has(k - 1) ? [] : [CHAPTER_END_LINE]),
+    const tail = [
       quick(node),
       // US-036 AC-6: the sheet page after the quick reference.
       sheetPageText(node, layout),
     ].filter((line) => line !== '');
+    const lines = [
+      ...(runs.covered.has(k - 1) ? [] : [CHAPTER_END_LINE]),
+      ...tail,
+      // US-033 AC-7 (#139): the end of the pages written after the chapter.
+      ...(tail.length > 0 ? [`#metadata(none) <${TAIL_END_LABEL}>`] : []),
+    ];
     if (lines.length === 0) return;
     if (k >= blocks.length) end = lines.join('\n');
     else add(k, lines.join('\n'));
@@ -859,6 +864,8 @@ function quickReferenceText(
         ];
   return [
     breakLines('left', layout.facingPages) ?? '',
+    // US-033 AC-7 (amended for #139): the header of these pages.
+    `#metadata((title: ${typstString(quick.title)})) <${TAIL_LABEL}>`,
     ...heading,
     // Set a little smaller, as reference tables are, so the columns fit.
     '#block[',
@@ -893,12 +900,17 @@ function sheetPageText(chapter: BlockNode, layout: EntryLayoutEnv): string {
       : `${'='.repeat(chapter.depth + 1)} ${escapeMarkup(sheet.title, {atBlockStart: false})}`;
   return [
     breakLines('page', layout.facingPages) ?? '',
+    // US-036 AC-6, US-033 AC-7 (amended for #139): the header of this page.
+    `#metadata((title: ${typstString(sheet.title)})) <${TAIL_LABEL}>`,
     bookSheetCall(sheet.data, layout.textWidth, layout.textHeight, head),
   ]
     .filter((line) => line !== '')
     .join('\n');
 }
 
+/** US-033 AC-7 (#139): a page written after a chapter's last entry, and their end. */
+const TAIL_LABEL = 'o2t-tail';
+const TAIL_END_LABEL = 'o2t-tail-end';
 const CHAPTER_START_LINE = '#metadata(none) <o2t-chapter-start>';
 const CHAPTER_END_LINE = '#metadata(none) <o2t-chapter-end>';
 const SECTION_START_LABEL = 'o2t-section-start';
