@@ -72,6 +72,17 @@ on the right, and the gutter is not used. In the settings tab the Gutter row
 can only be edited while the Facing pages switch of the Defaults is on; the
 switch shows the value in effect, also when the Defaults do not set it.
 
+With facing pages on, the exported PDF asks a PDF viewer to open as spreads:
+the file's page-layout setting is `TwoPageRight`, so a viewer's two-page view
+shows page 1 alone on the right and then pages 2 and 3 side by side, 4 and 5,
+and so on, the pairs a reader sees in print. Without facing pages the PDF is
+left as it is. This is the view the document opens in: a viewer's own
+setting, or a view it remembers for the document, may win, and the page-layout
+choice you make in the viewer afterwards always does. The A4 encounter sheet is a single page and is never
+changed. If the PDF cannot be set (it is not in the form the compiler
+writes), the export reports `PDF_PAGE_LAYOUT_FAILED` and writes the PDF as it
+was compiled.
+
 Facing pages also decide where page numbers stand and whether pages can be
 added to reach a left or right page (see [Book structure](book-structure.md)).
 

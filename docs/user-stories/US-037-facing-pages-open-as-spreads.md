@@ -1,8 +1,8 @@
 # US-037 — Facing pages open as spreads in a PDF viewer
 
-**Status:** Ready (G1 2026-11-09)
+**Status:** Implemented, waiting for the user's manual check M26 (code #148, #149 committed 2026-11-09)
 **Introduced:** v0.13.1 (planned)
-**Implemented:** —
+**Implemented:** v0.13.1 (planned); tickets #148 to #150, test build `0.13.1-m26.1` (M26)
 **Supersedes:** —
 
 Epic #147. Spike: [`spike-page-layout.md`](../technical/spike-page-layout.md).

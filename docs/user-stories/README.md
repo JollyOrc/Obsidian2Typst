@@ -55,7 +55,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-034](US-034-print-checks-resolution-and-word-gaps.md) | Print checks: image resolution and word gaps (epic #121) | Done (0.12.0, 2026-11-07; M21 to M24 passed); amendment for #139 Done 2026-11-09, M25 passed (AC-2, AC-6, AC-13; 0.13.0) | epic #121, #122 to #137; epic #139 |
 | [US-035](US-035-entry-block-preview-in-obsidian.md) | Statblock preview of entry blocks in Obsidian (epic #121) | Done (0.12.0, 2026-11-07; M21 to M24 passed; amendment AC-12 2026-11-08, 0.12.1) | epic #121, #122 to #137; #138 |
 | [US-036](US-036-encounter-sheet.md) | The encounter sheet: A4 file and book page (epic #121) | Done (0.12.0, 2026-11-07; M21 to M24 passed); amendment for #139 Done 2026-11-09, M25 passed (AC-6; 0.13.0) | epic #121, #122 to #137; epic #139 |
-| [US-037](US-037-facing-pages-open-as-spreads.md) | Facing pages open as spreads in a PDF viewer (`/PageLayout /TwoPageRight`) | Ready (G1 2026-11-09) | epic #147, #148 to #150 |
+| [US-037](US-037-facing-pages-open-as-spreads.md) | Facing pages open as spreads in a PDF viewer (`/PageLayout /TwoPageRight`) | Implemented, waiting for M26 (2026-11-09) | epic #147, #148 to #150 |
 
 ### Backlog
 
