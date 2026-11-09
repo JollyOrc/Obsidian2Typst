@@ -1,8 +1,8 @@
 # US-032 — Entry fit, overflow and the automatic layout
 
-**Status:** Done; amendment for #139 Ready (2026-11-09: AC-2, AC-4, AC-9, AC-12 — the portrait forms in the automatic choice and the fit, the grown landscape illustration, the space below it). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; AC-2, AC-4, AC-9, AC-12 — the portrait forms in the automatic choice and the fit, the grown landscape illustration, the space below it). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 and US-031)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 in v0.13.0 (released 2026-11-09), tickets #140 to #145, test build `0.13.0-m25.1` (M25)
 **Supersedes:** US-031 AC-3's interim `auto` rule (decision 1 of US-031)
 
 Epic #121, third of seven stories (see US-030). Drafts D-11, D-12, D-13 in

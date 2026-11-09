@@ -1,8 +1,8 @@
 # US-030 — Entry data and the statblock
 
-**Status:** Done; amendment for #139 Ready, decision 5 provisional (2026-11-09: AC-16 and AC-17, the text wraps around the statblock; G0 and G1 measurements 2026-11-08, the user's answers the same day). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
+**Status:** Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; decision 5 confirmed by the user 2026-11-09; AC-16 and AC-17, the text wraps around the statblock; G0 and G1 measurements 2026-11-08, the user's answers the same day). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
 **Introduced:** v0.12.0 (planned; a new feature bumps the minor version)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 in v0.13.0 (released 2026-11-09), tickets #140 to #145, test build `0.13.0-m25.1` (M25)
 **Supersedes:** —
 
 Epic #121 (entry layouts). First of seven stories: US-030 entry data and the
@@ -364,7 +364,7 @@ They gather at dusk.
     otherwise it starts the full-width part;
   - **a block that is not split** — an image, a table, code, a callout, a
     quote, a thematic break, a list of any length (only paragraphs are split
-    at the statblock's edge; provisional, decision 5) — goes into the column
+    at the statblock's edge; decision 5) — goes into the column
     when it fits whole, else it starts the full-width part, and the column
     may stay empty (an entry that starts with an image taller than the room
     beside the statblock: column empty, the image full width below);
@@ -504,8 +504,8 @@ They gather at dusk.
 4. **Strict mode:** ~~no entry warning stops the export~~ — revised by
    the user 2026-11-06 at #123's G4: entry warnings abort a strict-mode
    export like every conversion warning (US-006 AC-4 unchanged; AC-19).
-5. **A list at the statblock's edge (#139; provisional, put to the user
-   2026-11-09):** only paragraphs are split at the statblock's edge; a list
+5. **A list at the statblock's edge (#139; put to the user 2026-11-09,
+   confirmed the same day: "keep"):** only paragraphs are split at the statblock's edge; a list
    (also one of more than 10 items, which US-031 AC-12 lets break across a
    page) that does not fit whole beside the statblock goes whole into the
    full-width part, where US-031 AC-12 applies as before. The G0 answer named

@@ -1,8 +1,8 @@
 # US-033 — Entry openers, navigation and the quick reference
 
-**Status:** Done; amendment for #139 Ready (2026-11-09: AC-7, AC-9, AC-11, AC-12, AC-15 — the header of the quick reference's pages, the box column's label, section rows, entry names as links). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
+**Status:** Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; AC-7, AC-9, AC-11, AC-12, AC-15 — the header of the quick reference's pages, the box column's label, section rows, entry names as links). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 3 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-032)
-**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 planned for v0.13.0
+**Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 in v0.13.0 (released 2026-11-09), tickets #140 to #145, test build `0.13.0-m25.1` (M25)
 **Supersedes:** —
 
 Epic #121, fourth of seven stories (see US-030). Drafts D-09, D-14 in
