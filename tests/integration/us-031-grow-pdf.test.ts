@@ -11,7 +11,7 @@
 import {afterAll, describe, expect, it} from 'vitest';
 import {filler} from '../support/book';
 import {A5_PRINT} from '../support/convert';
-import {entry} from '../support/entries';
+import {ENTRIES, entry} from '../support/entries';
 import {
   compileEntries,
   disposeEntriesCompiler,
@@ -40,6 +40,7 @@ const IMAGES = {
   'Sample/assets/e-tall.png': png(100, 200), // 1:2
   'Sample/assets/e-slim.png': png(50, 200), // 1:4
   'Sample/assets/e-three.png': png(150, 200), // 3:4
+  'Sample/assets/e-near.png': png(180, 200), // 9:10
 };
 const LEDE = [
   'Fen hares are quick and shy. They live in reed beds and flee at the first sound.',
@@ -270,41 +271,61 @@ describe('US-031 AC-7b the portrait forms', () => {
   it(
     "US-031 AC-7b (G0 answer 13, G1 answer 1): across text lengths the form follows the table and the drawn picture is the chosen form's; each row is reached",
     async () => {
+      // Inputs calibrated at G4 of #142 (A5, the test preset): each reaches
+      // one row of the table; the row with an overflowing column and a
+      // stacked form that fits exists only in a window of about 1.5 lines,
+      // reached at minScale 100 with a 9:10 picture on a page.
       const seen = new Set<string>();
-      for (const [image, n] of [
-        ['e-tall.png', 2],
-        ['e-tall.png', 24],
-        ['e-tall.png', 34],
-        ['e-tall.png', 40],
-        ['e-tall.png', 52],
-        ['e-tall.png', 70],
-        ['e-three.png', 30],
-        ['e-three.png', 38],
-        ['e-three.png', 46],
-      ] as const) {
-        const name = `Cat ${image} ${n}`;
-        const c = await compile(chapter(e(name, 'spread-portrait', n, image)));
+      const log: string[] = [];
+      const cases: [string, string, number, number][] = [
+        ['e-tall.png', 'spread-portrait', 2, 70], // no text
+        ['e-tall.png', 'spread-portrait', 14, 70], // both fit, stacked larger
+        ['e-tall.png', 'spread-portrait', 18, 70], // both fit, columns larger
+        ['e-tall.png', 'spread-portrait', 20, 70], // columns only
+        // Neither fits, with a stamp-sized stacked picture (G1 answer 1:
+        // it does not win; G4 of #142, a mutant that let it win survived).
+        ['e-tall.png', 'spread-portrait', 22, 70],
+        ['e-tall.png', 'spread-portrait', 30, 70], // neither, no room at all
+        ['e-near.png', 'page-portrait', 6, 100], // stacked only
+      ];
+      for (const [image, layout, n, min] of cases) {
+        // A short name: the filler repeats it in every paragraph.
+        const name = `X${seen.size}${log.length}`;
+        const c = await compile(chapter(e(name, layout, n, image)), {
+          entries: {...ENTRIES, image: {minScale: min}},
+        });
         noConvergeWarning(c);
         const p = place(c, name);
         expect(p.form, name).toBe(expectedForm(p));
-        // The right page of the spread holds the picture.
-        const drawnW = mm(imageOn(c, p.page + 1)?.width ?? 0);
-        expect(drawnW, name).toBeCloseTo(
-          p.form === 'stacked' ? (p.stackW ?? 0) : (p.colW ?? 0),
-          0,
+        if (n === 22) {
+          expect(p.stackW ?? 0, name).toBeGreaterThan(0);
+          expect(p.colFits, name).toBe(false);
+        }
+        // The picture: on the spread's right page, or on the entry's page.
+        const page = layout === 'spread-portrait' ? p.page + 1 : p.page;
+        const drawnW = mm(imageOn(c, page)?.width ?? 0);
+        const want = p.form === 'stacked' ? (p.stackW ?? 0) : (p.colW ?? 0);
+        // On a page the stacked form's free height is estimated below the
+        // head (1.2 em); on the right page it is exact.
+        expect(Math.abs(drawnW - want), name).toBeLessThan(
+          layout === 'spread-portrait' ? 0.5 : 1.5,
         );
         const stackFits = (p.stackW ?? 0) >= (p.minW ?? Infinity) - 0.01;
+        log.push(`${name}: ${JSON.stringify(p)}`);
         seen.add(
           p.text === false
             ? 'none'
             : `${p.colFits === true ? 'C' : 'c'}${stackFits ? 'S' : 's'}`,
         );
       }
-      // SCAR-023: the sweep reached no text, a both-fit row, and a row
-      // where only one form fits or neither does.
-      expect(seen.has('none')).toBe(true);
-      expect(seen.has('CS') || seen.has('Cs')).toBe(true);
-      expect(seen.has('cS') || seen.has('cs')).toBe(true);
+      // SCAR-023: every row of the table was reached.
+      expect([...seen].sort(), log.join('\n')).toEqual([
+        'CS',
+        'Cs',
+        'cS',
+        'cs',
+        'none',
+      ]);
     },
     SWEEP,
   );
@@ -331,21 +352,18 @@ describe('US-032 AC-2 (amended) the automatic choice with the portrait forms', (
   it(
     'US-032 AC-2 (G0 answer 11): a portrait entry whose column overflows but whose stacked form fits is placed on one page (page-portrait)',
     async () => {
-      let hit = 0;
-      for (const n of [6, 9, 12, 15, 18]) {
-        const name = `Auto ${n}`;
-        const c = await compile(chapter(e(name, 'auto', n, 'e-three.png')));
-        const p = place(c, name);
-        if (
-          p.layout === 'page-portrait' &&
-          p.form === 'stacked' &&
-          p.colFits === false
-        )
-          hit++;
-        if (p.layout === 'page-portrait') expect(p.form).toBe(expectedForm(p));
-      }
-      expect(hit).toBeGreaterThan(0);
+      // Calibrated at G4 of #142: minScale 100, a 9:10 picture, six
+      // paragraphs; the column overflows at 100 %, the stacked picture is
+      // larger than the columns picture at 100 %.
+      const c = await compile(chapter(e('Auto Cat', 'auto', 6, 'e-near.png')), {
+        entries: {...ENTRIES, image: {minScale: 100}},
+      });
+      const p = place(c, 'Auto Cat');
+      expect(p.colFits).toBe(false);
+      expect(p.form).toBe('stacked');
+      expect(p.layout).toBe('page-portrait');
+      expect(p.size).toBe('page');
     },
-    SWEEP,
+    SLOW,
   );
 });
