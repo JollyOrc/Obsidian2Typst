@@ -9,7 +9,7 @@
 import {afterAll, describe, expect, it} from 'vitest';
 import {filler, isBlank} from '../support/book';
 import {A5_PRINT} from '../support/convert';
-import {entry} from '../support/entries';
+import {ENTRIES, entry} from '../support/entries';
 import {
   compileEntries,
   disposeEntriesCompiler,
@@ -167,12 +167,16 @@ describe('US-031 AC-5 and AC-6 spread-sized entries', () => {
   });
 
   it('US-031 AC-6 and AC-7: spread-portrait — 1:2 width-limited, 1:4 height-limited, on the outer (right) edge', async () => {
+    // Amended for #139 (AC-7b): the columns form is pinned by a full right
+    // page of text and minScale 100, so the stacked picture is the smaller.
     const c = await compile(
       chapter(
-        e('Reed Cat', 'spread-portrait', 10, 'e-tall.png'),
-        e('Reed Eel', 'spread-portrait', 10, 'e-slim.png'),
+        e('Reed Cat', 'spread-portrait', 60, 'e-tall.png'),
+        e('Reed Eel', 'spread-portrait', 60, 'e-slim.png'),
       ),
+      {entries: {...ENTRIES, image: {minScale: 100}}},
     );
+    expect(place(c, 'Reed Cat').form).toBe('columns');
     const cat = c.pages[place(c, 'Reed Cat').page]?.images[0];
     expect(cat?.width).toBeCloseTo(pt(TEXT_W * 0.55), 0);
     expect(cat?.height).toBeCloseTo(pt(TEXT_W * 0.55 * 2), 0);
@@ -202,7 +206,7 @@ describe('US-031 AC-7 captions', () => {
     expect(place(without, 'Marsh Owl').layout).toBe('page-landscape');
   });
 
-  it('US-031 AC-7: page-landscape — a 4:1 image at text width, a 1:1 image at most 40 % of the text height', async () => {
+  it('US-031 AC-7: page-landscape — a 4:1 image at text width, a 1:1 image at least 40 % of the text height (grown, amended for #139)', async () => {
     const c = await compile(
       chapter(
         e('Long One', 'page-landscape', 1, 'e-long.png'),
@@ -212,7 +216,8 @@ describe('US-031 AC-7 captions', () => {
     const long = c.pages[place(c, 'Long One').page - 1]?.images[0];
     expect(long?.width).toBeCloseTo(pt(TEXT_W), 0);
     const square = c.pages[place(c, 'Square One').page - 1]?.images[0];
-    expect(square?.height).toBeCloseTo(pt(TEXT_H * 0.4), 0);
+    // Amended for #139 (AC-7a): never smaller than the 40 % slot; it grows.
+    expect(square?.height ?? 0).toBeGreaterThanOrEqual(pt(TEXT_H * 0.4) - 1);
   });
 });
 
@@ -243,18 +248,36 @@ describe('US-031 AC-8 to AC-10 page-sized entries', () => {
   });
 
   it('US-031 AC-9: page-portrait — the image on the outer edge: left on a left page, right on a right page', async () => {
-    const c = await compile(
-      chapter(
-        e('Left Cat', 'page-portrait', 1, 'e-tall.png'),
-        e('Right Cat', 'page-portrait', 1, 'e-tall.png'),
-      ),
-    );
-    const w = c.pages[0]?.width ?? 0;
-    const left = c.pages[place(c, 'Left Cat').page - 1]?.images[0];
-    const right = c.pages[place(c, 'Right Cat').page - 1]?.images[0];
-    expect((left?.x ?? w) + (left?.width ?? 0) / 2).toBeLessThan(w / 2);
-    expect((right?.x ?? 0) + (right?.width ?? 0) / 2).toBeGreaterThan(w / 2);
-  });
+    // Amended for #139 (AC-7b): the outer edge is the columns form's. A
+    // sweep of text lengths reaches the columns form on a left and on a
+    // right page; every entry in that form has its picture on the outer
+    // edge.
+    const seen = {left: 0, right: 0};
+    for (const n of [3, 4, 5, 6, 8]) {
+      const c = await compile(
+        chapter(
+          e(`Left ${n}`, 'page-portrait', n, 'e-tall.png'),
+          e(`Right ${n}`, 'page-portrait', n, 'e-tall.png'),
+        ),
+      );
+      const w = c.pages[0]?.width ?? 0;
+      for (const name of [`Left ${n}`, `Right ${n}`]) {
+        const p = place(c, name);
+        if (p.form !== 'columns') continue;
+        const img = c.pages[p.page - 1]?.images[0];
+        const mid = (img?.x ?? 0) + (img?.width ?? 0) / 2;
+        if (p.page % 2 === 0) {
+          seen.left++;
+          expect(mid, name).toBeLessThan(w / 2);
+        } else {
+          seen.right++;
+          expect(mid, name).toBeGreaterThan(w / 2);
+        }
+      }
+    }
+    expect(seen.left).toBeGreaterThan(0);
+    expect(seen.right).toBeGreaterThan(0);
+  }, 120_000);
 
   it('US-031 AC-10: an unpaired page entry before a spread leaves its right page blank (folio only)', async () => {
     const c = await compile(
