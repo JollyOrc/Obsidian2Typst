@@ -50,3 +50,33 @@ export const readAllChecks = (): string =>
     readFileSync(CHECKS_INDEX, 'utf8'),
     ...checkFiles().map((name) => readFileSync(join(CHECKS_DIR, name), 'utf8')),
   ].join('\n');
+
+/**
+ * #158 C1, C2, C5 (SCAR-012, SCAR-028): the `**Expected version:**`
+ * sentences of a check's text, one entry per sentence, in order.
+ *
+ * Runs of whitespace count as one blank, since the source breaks the bold
+ * phrase across lines (`**Expected` / `version:**`). An entry is the
+ * backticked value right after the phrase, or `null` when the sentence names
+ * no version there (M2's handover form). A version anywhere else in the file
+ * is not read.
+ */
+export function expectedVersions(text: string): (string | null)[] {
+  const flat = text.replace(/\s+/g, ' ');
+  return [...flat.matchAll(/\*\*Expected version:\*\* ?(?:`([^`]*)`)?/g)].map(
+    (m) => m[1] ?? null,
+  );
+}
+
+/**
+ * #158 C3 (SCAR-012, SCAR-028): the places named by the `**Run in …**`
+ * sentences of a check's text, one entry per sentence (`the scratch vault`).
+ * Runs of whitespace count as one blank; the place elsewhere in the text is
+ * not read.
+ */
+export function runInPlaces(text: string): string[] {
+  const flat = text.replace(/\s+/g, ' ');
+  return [...flat.matchAll(/\*\*Run in ([^*]+)\*\*/g)].map((m) =>
+    (m[1] as string).trim(),
+  );
+}

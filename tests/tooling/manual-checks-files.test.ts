@@ -10,7 +10,9 @@ import {
   CHECKS_DIR,
   checkFile,
   checkFiles,
+  expectedVersions,
   indexRows,
+  runInPlaces,
 } from '../support/manual-checks';
 
 describe('SCAR-029 the reader of the manual checks', () => {
@@ -60,5 +62,69 @@ describe('SCAR-029 one file per manual check', () => {
       expect(text, file).toContain('](../manual-checks.md)');
       expect(text.match(/^# /gm), file).toHaveLength(1);
     }
+  });
+});
+
+// #158 C5 (SCAR-028): the sentence readers, on the forms the check files use
+// (the bold phrase broken across a line, as in M3 and M6 to M27).
+describe('#158 the readers of the Expected version and Run in sentences', () => {
+  const real =
+    '**Run in the scratch vault**\n(`spikes/typst-wasm/scratch-vault`). **Expected\nversion:** `0.14.0` (first line of the settings tab, also the plugin\nlist).';
+
+  it('#158 C1: reads the version of the sentence when the phrase breaks across a line', () => {
+    expect(expectedVersions(real)).toEqual(['0.14.0']);
+  });
+
+  it('#158 C1: reads the version on the next line after the phrase', () => {
+    expect(expectedVersions('**Expected version:**\n`0.14.0-m28.1`.')).toEqual([
+      '0.14.0-m28.1',
+    ]);
+  });
+
+  it('#158 C1: reads the sentence, not a version elsewhere in the file', () => {
+    expect(
+      expectedVersions(
+        '**Expected version:** `0.13.1` (first line).\n\nRecord: date, the build `0.14.0`, passed.',
+      ),
+    ).toEqual(['0.13.1']);
+    expect(expectedVersions('Record: date, the build `0.14.0`.')).toEqual([]);
+  });
+
+  it('#158 C2: a sentence without a version gives null (the handover form)', () => {
+    expect(
+      expectedVersions(
+        '**Expected version:** the one named in the handover; it is the first line of the settings tab.',
+      ),
+    ).toEqual([null]);
+  });
+
+  it('#158 C1: gives one entry per sentence', () => {
+    expect(
+      expectedVersions(
+        '**Expected version:** `0.14.0`. Later: **Expected version:** `0.13.1`.',
+      ),
+    ).toEqual(['0.14.0', '0.13.1']);
+  });
+
+  it('#158 C3: reads the place of the Run in sentence, also across a line', () => {
+    expect(runInPlaces(real)).toEqual(['the scratch vault']);
+    expect(runInPlaces('**Run in the\nscratch vault** (`x`).')).toEqual([
+      'the scratch vault',
+    ]);
+    expect(runInPlaces('**Run in the test vault**.')).toEqual([
+      'the test vault',
+    ]);
+  });
+
+  it('#158 C3: the place elsewhere in the text is not a Run in sentence', () => {
+    expect(
+      runInPlaces('the build is installed in the scratch vault (`npm run x`).'),
+    ).toEqual([]);
+  });
+
+  it('#158 C1: a real check file with the version twice gives one sentence (M27)', () => {
+    const m27 = readFileSync(join(CHECKS_DIR, 'M27.md'), 'utf8');
+    expect(m27.match(/`\d+\.\d+\.\d+[^`]*`/g)?.length ?? 0).toBeGreaterThan(1);
+    expect(expectedVersions(m27)).toHaveLength(1);
   });
 });
