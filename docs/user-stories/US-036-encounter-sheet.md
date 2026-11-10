@@ -1,6 +1,6 @@
 # US-036 — The encounter sheet
 
-**Status:** Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; AC-6 — the running header of the sheet page in the book). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Done; amendment for #157 in progress (2026-11-10: AC-7a, the key line's layout). Before: Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; AC-6 — the running header of the sheet page in the book). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-035)
 **Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 in v0.13.0 (released 2026-11-09), tickets #140 to #145, test build `0.13.0-m25.1` (M25)
 **Supersedes:** —
@@ -153,6 +153,35 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
   page. Example key line: `[Fine-icon] Fine  [Hurt-icon] Hurt  …  [Gone-icon]
   Gone`.
 
+- **AC-7a (the key line's layout; amendment for #157):** The same rule in the
+  book page and the A4 file:
+  - **An icon never leaves its label:** each cell's icon (4 mm high), a 1 mm
+    space and its label form one unbreakable item.
+  - **The gap shrinks before the line wraps:** between items the gap is
+    4 mm; when the items do not fit the text width with 4 mm, the gap
+    becomes `(text width − items' widths) / (n − 1)`, at least 1.5 mm. Only
+    when even 1.5 mm does not fit does the key wrap, between items, each
+    line starting at the left edge (no gap at a line start).
+  - **The icon is centred on the label's x-height**, not standing on the
+    baseline: its middle sits half an x-height above the baseline (7 pt
+    text: x-height 1.06 mm, the icon reaches 1.47 mm below the baseline).
+    The key line stays 4.00 mm high, so AC-8's row counts do not change.
+  - Examples (7 pt labels; measured 2026-11-10 with the plugin's compiler
+    and bundled fonts; invented labels):
+    - `Fine Hurt Down Fading Gone` (5 cells), 105 mm: one line, gap 4 mm
+      (as before).
+    - `Fine Hurt Down Fading Broken Gone` (6 cells), 95 mm: before, `Gone`'s
+      icon at the end of line 1 and its label on line 2; now one line, gap
+      4 mm.
+    - `Healthy Wounded Staggered Unconscious Dying Dead` (6 cells), 105 mm:
+      before, two lines; now one line, gap 3.43 mm.
+    - `Fine Hurt Down Fading Broken Dying Lost Gone` (8 cells), 105 mm:
+      before, two lines; now one line, gap 1.69 mm; at 95 mm two lines with
+      gap 1.5 mm, the second line starting at the left edge.
+    - A4 file (186 mm), any of these: one line, gap 4 mm.
+  - Row counts with the change (AC-8): A4 14, A5 5, the US-036 integration
+    tests unchanged (measured with the change in place).
+
 - **AC-8 (row count):** The number of rows is computed inside the compile:
   `measure()` of one row at its width, then the most rows (or lines of two)
   that fit the space below the key and above the credit with a 2 mm gap.
@@ -191,6 +220,18 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
    `ENCOUNTER_SHEET_SMALL_BOXES` (AC-3); the layout of the row does not
    change.
 
+Amendment for #157 (answered by the user, 2026-11-10), after the measured
+options were put:
+
+3. **Breaking of the key line:** unbreakable icon-and-label items; the gap
+   shrinks from 4 mm to 1.5 mm before the line wraps between items (not a
+   fixed 2.5 mm gap; measured over 16 cases: wraps in 2 against 3).
+4. **The icon's height and place:** 4 mm, centred on the x-height (option
+   A; not 4 mm on the cap height, 3 mm, 2.5 mm or the details row's 0.95 em,
+   which shorten the key line and could change AC-8's counts).
+5. **Checks:** automated PDF and compile tests only, no manual check for
+   this amendment.
+
 ---
 
 ## Notes
@@ -204,3 +245,4 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
 
 <!-- Filled in at step 3. Draft: D-21. -->
 - #143 (AC-6), #145; amendment for #139.
+- Amendment for #157 (AC-7a): bug #157; ticket at step 3.
