@@ -86,7 +86,18 @@ export const sheetFailedWarning = (error: string): Warning => ({
  * the icon key, the rule between two lines), as many lines of rows as fit
  * `th` below it and above the credit with a 2 mm gap (`measure()` of one
  * row), the credit at the foot, and records `<o2t-sheet>` (form, rows,
- * columns, the box size in mm).
+ * columns, the box size in mm, the key).
+ *
+ * US-036 | AC-7a (#157): each key item (the 4 mm icon, 1 mm, the label) is
+ * one box, so a line breaks only between items; the icon is moved down so
+ * its middle sits half an x-height above the baseline (the key line stays
+ * 4 mm high, AC-8's counts unchanged). The gap is 4 mm, shrunk to fit `tw`
+ * (less 0.01 mm against rounding) down to 1.5 mm; it is weak, so a wrapped
+ * line starts at the left edge. Assumes the items are measured in the
+ * styles they are drawn in: the sheet's text font (`in-font`) wraps every
+ * measurement of the key as it wraps the drawn sheet. The
+ * fact's `key` holds the gap, the line count (from the measured key height
+ * and the paragraph leading) and the icon's shift, in mm.
  */
 export const SHEET_HELPER_DEF = `#let o2t-sheet-row(d, w, box-col) = {
   let lk = d.look
@@ -119,7 +130,15 @@ export const SHEET_HELPER_DEF = `#let o2t-sheet-row(d, w, box-col) = {
   let title = if head != none { head } else {
     text(size: lk.sizes.band * 1.4, weight: "bold", fill: lk.accent, d.text.title)
   }
-  let key = d.cells.map(c => box(height: 4mm, if c.icon == none { none } else { o2t-icon(c.icon, lk.icon) }) + h(1mm) + lab(c.label)).join(h(4mm))
+  let f = lk.fonts.at("text", default: none)
+  let in-font(x) = if f == none { x } else { text(font: f, x) }
+  let xh = measure(in-font(text(size: lk.sizes.text, top-edge: "x-height", bottom-edge: "baseline", "x"))).height
+  let items = d.cells.map(c => box(box(height: 4mm, baseline: 2mm - xh / 2, if c.icon == none { none } else { o2t-icon(c.icon, lk.icon) }) + h(1mm) + lab(c.label)))
+  let n = items.len()
+  let gap = if n < 2 { 0mm } else { calc.max(1.5mm, calc.min(4mm, (tw - items.map(x => measure(in-font(x)).width).sum()) / (n - 1) - 0.01mm)) }
+  let key = if n == 0 { none } else { items.join(h(gap, weak: true)) }
+  let lead = par.leading.to-absolute()
+  let key-lines = if key == none { 0 } else { calc.round((measure(in-font(block(width: tw, key))).height + lead) / (4mm + lead)) }
   let header = block(width: tw, {
     title
     if key != none { v(1.5mm); key }
@@ -139,14 +158,13 @@ export const SHEET_HELPER_DEF = `#let o2t-sheet-row(d, w, box-col) = {
   let n = lines * columns
   let bc = calc.min(box-col, row-w - 5mm - 0.8pt)
   let body = {
-    [#metadata((form: form, rows: n, columns: columns, boxMm: calc.round(o2t-box-size(bc) / 1mm, digits: 3))) <o2t-sheet>]
+    [#metadata((form: form, rows: n, columns: columns, boxMm: calc.round(o2t-box-size(bc) / 1mm, digits: 3), key: (gapMm: calc.round(gap / 1mm, digits: 2), lines: key-lines, shiftMm: calc.round((2mm - xh / 2) / 1mm, digits: 2)))) <o2t-sheet>]
     header
     v(3mm)
     grid(columns: (row-w,) * columns, column-gutter: ${SHEET_LAYOUT.gap}mm, row-gutter: 2mm, ..range(n).map(_ => o2t-sheet-row(d, row-w, box-col)))
     if credit != none { place(bottom + left, credit) }
   }
-  let f = lk.fonts.at("text", default: none)
-  if f == none { body } else { text(font: f, body) }
+  in-font(body)
 }`;
 
 /** The sheet's settings in effect, or null when no sheet can be made (AC-2). */

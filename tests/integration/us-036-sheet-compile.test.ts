@@ -30,7 +30,15 @@ describe('US-036 AC-5 the A4 sheet in the plugin’s compiler', () => {
     if (!result.ok) throw new Error(result.error);
     expect(result.sheets).toEqual([
       // M23 (2026-11-07): three attack slots, no round line: 14 rows.
-      {form: 'A4', rows: 14, columns: 2, boxMm: expect.closeTo(2.62, 1)},
+      // #157 (AC-7a): the key's gap, lines and icon shift; ENTRIES' five
+      // cells fit the A4 width at the full gap.
+      {
+        form: 'A4',
+        rows: 14,
+        columns: 2,
+        boxMm: expect.closeTo(2.62, 1),
+        key: {gapMm: 4, lines: 1, shiftMm: expect.closeTo(1.47, 1)},
+      },
     ]);
     // SCAR-030: measured, not assumed; the bound is generous on purpose.
     console.info(`US-036 AC-5: A4 sheet compile ${Math.round(ms)} ms`);

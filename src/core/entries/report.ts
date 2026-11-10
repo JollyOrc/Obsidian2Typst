@@ -182,13 +182,20 @@ export function sectionWarnings(
   return out;
 }
 
-/** What `<o2t-sheet>` records (US-036 AC-3, AC-8). */
+/** What `<o2t-sheet>` records (US-036 AC-3, AC-8, AC-7a). */
 export interface SheetFact {
   form: 'A4' | 'book';
   rows: number;
   columns: number;
   /** The tick boxes' size in mm. */
   boxMm: number;
+  /**
+   * US-036 AC-7a (#157): the key line — the gap between its items in mm
+   * (4 to 1.5), its number of lines (0 without a track), and how far each
+   * icon is moved below the baseline in mm. Read by the tests; no warning
+   * is made from it. Optional: facts written before #157 lack it.
+   */
+  key?: {gapMm: number; lines: number; shiftMm: number};
 }
 
 /**
