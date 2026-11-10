@@ -239,8 +239,8 @@ options were put:
    fixed 2.5 mm gap). Corrected measurement (2026-11-10, while coding #163),
    16 cases: today 1 split and 3 two-line keys; the shrinking gap and a
    fixed 2.5 mm each 0 splits and 1 two-line key (the first count, 2 against
-   3, came from a probe that widened every item by a space). Confirmation
-   asked again of the user.
+   3, came from a probe that widened every item by a space). Confirmed by
+   the user on the corrected numbers, 2026-11-10.
 4. **The icon's height and place:** 4 mm, centred on the x-height (option
    A; not 4 mm on the cap height, 3 mm, 2.5 mm or the details row's 0.95 em,
    which shorten the key line and could change AC-8's counts).
