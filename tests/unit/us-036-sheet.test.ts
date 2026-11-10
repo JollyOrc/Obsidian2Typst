@@ -135,3 +135,31 @@ describe("US-036 AC-5 the A4 file's names", () => {
     }
   });
 });
+
+// US-036 AC-7a (#157, SCAR-023): the statements of the key line, matched
+// whole. An item is one box (the icon, 1 mm, the label), so a line can only
+// break between items; the gap is weak, so a wrapped line starts at the left
+// edge; the fact records the key for the PDF tests.
+describe('US-036 AC-7a the key line in the sheet helper', () => {
+  it('US-036 AC-7a: each item is one unbreakable box with its icon centred on the x-height', async () => {
+    const {SHEET_HELPER_DEF} = await import('../../src/core/entries/sheet');
+    expect(SHEET_HELPER_DEF).toContain(
+      '  let items = d.cells.map(c => box(box(height: 4mm, baseline: 2mm - xh / 2, if c.icon == none { none } else { o2t-icon(c.icon, lk.icon) }) + h(1mm) + lab(c.label)))\n',
+    );
+    expect(SHEET_HELPER_DEF).toContain(
+      '  let xh = measure(text(size: lk.sizes.text, top-edge: "x-height", bottom-edge: "baseline", "x")).height\n',
+    );
+  });
+
+  it('US-036 AC-7a: the gap shrinks from 4 mm to 1.5 mm and is weak at a line start', async () => {
+    const {SHEET_HELPER_DEF} = await import('../../src/core/entries/sheet');
+    expect(SHEET_HELPER_DEF).toContain(
+      '  let gap = if n < 2 { 0mm } else { calc.max(1.5mm, calc.min(4mm, (tw - items.map(x => measure(x).width).sum()) / (n - 1) - 0.01mm)) }\n',
+    );
+    expect(SHEET_HELPER_DEF).toContain(
+      '  let key = if n == 0 { none } else { items.join(h(gap, weak: true)) }\n',
+    );
+    // The old line, which let an icon and its label part, is gone.
+    expect(SHEET_HELPER_DEF).not.toContain('.join(h(4mm))');
+  });
+});

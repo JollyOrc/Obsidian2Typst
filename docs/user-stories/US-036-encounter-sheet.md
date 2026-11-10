@@ -181,6 +181,11 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
     - A4 file (186 mm), any of these: one line, gap 4 mm.
   - Row counts with the change (AC-8): A4 14, A5 5, the US-036 integration
     tests unchanged (measured with the change in place).
+  - **The sheet records its key** in its `<o2t-sheet>` fact, beside the
+    form, rows, columns and box size (AC-3): `key: (gapMm, lines, shiftMm)`
+    — the gap used, the number of key lines and how far the icon is moved
+    below the baseline. Read by the tests (`us-036-sheet-key.test.ts`,
+    through the plugin's compiler); no warning is made from it.
 
 - **AC-8 (row count):** The number of rows is computed inside the compile:
   `measure()` of one row at its width, then the most rows (or lines of two)
