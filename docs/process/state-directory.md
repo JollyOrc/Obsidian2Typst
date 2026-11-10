@@ -10,4 +10,5 @@ parts are shared by the three plugins and live in the SCARs repository:
   former lists and obsidian-webpage-export's table (nothing contradicted).
   This project's former lists added nothing that table lacks; the table adds
   G2 for SCAR-009, 010 and 044, G2/G4 for SCAR-042 and 043, G1/G4 for
-  SCAR-045, and proposed gates for SCAR-033 to 041.
+  SCAR-045, and the gates of SCAR-033 to 041, confirmed by the user on
+  2026-11-10.
