@@ -105,6 +105,8 @@ export interface WrapFact {
   /** The column's and the statblock's heights, mm. */
   column: number;
   statblock: number;
+  /** US-030 AC-16c (#160): the leading added to the column's lines, mm (0 without). */
+  fill: number;
   /** The page and the top of the statblock (mm from the page's top). */
   page: number;
   y: number;

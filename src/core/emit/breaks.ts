@@ -264,7 +264,10 @@ export function entriesLayoutHelper(bandSize: string): string {
   if scales.last() != min-scale { scales.push(min-scale) }
   // The composed content of a page layout at a scale (measured as drawn;
   // v(1fr) measures as nothing).
-  let portrait-slot(e) = (th - hgt(e.head) - 1.2em).to-absolute()
+  // US-030 AC-16c (#160): the head is measured with the space actually set
+  // after it (the wrap ends with the leading after a split paragraph); the
+  // 1.2 em estimate stands for the paragraph spacing it used to assume.
+  let portrait-slot(e) = (th - hgt({ e.head; parbreak(); block(height: 0pt) }) - 1.2em + par.spacing).to-absolute()
   // US-034 AC-6: text in a column under ${NARROW_COLUMN_SHARE} % of the text width is set
   // with the preset's justification limits.
   let col(c, w) = if narrow != none and w < tw * ${NARROW_COLUMN_SHARE / 100} { set par(justification-limits: narrow); c } else { c }

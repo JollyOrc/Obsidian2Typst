@@ -51,10 +51,22 @@ function e(
   layout: string,
   paragraphs: number,
   image?: string,
+  extra = 0,
 ): string {
   const yaml = ['might: 4', `layout: ${layout}`];
   if (image !== undefined) yaml.push(`illustration: "![](assets/${image})"`);
-  return entry(`### ${name}`, yaml, [...LEDE, '', filler(paragraphs, name)]);
+  // #160: `extra` short words in a last paragraph, to reach a window of
+  // about 1.5 lines that whole paragraphs step over.
+  const tail =
+    extra === 0
+      ? []
+      : ['', Array.from({length: extra}, (_, i) => `w${i}`).join(' ')];
+  return entry(`### ${name}`, yaml, [
+    ...LEDE,
+    '',
+    filler(paragraphs, name),
+    ...tail,
+  ]);
 }
 const chapter = (...entries: string[]): string =>
   [
@@ -271,27 +283,29 @@ describe('US-031 AC-7b the portrait forms', () => {
   it(
     "US-031 AC-7b (G0 answer 13, G1 answer 1): across text lengths the form follows the table and the drawn picture is the chosen form's; each row is reached",
     async () => {
-      // Inputs calibrated at G4 of #142 (A5, the test preset): each reaches
-      // one row of the table; the row with an overflowing column and a
-      // stacked form that fits exists only in a window of about 1.5 lines,
-      // reached at minScale 100 with a 9:10 picture on a page.
+      // Inputs calibrated at G4 of #142 (A5, the test preset), recalibrated
+      // at G2 of #160 (the line spacing below a split shortened the text):
+      // each reaches one row of the table; the row with an overflowing column
+      // and a stacked form that fits exists only in a window of about 1.5
+      // lines, reached at minScale 100 with a 9:10 picture on a page, six
+      // paragraphs and 6 to 18 extra words (12 taken).
       const seen = new Set<string>();
       const log: string[] = [];
-      const cases: [string, string, number, number][] = [
+      const cases: [string, string, number, number, number?][] = [
         ['e-tall.png', 'spread-portrait', 2, 70], // no text
         ['e-tall.png', 'spread-portrait', 14, 70], // both fit, stacked larger
         ['e-tall.png', 'spread-portrait', 18, 70], // both fit, columns larger
-        ['e-tall.png', 'spread-portrait', 20, 70], // columns only
+        ['e-tall.png', 'spread-portrait', 21, 70], // columns only
         // Neither fits, with a stamp-sized stacked picture (G1 answer 1:
         // it does not win; G4 of #142, a mutant that let it win survived).
         ['e-tall.png', 'spread-portrait', 22, 70],
         ['e-tall.png', 'spread-portrait', 30, 70], // neither, no room at all
-        ['e-near.png', 'page-portrait', 6, 100], // stacked only
+        ['e-near.png', 'page-portrait', 6, 100, 12], // stacked only
       ];
-      for (const [image, layout, n, min] of cases) {
+      for (const [image, layout, n, min, extra] of cases) {
         // A short name: the filler repeats it in every paragraph.
         const name = `X${seen.size}${log.length}`;
-        const c = await compile(chapter(e(name, layout, n, image)), {
+        const c = await compile(chapter(e(name, layout, n, image, extra)), {
           entries: {...ENTRIES, image: {minScale: min}},
         });
         noConvergeWarning(c);
@@ -353,11 +367,15 @@ describe('US-032 AC-2 (amended) the automatic choice with the portrait forms', (
     'US-032 AC-2 (G0 answer 11): a portrait entry whose column overflows but whose stacked form fits is placed on one page (page-portrait)',
     async () => {
       // Calibrated at G4 of #142: minScale 100, a 9:10 picture, six
-      // paragraphs; the column overflows at 100 %, the stacked picture is
-      // larger than the columns picture at 100 %.
-      const c = await compile(chapter(e('Auto Cat', 'auto', 6, 'e-near.png')), {
-        entries: {...ENTRIES, image: {minScale: 100}},
-      });
+      // paragraphs; recalibrated at G2 of #160 with 12 extra words (the
+      // window is 6 to 18); the column overflows at 100 %, the stacked
+      // picture is larger than the columns picture at 100 %.
+      const c = await compile(
+        chapter(e('Auto Cat', 'auto', 6, 'e-near.png', 12)),
+        {
+          entries: {...ENTRIES, image: {minScale: 100}},
+        },
+      );
       const p = place(c, 'Auto Cat');
       expect(p.colFits).toBe(false);
       expect(p.form).toBe('stacked');

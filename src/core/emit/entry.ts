@@ -80,15 +80,24 @@ export const ENTRY_MARKS_DEF = `#let o2t-box-size(w) = (w - 12 * ${L.boxGap} - 2
  * beside it (the rest less the gutter) with `blocks` — `(kind, body)` with
  * kind `par` (may be split), `heading` (sticky), `block` (whole) or
  * `entry` (a nested entry, never beside) — while the column stays no taller
- * than the statblock. The first paragraph that does not fit is split at the
+ * than the statblock (a paragraph: than the statblock plus half a line,
+ * AC-16c). The first paragraph that does not fit is split at the
  * most words that fit (binary search with `measure()`; atoms: top-level
  * children, `text` split at spaces, leading and trailing spaces dropped),
  * its column part ended by `linebreak(justify: par.justify)`, the rest set
  * with no first-line indent. A heading goes beside only when two lines of
  * the paragraph after it (or all of a shorter one, or the whole block after
  * it) fit too. Returns `(top, rest)`: the unbreakable statblock-and-column
- * block (`below: par.spacing`) and the full-width blocks. Records
- * `<o2t-wrap>`. Reads only `measure()` and the context (no query, locate or
+ * block (`below: par.spacing`, or `par.leading` after a split) and the
+ * full-width blocks. Records `<o2t-wrap>`.
+ *
+ * US-030 | AC-16c (#160): `pitch` (line height + leading) is measured in the
+ * column; the split takes the most words that end within half a pitch below
+ * the statblock's foot (the nearer line count). After a split the column's
+ * leading changes by `(sh − hc) / gaps` — `gaps` the column's leading gaps,
+ * measured as its growth at +1 mm leading, so headings, lists and paragraph
+ * breaks do not count — when that is at most a tenth of `pitch`, so the
+ * column ends at the foot; `fill` (mm) is recorded. Reads only `measure()` and the context (no query, locate or
  * state), so it settles in one compile (spike-entry-wrap.md). Must be called
  * in a context. `narrow`: US-034 AC-6's limits for the column.
  */
@@ -114,6 +123,8 @@ export const WRAP_HELPER_DEF = `#let o2t-atoms(c) = {
   let cw = width - sbw - ${L.gutter}
   let sh = measure(block(width: sbw, sb)).height
   let hcol(items) = if items.len() == 0 { 0pt } else { measure(block(width: cw, nar(items.join(parbreak())))).height }
+  let hcol0(c) = measure(block(width: cw, nar(c))).height
+  let pitch = hcol0([A \\ A]) - hcol0([A])
   let col = ()
   let rest = ()
   let split = none
@@ -122,7 +133,7 @@ export const WRAP_HELPER_DEF = `#let o2t-atoms(c) = {
   while i < blocks.len() {
     let b = blocks.at(i)
     if b.kind == "entry" { break }
-    if hcol((..col, b.body)) <= sh {
+    if hcol((..col, b.body)) <= sh + if b.kind == "par" { pitch / 2 } else { 0pt } {
       if b.kind == "heading" and i + 1 < blocks.len() {
         let nb = blocks.at(i + 1)
         let need = if nb.kind == "par" and hcol((nb.body,)) > hcol(([A \\ A],)) { [A \\ A] } else { nb.body }
@@ -139,7 +150,7 @@ export const WRAP_HELPER_DEF = `#let o2t-atoms(c) = {
       let hi = words - 1
       while lo < hi {
         let mid = calc.div-euclid(lo + hi + 1, 2)
-        if hcol((..col, first(mid))) <= sh { lo = mid } else { hi = mid - 1 }
+        if hcol((..col, first(mid))) <= sh + pitch / 2 { lo = mid } else { hi = mid - 1 }
       }
       if lo > 0 {
         col.push(first(lo))
@@ -153,9 +164,13 @@ export const WRAP_HELPER_DEF = `#let o2t-atoms(c) = {
   }
   while i < blocks.len() { rest.push(blocks.at(i).body); i += 1 }
   let hc = hcol(col)
-  let colc = if col.len() == 0 { [] } else { nar(col.join(parbreak())) }
-  let top = block(breakable: false, width: 100%, below: par.spacing, {
-    context [#metadata((band: band, beside: beside, split: split, column: hc / 1mm, statblock: sh / 1mm, page: here().page(), y: here().position().y / 1mm)) <o2t-wrap>]
+  let lead = par.leading.to-absolute()
+  let gaps = if col.len() == 0 { 0 } else { (measure(block(width: cw, { set par(leading: lead + 1mm); nar(col.join(parbreak())) })).height - hc) / 1mm }
+  let fill = if split != none and gaps > 0.5 { (sh - hc) / gaps } else { 0pt }
+  let fill = if calc.abs(fill) <= pitch / 10 { fill } else { 0pt }
+  let colc = if col.len() == 0 { [] } else { set par(leading: lead + fill); nar(col.join(parbreak())) }
+  let top = block(breakable: false, width: 100%, below: if split == none { par.spacing } else { par.leading }, {
+    context [#metadata((band: band, beside: beside, split: split, column: hc / 1mm, statblock: sh / 1mm, fill: fill / 1mm, page: here().page(), y: here().position().y / 1mm)) <o2t-wrap>]
     grid(columns: (1fr, sbw), column-gutter: ${L.gutter}, colc, sb)
   })
   (top: top, rest: rest)
