@@ -39,3 +39,4 @@ steps and how it is recorded. A new check gets the next number, a file
 | [M25](manual-checks/M25.md) | Entry layouts, second round: the wrap, grown and stacked illustrations, the quick reference | US-030 AC-16, AC-16a, AC-16b, AC-17; US-031 AC-7a, AC-7b, AC-9; US-032 AC-2, AC-4; US-033 AC-7, AC-9, AC-11; US-036 AC-6 (#139) |
 | [M26](manual-checks/M26.md) | Facing pages open as spreads in your PDF viewers | US-037 AC-1, AC-2, AC-4 to AC-10 (#147) |
 | [M27](manual-checks/M27.md) | Detail rows: the row under a heading, in the PDF and in Obsidian | US-038 AC-1, AC-3, AC-4, AC-6 to AC-10, AC-12, AC-14, AC-15 (#152) |
+| [M28](manual-checks/M28.md) | Text beside a statblock: the paragraph continues below without a gap | US-030 AC-16c (#160, #164) |

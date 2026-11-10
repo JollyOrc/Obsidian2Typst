@@ -58,6 +58,9 @@ const compile = (
   });
 
 /**
+ * A run's text: its characters; a kern item is an adjustment, not a space
+ * (justified text kerns inside words — SCAR-028, found with M28's fixture).
+ *
  * The baselines (PDF points, y up) of the lines on page `page` that hold a
  * word `<p>i` of the test text, top first — not the statblock's own lines,
  * which stand beside the column at other heights (SCAR-028).
@@ -67,7 +70,7 @@ function baselines(c: CompiledEntries, page: number, p: string): number[] {
   const re = new RegExp(`(^|\\s)${p}\\d+(\\s|$)`);
   const ys = new Set<number>();
   for (const r of runs) {
-    const text = r.items.map((i) => ('ch' in i ? i.ch : ' ')).join('');
+    const text = r.items.map((i) => ('ch' in i ? i.ch : '')).join('');
     if (!r.furniture && re.test(text)) ys.add(Math.round(r.y * 100) / 100);
   }
   return [...ys].sort((a, b) => b - a);
@@ -80,7 +83,7 @@ function yOf(c: CompiledEntries, page: number, word: string): number {
   const hit = runs.find(
     (r) =>
       !r.furniture &&
-      re.test(r.items.map((i) => ('ch' in i ? i.ch : ' ')).join('')),
+      re.test(r.items.map((i) => ('ch' in i ? i.ch : '')).join('')),
   );
   if (hit === undefined) throw new Error(`no line holds ${word}`);
   return hit.y * MM;

@@ -453,8 +453,10 @@ They gather at dusk.
   short). A 56-word paragraph that fits whole within half a line goes whole
   into the column (0.14 mm past the foot), and the next paragraph follows
   with the paragraph spacing.
-  Not measured (the manual check, SCAR-032): the author's preset "A5 Print
-  MU White", a justified template.
+  Justified (measured 2026-11-10 with the sample's `Entries` preset and a
+  template that justifies, M28's fixture): the step at each cut 4.61 mm, as
+  without. Not measured (the manual check M28, SCAR-032): the author's
+  preset "A5 Print MU White" and Obsidian's own export.
 
 - **AC-16b (where the wrap reaches, #139):** The wrap is the same for an
   entry in an entries chapter, a nested entry and an entry outside the
