@@ -71,6 +71,14 @@ fakes and do not replace them.
 
 Procedures that need more than a few steps are manual checks, one file per check in [manual-checks/](manual-checks/) (`M01.md` to `M27.md`), listed with what each covers in the index [manual-checks.md](manual-checks.md) (split 2026-10-29, SCAR-029).
 
+Every check from M3 and M6 on (the newest included, found from the folder)
+has exactly one ``**Expected version:** `x.y.z` `` sentence and one
+`**Run in the scratch vault**` sentence; M2 has both, with no version in its
+sentence (the handover names it). `tests/tooling/us-000-test-build-version.test.ts`
+reads these two sentences (#158, SCAR-012): the version in the sentence must
+equal the manifest's, and a version or the place named elsewhere in the file
+does not count. A new check keeps both sentences in this form.
+
 ### §1 — Clickable warning line (US-006 AC-2b)
 
 1. Export a note whose source has an unresolved link on a known line.

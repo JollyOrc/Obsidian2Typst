@@ -12,7 +12,12 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {describe, expect, it} from 'vitest';
 import {installBuild} from '../../build/install-scratch.mjs';
-import {readCheck} from '../support/manual-checks';
+import {
+  checkFiles,
+  expectedVersions,
+  readCheck,
+  runInPlaces,
+} from '../support/manual-checks';
 
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as {
   version: string;
@@ -37,25 +42,38 @@ describe('TICKET-026 version of a test build', () => {
     expect(tab).toContain('Obsidian2Typst ');
   });
 
-  it('SCAR-012: M2, M3, M6 to M27 name where they run and the version to expect, and M3, M6 to M27 name the current one', () => {
-    // SCAR-029: each check is a file of its own, so each is read on its own
-    // (before the split a section ran to the end of the one file).
-    const ids = [
-      'M2',
-      'M3',
-      ...Array.from({length: 22}, (_, i) => `M${i + 6}`),
-    ];
-    // #137: M21 to M24 of epic #121; #145: M25 of epic #139; #150: M26 of epic #147;
-    // #156: M27 of epic #152.
-    expect(ids.at(-1)).toBe('M27');
-    for (const id of ids) {
-      const section = readCheck(id).replace(/\s+/g, ' ');
-      expect(section, id).toContain('Expected version');
-      expect(section, id).toContain('scratch vault');
-      if (id !== 'M2') {
-        expect(section, id).toContain(`\`${manifest.version}\``);
-      }
+  // #158 (SCAR-012, SCAR-023): the version the tester compares stands in the
+  // one `**Expected version:**` sentence, and the place in the one `**Run in
+  // …**` sentence; a version or a place elsewhere in the file does not count.
+  // The checks in scope are found from the folder (M3 and M6 to the newest),
+  // so a new check is in scope without a test edit. SCAR-029: each check is
+  // read on its own, by its id.
+  const ids = checkFiles().map((name) => `M${Number(name.slice(1, -3))}`);
+  const numberOf = (id: string): number => Number(id.slice(1));
+  const inScope = ids.filter((id) => numberOf(id) === 3 || numberOf(id) >= 6);
+
+  it('#158 C4: the checks in scope are M3 and M6 to the newest, found from the folder', () => {
+    expect(inScope[0]).toBe('M3');
+    expect(inScope.at(-1)).toBe(ids.at(-1));
+    expect(inScope.length).toBe(1 + (numberOf(ids.at(-1) as string) - 5));
+    expect(inScope.length).toBeGreaterThanOrEqual(23);
+  });
+
+  it('#158 C1 and C3: M3 and M6 to the newest name the current version and the scratch vault in their own sentences', () => {
+    let checked = 0;
+    for (const id of inScope) {
+      const text = readCheck(id);
+      expect(expectedVersions(text), id).toEqual([manifest.version]);
+      expect(runInPlaces(text), id).toEqual(['the scratch vault']);
+      checked++;
     }
+    expect(checked).toBe(inScope.length);
+  });
+
+  it('#158 C2 and C3: M2 names no version (the handover does) and runs in the scratch vault', () => {
+    const m2 = readCheck('M2');
+    expect(expectedVersions(m2)).toEqual([null]);
+    expect(runInPlaces(m2)).toEqual(['the scratch vault']);
   });
 
   it('SCAR-012: an npm script installs the build into the scratch vault', () => {
