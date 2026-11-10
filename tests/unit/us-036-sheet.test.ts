@@ -147,14 +147,18 @@ describe('US-036 AC-7a the key line in the sheet helper', () => {
       '  let items = d.cells.map(c => box(box(height: 4mm, baseline: 2mm - xh / 2, if c.icon == none { none } else { o2t-icon(c.icon, lk.icon) }) + h(1mm) + lab(c.label)))\n',
     );
     expect(SHEET_HELPER_DEF).toContain(
-      '  let xh = measure(text(size: lk.sizes.text, top-edge: "x-height", bottom-edge: "baseline", "x")).height\n',
+      '  let xh = measure(in-font(text(size: lk.sizes.text, top-edge: "x-height", bottom-edge: "baseline", "x"))).height\n',
+    );
+    // SCAR-019: the key is measured in the sheet's text font, as drawn.
+    expect(SHEET_HELPER_DEF).toContain(
+      '  let in-font(x) = if f == none { x } else { text(font: f, x) }\n',
     );
   });
 
   it('US-036 AC-7a: the gap shrinks from 4 mm to 1.5 mm and is weak at a line start', async () => {
     const {SHEET_HELPER_DEF} = await import('../../src/core/entries/sheet');
     expect(SHEET_HELPER_DEF).toContain(
-      '  let gap = if n < 2 { 0mm } else { calc.max(1.5mm, calc.min(4mm, (tw - items.map(x => measure(x).width).sum()) / (n - 1) - 0.01mm)) }\n',
+      '  let gap = if n < 2 { 0mm } else { calc.max(1.5mm, calc.min(4mm, (tw - items.map(x => measure(in-font(x)).width).sum()) / (n - 1) - 0.01mm)) }\n',
     );
     expect(SHEET_HELPER_DEF).toContain(
       '  let key = if n == 0 { none } else { items.join(h(gap, weak: true)) }\n',

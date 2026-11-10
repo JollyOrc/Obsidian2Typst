@@ -5,7 +5,7 @@
 // the tests read it through the plugin's compiler (the worker core, the
 // bundled fonts), in the book page at the story's widths and in the A4 file.
 // Source of truth: docs/user-stories/US-036-encounter-sheet.md.
-// Red until #157 is implemented (G2, 2026-11-10).
+// Written red at G2 (2026-11-10); green with #163.
 import {afterAll, describe, expect, it} from 'vitest';
 import {ENTRY_MARKS_DEF} from '../../src/core/emit/entry';
 import {
@@ -23,7 +23,6 @@ afterAll(disposeBookCompiler);
 /** The story's label sets (AC-7a examples; invented labels). */
 const LABELS = {
   five: ['Fine', 'Hurt', 'Down', 'Fading', 'Gone'],
-  six: ['Fine', 'Hurt', 'Down', 'Fading', 'Broken', 'Gone'],
   sixLong: ['Healthy', 'Wounded', 'Staggered', 'Unconscious', 'Dying', 'Dead'],
   eight: ['Fine', 'Hurt', 'Down', 'Fading', 'Broken', 'Dying', 'Lost', 'Gone'],
 } as const;
@@ -33,11 +32,15 @@ const FILES = Object.fromEntries(
   Object.entries(ICONS).map(([p, s]) => [p, new TextEncoder().encode(s)]),
 );
 
-/** ENTRIES with a track of `labels`, the test icons in turn. */
-const withTrack = (labels: readonly string[]) => ({
+/** ENTRIES with a track of `labels`, the test icons in turn, and `fonts`. */
+const withTrack = (
+  labels: readonly string[],
+  fonts: Record<string, string> = {},
+) => ({
   ...ENTRIES,
   statblock: {
     ...ENTRIES.statblock,
+    fonts,
     track: labels.map((label, i) => ({
       label,
       icon: PATHS[i % PATHS.length] as string,
@@ -71,8 +74,13 @@ async function keyOf(source: string): Promise<KeyFact> {
 async function bookKey(
   labels: readonly string[],
   tw: number,
+  fonts: Record<string, string> = {},
 ): Promise<KeyFact> {
-  const data = sheetData(withTrack(labels) as never, undefined, (p) => p);
+  const data = sheetData(
+    withTrack(labels, fonts) as never,
+    undefined,
+    (p) => p,
+  );
   if (data === null) throw new Error('no sheet');
   return keyOf(
     [
@@ -85,7 +93,8 @@ async function bookKey(
   );
 }
 
-// SCAR-030: a compile of one sheet page each; measured at G4.
+// SCAR-030: a compile of one sheet page each; measured 2026-11-10 under a
+// full parallel run: the slowest 0.42 s. 60 s as the other compile tests.
 describe('US-036 AC-7a the key line', {timeout: 60_000}, () => {
   it('US-036 AC-7a: five cells at 105 mm — one line, gap 4 mm (as before)', async () => {
     const key = await bookKey(LABELS.five, 105);
@@ -93,25 +102,19 @@ describe('US-036 AC-7a the key line', {timeout: 60_000}, () => {
     expect(key.gapMm).toBeCloseTo(4, 2);
   });
 
-  it('US-036 AC-7a: six cells at 95 mm — one line, gap 4 mm (before: Gone split from its icon)', async () => {
-    const key = await bookKey(LABELS.six, 95);
+  it('US-036 AC-7a: six long labels at 95 mm — one line, the gap shrunk to 2.59 mm (before: two lines)', async () => {
+    const key = await bookKey(LABELS.sixLong, 95);
     expect(key.lines).toBe(1);
-    expect(key.gapMm).toBeCloseTo(4, 2);
+    expect(key.gapMm).toBeCloseTo(2.59, 1);
   });
 
-  it('US-036 AC-7a: six long labels at 105 mm — one line, the gap shrunk to 3.43 mm', async () => {
-    const key = await bookKey(LABELS.sixLong, 105);
-    expect(key.lines).toBe(1);
-    expect(key.gapMm).toBeCloseTo(3.43, 1);
-  });
-
-  it('US-036 AC-7a: eight cells at 105 mm — one line, the gap shrunk to 1.69 mm', async () => {
+  it('US-036 AC-7a: eight cells at 105 mm — one line, the gap shrunk to 2.8 mm (before: two lines)', async () => {
     const key = await bookKey(LABELS.eight, 105);
     expect(key.lines).toBe(1);
-    expect(key.gapMm).toBeCloseTo(1.69, 1);
+    expect(key.gapMm).toBeCloseTo(2.8, 1);
   });
 
-  it('US-036 AC-7a: eight cells at 95 mm — two lines at the smallest gap, 1.5 mm', async () => {
+  it('US-036 AC-7a: eight cells at 95 mm — two lines at the smallest gap, 1.5 mm (before: Lost split from its icon)', async () => {
     const key = await bookKey(LABELS.eight, 95);
     expect(key.lines).toBe(2);
     expect(key.gapMm).toBeCloseTo(1.5, 2);
@@ -120,6 +123,21 @@ describe('US-036 AC-7a the key line', {timeout: 60_000}, () => {
   it('US-036 AC-7a: the icon is centred on the x-height — 1.47 mm below the baseline at 7 pt', async () => {
     const key = await bookKey(LABELS.five, 105);
     expect(key.shiftMm).toBeCloseTo(1.47, 1);
+  });
+
+  // SCAR-019: the key is measured in the preset's text font, as it is drawn
+  // (values measured with DejaVu Sans Mono, a bundled font, 2026-11-10).
+  it('US-036 AC-7a: with the text font DejaVu Sans Mono — six long labels at 105 mm one line, gap 2.2 mm', async () => {
+    const key = await bookKey(LABELS.sixLong, 105, {text: 'DejaVu Sans Mono'});
+    expect(key.lines).toBe(1);
+    expect(key.gapMm).toBeCloseTo(2.2, 1);
+  });
+
+  it('US-036 AC-7a: with the text font DejaVu Sans Mono — eight cells at 105 mm two lines at 1.5 mm, the icon moved 1.06 mm', async () => {
+    const key = await bookKey(LABELS.eight, 105, {text: 'DejaVu Sans Mono'});
+    expect(key.lines).toBe(2);
+    expect(key.gapMm).toBeCloseTo(1.5, 2);
+    expect(key.shiftMm).toBeCloseTo(1.06, 1);
   });
 
   it('US-036 AC-7a: the A4 file (186 mm) — one line, gap 4 mm, for every example set', async () => {

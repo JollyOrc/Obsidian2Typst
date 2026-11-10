@@ -1,6 +1,6 @@
 # US-036 — The encounter sheet
 
-**Status:** Done; amendment for #157 in progress, ticket #163 (2026-11-10: AC-7a, the key line's layout). Before: Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; AC-6 — the running header of the sheet page in the book). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Done; amendment for #157 Done, ticket #163 (2026-11-10, automated checks only, decision 5: AC-7a, the key line's layout). Before: Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; AC-6 — the running header of the sheet page in the book). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-035)
 **Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 in v0.13.0 (released 2026-11-09), tickets #140 to #145, test build `0.13.0-m25.1` (M25)
 **Supersedes:** —
@@ -167,18 +167,24 @@ track Fine, Hurt, Down, Fading, Gone with SVG icons) with
     text: x-height 1.06 mm, the icon reaches 1.47 mm below the baseline).
     The key line stays 4.00 mm high, so AC-8's row counts do not change.
   - Examples (7 pt labels; measured 2026-11-10 with the plugin's compiler
-    and bundled fonts; invented labels):
+    and bundled fonts, the sheet's own fact; invented labels; corrected the
+    same day while coding #163 — the first probe's marks added a space to
+    every item):
     - `Fine Hurt Down Fading Gone` (5 cells), 105 mm: one line, gap 4 mm
       (as before).
-    - `Fine Hurt Down Fading Broken Gone` (6 cells), 95 mm: before, `Gone`'s
-      icon at the end of line 1 and its label on line 2; now one line, gap
-      4 mm.
-    - `Healthy Wounded Staggered Unconscious Dying Dead` (6 cells), 105 mm:
-      before, two lines; now one line, gap 3.43 mm.
+    - `Healthy Wounded Staggered Unconscious Dying Dead` (6 cells), 95 mm:
+      before, two lines; now one line, gap 2.59 mm.
     - `Fine Hurt Down Fading Broken Dying Lost Gone` (8 cells), 105 mm:
-      before, two lines; now one line, gap 1.69 mm; at 95 mm two lines with
-      gap 1.5 mm, the second line starting at the left edge.
+      before, two lines; now one line, gap 2.80 mm.
+    - The same 8 cells, 95 mm: before, `Lost`'s icon at the end of line 1
+      and its label on line 2; now two lines with gap 1.5 mm, `Lost` whole
+      on the second line, each line starting at the left edge.
     - A4 file (186 mm), any of these: one line, gap 4 mm.
+    - With a preset text font (`entries.statblock.fonts.text`, here the
+      bundled DejaVu Sans Mono; SCAR-019) the key is measured in that font,
+      as drawn: six long labels at 105 mm one line, gap 2.20 mm; eight cells
+      at 105 mm two lines, gap 1.5 mm; the icon moved 1.06 mm (that font's
+      x-height is 1.88 mm at 7 pt).
   - Row counts with the change (AC-8): A4 14, A5 5, the US-036 integration
     tests unchanged (measured with the change in place).
   - **The sheet records its key** in its `<o2t-sheet>` fact, beside the
@@ -230,7 +236,11 @@ options were put:
 
 3. **Breaking of the key line:** unbreakable icon-and-label items; the gap
    shrinks from 4 mm to 1.5 mm before the line wraps between items (not a
-   fixed 2.5 mm gap; measured over 16 cases: wraps in 2 against 3).
+   fixed 2.5 mm gap). Corrected measurement (2026-11-10, while coding #163),
+   16 cases: today 1 split and 3 two-line keys; the shrinking gap and a
+   fixed 2.5 mm each 0 splits and 1 two-line key (the first count, 2 against
+   3, came from a probe that widened every item by a space). Confirmation
+   asked again of the user.
 4. **The icon's height and place:** 4 mm, centred on the x-height (option
    A; not 4 mm on the cap height, 3 mm, 2.5 mm or the details row's 0.95 em,
    which shorten the key line and could change AC-8's counts).
