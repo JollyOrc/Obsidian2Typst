@@ -156,7 +156,9 @@ describe('US-014 AC-1b tree shape', () => {
       href: 'https://a.org/x',
       markup: 'linkify',
     });
-    expect(link('[x](mailto:a@b.de)')).toMatchObject({href: 'mailto:a@b.de'});
+    expect(link('[x](mailto:email@example.org)')).toMatchObject({
+      href: 'mailto:email@example.org',
+    });
     expect(link('[x](#anchor)')).toMatchObject({href: '#anchor'});
   });
 

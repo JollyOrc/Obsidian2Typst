@@ -17,7 +17,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-001](US-001-convert-markdown-to-typst.md) | Convert text, inline formatting, lists, quotes, and code | Done (2026-10-17, AC-by-AC check) | — |
 | [US-002](US-002-headings-and-structure.md) | Convert headings, number them automatically, and label them | Done (2026-10-17, AC-by-AC check) | [TICKET-014](../tickets/TICKET-014-headings-and-labels.md) |
 | [US-003](US-003-images-and-assets.md) | Convert images and copy their assets | Done | [TICKET-017](../tickets/TICKET-017-images-and-assets.md) |
-| [US-004](US-004-links-and-references.md) | Convert links, wikilinks, and anchors into PDF links | Done (2026-10-17, AC-by-AC check) | [TICKET-015](../tickets/TICKET-015-links-and-references.md) |
+| [US-004](US-004-links-and-references.md) | Convert links, wikilinks, and anchors into PDF links | Done (2026-10-17, AC-by-AC check); amendment #159 Done 2026-11-10 (AC-1b example address invented) | [TICKET-015](../tickets/TICKET-015-links-and-references.md); #159, #161 |
 | [US-005](US-005-tables-footnotes-tasklists.md) | Convert tables, footnotes, and task lists | Done (2026-10-17, AC-by-AC check) | [TICKET-016](../tickets/TICKET-016-tables-footnotes-tasklists.md) |
 | [US-006](US-006-warnings-and-strict-mode.md) | Report conversion warnings; optional strict mode | Done (registration of the handler and the settings screen with US-008/US-015) | [TICKET-018](../tickets/TICKET-018-warning-report-and-strict-mode.md) |
 | [US-007](US-007-in-plugin-typst-compilation.md) | Compile to PDF inside Obsidian with a bundled Typst compiler | Done (2026-10-17, AC-by-AC check) | [TICKET-019](../tickets/TICKET-019-in-plugin-compilation.md), [TICKET-027](../tickets/TICKET-027-default-fonts.md) |

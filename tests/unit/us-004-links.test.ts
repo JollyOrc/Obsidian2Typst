@@ -78,20 +78,22 @@ describe('US-004 AC-1b no footnote when the text is the address', () => {
   });
 
   it('US-004 AC-1b: emits no footnote when the text equals the address after removing mailto: (colophon e-mail link)', () => {
-    expect(typ('<a@b.de>')).toBe('#link("mailto:a@b.de")');
-    expect(typ('[a@b.de](mailto:a@b.de)')).toBe('#link("mailto:a@b.de")');
+    expect(typ('<email@example.org>')).toBe(
+      '#link("mailto:email@example.org")',
+    );
+    expect(typ('[email@example.org](mailto:email@example.org)')).toBe(
+      '#link("mailto:email@example.org")',
+    );
     expect(
-      typ(
-        '[<u><span>raiders@orkpiraten.de</span></u>](mailto:raiders@orkpiraten.de)',
-      ),
+      typ('[<u><span>email@example.org</span></u>](mailto:email@example.org)'),
     ).toBe(
-      '#link("mailto:raiders@orkpiraten.de")[#underline[raiders\\@orkpiraten.de]]',
+      '#link("mailto:email@example.org")[#underline[email\\@example.org]]',
     );
   });
 
   it('US-004 AC-1b: emits a footnote with the address without mailto: when the text differs', () => {
-    expect(typ('[Write us](mailto:a@b.de)')).toBe(
-      `#link("mailto:a@b.de")[Write us]${fn('mailto:a@b.de')}`,
+    expect(typ('[Write us](mailto:email@example.org)')).toBe(
+      `#link("mailto:email@example.org")[Write us]${fn('mailto:email@example.org')}`,
     );
   });
 
@@ -160,8 +162,8 @@ describe('US-004 AC-1e when the link has no body', () => {
   });
 
   it('US-004 AC-1e: gives an autolink no footnote even when its text shows the prefix', () => {
-    expect(typ('<mailto:a@b.de>')).toBe(
-      '#link("mailto:a@b.de")[mailto:a\\@b.de]',
+    expect(typ('<mailto:email@example.org>')).toBe(
+      '#link("mailto:email@example.org")[mailto:email\\@example.org]',
     );
   });
 
@@ -467,7 +469,9 @@ describe('US-004 AC-8 anchors', {timeout: 60_000}, () => {
     expect(classifyHref('#A%20b')).toEqual({kind: 'anchor', target: 'A b'});
     expect(classifyHref('#100%')).toEqual({kind: 'anchor', target: '100%'});
     expect(classifyHref('https://x.org')).toEqual({kind: 'external'});
-    expect(classifyHref('mailto:a@b.de')).toEqual({kind: 'external'});
+    expect(classifyHref('mailto:email@example.org')).toEqual({
+      kind: 'external',
+    });
     expect(classifyHref('a/B%20c.md#D%20e')).toEqual({
       kind: 'note',
       target: 'D e',

@@ -1,6 +1,6 @@
 # US-004 — Convert links, wikilinks, and anchors into PDF links
 
-**Status:** Done (2026-10-17, AC-by-AC check; the preset field `externalLinkFootnotes` is delivered by US-008)
+**Status:** Done (2026-10-17, AC-by-AC check; the preset field `externalLinkFootnotes` is delivered by US-008); amendment for #159 Done, ticket #161 (2026-11-10: the AC-1b mail-link example uses an invented address; no change of behaviour)
 **Introduced:** v0.1.0
 **Implemented:** —
 **Supersedes:** —
@@ -40,8 +40,8 @@
   ```
   md : <https://example.org>                          typ: #link("https://example.org")
   md : https://example.org                            typ: #link("https://example.org")
-  md : [<u><span>raiders@orkpiraten.de</span></u>](mailto:raiders@orkpiraten.de)
-  typ: #link("mailto:raiders@orkpiraten.de")[#underline[raiders\@orkpiraten.de]]
+  md : [<u><span>email@example.org</span></u>](mailto:email@example.org)
+  typ: #link("mailto:email@example.org")[#underline[email\@example.org]]
   ```
   Where a bare address ends is decided by the parser (linkify-it, measured in
   TICKET-010 follow-up probes): before whitespace, before trailing `.` `,` `;`
@@ -52,7 +52,10 @@
   md : (https://example.org)               typ: (#link("https://example.org"))
   md : [https://example.org/X-Card]        typ: \[#link("https://example.org/X-Card")\]
   ```
-  The last two lines of the first example are taken from the colophon in `The Rules/compiledtext.md`.
+  The last two lines of the first example have the shape of a colophon's
+  e-mail link; the address is invented, under a reserved domain (#159;
+  measured 2026-11-10: no warning, compiles, Typst reads the text
+  `email@example.org` underlined inside the link, also with a `.` after it).
   The `;` after the call in the first line is the call separator (AC-1).
   `mailto:` links whose text differs get a footnote showing the address without
   `mailto:`.
