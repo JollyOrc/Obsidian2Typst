@@ -96,8 +96,10 @@ describe('US-030 AC-16a a long paragraph is split at the statblock', () => {
       const cut = w?.split?.words ?? 0;
       expect(cut).toBeGreaterThan(0);
       expect(cut).toBeLessThan(150);
+      // AC-16c (#160): the nearer line count — within half a line (the
+      // sample's pitch 4.62 mm) of the statblock's foot.
       expect(w?.column ?? Infinity).toBeLessThanOrEqual(
-        (w?.statblock ?? 0) + 0.01,
+        (w?.statblock ?? 0) + 4.62 / 2 + 0.01,
       );
       allOnceInOrder(c, 150);
       // The first full-width line starts with the word after the cut, at

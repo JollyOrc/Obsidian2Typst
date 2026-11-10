@@ -418,8 +418,11 @@ They gather at dusk.
     column (it is not split, so no lone last word is left below);
   - **the column ends at the statblock's foot:** when the paragraph was
     split, the leading of the column's lines is changed by
-    `(statblock height − column height) / (lines − 1)` so its last line ends
-    at the statblock's foot — but only when that change is at most a tenth of
+    `(statblock height − column height) / gaps`, where `gaps` is the number
+    of leading gaps in the column, measured (the column's growth when its
+    leading grows by 1 mm; a sub-heading, a list or the space between two
+    paragraphs is not a leading gap), so its last line ends at the
+    statblock's foot — but only when that change is at most a tenth of
     `pitch`; otherwise the column keeps its normal leading (it then ends
     within half a line of the foot);
   - **no paragraph gap:** after a split, the full-width part starts below the
@@ -439,14 +442,19 @@ They gather at dusk.
   pitch 4.34 to 4.94 mm (−6 % to +7 %). With 2 attack lines (statblock 34.48
   mm): before, 52 words in the column (30.01 mm) and a step of 11.01 mm; now
   59 words, the column 34.62 mm squeezed to the statblock's foot, a step of
-  4.62 mm. The tenth-of-a-line bound: a column of 4 lines that ends 2.0 mm
-  above the foot would need 0.67 mm more leading per line, more than 0.46 mm
-  (a tenth of 4.62 mm), so its leading stays and it ends 2.0 mm above the
-  foot (an example measured in the tests, G2).
-  Not measured at G1 (to measure at G2 or in the manual check, SCAR-032):
-  the author's preset "A5 Print MU White", a column with a sub-heading or a
-  list before the split paragraph, a justified template, columns of 2 to 4
-  lines.
+  4.62 mm. The tenth-of-a-line bound (body text 18 pt, one attack line;
+  measured at G2): the column's 4 lines end 2.84 mm above the statblock's
+  foot; filling would need 0.95 mm per line, more than 0.83 mm (a tenth of
+  the 8.33 mm pitch), so the leading stays and the line below follows 2.84 mm
+  further down than one pitch. Composed (measured at G2): a column with a
+  whole paragraph (52 words), a sub-heading or a list of three items before
+  the split paragraph also ends at the foot (the next line one pitch below;
+  with "lines − 1" instead of the measured gaps it stopped 0.4 to 0.6 mm
+  short). A 56-word paragraph that fits whole within half a line goes whole
+  into the column (0.14 mm past the foot), and the next paragraph follows
+  with the paragraph spacing.
+  Not measured (the manual check, SCAR-032): the author's preset "A5 Print
+  MU White", a justified template.
 
 - **AC-16b (where the wrap reaches, #139):** The wrap is the same for an
   entry in an entries chapter, a nested entry and an entry outside the
