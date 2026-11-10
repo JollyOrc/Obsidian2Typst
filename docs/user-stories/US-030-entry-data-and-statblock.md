@@ -1,6 +1,6 @@
 # US-030 — Entry data and the statblock
 
-**Status:** Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; decision 5 confirmed by the user 2026-11-09; AC-16 and AC-17, the text wraps around the statblock; G0 and G1 measurements 2026-11-08, the user's answers the same day). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
+**Status:** Done; amendment for #160 in progress (2026-11-10: AC-16c, a split paragraph reads as one paragraph). Before: Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; decision 5 confirmed by the user 2026-11-09; AC-16 and AC-17, the text wraps around the statblock; G0 and G1 measurements 2026-11-08, the user's answers the same day). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
 **Introduced:** v0.12.0 (planned; a new feature bumps the minor version)
 **Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 in v0.13.0 (released 2026-11-09), tickets #140 to #145, test build `0.13.0-m25.1` (M25)
 **Supersedes:** —
@@ -342,14 +342,16 @@ They gather at dusk.
 
 - **AC-16a (the wrap, #139; G0 answers 1 to 6, 2026-11-08):** The entry's
   body is a list of blocks in the note's order. Each block goes into the
-  column while the column, with it, stays no taller than the statblock; the
+  column while the column, with it, stays no taller than the statblock (a
+  paragraph: no taller than the statblock plus half a line, AC-16c); the
   first block that does not fit ends the column, and it and every block after
   it are set at full width below the statblock:
   - **a paragraph** that does not fit whole is split at a word boundary: the
     column holds the most words that still fit (found by measuring inside the
     compile, `measure()`), its last line set to the column's edge as the
     paragraph's other lines are (justified when the template justifies,
-    `linebreak(justify: par.justify)`; ragged otherwise); the rest of the
+    `linebreak(justify: par.justify)`; ragged otherwise; which line count
+    the column takes, and its line spacing: AC-16c); the rest of the
     paragraph continues at full width directly below the statblock, its first
     line not indented, followed by the other blocks. There is no minimum of
     lines on either side of the cut (one line beside, one line below is
@@ -370,9 +372,11 @@ They gather at dusk.
     beside the statblock: column empty, the image full width below);
   - **a nested entry** (AC-20; its heading, statblock and body) is never set
     in the column: it starts the full-width part;
-  - the full-width part starts directly below the statblock with the normal
-    space between paragraphs (`par.spacing`) and no first-line indent; a
-    statblock taller than all of the text leaves nothing below it.
+  - the full-width part starts directly below the statblock and its column
+    with the normal space between paragraphs (`par.spacing`) and no
+    first-line indent when the column ends with a whole block; when it ends
+    with a split paragraph, with the line spacing (AC-16c, amendment for
+    #160); a statblock taller than all of the text leaves nothing below it.
 
   Text in the column is set with US-034's narrow-column justification limits
   (US-034 AC-6), in measuring and drawing alike. The wrap reads only
@@ -399,7 +403,50 @@ They gather at dusk.
   Test interface: each wrap records `<o2t-wrap>` metadata `(heading, beside,
   split, column, statblock)`: the number of blocks wholly in the column, the
   split as `(block, words, of)` or `none`, the column's and the statblock's
-  heights in mm.
+  heights in mm (the column's at its normal leading; AC-16c's change of the
+  leading is recorded as `fill`, mm per line, 0 without it — #160).
+
+- **AC-16c (a split paragraph reads as one paragraph; amendment for #160,
+  decisions 6 to 8):** Where AC-16a splits a paragraph at the statblock, the
+  text below continues it at the normal line spacing, with no hole at the
+  end of the column and none under the statblock:
+  - **the nearer line count:** the column takes the most words whose lines
+    end no lower than half a line below the statblock's foot (a line =
+    the line height plus the leading, measured in the column, `pitch`). So
+    the column ends within half a line above or below the statblock's foot.
+    A paragraph that fits whole within that half line goes whole into the
+    column (it is not split, so no lone last word is left below);
+  - **the column ends at the statblock's foot:** when the paragraph was
+    split, the leading of the column's lines is changed by
+    `(statblock height − column height) / (lines − 1)` so its last line ends
+    at the statblock's foot — but only when that change is at most a tenth of
+    `pitch`; otherwise the column keeps its normal leading (it then ends
+    within half a line of the foot);
+  - **no paragraph gap:** after a split, the full-width part starts below the
+    statblock and the column with the leading (`par.leading`), not with the
+    paragraph spacing; after a column that ends with a whole block, with
+    `par.spacing` as before;
+  - **composed (US-031):** the page layouts that place a picture beside or
+    under the text left after the wrap (US-031 AC-7b) measure the head with
+    the space actually set below the wrap, not an assumed paragraph spacing.
+  Examples (A5, 105 mm text width, the sample's 10.5 pt and spacing, a 150-word
+  opening paragraph of distinct words, statblocks of 1 to 8 attack lines;
+  measured 2026-11-10 with the real conversion and compile, text baselines
+  read from the PDF): the line pitch is 4.62 mm. Before: the step from the
+  column's last line to the first full-width line was 6.88 to 11.01 mm (the
+  unused room at the column's foot, 0.33 to 4.48 mm, plus 1.93 mm of
+  paragraph spacing). Now: 4.59 to 4.62 mm in all eight; the column's own
+  pitch 4.34 to 4.94 mm (−6 % to +7 %). With 2 attack lines (statblock 34.48
+  mm): before, 52 words in the column (30.01 mm) and a step of 11.01 mm; now
+  59 words, the column 34.62 mm squeezed to the statblock's foot, a step of
+  4.62 mm. The tenth-of-a-line bound: a column of 4 lines that ends 2.0 mm
+  above the foot would need 0.67 mm more leading per line, more than 0.46 mm
+  (a tenth of 4.62 mm), so its leading stays and it ends 2.0 mm above the
+  foot (an example measured in the tests, G2).
+  Not measured at G1 (to measure at G2 or in the manual check, SCAR-032):
+  the author's preset "A5 Print MU White", a column with a sub-heading or a
+  list before the split paragraph, a justified template, columns of 2 to 4
+  lines.
 
 - **AC-16b (where the wrap reaches, #139):** The wrap is the same for an
   entry in an entries chapter, a nested entry and an entry outside the
@@ -512,6 +559,19 @@ They gather at dusk.
    lists of up to 10 items as blocks that are not split; longer lists were
    not asked about.
 
+Amendment for #160 (answered by the user, 2026-11-10, after the measured
+options were put; AC-16c):
+
+6. **The rule at the column's foot:** the nearer line count, then the column's
+   leading changed so it ends at the statblock's foot, and line spacing (not
+   paragraph spacing) below a split. Not: only the spacing (a hole of up to
+   4.5 mm stayed), the line past the statblock (a hole of up to 4.3 mm under
+   the statblock) or only stretching (the column's pitch up to +16 %).
+7. **The bound:** the leading changes by at most a tenth of the line pitch;
+   beyond it the column keeps its leading.
+8. **Check:** a test build and a short manual check with the author's own
+   preset at the handover (SCAR-045: the defect was seen with that preset).
+
 ---
 
 ## Notes
@@ -527,3 +587,4 @@ They gather at dusk.
 
 <!-- Filled in at step 3. Drafts: D-01, D-02, D-04, D-05, D-17, D-19. -->
 - #140 (AC-16, AC-16a, AC-16b, AC-17, amendment for #139), #145 (AC-23: the manual check).
+- Amendment for #160 (AC-16c): bug #160; ticket at step 3.
