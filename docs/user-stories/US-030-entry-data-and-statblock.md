@@ -1,6 +1,6 @@
 # US-030 — Entry data and the statblock
 
-**Status:** Done; amendment for #160 in progress (2026-11-10: AC-16c, a split paragraph reads as one paragraph). Before: Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; decision 5 confirmed by the user 2026-11-09; AC-16 and AC-17, the text wraps around the statblock; G0 and G1 measurements 2026-11-08, the user's answers the same day). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
+**Status:** Done; amendment for #160 in progress, ticket #164 (2026-11-10: AC-16c, a split paragraph reads as one paragraph). Before: Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; decision 5 confirmed by the user 2026-11-09; AC-16 and AC-17, the text wraps around the statblock; G0 and G1 measurements 2026-11-08, the user's answers the same day). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 to 4 answered the same day, G1 re-check; decision 4 revised by the user 2026-11-06 at #123's G4)
 **Introduced:** v0.12.0 (planned; a new feature bumps the minor version)
 **Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 in v0.13.0 (released 2026-11-09), tickets #140 to #145, test build `0.13.0-m25.1` (M25)
 **Supersedes:** —
@@ -595,4 +595,4 @@ options were put; AC-16c):
 
 <!-- Filled in at step 3. Drafts: D-01, D-02, D-04, D-05, D-17, D-19. -->
 - #140 (AC-16, AC-16a, AC-16b, AC-17, amendment for #139), #145 (AC-23: the manual check).
-- Amendment for #160 (AC-16c): bug #160; ticket at step 3.
+- Amendment for #160 (AC-16c): bug #160, ticket #164.
