@@ -13,3 +13,6 @@ spikes/
 docs/state/
 releases/*.zip
 tests/fixtures/private-words.local.txt
+
+# private local instructions, never published
+CLAUDE.local.md
