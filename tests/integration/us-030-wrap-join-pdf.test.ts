@@ -6,7 +6,7 @@
 // (the split recorded in `<o2t-wrap>`), through the real conversion and
 // compile (A5, the sample's settings).
 // Source of truth: docs/user-stories/US-030-entry-data-and-statblock.md.
-// Red until #160 is implemented (G2, 2026-11-10).
+// Written red at G2 (2026-11-10); green with #164.
 import {afterAll, describe, expect, it} from 'vitest';
 import {openPdf} from '../../src/core/pdf/reader';
 import {pageRuns} from '../../src/core/pdf/text';
@@ -22,6 +22,8 @@ import {
 afterAll(disposeEntriesCompiler);
 
 // SCAR-030: one entry per compile; the limit as the other wrap tests.
+// Measured 2026-11-10 under a full parallel run: the 8-entry sweep 1.2 s,
+// the others under 0.5 s.
 const SLOW = 30_000;
 const MM = 25.4 / 72;
 /** AC-16c: the sample's line pitch (line height + leading), mm. */
