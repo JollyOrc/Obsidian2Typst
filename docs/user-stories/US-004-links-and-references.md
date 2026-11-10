@@ -1,6 +1,6 @@
 # US-004 — Convert links, wikilinks, and anchors into PDF links
 
-**Status:** Done (2026-10-17, AC-by-AC check; the preset field `externalLinkFootnotes` is delivered by US-008); amendment for #159 in progress (2026-11-10: the AC-1b mail-link example uses an invented address; no change of behaviour)
+**Status:** Done (2026-10-17, AC-by-AC check; the preset field `externalLinkFootnotes` is delivered by US-008); amendment for #159 in progress, ticket #161 (2026-11-10: the AC-1b mail-link example uses an invented address; no change of behaviour)
 **Introduced:** v0.1.0
 **Implemented:** —
 **Supersedes:** —
