@@ -1,6 +1,6 @@
 # US-036 — The encounter sheet
 
-**Status:** Done; amendment for #157 in progress (2026-11-10: AC-7a, the key line's layout). Before: Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; AC-6 — the running header of the sheet page in the book). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
+**Status:** Done; amendment for #157 in progress, ticket #163 (2026-11-10: AC-7a, the key line's layout). Before: Done; amendment for #139 Done (0.13.0, released 2026-11-09; M25 passed 2026-11-09 and the user checked a real chapter of 30 spreads; AC-6 — the running header of the sheet page in the book). Before: Done (M21 to M24 passed 2026-11-07; M21's findings and M23's changes merged without a re-run, the user's decision; G1 2026-11-06; decisions 1 and 2 answered the same day, G1 re-check)
 **Introduced:** v0.12.0 (planned, with US-030 to US-035)
 **Implemented:** v0.12.0 (released 2026-11-07), epic #121 (tickets #122 to #137); test builds `0.12.0-m21.1` (M21 to M24) and `0.12.0-m21.2` (their follow-ups); the amendment for #139 in v0.13.0 (released 2026-11-09), tickets #140 to #145, test build `0.13.0-m25.1` (M25)
 **Supersedes:** —
@@ -250,4 +250,4 @@ options were put:
 
 <!-- Filled in at step 3. Draft: D-21. -->
 - #143 (AC-6), #145; amendment for #139.
-- Amendment for #157 (AC-7a): bug #157; ticket at step 3.
+- Amendment for #157 (AC-7a): bug #157, ticket #163.
