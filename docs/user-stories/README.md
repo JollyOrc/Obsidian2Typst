@@ -57,6 +57,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-036](US-036-encounter-sheet.md) | The encounter sheet: A4 file and book page (epic #121) | Done (0.12.0, 2026-11-07; M21 to M24 passed); amendment for #139 Done 2026-11-09, M25 passed (AC-6; 0.13.0); amendment for #157 Done 2026-11-10 (AC-7a, the key line; no manual check) | epic #121, #122 to #137; epic #139; #157, #163 |
 | [US-037](US-037-facing-pages-open-as-spreads.md) | Facing pages open as spreads in a PDF viewer (`/PageLayout /TwoPageRight`) | Done (0.13.1, 2026-11-09; M26 passed) | epic #147, #148 to #150 |
 | [US-038](US-038-detail-rows.md) | Detail rows: note properties drawn as a row of icon badges under a heading (`o2t-details`, preset group `details`, `api.renderDetails`) | Done (0.14.0, 2026-11-09; M27 passed) | epic #152, #153 to #156 |
+| [US-039](US-039-statblock-typst-api.md) | The statblock as Typst for another plugin (`api.statblockTypst`, `api.compileFonts`) | Draft (G0 2026-11-11) | asked for by Game Card Creator US-004 |
 
 ### Backlog
 
