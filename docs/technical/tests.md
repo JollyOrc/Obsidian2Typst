@@ -652,3 +652,36 @@ is ✅. Rows for the spike (TICKET-001) are listed last.
 
 **Status values:** `🔴 written, red until TICKET-NNN` (real test, implementation pending, tracked by a ticket) · `❌ todo` · `⏭ skip #NNN` · `✅ pass`
 
+
+## US-039 — the statblock as Typst for another plugin (G2, 2026-11-11)
+
+Tests written, red until the code ticket (the module `src/plugin/entries/typst-api.ts`
+does not exist). Titles start with `US-039 AC-n`.
+
+| AC | Test | State |
+|---|---|---|
+| AC-1 | `tests/plugin/us-039-statblock-typst.test.ts` AC-1 (shape; data equal to the converter's text; prelude; band; keys without case) | red |
+| AC-2 | same file, AC-2 (six values, each equal to the book's text and to the measured literal; the `<x>` warning) | red |
+| AC-3 | same file, AC-3 (files and paths; missing icon; shared icon; no shared path; the entry's own cells) | red |
+| AC-4 | same file, AC-4 (credit text, empty, absent) | red |
+| AC-5 | same file, AC-5 (four no-settings shapes; no-statblock; no Typst) | red |
+| AC-6 | same file, AC-6 (codes and messages equal to the converter's) | red |
+| AC-7 | same file, AC-7 (the list and the call count) | red |
+| AC-8 | same file, AC-8 (preset change; icons once per path; failing dependency) | red |
+| AC-9 | same file, AC-9 (two calls; two fresh processes via `tests/support/us-039-answer-cli.ts`) | red |
+| AC-10 | same file, AC-10 (`composeApi` with and without the third part; `main.ts` hand-over; the manual) | red |
+| AC-11 | `tests/integration/us-039-statblock-typst-pdf.test.ts` (Fen Hare with and without icons; 35 boxes; the guard without the prelude) | red |
+
+Proven against a throwaway reference implementation (outside the repository,
+removed, checksum checked): 34 of the 37 tests passed; the three that failed
+are the wiring the reference did not have (`composeApi`, `main.ts`, the
+manual). Mutation check of that reference (12 mutants, backup and checksum):
+11 caught; `flattenLinks` removed gives the same output (the standalone writer
+has no link resolver): an equivalent mutant, so the story says it is not needed.
+The whole suite outside the new tests passes (2483, 121 files).
+
+Guards and tests that pin what the code ticket changes (SCAR-023, searched
+before the tickets): `us-038-details-processor` AC-15 (`composeApi` with two
+arguments: stays, the third is optional), the `main.ts` text checks in
+`us-035-preview` (`this.api = composeApi(createEntriesApi(this.entryDeps)`) and
+`us-038-details-processor` (`this.api = composeApi(`): both keep matching.

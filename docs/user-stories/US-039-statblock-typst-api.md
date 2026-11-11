@@ -1,6 +1,6 @@
 # US-039 — The statblock as Typst for another plugin (`api.statblockTypst`)
 
-**Status:** Draft (G0 done 2026-11-11; G1 not run)
+**Status:** Ready (G0 and G1 done 2026-11-11; D1 to D3 accepted by the author 2026-11-11)
 **Introduced:** —
 **Implemented:** —
 **Supersedes:** —
@@ -70,24 +70,34 @@ second copy of the preset's settings and the drawing code (SCAR-017).
   statblock's values: `**Bite**: 1d6` → `*Bite*: 1d6`; a link as its text; the
   specials escaped; `= x` and `- x` escaped at the start; `<x>` dropped with
   `HTML_UNSUPPORTED` in `warnings`.
-- **AC-3 (icons).** For each track cell whose icon file exists in the vault
-  one entry `{path, bytes}` with the Typst path that `data` names and the
-  file's bytes unchanged; a missing icon: `icon: none` in the cell and the
-  warning `STATBLOCK_ICON_MISSING` naming the path (the book writes a
-  different, image-based warning; one code for this answer is proposed, D2).
+- **AC-3 (icons).** The icons of the cells the statblock draws (the entry's
+  own `trackKey` cells, else `trackDefault`) are read from the vault, each vault
+  path once. For each icon file that exists one entry `{path, bytes}`: `path`
+  is `o2t-icons/<n>.svg`, `n` counting from 1 in the order of first use (the
+  same vault path is one entry; no two entries share a path, whatever the
+  vault names are), `bytes` are the file's bytes unchanged, and `data` names
+  the path in the cell (`icon: "o2t-icons/1.svg"`). Fen Hare under the
+  example preset (cells Fine, Hurt, Down, Gone): four entries, `o2t-icons/1.svg`
+  to `4.svg`. A cell with its own `states: [Fine, Gone]`: two entries. A
+  missing icon: `icon: none` in its cell (`(label: "Hurt", icon: none)`) and the
+  warning `STATBLOCK_ICON_MISSING` naming the vault path (D2).
 - **AC-4 (credit).** The preset's `encounterSheetText.credit`, or `null`.
-- **AC-5 (nothing to draw).** No `entries.statblock.stats` in the active
-  preset, no active preset, or no stat and no attack in the data: `{ok:
-  false, reason, message}` with the reasons and texts of the preview's
-  notices (`No statblock settings...`, `NO_SETTINGS`), no Typst.
+- **AC-5 (nothing to draw).** No active preset, no `entries.statblock.stats`
+  in it: `{ok: false, reason: 'no-settings', message}` with the text of the
+  preview's notice (`NO_SETTINGS`); no stat and no attack in the data:
+  `reason: 'no-statblock'` with `NO_STATS`; no Typst in either answer.
 - **AC-6 (data checks).** The model's checks (`STAT_SUM_MISMATCH`,
   `STAT_BOXES_MANY`, `TAG_UNMAPPED`, ...) come back in `warnings` as the book
   reports them (code, message), once each.
 - **AC-7 (fonts).** `api.compileFonts()` returns the font files the export
   gives the compiler (the bundled ones first, then the vault's, one call).
 - **AC-8 (the active preset, read each time; SCAR-016, SCAR-022).** A change
-  of the active preset between two calls changes the answer; nothing is
-  cached across calls except the icon files per path until `clearIconCache()`.
+  of the active preset between two calls changes the answer (settings are read
+  once per call); icons are read once per path until `clearIconCache()` (the
+  call the plugin makes when the preset changes, with the preview's); fonts are
+  read at every `compileFonts()` call. A dependency that fails (a thrown error)
+  gives `{ok: false, reason: 'error', message}`, never a throw or a half
+  answer.
 - **AC-9 (deterministic).** The same data and preset give the same answer
   byte for byte, in two fresh processes.
 - **AC-10 (composed).** `renderStatblock` and the export are unchanged (their
@@ -100,11 +110,23 @@ second copy of the preset's settings and the drawing code (SCAR-017).
 
 ## Open decisions (for the author)
 
-- **D1** the function name and the answer's shape are those of the contract in
-  Game Card Creator US-004 AC-3 (`statblockTypst`, `compileFonts`).
-- **D2** one new warning code `STATBLOCK_ICON_MISSING` for the answer, or the
+- **D1** (accepted) the function name and the answer's shape are those of the
+  contract in Game Card Creator US-004 AC-3 (`statblockTypst`, `compileFonts`).
+- **D2** (accepted) one new warning code `STATBLOCK_ICON_MISSING` for the answer, or the
   book's image warning.
-- **D3** release as 0.15.0 (a new function: a minor version).
+- **D3** (accepted) release as 0.15.0 (a new function: a minor version).
+
+## Interface used by the tests (G1)
+
+`createStatblockTypstApi(deps)` in `src/plugin/entries/typst-api.ts`, with
+`deps.settings()` (the preview's), `deps.readIconBytes(path)` (bytes or null)
+and `deps.fonts()`; it returns `{statblockTypst, compileFonts, clearIconCache}`.
+`composeApi(entries, details, typst?)` takes the third part as an optional
+argument (the US-038 test, which passes two, stays as it is); `main.ts` passes
+`createStatblockTypstApi(this.typstDeps)`. The pure pieces (`statblockModel`,
+`statblockData`, `statblockLook`, the definitions) are used as they are. A
+standalone call does not need `flattenLinks` (measured with a reference
+implementation: the output is the same without it).
 
 ## Not covered
 
