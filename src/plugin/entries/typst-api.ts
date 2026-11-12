@@ -70,14 +70,22 @@ export interface StatblockTypstApi {
 const ICON_FOLDER = 'o2t-icons';
 
 /**
- * US-039 | AC-3: the icons of the model's cells, read from the vault (each
- * vault path once), as the files the data names. `n` counts from 1 in the
- * order of first use, so no two files share a path whatever the vault names
- * are. A missing file gives no entry and `STATBLOCK_ICON_MISSING`.
+ * US-039 | AC-3, US-040 | AC-1 to AC-4: the icons of the model's cells, read
+ * from the vault (each vault path once), as the files the data names.
+ *
+ * `n` in `o2t-icons/<n>.svg` is the 1-based position in the preset's `track`
+ * of the first entry that names the vault path, never the order of use: one
+ * path is then one file in every answer of one preset, and no vault name can
+ * decide a number. A track entry whose icon is missing still counts as a
+ * position, so the other numbers do not move. Two entries with one vault icon
+ * share the path of the first. A missing file gives no entry and
+ * `STATBLOCK_ICON_MISSING`. Assumes every cell's icon is an entry of `track`
+ * (the model takes its cells from it).
  */
 async function iconFiles(
   model: StatblockModel,
   read: (path: string) => Promise<Uint8Array | null>,
+  track: readonly {icon: string}[],
 ): Promise<{
   files: TypstFile[];
   pathOf: Map<string, string | null>;
@@ -93,7 +101,7 @@ async function iconFiles(
       pathOf.set(cell.icon, null);
       warnings.push(statblockIconMissing(model.band, cell.icon));
     } else {
-      const path = `${ICON_FOLDER}/${files.length + 1}.svg`;
+      const path = `${ICON_FOLDER}/${track.findIndex((t) => t.icon === cell.icon) + 1}.svg`;
       files.push({path, bytes});
       pathOf.set(cell.icon, path);
     }
@@ -137,7 +145,11 @@ export function createStatblockTypstApi(deps: TypstApiDeps): StatblockTypstApi {
         return {ok: false, reason: 'no-statblock', message: NO_STATS};
       const colorMode = settings?.colorMode as ColorMode | undefined;
       const ctx = new EmitContext();
-      const used = await iconFiles(model, (p) => icons.get(p));
+      const used = await iconFiles(
+        model,
+        (p) => icons.get(p),
+        entries.statblock?.track ?? [],
+      );
       const writer: StatblockWriter = {
         content: (value) =>
           emitInline(flattenLinks(parseInline(value, 1)), ctx, {

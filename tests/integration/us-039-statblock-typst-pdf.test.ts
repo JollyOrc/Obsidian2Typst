@@ -138,7 +138,10 @@ const FEN_HARE = {
 describe('US-039 AC-11: the answer compiles at 54 mm', () => {
   it('Fen Hare with its icons: one page, no diagnostic, the parts in the facts and in the text', async () => {
     const out = await card(FEN_HARE, true);
-    expect(out.answer.files).toHaveLength(4);
+    // numbered by the track position (US-040 AC-1): Gone is the fifth entry
+    expect(out.answer.files.map((f) => f.path)).toEqual(
+      [1, 2, 3, 5].map((n) => `o2t-icons/${n}.svg`),
+    );
     expect(out.diagnostics).toEqual([]);
     expect(out.pages).toHaveLength(1);
     expect(out.facts).toEqual([

@@ -5,8 +5,11 @@
 // the same text, SCAR-023), the measured cases of the story (2026-11-11) and
 // the story's examples. Source of truth:
 // docs/user-stories/US-039-statblock-typst-api.md.
-// Red until US-039 is implemented (G2, 2026-11-11).
+// Red until US-039 is implemented (G2, 2026-11-11). Amended 2026-11-12 (US-040:
+// the icon files are numbered by the preset's track position; tests of AC-1 to
+// AC-6 of that story are the `US-040` blocks).
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {mkdtempSync, readFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -320,7 +323,7 @@ describe('US-039 AC-2 (mutation round 1: gaps found)', () => {
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.reason).toBe('no-settings');
   });
-  it('the files of the answer are numbered by use, a missing icon takes no number', async () => {
+  it('a missing icon keeps its position in the numbers (US-040 AC-3): the others do not move', async () => {
     const {createStatblockTypstApi} = await load();
     const {d, state} = deps();
     state.icons['Icons/hurt.svg'] = null;
@@ -331,8 +334,8 @@ describe('US-039 AC-2 (mutation round 1: gaps found)', () => {
     );
     expect(a.files.map((f) => f.path)).toEqual([
       'o2t-icons/1.svg',
-      'o2t-icons/2.svg',
       'o2t-icons/3.svg',
+      'o2t-icons/5.svg',
     ]);
   });
 });
@@ -346,12 +349,13 @@ describe('US-039 AC-3: icons', () => {
         heading: 'Fen Hare',
       }),
     );
-    // trackDefault of the example: Fine, Hurt, Down, Gone
+    // trackDefault of the example: Fine, Hurt, Down, Gone; the track is Fine,
+    // Hurt, Down, Fading, Gone, so Gone is position 5 (US-040 AC-1)
     expect(a.files.map((f) => f.path)).toEqual([
       'o2t-icons/1.svg',
       'o2t-icons/2.svg',
       'o2t-icons/3.svg',
-      'o2t-icons/4.svg',
+      'o2t-icons/5.svg',
     ]);
     expect(a.files.map((f) => Array.from(f.bytes))).toEqual(
       [
@@ -432,7 +436,13 @@ describe('US-039 AC-3: icons', () => {
         heading: 'Fen Hare',
       }),
     );
-    expect(new Set(a.files.map((f) => f.path)).size).toBe(3);
+    // the track position decides, never the vault name (US-040 AC-4): Fine is
+    // position 1, Hurt 2 (Down shares the icon of Fine), Gone 4
+    expect(a.files.map((f) => f.path)).toEqual([
+      'o2t-icons/1.svg',
+      'o2t-icons/2.svg',
+      'o2t-icons/4.svg',
+    ]);
     expect(a.files.map((f) => new TextDecoder().decode(f.bytes))).toEqual([
       '<svg a/>',
       '<svg b/>',
@@ -449,8 +459,245 @@ describe('US-039 AC-3: icons', () => {
     );
     expect(a.files.map((f) => f.path)).toEqual([
       'o2t-icons/1.svg',
-      'o2t-icons/2.svg',
+      'o2t-icons/5.svg',
     ]);
+  });
+});
+
+const NORMALISED_0_15_0 =
+  '(band: "Fen Hare", look: (fill: none, frame: (color: rgb("#000000"), width: 0.75pt), rules: (color: rgb("#000000"), width: 0.4pt), box-fill: rgb("#ffffff"), accent: rgb("#000000"), icon: "#000000", fonts: (:), sizes: (band: 11.5pt, value: 11pt, label: 5.5pt, text: 7pt, attacks: 7.5pt, skills: 9pt), narrow: (spacing: (min: 80%, max: 150%), tracking: (min: -0.01em, max: 0.03em))), boxes: (label: [VIGOUR], value: [11], count: 11), track: (label: [STATE], cells: ((label: "Fine", icon: "ICON"), (label: "Hurt", icon: "ICON"), (label: "Down", icon: "ICON"), (label: "Gone", icon: "ICON"))), attributes: [Might 4 \u00b7 Wits 2 \u00b7 Speed 5], traits: none, attacks: (([Kick], [2d6]), ([*Bite*], [1d6])), skills: [Quick Step, Keen Nose], tags: [Beast])';
+const PRELUDE_SHA_0_15_0 =
+  'ed9c12577d8b5207c603cc2563a0f2f3ec605f1d849aa0ce4368b147ad4e38a9';
+const ICON_NAMES = ['fine', 'hurt', 'down', 'gone'] as const;
+const pathsOf = (a: Answer) => a.files.map((f) => f.path);
+const text = (b: Uint8Array) => new TextDecoder().decode(b);
+
+describe('US-040 AC-1, AC-4: one path is one file over many answers', () => {
+  const notes: [string, Record<string, unknown>, string[]][] = [
+    ['no states', FEN_HARE_DATA, ['1', '2', '3', '5']],
+    ['[Hurt, Gone]', {...FEN_HARE_DATA, states: ['Hurt', 'Gone']}, ['2', '5']],
+    ['[Down, Gone]', {...FEN_HARE_DATA, states: ['Down', 'Gone']}, ['3', '5']],
+  ];
+  it.each(notes)(
+    '%s: the paths are the track positions',
+    async (_n, data, nums) => {
+      const {createStatblockTypstApi} = await load();
+      const a = ok(
+        await createStatblockTypstApi(deps().d).statblockTypst(data, {
+          heading: 'Fen Hare',
+        }),
+      );
+      expect(pathsOf(a)).toEqual(nums.map((n) => `o2t-icons/${n}.svg`));
+    },
+  );
+  it('the cells of the data name the track position: Gone is o2t-icons/5.svg', async () => {
+    const {createStatblockTypstApi} = await load();
+    const a = ok(
+      await createStatblockTypstApi(deps().d).statblockTypst(FEN_HARE_DATA, {
+        heading: 'Fen Hare',
+      }),
+    );
+    expect(a.data).toContain('(label: "Gone", icon: "o2t-icons/5.svg")');
+    expect(a.data).toContain('(label: "Fine", icon: "o2t-icons/1.svg")');
+  });
+  it('the three notes called one after the other: equal paths have equal bytes, different files different paths', async () => {
+    const {createStatblockTypstApi} = await load();
+    const api = createStatblockTypstApi(deps().d);
+    const seen = new Map<string, string>();
+    let files = 0;
+    for (const [, data] of notes) {
+      const a = ok(await api.statblockTypst(data, {heading: 'X'}));
+      for (const f of a.files) {
+        files++;
+        const known = seen.get(f.path);
+        if (known !== undefined) expect(text(f.bytes), f.path).toBe(known);
+        seen.set(f.path, text(f.bytes));
+      }
+    }
+    expect(files).toBe(8); // 4 + 2 + 2: nothing skipped (SCAR-023)
+    expect([...seen.keys()].sort()).toEqual([
+      'o2t-icons/1.svg',
+      'o2t-icons/2.svg',
+      'o2t-icons/3.svg',
+      'o2t-icons/5.svg',
+    ]);
+    expect(new Set(seen.values()).size).toBe(4); // four paths, four files
+    // and each path holds the icon of its own track entry
+    expect(seen.get('o2t-icons/2.svg')).toBe(
+      text(ICON_FILES['Icons/hurt.svg']!),
+    );
+    expect(seen.get('o2t-icons/5.svg')).toBe(
+      text(ICON_FILES['Icons/gone.svg']!),
+    );
+    expect(ICON_NAMES).toHaveLength(4);
+  });
+  it('the order of the calls does not matter: the second note first gives the same paths', async () => {
+    const {createStatblockTypstApi} = await load();
+    const api = createStatblockTypstApi(deps().d);
+    const a = ok(
+      await api.statblockTypst(
+        {...FEN_HARE_DATA, states: ['Down', 'Gone']},
+        {heading: 'X'},
+      ),
+    );
+    const b = ok(await api.statblockTypst(FEN_HARE_DATA, {heading: 'X'}));
+    expect(pathsOf(a)).toEqual(['o2t-icons/3.svg', 'o2t-icons/5.svg']);
+    expect(pathsOf(b)).toEqual([1, 2, 3, 5].map((n) => `o2t-icons/${n}.svg`));
+  });
+});
+
+describe('US-040 AC-2, AC-3: shared icons and missing icons', () => {
+  const withTrack = (track: {label: string; icon: string}[]) => ({
+    ...ENTRIES,
+    statblock: {...ENTRIES.statblock, track},
+  });
+  it('two track entries with one vault icon share the path of the first; one file', async () => {
+    const {createStatblockTypstApi} = await load();
+    const {d, state} = deps();
+    state.current = {
+      entries: withTrack([
+        {label: 'Fine', icon: 'Icons/fine.svg'},
+        {label: 'Hurt', icon: 'Icons/hurt.svg'},
+        {label: 'Down', icon: 'Icons/hurt.svg'},
+        {label: 'Fading', icon: 'Icons/fading.svg'},
+        {label: 'Gone', icon: 'Icons/gone.svg'},
+      ]),
+    };
+    const a = ok(
+      await createStatblockTypstApi(d).statblockTypst(FEN_HARE_DATA, {
+        heading: 'Fen Hare',
+      }),
+    );
+    expect(pathsOf(a)).toEqual([
+      'o2t-icons/1.svg',
+      'o2t-icons/2.svg',
+      'o2t-icons/5.svg',
+    ]);
+    expect(a.data).toContain('(label: "Hurt", icon: "o2t-icons/2.svg")');
+    expect(a.data).toContain('(label: "Down", icon: "o2t-icons/2.svg")');
+  });
+  it('Fine and Down with one icon, a creature with both cells: one file o2t-icons/1.svg, both cells name it', async () => {
+    const {createStatblockTypstApi} = await load();
+    const {d, state} = deps();
+    state.current = {
+      entries: withTrack([
+        {label: 'Fine', icon: 'Icons/a.svg'},
+        {label: 'Hurt', icon: 'Icons/hurt.svg'},
+        {label: 'Down', icon: 'Icons/a.svg'},
+      ]),
+    };
+    state.icons['Icons/a.svg'] = bytes('<svg a/>');
+    const a = ok(
+      await createStatblockTypstApi(d).statblockTypst(
+        {...FEN_HARE_DATA, states: ['Fine', 'Down']},
+        {heading: 'Fen Hare'},
+      ),
+    );
+    expect(pathsOf(a)).toEqual(['o2t-icons/1.svg']);
+    expect(a.data.match(/icon: "o2t-icons\/1\.svg"/g)).toHaveLength(2);
+  });
+  it('Hurt missing, the default creature: files 1, 3, 5; Hurt has icon none; the warning once', async () => {
+    const {createStatblockTypstApi} = await load();
+    const {d, state} = deps();
+    state.icons['Icons/hurt.svg'] = null;
+    const a = ok(
+      await createStatblockTypstApi(d).statblockTypst(FEN_HARE_DATA, {
+        heading: 'Fen Hare',
+      }),
+    );
+    expect(pathsOf(a)).toEqual([
+      'o2t-icons/1.svg',
+      'o2t-icons/3.svg',
+      'o2t-icons/5.svg',
+    ]);
+    expect(a.data).toContain('(label: "Hurt", icon: none)');
+    expect(
+      a.warnings.filter((w) => w.code === 'STATBLOCK_ICON_MISSING'),
+    ).toHaveLength(1);
+  });
+  it('Hurt missing but not drawn ([Down, Gone]): files 3, 5 and no warning', async () => {
+    const {createStatblockTypstApi} = await load();
+    const {d, state} = deps();
+    state.icons['Icons/hurt.svg'] = null;
+    const a = ok(
+      await createStatblockTypstApi(d).statblockTypst(
+        {...FEN_HARE_DATA, states: ['Down', 'Gone']},
+        {heading: 'Fen Hare'},
+      ),
+    );
+    expect(pathsOf(a)).toEqual(['o2t-icons/3.svg', 'o2t-icons/5.svg']);
+    expect(
+      a.warnings.filter((w) => w.code === 'STATBLOCK_ICON_MISSING'),
+    ).toEqual([]);
+  });
+  it('a vault name that looks generated does not decide: C/o2t-icons/5.svg as the icon of Fine', async () => {
+    const {createStatblockTypstApi} = await load();
+    const {d, state} = deps();
+    state.current = {
+      entries: withTrack([
+        {label: 'Fine', icon: 'C/o2t-icons/5.svg'},
+        {label: 'Hurt', icon: 'Icons/hurt.svg'},
+        {label: 'Down', icon: 'Icons/down.svg'},
+        {label: 'Fading', icon: 'Icons/fading.svg'},
+        {label: 'Gone', icon: 'Icons/gone.svg'},
+      ]),
+    };
+    state.icons['C/o2t-icons/5.svg'] = bytes('<svg c/>');
+    const a = ok(
+      await createStatblockTypstApi(d).statblockTypst(FEN_HARE_DATA, {
+        heading: 'Fen Hare',
+      }),
+    );
+    expect(pathsOf(a)).toEqual([1, 2, 3, 5].map((n) => `o2t-icons/${n}.svg`));
+    expect(text(a.files[0]!.bytes)).toBe('<svg c/>');
+    expect(text(a.files[3]!.bytes)).toBe(text(ICON_FILES['Icons/gone.svg']!));
+  });
+});
+
+describe('US-040 AC-5, AC-6: nothing else changes; the preset is read at each call', () => {
+  it('the answer equals the real 0.15.0 answer except the numbers in the icon paths', async () => {
+    const {createStatblockTypstApi} = await load();
+    const a = ok(
+      await createStatblockTypstApi(deps().d).statblockTypst(FEN_HARE_DATA, {
+        heading: 'Fen Hare',
+      }),
+    );
+    expect(a.data.replace(/o2t-icons\/\d+\.svg/g, 'ICON')).toBe(
+      NORMALISED_0_15_0,
+    );
+    expect(createHash('sha256').update(a.prelude).digest('hex')).toBe(
+      PRELUDE_SHA_0_15_0,
+    );
+    expect(a.credit).toBeNull();
+    expect(a.warnings).toEqual([]);
+    expect(Object.keys(a).sort()).toEqual([
+      'credit',
+      'data',
+      'files',
+      'ok',
+      'prelude',
+      'warnings',
+    ]);
+  });
+  it('after a change of the track the paths follow it: Gone moved to the front is o2t-icons/1.svg', async () => {
+    const {createStatblockTypstApi} = await load();
+    const {d, state} = deps();
+    const api = createStatblockTypstApi(d);
+    const first = ok(await api.statblockTypst(FEN_HARE_DATA, {heading: 'X'}));
+    expect(first.data).toContain('(label: "Gone", icon: "o2t-icons/5.svg")');
+    const track = [...ENTRIES.statblock.track];
+    state.current = {
+      entries: {
+        ...ENTRIES,
+        statblock: {
+          ...ENTRIES.statblock,
+          track: [track[4]!, ...track.slice(0, 4)],
+        },
+      },
+    };
+    const second = ok(await api.statblockTypst(FEN_HARE_DATA, {heading: 'X'}));
+    expect(second.data).toContain('(label: "Gone", icon: "o2t-icons/1.svg")');
+    expect(second.data).toContain('(label: "Fine", icon: "o2t-icons/2.svg")');
   });
 });
 

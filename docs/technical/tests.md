@@ -686,3 +686,21 @@ arguments: stays, the third is optional), the `main.ts` text checks in
 `us-038-details-processor` (`this.api = composeApi(`): both keep matching.
 
 Mutation rounds on the code (backup and checksum): #165 12 mutants, five survived and five tests were added (describe "AC-2 (mutation round 1: gaps found)"), then all caught; #166 11 mutants, all caught. The US-012 text check of `compileFonts(` now expects two call sites in `main.ts` (the export and `typstDeps.fonts`). The desktop check is [M29](manual-checks/M29.md) (not run).
+
+## US-040 — icon files numbered by the preset's track order (G2, 2026-11-12; tickets #168, #169)
+
+Titles start with `US-040 AC-n` in `tests/plugin/us-039-statblock-typst.test.ts`
+(the amended US-039 AC-3 tests keep their titles). Red until the code ticket:
+16 tests in that file and in `tests/integration/us-039-statblock-typst-pdf.test.ts`; all other
+tests pass (3279). Proven against a throwaway reference (a copy of the source
+with the numbering patched, outside this repo): 56 of 56 pass there.
+
+| AC | Test |
+|---|---|
+| AC-1 | `US-040 AC-1, AC-4` (three notes: paths 1, 2, 3, 5 / 2, 5 / 3, 5; cells of `data`; order of calls); the amended AC-3 tests; the integration test (paths 1, 2, 3, 5 compile with no diagnostic) |
+| AC-2 | `US-040 AC-2, AC-3` (Hurt and Down share an icon: one file at position 2; Fine and Down: one file `1.svg`, both cells name it) |
+| AC-3 | `US-040 AC-2, AC-3` (Hurt missing: 1, 3, 5, `icon: none`, one warning; Hurt missing but not drawn: 3, 5, no warning); the amended "keeps its position" test |
+| AC-4 | `US-040 AC-1, AC-4` (eight files over three answers, equal paths equal bytes, four paths four files); the vault name `C/o2t-icons/5.svg`; the amended different-folders test |
+| AC-5 | `US-040 AC-5, AC-6` (the real 0.15.0 data with icon numbers normalised, the prelude's SHA-256, `credit`, `warnings`, the keys); the converter and preview tests of US-039 AC-10 unchanged and green |
+| AC-6 | `US-040 AC-5, AC-6` (the track reordered between two calls: paths follow) |
+| AC-7 | release steps (tickets) |
