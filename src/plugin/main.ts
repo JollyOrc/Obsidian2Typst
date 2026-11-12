@@ -27,6 +27,7 @@ import {
   type MenuEntry,
 } from './menus';
 import {lineContext} from '../core/convert';
+import {mergeFonts} from '../core/fonts';
 import {isPresetNote} from '../core/presets';
 import {
   createTypstCompiler,
@@ -49,6 +50,7 @@ import {
   inQuote,
   type PreviewDeps,
 } from './entries/processor';
+import {createStatblockTypstApi, type TypstApiDeps} from './entries/typst-api';
 import {
   composeApi,
   createDetailsApi,
@@ -198,6 +200,32 @@ export default class Obsidian2TypstPlugin extends Plugin {
     },
   };
 
+  /**
+   * US-039 AC-7, AC-8: what the Typst answer reads, each time it is asked
+   * (SCAR-016): the active preset, the icon files as bytes, the fonts of a
+   * compile (the bundled ones, then the vault fonts of the active preset's
+   * folder, as the export hands them over).
+   */
+  private readonly typstDeps: TypstApiDeps = {
+    settings: this.entryDeps.settings,
+    readIconBytes: async (path) => {
+      const at = normalizePath(path);
+      const adapter = this.app.vault.adapter;
+      return (await adapter.exists(at))
+        ? new Uint8Array(await adapter.readBinary(at))
+        : null;
+    },
+    fonts: async () => {
+      const view = this.activeView();
+      const folder = mergeFonts(
+        view.fields?.fonts,
+        this.pluginSettings.data.defaults.fonts,
+      ).folder;
+      const set = await this.fontSet(folder);
+      return compileFonts(await embeddedFonts(), set.files);
+    },
+  };
+
   /** US-038 AC-14: the processor of details blocks. */
   private readonly detailsProcessor = createDetailsProcessor(this.detailsDeps);
 
@@ -279,6 +307,7 @@ export default class Obsidian2TypstPlugin extends Plugin {
     this.api = composeApi(
       createEntriesApi(this.entryDeps),
       createDetailsApi(this.detailsDeps),
+      createStatblockTypstApi(this.typstDeps),
     );
     // US-035 AC-7 (decision 2): a change of the active preset, or of its
     // note, redraws the open previews at once.

@@ -179,10 +179,12 @@ function lookProps(look: StatblockLookValues): Record<string, string> {
 }
 
 /** Icons read once per path until the cache is cleared (AC-8; US-038 AC-14 too). */
-export function iconCache(read: (path: string) => Promise<string | null>) {
-  const cache = new Map<string, Promise<string | null>>();
+export function iconCache<T = string>(
+  read: (path: string) => Promise<T | null>,
+) {
+  const cache = new Map<string, Promise<T | null>>();
   return {
-    get(path: string): Promise<string | null> {
+    get(path: string): Promise<T | null> {
       let found = cache.get(path);
       if (found === undefined) {
         found = read(path).catch(() => null);

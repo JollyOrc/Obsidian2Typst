@@ -146,6 +146,7 @@ report are still written. Errors usually come from a
 | `ENTRY_NO_LEDE`, `ENTRY_LEDE_SHORT` | An entry starts with something other than a paragraph (a list, an image, …), or its opening paragraph has fewer than 10 words; it is still set beside the statblock. |
 | `STAT_BOXES_MANY`, `STAT_BOXES_NOT_NUMBER` | The box value is over 45, or not a whole number; no boxes are drawn. |
 | `TAG_UNMAPPED` | An entry's tag has no label in `entries.tagLabels`; it is left out. |
+| `STATBLOCK_ICON_MISSING` | A track icon of the statblock was not found, when another plugin asks for the statblock as Typst (`api.statblockTypst`); its cell is empty. |
 | `STAT_SUM_MISMATCH` | The total of `entries.statblock.sum` does not equal the sum of its keys. |
 | `STAT_ATTACK_NO_DICE` | An attack names no dice (`2d6`). |
 | `ENTRY_OUTSIDE_CHAPTER` | An entry outside every entries chapter is printed as text with its statblock. |

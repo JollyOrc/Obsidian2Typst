@@ -12,6 +12,7 @@ import {
   type DetailsLookValues,
 } from '../../core/emit/details';
 import {recolourSvg} from '../../core/entries/model';
+import type {StatblockTypstApi} from '../entries/typst-api';
 import type {ColorMode, DetailsSettings} from '../../core/markers';
 import {
   iconCache,
@@ -210,6 +211,9 @@ export function createDetailsApi(deps: DetailsDeps): DetailsApi {
 /** US-038 AC-15: the one API object of the plugin (`version` stays 1). */
 export interface PluginApi extends EntriesApi {
   renderDetails: DetailsApi['renderDetails'];
+  /** US-039 AC-10: the statblock as Typst, for another plugin (when composed). */
+  statblockTypst?: StatblockTypstApi['statblockTypst'];
+  compileFonts?: StatblockTypstApi['compileFonts'];
 }
 
 /**
@@ -221,14 +225,22 @@ export interface PluginApi extends EntriesApi {
 export function composeApi(
   entries: EntriesApi,
   details: DetailsApi,
+  typst?: StatblockTypstApi,
 ): PluginApi {
   return {
     version: entries.version,
     renderStatblock: entries.renderStatblock,
     renderDetails: details.renderDetails,
+    ...(typst === undefined
+      ? {}
+      : {
+          statblockTypst: typst.statblockTypst,
+          compileFonts: typst.compileFonts,
+        }),
     clearIconCache() {
       entries.clearIconCache();
       details.clearIconCache();
+      typst?.clearIconCache();
     },
   };
 }

@@ -78,6 +78,7 @@ fixed by the story that owns the code.
 | `ENTRY_IN_GLOSSARY` | US-030 AC-21 | `"Fen Hare"`: an `o2t-entry` block under a glossary term is not read as an entry and not printed (at the block's line; decision 3) | active |
 | `ENTRY_TRACK_UNKNOWN` | US-030 AC-13 | `"Fen Hare": Lost`: a label of the block's track key is not in `entries.statblock.track`; that cell is left out | active |
 | `ENTRY_NO_LEDE` | US-030 AC-16 | `"Fen Hare": starts with list`: the entry's first block is not a plain paragraph (list, image, callout, quote, heading, table, code); it starts beside the statblock | active |
+| `STATBLOCK_ICON_MISSING` | US-039 AC-3 | `"Fen Hare": icon file not found: Icons/hurt.svg`: in the answer of `api.statblockTypst` only (not in an export); the cell is written with `icon: none`; once per path | active |
 | `ENTRY_LEDE_SHORT` | US-030 AC-16 | `"Fen Hare": 9 words`: the opening paragraph has fewer than 10 words; it is used as normal | active |
 | `STAT_BOXES_MANY` | US-030 AC-12 | `"Fen Hare": 46`: the box value is over 45; it is printed, no boxes are drawn | active |
 | `STAT_BOXES_NOT_NUMBER` | US-030 AC-12 | `"Fen Hare"`: the box value is not a whole number from 0 (`varies`, `2d6`, `-3`, `2.5`); printed as written, no boxes | active |

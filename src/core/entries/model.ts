@@ -307,3 +307,18 @@ export function boxColumnLabel(
   if (field !== undefined) return field.label;
   return boxes.charAt(0).toUpperCase() + boxes.slice(1);
 }
+
+/**
+ * US-039 | AC-3: the warning for a track icon that is not in the vault, made
+ * for the answer of `api.statblockTypst` (the one place its code and text are
+ * written, SCAR-017): `"Fen Hare": icon file not found: Icons/hurt.svg`.
+ */
+export function statblockIconMissing(
+  band: string,
+  path: string,
+): {code: 'STATBLOCK_ICON_MISSING'; message: string} {
+  return {
+    code: 'STATBLOCK_ICON_MISSING',
+    message: `"${band}": icon file not found: ${path}`,
+  };
+}

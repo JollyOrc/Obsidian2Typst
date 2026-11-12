@@ -302,6 +302,41 @@ if (api?.version === 1) {
   (each cell has its label as `aria-label`). The API adds no clicks.
 - `api.version` is `1`; a change that breaks your code raises it.
 
+### Typst for another plugin
+
+Another plugin (for example one that prints game cards) can ask for the same
+statblock as Typst instead of drawing it, so the card shows what the book
+shows:
+
+```js
+const api = app.plugins.plugins["obsidian2typst"].api;
+const answer = await api.statblockTypst(
+  {vigour: 11, might: 4, wits: 2, speed: 5,
+   attacks: ["Kick: 2d6", "**Bite**: 1d6"], skills: ["Quick Step"], tags: ["beast"]},
+  {heading: "Fen Hare"},
+);
+if (answer.ok) {
+  // answer.prelude: the definitions to put once in the document
+  // answer.data:    the statblock's data, for #o2t-statblock(...) or o2t-sb-box(...)
+  // answer.files:   [{path: "o2t-icons/1.svg", bytes}] the icon files the data names
+  // answer.credit:  the preset's credit text, or null
+  // answer.warnings: [{code, message}] data checks and missing icons
+}
+const fonts = await api.compileFonts(); // the bundled fonts, then the vault fonts of the active preset
+```
+
+- `statblockTypst(data, options)` reads the active preset each time it is
+  asked; `data` is an object of note properties (keys in any case), the band
+  is `options.heading`, else `data.name`, else `—`.
+- Without an `entries` statblock in the preset it answers
+  `{ok: false, reason: "no-settings", message}`; with no stat and no attack
+  in the data `{ok: false, reason: "no-statblock", message}`.
+- The icon files are read from the vault once per path (until the preset
+  changes); a missing icon is drawn as an empty cell and reported as
+  `STATBLOCK_ICON_MISSING`.
+- The same data and preset give the same answer, byte for byte.
+- `compileFonts()` is the list the export hands the compiler.
+
 ## Warnings
 
 Every warning of entries is listed in [Warnings and strict mode](warnings.md).

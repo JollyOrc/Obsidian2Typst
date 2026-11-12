@@ -1,6 +1,6 @@
 # US-039 — The statblock as Typst for another plugin (`api.statblockTypst`)
 
-**Status:** Ready (G0 and G1 done 2026-11-11; D1 to D3 accepted by the author 2026-11-11)
+**Status:** Code done 2026-11-12 (#165, #166, #167); desktop check M29 and release 0.15.0 open (G0 and G1 done 2026-11-11; D1 to D3 accepted by the author 2026-11-11)
 **Introduced:** —
 **Implemented:** —
 **Supersedes:** —

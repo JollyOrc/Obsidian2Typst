@@ -335,12 +335,14 @@ describe('US-012 AC-13 fonts, active preset and edge-case names at the new call 
   it('US-012 AC-13: export and preview both build the font list with compileFonts (text check, SCAR-017)', () => {
     // The export builds the list in main.ts, the preview inside the request
     // builder (`preparePreview`); neither joins the lists by hand.
-    for (const file of [
-      'src/plugin/main.ts',
-      'src/plugin/preview/request.ts',
-    ]) {
+    // US-039 AC-7: main.ts has a second call site, `typstDeps.fonts` for
+    // `api.compileFonts` (also through `compileFonts`, never by hand).
+    for (const [file, calls] of [
+      ['src/plugin/main.ts', 2],
+      ['src/plugin/preview/request.ts', 1],
+    ] as const) {
       const source = readFileSync(file, 'utf8');
-      expect(source.match(/compileFonts\(/g)?.length ?? 0, file).toBe(1);
+      expect(source.match(/compileFonts\(/g)?.length ?? 0, file).toBe(calls);
       expect(source, file).not.toMatch(/\.\.\.\(await embeddedFonts\(\)\)/);
       expect(source, file).not.toMatch(/\[\.\.\.bundled|\.\.\.request\.fonts/);
     }

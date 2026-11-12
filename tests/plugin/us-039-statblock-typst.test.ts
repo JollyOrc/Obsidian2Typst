@@ -274,6 +274,69 @@ describe('US-039 AC-2: values as the book writes them', () => {
   });
 });
 
+describe('US-039 AC-2 (mutation round 1: gaps found)', () => {
+  it('an unset stat is left out, as the book writes an entry (no dash)', async () => {
+    const {createStatblockTypstApi} = await load();
+    const yaml = ['vigour: 11', 'might: 4', 'attacks:', '  - "Kick: 2d6"'];
+    const book = await bookData(yaml);
+    const a = ok(
+      await createStatblockTypstApi(noIcons().d).statblockTypst(
+        {vigour: 11, might: 4, attacks: ['Kick: 2d6']},
+        {heading: 'Fen Hare'},
+      ),
+    );
+    expect(a.data).toBe(book.data);
+    expect(a.data).not.toContain('—]');
+  });
+  it('a link in a value gives no warning (it is its text)', async () => {
+    const {createStatblockTypstApi} = await load();
+    const a = ok(
+      await createStatblockTypstApi(noIcons().d).statblockTypst(
+        {...FEN_HARE_DATA, attacks: ['[[Fen Hare|hare]] and [x](y.md): 1d4']},
+        {heading: 'Fen Hare'},
+      ),
+    );
+    expect(
+      a.warnings.filter((w) => w.code !== 'STATBLOCK_ICON_MISSING'),
+    ).toEqual([]);
+  });
+  it('a line break in a value is one space', async () => {
+    const {createStatblockTypstApi} = await load();
+    const a = ok(
+      await createStatblockTypstApi(noIcons().d).statblockTypst(
+        {...FEN_HARE_DATA, skills: ['Quick\nStep']},
+        {heading: 'Fen Hare'},
+      ),
+    );
+    expect(a.data).toContain('skills: [Quick Step]');
+  });
+  it('stats: an empty list is no statblock setup (no-settings)', async () => {
+    const {createStatblockTypstApi} = await load();
+    const {d, state} = deps();
+    state.current = {entries: {statblock: {stats: []}}};
+    const r = await createStatblockTypstApi(d).statblockTypst(FEN_HARE_DATA, {
+      heading: 'x',
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe('no-settings');
+  });
+  it('the files of the answer are numbered by use, a missing icon takes no number', async () => {
+    const {createStatblockTypstApi} = await load();
+    const {d, state} = deps();
+    state.icons['Icons/hurt.svg'] = null;
+    const a = ok(
+      await createStatblockTypstApi(d).statblockTypst(FEN_HARE_DATA, {
+        heading: 'Fen Hare',
+      }),
+    );
+    expect(a.files.map((f) => f.path)).toEqual([
+      'o2t-icons/1.svg',
+      'o2t-icons/2.svg',
+      'o2t-icons/3.svg',
+    ]);
+  });
+});
+
 describe('US-039 AC-3: icons', () => {
   it('each track cell with an icon file: one file entry, the path the data names, the bytes unchanged', async () => {
     const {createStatblockTypstApi} = await load();
@@ -666,6 +729,24 @@ describe('US-039 AC-10: composed with the rest of the API', () => {
       /this\.api\s*=\s*composeApi\(\s*createEntriesApi\(this\.entryDeps\),\s*createDetailsApi\(this\.detailsDeps\),\s*createStatblockTypstApi\(this\.typstDeps\),?\s*\)/,
     );
     expect(main).not.toContain('statblockTypst(');
+  });
+  it('main.ts reads the fonts and the icons at each call: the active preset folder over the Defaults, the bundled fonts first, icons as bytes', () => {
+    const main = readFileSync('src/plugin/main.ts', 'utf8');
+    const at = main.indexOf('private readonly typstDeps');
+    expect(at).toBeGreaterThan(0);
+    const block = main.slice(
+      at,
+      main.indexOf('/** US-038 AC-14: the processor', at),
+    );
+    expect(block).toMatch(/settings:\s*this\.entryDeps\.settings/);
+    expect(block).toMatch(/adapter\.readBinary\(/);
+    expect(block).toMatch(
+      /mergeFonts\(\s*view\.fields\?\.fonts,\s*this\.pluginSettings\.data\.defaults\.fonts,?\s*\)\.folder/,
+    );
+    expect(block).toMatch(
+      /compileFonts\(await embeddedFonts\(\),\s*set\.files\)/,
+    );
+    expect(block).toMatch(/this\.activeView\(\)/);
   });
   it('the manual documents both functions, with the example', () => {
     const manual = readFileSync('manual/entries.md', 'utf8');
