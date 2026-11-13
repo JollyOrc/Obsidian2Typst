@@ -73,12 +73,16 @@ second copy of the preset's settings and the drawing code (SCAR-017).
 - **AC-3 (icons).** The icons of the cells the statblock draws (the entry's
   own `trackKey` cells, else `trackDefault`) are read from the vault, each vault
   path once. For each icon file that exists one entry `{path, bytes}`: `path`
-  is `o2t-icons/<n>.svg`, `n` counting from 1 in the order of first use (the
-  same vault path is one entry; no two entries share a path, whatever the
-  vault names are), `bytes` are the file's bytes unchanged, and `data` names
+  is `o2t-icons/<n>.svg`, `n` the 1-based position in the preset's `track`
+  of the first entry that names the vault path (**amended by US-040, 0.15.1**:
+  until 0.15.0 `n` counted in the order of first use within one answer, so
+  one path could be two files in two answers; now one path is one file for
+  one preset; the same vault path is one entry; no vault name decides a
+  number), `bytes` are the file's bytes unchanged, and `data` names
   the path in the cell (`icon: "o2t-icons/1.svg"`). Fen Hare under the
-  example preset (cells Fine, Hurt, Down, Gone): four entries, `o2t-icons/1.svg`
-  to `4.svg`. A cell with its own `states: [Fine, Gone]`: two entries. A
+  example preset (track Fine, Hurt, Down, Fading, Gone; cells Fine, Hurt,
+  Down, Gone): four entries, `o2t-icons/1.svg`, `2.svg`, `3.svg` and `5.svg`.
+  A cell with its own `states: [Fine, Gone]`: two entries, `1.svg` and `5.svg`. A
   missing icon: `icon: none` in its cell (`(label: "Hurt", icon: none)`) and the
   warning `STATBLOCK_ICON_MISSING` naming the vault path (D2).
 - **AC-4 (credit).** The preset's `encounterSheetText.credit`, or `null`.

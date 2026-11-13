@@ -318,7 +318,9 @@ const answer = await api.statblockTypst(
 if (answer.ok) {
   // answer.prelude: the definitions to put once in the document
   // answer.data:    the statblock's data, for #o2t-statblock(...) or o2t-sb-box(...)
-  // answer.files:   [{path: "o2t-icons/1.svg", bytes}] the icon files the data names
+  // answer.files:   [{path: "o2t-icons/1.svg", bytes}] the icon files the data names;
+  //                 the number is the icon's position in the preset's track, so one
+  //                 path is one file in every answer of one preset
   // answer.credit:  the preset's credit text, or null
   // answer.warnings: [{code, message}] data checks and missing icons
 }
@@ -333,7 +335,10 @@ const fonts = await api.compileFonts(); // the bundled fonts, then the vault fon
   in the data `{ok: false, reason: "no-statblock", message}`.
 - The icon files are read from the vault once per path (until the preset
   changes); a missing icon is drawn as an empty cell and reported as
-  `STATBLOCK_ICON_MISSING`.
+  `STATBLOCK_ICON_MISSING`. The file `o2t-icons/<n>.svg` is the icon of the
+  `n`th entry of the preset's track (a missing icon keeps its number), so a
+  caller that compiles the answers of many notes in one document can put
+  the files together by path.
 - The same data and preset give the same answer, byte for byte.
 - `compileFonts()` is the list the export hands the compiler.
 
