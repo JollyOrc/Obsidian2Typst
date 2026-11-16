@@ -739,3 +739,4 @@ by 0.75 mm) and a test was strengthened (the marks one gap from the name).
 | AC-8 | `US-040 AC-5, AC-6` amended (the prelude with the band's piece cut out has the 0.15.0 hash; the whole prelude pinned anew); the other US-030, US-035 and US-039 tests unchanged and green |
 | AC-9 | release steps (tickets) |
 
+**Ticket #171 (2026-11-16), green:** the 16 tests of `us-041-band-marks-pdf` and the amended prelude pin (52 in `us-039-statblock-typst`); mutation round on the real code: 12 of 12 caught; the whole suite after it: `npm test` 2620 passed / 7 red (#172's preview tests), integration 692 passed.

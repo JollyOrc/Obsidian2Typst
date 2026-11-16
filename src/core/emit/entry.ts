@@ -183,6 +183,18 @@ export const WRAP_HELPER_DEF = `#let o2t-atoms(c) = {
  * with the entry's body wrapped around it (`o2t-wrap`, #139) at the width
  * of the container. An entry of an entries chapter hands `d` to
  * `o2t-entries` instead (breaks.ts), which wraps it at the text width.
+ *
+ * US-041 AC-1 to AC-5 | the title band, drawn in its own `layout` (it needs the
+ * band's inner width) from three measured quantities, all in the band's font and
+ * size: the mark's width `wm`, the gap (one space: `measure` of `a b` less `ab`,
+ * because a lone space measures 0) and the longest space-separated word of the
+ * name (`d.band` is a string). (1) `◆ name ◆` not wider than the band: one
+ * centred line, as before. (2) Otherwise, when the longest word fits the width
+ * `W - 2 * (wm + gap)`: three columns (mark, `1fr`, mark), the marks at the band's
+ * ends and `horizon`-aligned, so level with the middle of the name block, the
+ * name centred and wrapped between them. (3) Otherwise (a word that cannot fit
+ * beside the marks, or wider than the band): the name alone, centred, no marks.
+ * All its names are local to the closure (SCAR-011).
  */
 export const STATBLOCK_HELPER_DEF = `#let o2t-sb-box(d) = {
   let lk = d.look
@@ -193,7 +205,23 @@ export const STATBLOCK_HELPER_DEF = `#let o2t-sb-box(d) = {
   let rule = line(length: 100%, stroke: lk.rules.width + lk.rules.color)
   let pieces = ()
   let parts = ("band",)
-  pieces.push(align(center, fonted("band", text(size: lk.sizes.band, fill: lk.accent)[◆ #d.band ◆])))
+  pieces.push(layout(size => {
+    let tx(body) = fonted("band", text(size: lk.sizes.band, fill: lk.accent, body))
+    let mark = tx[◆]
+    let gap = measure(tx[a b]).width - measure(tx[ab]).width
+    let wm = measure(mark).width
+    let name = tx(d.band)
+    if measure(tx[◆ #d.band ◆]).width <= size.width {
+      align(center, tx[◆ #d.band ◆])
+    } else {
+      let longest = calc.max(..str(d.band).split(" ").map(w => measure(tx(w)).width))
+      if longest > size.width - 2 * (wm + gap) {
+        align(center, name)
+      } else {
+        grid(columns: (wm, 1fr, wm), column-gutter: gap, align: horizon, mark, align(center, name), mark)
+      }
+    }
+  }))
   let count = 0
   let rows = 0
   if d.boxes != none {
