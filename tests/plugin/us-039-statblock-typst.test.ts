@@ -466,8 +466,25 @@ describe('US-039 AC-3: icons', () => {
 
 const NORMALISED_0_15_0 =
   '(band: "Fen Hare", look: (fill: none, frame: (color: rgb("#000000"), width: 0.75pt), rules: (color: rgb("#000000"), width: 0.4pt), box-fill: rgb("#ffffff"), accent: rgb("#000000"), icon: "#000000", fonts: (:), sizes: (band: 11.5pt, value: 11pt, label: 5.5pt, text: 7pt, attacks: 7.5pt, skills: 9pt), narrow: (spacing: (min: 80%, max: 150%), tracking: (min: -0.01em, max: 0.03em))), boxes: (label: [VIGOUR], value: [11], count: 11), track: (label: [STATE], cells: ((label: "Fine", icon: "ICON"), (label: "Hurt", icon: "ICON"), (label: "Down", icon: "ICON"), (label: "Gone", icon: "ICON"))), attributes: [Might 4 \u00b7 Wits 2 \u00b7 Speed 5], traits: none, attacks: (([Kick], [2d6]), ([*Bite*], [1d6])), skills: [Quick Step, Keen Nose], tags: [Beast])';
-const PRELUDE_SHA_0_15_0 =
-  'ed9c12577d8b5207c603cc2563a0f2f3ec605f1d849aa0ce4368b147ad4e38a9';
+const sha = (text: string): string =>
+  createHash('sha256').update(text).digest('hex');
+/** The prelude without the band's piece: the lines between `let parts = ("band",)` and `let count = 0`. */
+const withoutBand = (prelude: string): string => {
+  const cut = /(let parts = \("band",\)\n)[\s\S]*?(\n {2}let count = 0)/.exec(
+    prelude,
+  );
+  expect(cut, 'the band piece is found').not.toBeNull();
+  return prelude.replace(
+    /(let parts = \("band",\)\n)[\s\S]*?(\n {2}let count = 0)/,
+    '$1<band>$2',
+  );
+};
+/** US-041: the 0.15.0 prelude with its band piece cut out; the whole 0.15.2 prelude. */
+const PRELUDE_WITHOUT_BAND_SHA_0_15_0 =
+  '5a3f3d4e50810131c7d87efe07741b62488a8e982643455019aca4580435dea0';
+const PRELUDE_SHA_0_15_2 =
+  'a4c5969151f67cd74038efabd96fc3986b7b0579c6810c53cca3dc33151a1a69';
+// (US-040 AC-5 pinned the whole 0.15.0 prelude by its hash; US-041 AC-8 changes the band's piece.)
 const ICON_NAMES = ['fine', 'hurt', 'down', 'gone'] as const;
 const pathsOf = (a: Answer) => a.files.map((f) => f.path);
 const text = (b: Uint8Array) => new TextDecoder().decode(b);
@@ -665,9 +682,12 @@ describe('US-040 AC-5, AC-6: nothing else changes; the preset is read at each ca
     expect(a.data.replace(/o2t-icons\/\d+\.svg/g, 'ICON')).toBe(
       NORMALISED_0_15_0,
     );
-    expect(createHash('sha256').update(a.prelude).digest('hex')).toBe(
-      PRELUDE_SHA_0_15_0,
-    );
+    // US-041 AC-8: the helper's text changes in the band's piece only: with that piece
+    // cut out the prelude is the 0.15.0 prelude (its hash), and the whole prelude is
+    // the 0.15.2 text (pinned at G2 from the reference drawing; re-pinned at G4 with
+    // the reason in the ledger if the text is written differently).
+    expect(sha(withoutBand(a.prelude))).toBe(PRELUDE_WITHOUT_BAND_SHA_0_15_0);
+    expect(sha(a.prelude)).toBe(PRELUDE_SHA_0_15_2);
     expect(a.credit).toBeNull();
     expect(a.warnings).toEqual([]);
     expect(Object.keys(a).sort()).toEqual([

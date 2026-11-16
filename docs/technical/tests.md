@@ -704,3 +704,38 @@ with the numbering patched, outside this repo): 56 of 56 pass there.
 | AC-5 | `US-040 AC-5, AC-6` (the real 0.15.0 data with icon numbers normalised, the prelude's SHA-256, `credit`, `warnings`, the keys); the converter and preview tests of US-039 AC-10 unchanged and green |
 | AC-6 | `US-040 AC-5, AC-6` (the track reordered between two calls: paths follow) |
 | AC-7 | release steps (tickets) |
+
+## US-041 — the ◆ marks of the statblock band (G2, 2026-11-16; backlog #170)
+
+Titles start with `US-041 AC-n` in `tests/integration/us-041-band-marks-pdf.test.ts`
+(16 tests) and `tests/plugin/us-041-preview-band.test.ts` (8 tests); one old
+test amended (`tests/plugin/us-039-statblock-typst.test.ts`, the prelude pin).
+The PDF tests compile `api.statblockTypst`'s answer in a block of known width (the
+band's inner width is the block's less 2 x 2 mm; the band's left edge at 6 mm) and
+read the band's glyphs with their positions from the PDF (`pageRuns`: x, baseline,
+advances and kerns), never from the helper's own facts. Numbers: Typst 0.14.2,
+Libertinus Serif 11.5 pt (mark 2.7 mm, gap 1.01 mm; confirmed by the AC-1 tests on
+the unchanged code). Current state: 19 red by design (11 PDF, 7 preview, 1 amended
+pin), every other test passes (2619 unit/plugin/tooling, 681 integration). Proven
+against a throwaway reference (the three files patched in place with a backup and a
+checksum list, restored and checked): all 24 new tests and the amended one pass there
+and the whole suite is green (2627 + 692); a mutation round over the reference: 16
+mutants (mark at the top, columns not 1fr, no gap, no too-narrow rule, the rule against
+the band's width, a stricter inline test, never inline, the name not centred, marks
+without the band font, the longest word by characters, marks swapped, the name with its
+marks as one text, CSS without vertical centring, a name that cannot shrink, marks that
+shrink): 15 caught first time, one survived (a stricter inline test: the name that fits
+by 0.75 mm) and a test was strengthened (the marks one gap from the name).
+
+| AC | Test |
+|---|---|
+| AC-1 | `US-041 AC-1` (Fen Hare: one line, a mark 2.7 mm, a gap 1.01 mm each side, 15.6 mm from each edge; `Pneumonoultramicroscopic`: one line, the marks one gap from the name, 0.37 mm from the band's edge); green on the unchanged code (a guard) |
+| AC-2 | `US-041 AC-2` (two names of two lines with their exact lines; three lines; marks at the band's ends and level with the middle, to 0.1 mm; the lines centred and inside the name's width; the line below moves down by one line) |
+| AC-3 | `US-041 AC-3` (`Pneumonoultramicroscopically`: one line, no mark; a name with that word and others: no mark, wrapped in the band) |
+| AC-4 | `US-041 AC-4` (a word of 67.4 mm: not broken, no mark, centred, wider than the band) |
+| AC-5 | `US-041 AC-5` (11.5 pt, 8 pt, 16 pt, DejaVu Sans Mono: the mark, gap and letter width read from a wide band; one line, wrapped, and a probe word between the two widths) |
+| AC-6 | `us-041-preview-band` (three parts in order, the text `◆ Fen Hare ◆`, one name element, the name as text, the API's `◆ — ◆`; the three CSS rules, each declaration); the look in Obsidian by hand: M30 (ticket) |
+| AC-7 | `US-041 AC-7` (a chapter: the statblock is as high as one with a short name when the marks no longer wrap alone, one band line higher for a wrapped name, the same bytes from two compiles) |
+| AC-8 | `US-040 AC-5, AC-6` amended (the prelude with the band's piece cut out has the 0.15.0 hash; the whole prelude pinned anew); the other US-030, US-035 and US-039 tests unchanged and green |
+| AC-9 | release steps (tickets) |
+

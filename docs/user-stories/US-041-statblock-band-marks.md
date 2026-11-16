@@ -1,6 +1,6 @@
 # US-041 — The ◆ marks of the statblock band sit beside the name
 
-**Status:** Ready 2026-11-16 (G0 and G1 done; D1 to D5 decided by the author 2026-11-16); tests not written yet (G2)
+**Status:** Ready 2026-11-16 (G0 and G1 done; D1 to D5 decided by the author 2026-11-16); tests written (G2, 2026-11-16: 19 red by design); tickets not yet written (G3)
 **Introduced:** 0.15.2
 **Implemented:** —
 **Amends:** US-030 AC-10 item 1 (the title band), US-035 AC-1 (the band in the preview)
@@ -82,8 +82,10 @@ colour; a *gap* is the width of one space of that font and size. W<sub>name</sub
   `Giant Swamp Chieftain of the Reeds` is two lines `Giant Swamp Chieftain of` /
   `the Reeds` (the breaks are those of the name alone in 46.33 mm); a name of
   three lines has the marks level with the middle of the second line.
-- **AC-3 (a word that cannot fit beside the marks: no marks).** When the longest
-  word of the name is wider than W<sub>name</sub>, **no mark is drawn**, on either
+- **AC-3 (a word that cannot fit beside the marks: no marks).** A *word* is a run
+  of characters between spaces (a hyphenated word is one word, though Typst could
+  break it at the hyphen). When the longest word of the name is wider than
+  W<sub>name</sub>, **no mark is drawn**, on either
   side: the name is set alone, centred, wrapped in W, and the band is as high as the
   name's lines. Example: `Pneumonoultramicroscopically` (51.7 mm: fits W, not
   W<sub>name</sub>): one line, no marks (today: three lines).
@@ -102,7 +104,9 @@ colour; a *gap* is the width of one space of that font and size. W<sub>name</sub
   middle of the name block, the name centred and wrapping in the width between them;
   a name on one line looks as before. The band's text content stays `◆ name ◆`
   (the marks are text; the name is the name), so `◆ — ◆` for a statblock without a
-  name. **Limit, by decision D3:** CSS cannot measure whether a word fits, so in
+  name. The gap between a mark and the name is **0.25 em** (CSS has no "the width
+  of a space": 0.25 em is the space of the default band font; in another band font
+  it differs a little from the PDF's gap). **Limit, by decision D3:** CSS cannot measure whether a word fits, so in
   the case of AC-3 the preview does not remove the marks: they wrap with the name,
   as today. The same drawing is the website's. Measured by hand in Obsidian
   (SCAR-045, manual check M30), not only in the fake DOM.
@@ -118,7 +122,9 @@ colour; a *gap* is the width of one space of that font and size. W<sub>name</sub
   statblock data, `<o2t-statblock>`'s `band` field, the shape of `api.statblockTypst`'s
   answer, `api.version === 1`, the other parts of the statblock, the encounter sheet
   and the book outside the band are byte-identical to 0.15.1 for the same input,
-  except the Typst text of the helper (it is part of the answer's prelude) and,
+  except the Typst text of the helper (it is part of the answer's prelude: the
+  prelude with the band's piece cut out is byte-identical to 0.15.0's, the test that
+  pinned the whole prelude by its hash is amended to say so) and,
   where a name wraps, what AC-2, AC-3 and AC-7 say.
 - **AC-9 (release 0.15.2).** Version 0.15.2 in `package.json`, `manifest.json`,
   `versions.json`; notes `releases/v0.15.2.md`, a line in `RELEASES.md`; the
