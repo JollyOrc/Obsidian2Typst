@@ -1,6 +1,6 @@
 # US-041 — The ◆ marks of the statblock band sit beside the name
 
-**Status:** Ready 2026-11-16 (G0 and G1 done; D1 to D5 decided by the author 2026-11-16); tests written (G2, 2026-11-16: 19 red by design); tickets not yet written (G3)
+**Status:** Ready 2026-11-16 (G0 and G1 done; D1 to D5 decided by the author 2026-11-16); tests written (G2, 2026-11-16: 19 red by design); tickets #171 (Typst), #172 (preview), #173 (documents, M30, release) written (G3)
 **Introduced:** 0.15.2
 **Implemented:** —
 **Amends:** US-030 AC-10 item 1 (the title band), US-035 AC-1 (the band in the preview)
