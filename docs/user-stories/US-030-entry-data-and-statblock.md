@@ -233,7 +233,10 @@ They gather at dusk.
   1. **title band:** the heading's plain text (US-017 AC-2's `visibleText`),
      between ◆ ornaments, centred, in the band font. Never a heading number
      (G0-C12): with numbered headings `### 3.2 Fen Hare` prints the band
-     `◆ Fen Hare ◆`.
+     `◆ Fen Hare ◆`. **Amended 2026-11-16 (US-041, #170):** when the name does
+     not fit on one line with its marks, the marks stand at the left and right
+     ends of the band, level with the middle of the name, which wraps between
+     them; a word that cannot fit beside the marks removes both marks.
   2. **box row** (AC-12) and **state track** (AC-13);
   3. **attributes line:** each stat of `entries.statblock.stats` that is set,
      as `<label> <value>`, joined with ` · `, centred (`Might 4 · Wits 2 ·

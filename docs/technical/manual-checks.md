@@ -41,3 +41,4 @@ steps and how it is recorded. A new check gets the next number, a file
 | [M27](manual-checks/M27.md) | Detail rows: the row under a heading, in the PDF and in Obsidian | US-038 AC-1, AC-3, AC-4, AC-6 to AC-10, AC-12, AC-14, AC-15 (#152) |
 | [M28](manual-checks/M28.md) | Text beside a statblock: the paragraph continues below without a gap | US-030 AC-16c (#160, #164) |
 | [M29](manual-checks/M29.md) | The statblock as Typst for another plugin: icons and fonts in a real compile | US-039 AC-3, AC-7, AC-8 (#165 to #167) |
+| [M30](manual-checks/M30.md) | The ◆ marks of the statblock band (US-041): one line unchanged, a wrapped name with the marks level with its middle, a word too wide in the PDF and in the preview, the narrow pane | the test build `0.15.2-m30.1` of #171 and #172 installed in the scratch vault (passed 2026-11-16, build `0.15.2-m30.1`; part B not run) |

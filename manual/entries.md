@@ -90,7 +90,10 @@ colorMode: color
 
 From top to bottom the statblock shows:
 
-1. the **band** with the entry's heading, `◆ Fen Hare ◆`;
+1. the **band** with the entry's heading, `◆ Fen Hare ◆`; a name too long for
+   one line wraps between the two ◆ marks, which stand at the left and right
+   ends of the band, level with the middle of the name (a word too wide to fit
+   beside the marks drops them in the PDF);
 2. the **box row**: the `boxes` key's value as tick boxes, 15 to a row in
    groups of five (at most 45);
 3. the **state track**: one cell per `track` item with its SVG icon,

@@ -52,7 +52,9 @@ Examples use US-030's preset and `Fen Hare` block, with that preset active
   AC-1). The band shows the nearest heading above the block
   in the note (as US-030 AC-1), or the note's file name without `.md` when
   there is none (decision 3: a single note `Fen Hare.md` with the block at
-  its top shows `◆ Fen Hare ◆`). Example: the
+  its top shows `◆ Fen Hare ◆`; **amended 2026-11-16, US-041 AC-6:** the
+  band is the left mark, the name and the right mark in a row, the marks level
+  with the middle of a wrapped name). Example: the
   `Fen Hare` block shows `◆ Fen Hare ◆`, 11 boxes in one row, four cells
   `Fine Hurt Down Gone` (as icons with these labels as `aria-label`),
   `Might 4 · Wits 2 · Speed 5`, two attacks, `Skills: Quick Step, Keen Nose`,
