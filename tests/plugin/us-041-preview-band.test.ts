@@ -105,7 +105,10 @@ describe('US-041 AC-6 the preview draws the band as three parts', () => {
 
 /** The declarations of the rule whose selector is exactly `selector`. */
 function declarations(css: string, selector: string): Map<string, string> {
-  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+  // comments are no part of a selector or a declaration
+  const rules = [
+    ...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g),
+  ];
   const own = rules.filter((r) =>
     (r[1] as string)
       .split(',')

@@ -201,6 +201,7 @@ export function iconCache<T = string>(
 /**
  * US-035 | AC-1 to AC-3, AC-6, AC-11: draws the statblock of `model` into
  * `el`; returns the boxes and cells in their drawn order. No listeners.
+ * US-041 | AC-6: the band is the left mark, the name and the right mark.
  */
 async function draw(
   el: DrawEl,
@@ -210,9 +211,14 @@ async function draw(
 ): Promise<{boxes: DrawEl[]; cells: DrawEl[]}> {
   const root = el.createDiv({cls: 'o2t-sb'});
   root.setCssProps(lookProps(look));
-  root.createDiv({cls: 'o2t-sb-band'}).createEl('span', {
-    text: `◆ ${model.band} ◆`,
-  });
+  // US-041 AC-6: the band is a row of three parts: the left mark, the name, the
+  // right mark. The name is text (never markup) and wraps between the marks; the
+  // stylesheet centres the marks level with the name block. The reading order is
+  // still `◆ name ◆`.
+  const band = root.createDiv({cls: 'o2t-sb-band'});
+  band.createEl('span', {cls: 'o2t-sb-mark', text: '◆'});
+  band.createEl('span', {cls: 'o2t-sb-name', text: model.band});
+  band.createEl('span', {cls: 'o2t-sb-mark', text: '◆'});
   const boxes: DrawEl[] = [];
   if (model.parts.includes('boxes')) {
     const row = root.createDiv({cls: 'o2t-sb-boxrow'});

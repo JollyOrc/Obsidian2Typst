@@ -99,11 +99,29 @@
     var(--o2t-sb-rule, currentColor);
 }
 
+/* US-041 AC-6: a centred row of the left mark, the name and the right mark; the
+   marks are level with the middle of the name block and the name wraps between
+   them. The gap is 0.25 em (CSS has no "the width of a space"). When a word is
+   too wide the marks wrap with the name: CSS cannot measure it (decision D3). */
 .o2t-sb-band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.25em;
   text-align: center;
   color: var(--o2t-sb-accent);
   font-family: var(--o2t-sb-font-band, inherit);
   font-size: var(--o2t-sb-size-band, 1.1em);
+}
+
+.o2t-sb-name {
+  text-align: center;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.o2t-sb-mark {
+  flex: none;
 }
 
 /* US-035 AC-12: minmax(0, 1fr) columns and no margins, so the box row

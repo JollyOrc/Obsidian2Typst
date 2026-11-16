@@ -740,3 +740,6 @@ by 0.75 mm) and a test was strengthened (the marks one gap from the name).
 | AC-9 | release steps (tickets) |
 
 **Ticket #171 (2026-11-16), green:** the 16 tests of `us-041-band-marks-pdf` and the amended prelude pin (52 in `us-039-statblock-typst`); mutation round on the real code: 12 of 12 caught; the whole suite after it: `npm test` 2620 passed / 7 red (#172's preview tests), integration 692 passed.
+
+
+**Ticket #172 (2026-11-16), green:** the 8 tests of `us-041-preview-band` (one G2 test helper fixed: it did not strip CSS comments); `us-035-preview` and `us-035-preview-cases` unchanged and green; mutation round: 12 of 12 caught; the whole suite: `npm test` 2627 passed, integration 692 passed.
