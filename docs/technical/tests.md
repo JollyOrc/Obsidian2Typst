@@ -813,3 +813,13 @@ with the dialog's texts (T6 moves the rest in), so the string check's "the table
 round on the real code (three files, backup by path, checksums proven): 21 mutants, 19 caught first, one gap closed
 by the test above and then caught, one equivalent (Enter on a refused folder: `run()` refuses it too). The whole
 suite after it: `npm test` 101 red (T3 to T6), integration 4 red (T3 and later).
+
+**Ticket #177 (T3, 2026-11-17), green:** `us-042-direct-export` (24, two of them added at T3: an empty remembered
+folder opens the dialog; the `Export…` action asks also with a remembered folder, `Export current note` does not),
+the dialog and command checks of `us-042-wiring`, the amended `us-008-export-command`, `us-010-fonts-plugin`,
+`us-012-request`, `us-020-actions-menus`, `us-021-groups-details` (the ribbon), `us-037-export-spreads`, the rigs,
+and `tests/integration/us-007-composed-export`. Mutation round on the real code (five files, backup by path,
+checksums proven): 18 valid mutants (one more was invalid — it called a function that does not exist — and is not
+counted), 16 caught first, two gaps closed by the tests above and then caught. The whole suite after it: `npm test`
+26 red (T4: the drawing and the tab's wiring; T5: the settings tab and its wiring; T6: the text checks and the
+string table), integration 1 red (`build-output`: the tests of T4 and T5 import modules not written yet).

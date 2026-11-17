@@ -168,6 +168,14 @@ describe('US-042 AC-1: a direct export goes at once into the remembered folder',
     );
   });
 
+  // Added at T3 (#177; SCAR-023): an empty remembered folder is no folder.
+  it('an empty remembered folder: the dialog opens', async () => {
+    const r = await rig({folders: {'A5 print': ''}});
+    await exportNoteAt(r.deps, NOTE);
+    expect(r.asked).toEqual([{noteName: 'Rules', preset: 'A5 print'}]);
+    expect(r.requests[0]?.exportDir).toBe('/chosen');
+  });
+
   it('the dialog closed without Export: nothing saved, nothing run, no notice', async () => {
     const r = await rig({answer: null});
     expect(await exportNoteAt(r.deps, NOTE)).toEqual({status: 'cancelled'});
@@ -341,6 +349,18 @@ describe('US-042 AC-2: the entries', () => {
     calls.length = 0;
     await entries[0]?.run?.();
     expect(calls).toEqual([`export ${NOTE}`]);
+  });
+
+  // Added at T3 (#177; SCAR-023): the action itself asks, also with a
+  // remembered folder (not only through an error path).
+  it('the action Export… opens the dialog with a remembered folder; Export current note does not', async () => {
+    const {createActions} = await import('../../src/plugin/actions');
+    const r = await rig({folders: {'A5 print': '/out/a5'}});
+    const made = createActions(r.deps as never);
+    await made.exportNote(NOTE);
+    expect(r.asked).toEqual([]);
+    await made.exportWithDialog(NOTE);
+    expect(r.asked).toEqual([{noteName: 'Rules', preset: 'A5 print'}]);
   });
 
   it('the command Export… is registered and calls the action', () => {

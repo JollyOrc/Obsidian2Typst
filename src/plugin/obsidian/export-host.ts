@@ -8,7 +8,7 @@ import type {RunExportHost} from '../run-export';
 
 export function createExportHost(app: App, disk: DiskWriter): RunExportHost {
   return {
-    notice: (text) => void new Notice(text),
+    notice: (text) => void new Notice(text, 5000),
     writeExportFile: (path, text) => disk.writeText(path, text),
     writeExportBytes: (path, data) => disk.writeBytes(path, data),
     async writeVaultFile(path, text) {

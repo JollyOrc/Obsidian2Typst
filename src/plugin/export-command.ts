@@ -9,6 +9,9 @@ import type {PresetStore} from './presets/store';
 import type {ExportResult, FallbackNote} from './run-export';
 import type {PluginData} from './settings/data';
 import type {ExportSource, WarningSettings} from './warning-flow';
+import {endOf, type ExportProgress} from '../core/export-progress';
+import {saveExportChoices} from './export-dialog/rules';
+import {STRINGS} from './strings';
 
 /** What the export run is given (US-007 `RunExportOptions` without the host). */
 export interface ExportRequest {
@@ -38,6 +41,8 @@ export interface ExportRequest {
   sheetTyp?: string | null;
   /** US-037 AC-4: the effective `page.facingPages` of the preset. */
   facingPages?: boolean;
+  /** US-042 AC-7: the export's progress, started by the command. */
+  progress?: ExportProgress;
 }
 
 /** How the command ended when no export was run. */
@@ -65,9 +70,15 @@ export interface ExportCommandDeps {
   settings: {
     readonly data: PluginData;
     setLastExportFolder(preset: string, folder: string): Promise<void>;
+    update(patch: {activePreset: string}): Promise<void>;
   };
-  /** Asks for the export folder; null when cancelled. */
-  chooseFolder(initial: string | null): Promise<string | null>;
+  /** US-042 AC-3: the export dialog; null when closed without Export. */
+  exportDialog(request: {
+    noteName: string;
+    preset: string;
+  }): Promise<{preset: string; folder: string} | null>;
+  /** US-042 AC-7: starts the progress of an export (optional). */
+  startProgress?(noteName: string): ExportProgress;
   run(request: ExportRequest): Promise<ExportResult>;
   notice(text: string): void;
 }
@@ -82,44 +93,114 @@ export function exportCurrentNote(
   return exportNoteAt(deps, deps.notes.activePath());
 }
 
+/** US-042 AC-11: a refusal reads as a sentence (a full stop at its end). */
+const sentence = (text: string): string =>
+  /[.!?]$/.test(text) ? text : `${text}.`;
+
 /**
- * US-008 AC-15 | US-020 AC-2: The export of the note at `path` (null: no note).
- *
- * Takes the active preset, asks for the folder (remembered per preset),
- * converts that note and hands the result to the export run. Refuses, with a
- * notice, when there is no note, when the note is a preset, when there is no
- * preset, or when the active preset is invalid. The note need not be the
- * active one (a context menu passes the clicked note).
+ * US-008 AC-15 | US-020 AC-2 | US-042 AC-1: The export of the note at `path`
+ * (null: no note): at once into the active preset's remembered folder, through
+ * the dialog when it has none.
  */
-export async function exportNoteAt(
+export function exportNoteAt(
   deps: ExportCommandDeps,
   path: string | null,
 ): Promise<{status: CommandStatus} | ExportResult> {
+  return exportWith(deps, path, false);
+}
+
+/** US-042 | AC-2: The export of the note at `path`, always through the dialog. */
+export function exportNoteWithDialog(
+  deps: ExportCommandDeps,
+  path: string | null,
+): Promise<{status: CommandStatus} | ExportResult> {
+  return exportWith(deps, path, true);
+}
+
+/**
+ * US-008 AC-15 | US-042 AC-1, AC-2, AC-6, AC-7: Takes the active preset, the
+ * folder (remembered, or from the dialog, whose choice is saved before the
+ * conversion: P1), converts the note and hands it to the run with a progress
+ * that the command ends with the run's end. Refuses, with a notice ending in a
+ * full stop, when there is no note, the note is a preset, there is no preset or
+ * the active preset is invalid. A dialog closed without Export ends quietly.
+ */
+async function exportWith(
+  deps: ExportCommandDeps,
+  path: string | null,
+  ask: boolean,
+): Promise<{status: CommandStatus} | ExportResult> {
   const {notice} = deps;
   if (path === null) {
-    notice('Open a note to export it');
+    notice(STRINGS.notices.openNote);
     return {status: 'no-note'};
   }
-  const data = deps.settings.data;
-  const selected = selectPreset(deps, path);
+  let selected = selectPreset(deps, path);
   if (!selected.ok) {
-    notice(selected.message);
+    notice(sentence(selected.message));
     return {status: selected.status};
   }
-  const {active} = selected;
-
-  const folder = await deps.chooseFolder(
-    data.lastExportFolders[active] ?? null,
-  );
-  if (folder === null) return {status: 'cancelled'};
-  await deps.settings.setLastExportFolder(active, folder);
-
-  const prepared = await convertNote(deps, path, active, selected.preset);
-  if (!prepared.ok) {
-    notice(prepared.message);
-    return {status: prepared.status};
+  const noteName = noteNameOf(path);
+  const remembered = deps.settings.data.lastExportFolders[selected.active];
+  let folder: string;
+  if (!ask && remembered !== undefined && remembered !== '') {
+    folder = remembered;
+  } else {
+    const choice = await deps.exportDialog({
+      noteName,
+      preset: selected.active,
+    });
+    if (choice === null) return {status: 'cancelled'};
+    await saveExportChoices(deps.settings, choice);
+    folder = choice.folder;
+    selected = selectPreset(deps, path);
+    if (!selected.ok) {
+      notice(sentence(selected.message));
+      return {status: selected.status};
+    }
   }
+  const {active} = selected;
+  const progress = deps.startProgress?.(noteName);
+  progress?.step({kind: 'convert'});
+  let ended = false;
+  try {
+    const prepared = await convertNote(deps, path, active, selected.preset);
+    if (!prepared.ok) {
+      notice(sentence(prepared.message));
+      return {status: prepared.status};
+    }
+    const result = await runPrepared(deps, {
+      path,
+      selected,
+      prepared,
+      folder,
+      progress,
+    });
+    progress?.end(endOf(result.status));
+    ended = true;
+    return result;
+  } finally {
+    if (!ended) progress?.end('failed');
+  }
+}
 
+/**
+ * US-007 AC-1 | US-042 AC-7: Hands a converted note to the run, with the
+ * folder, the settings of now and the progress (when there is one).
+ */
+function runPrepared(
+  deps: ExportCommandDeps,
+  job: {
+    path: string;
+    selected: Extract<ReturnType<typeof selectPreset>, {ok: true}>;
+    prepared: Extract<Awaited<ReturnType<typeof convertNote>>, {ok: true}>;
+    folder: string;
+    progress: ExportProgress | undefined;
+  },
+): Promise<ExportResult> {
+  const {path, selected, prepared, folder, progress} = job;
+  const {active} = selected;
+  const data = deps.settings.data;
   return deps.run({
     noteName: noteNameOf(path),
     source: {path, inVault: true},
@@ -145,6 +226,8 @@ export async function exportNoteAt(
     sheetTyp: prepared.sheetTyp,
     // US-037 AC-4: facing pages decide whether the PDF opens as spreads.
     facingPages: prepared.facingPages,
+    // US-042 AC-7: the progress goes with the run.
+    ...(progress === undefined ? {} : {progress}),
     // US-028 AC-16: the text read above, converted again without image fit.
     fallback: async () => {
       const at100 = await convertNote(deps, path, active, selected.preset, {

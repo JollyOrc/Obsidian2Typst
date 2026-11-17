@@ -11,4 +11,7 @@ export const STRINGS = {
     export: 'Export',
     moreOptions: 'More options',
   },
+  notices: {
+    openNote: 'Open a note to export it.',
+  },
 } as const;

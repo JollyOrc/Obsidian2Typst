@@ -5,7 +5,12 @@
 // from Obsidian is injected, so they run without Obsidian.
 import {extensionOf, sniffImage} from '../core/assets';
 import {editPresetField, pickActive, type PresetChange} from '../core/presets';
-import {exportNoteAt, type ExportCommandDeps} from './export-command';
+import {
+  exportNoteAt,
+  exportNoteWithDialog,
+  type ExportCommandDeps,
+} from './export-command';
+import {failedNotice} from '../core/report';
 import type {VaultPort} from './presets/store';
 import {openStylePanel, type PanelWorkspace} from './preview/open';
 import type {DeleteConfirmation} from './settings/dialog';
@@ -38,6 +43,8 @@ export interface PresetChangeRequest {
 export interface Actions {
   /** Exports the note at `path`; without a path, the active note. */
   exportNote(path?: string): Promise<unknown>;
+  /** US-042 AC-2: the same through the export dialog. */
+  exportWithDialog(path?: string): Promise<unknown>;
   /** Shows the note at `path` (it becomes active), then the panel. */
   previewNote(path?: string): Promise<void>;
   /** Makes `name` the active preset, read from the store at the call. */
@@ -88,7 +95,9 @@ export function panelOpener(workspace: PanelWorkspace): () => Promise<boolean> {
  * US-020 | AC-1, AC-2, AC-4, AC-5, AC-8: Builds the actions over `deps`.
  *
  * `exportNote` hands the path (or the active note's) to `exportNoteAt`, with
- * its checks and messages; an error becomes the notice `Export failed: …`.
+ * its checks and messages; US-042 AC-2: `exportWithDialog` hands it to
+ * `exportNoteWithDialog` (always the dialog); an error of either becomes the
+ * notice `❌ Export failed: …` (AC-11).
  * `previewNote` shows the note first, so the panel, which follows the active
  * note (US-012 AC-4), shows it; without room for the panel it gives today's
  * notice. `usePreset` asks the preset store when it is
@@ -111,7 +120,19 @@ export function createActions(deps: ActionDeps): Actions {
         return await exportNoteAt(deps, path ?? deps.notes.activePath());
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        deps.notice(`Export failed: ${message}`);
+        deps.notice(failedNotice(message));
+        return undefined;
+      }
+    },
+    async exportWithDialog(path) {
+      try {
+        return await exportNoteWithDialog(
+          deps,
+          path ?? deps.notes.activePath(),
+        );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        deps.notice(failedNotice(message));
         return undefined;
       }
     },

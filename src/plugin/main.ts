@@ -61,6 +61,9 @@ import {
 import {createFontSet} from './fonts';
 import {createExportHost} from './obsidian/export-host';
 import {chooseExportFolder} from './obsidian/folder-dialog';
+import {stat} from 'node:fs/promises';
+import {isAbsolute, join} from 'node:path';
+import {ExportDialog} from './export-dialog/dialog';
 import {
   createFontVault,
   createNoteSource,
@@ -242,8 +245,28 @@ export default class Obsidian2TypstPlugin extends Plugin {
     presets: this.presets,
     fonts: this.fontSet,
     settings: this.pluginSettings,
-    chooseFolder: chooseExportFolder,
-    notice: (text) => void new Notice(text),
+    // US-042 AC-3: the export dialog (AC-1: only when the active preset has
+    // no remembered folder, or from Export…).
+    exportDialog: (request) =>
+      new ExportDialog(this.app, {
+        noteName: request.noteName,
+        presets: this.presets.entries(),
+        activePreset: request.preset,
+        lastExportFolders: this.pluginSettings.data.lastExportFolders,
+        pathApi: {isAbsolute},
+        join,
+        modifiedAt: async (path) => {
+          try {
+            return (await stat(path)).mtime;
+          } catch {
+            return null;
+          }
+        },
+        chooseFolder: chooseExportFolder,
+        openSettings: () => this.openOwnSettings(),
+      }).choose(),
+    // US-042 AC-11: notices last 5 s.
+    notice: (text) => void new Notice(text, 5000),
     run: (request) => this.runExportRequest(request),
     showNote: (path) => this.showNote(path),
     openPanel: panelOpener({
@@ -323,6 +346,12 @@ export default class Obsidian2TypstPlugin extends Plugin {
       id: 'export-current-note',
       name: 'Export current note',
       callback: () => void this.actions.exportNote(),
+    });
+    // US-042 AC-2: the export dialog from the palette.
+    this.addCommand({
+      id: 'export-dialog',
+      name: 'Export…',
+      callback: () => void this.actions.exportWithDialog(),
     });
     this.addCommand({
       id: 'check-compiler',
@@ -484,6 +513,21 @@ export default class Obsidian2TypstPlugin extends Plugin {
         if (run !== undefined) item.onClick(() => void run());
       });
     }
+  }
+
+  /**
+   * US-042 | AC-3: the dialog's gear opens this plugin's settings tab
+   * (`app.setting`, private: reached through a structural type; measured for
+   * Game Card Creator in its M11 on the same Obsidian, checked here in T7).
+   */
+  private openOwnSettings(): void {
+    const setting = (
+      this.app as unknown as {
+        setting?: {open(): void; openTabById(id: string): void};
+      }
+    ).setting;
+    setting?.open();
+    setting?.openTabById(this.manifest.id);
   }
 
   /** One export at a time (US-007 AC-3). */

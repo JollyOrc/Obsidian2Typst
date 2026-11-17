@@ -73,6 +73,12 @@ export function ribbonMenuEntries(
   presets: PresetsView,
 ): MenuEntry[] {
   const entries: MenuEntry[] = [
+    // US-042 AC-2 (D6): the dialog first.
+    {
+      title: 'Export…',
+      icon: 'file-output',
+      run: () => actions.exportWithDialog(),
+    },
     {
       title: 'Export current note',
       icon: 'file-output',
