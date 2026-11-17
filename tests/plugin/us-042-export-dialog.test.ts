@@ -36,8 +36,10 @@ async function rig(
   options: {
     active?: string;
     folders?: Record<string, string>;
+    presets?: {name: string; valid: boolean; group: string | null}[];
     existing?: string[];
     picked?: string | null;
+    modifiedAt?: (path: string) => Promise<Date | null>;
   } = {},
 ) {
   resetFake();
@@ -47,7 +49,7 @@ async function rig(
   const {ExportDialog} = await import('../../src/plugin/export-dialog/dialog');
   const dialog = new ExportDialog({} as never, {
     noteName: 'Book',
-    presets: [
+    presets: options.presets ?? [
       {name: 'A5 print', valid: true, group: null},
       {name: 'Broken', valid: false, group: null},
       {name: 'Proof', valid: true, group: null},
@@ -57,6 +59,7 @@ async function rig(
     pathApi: posix,
     join: (folder: string, name: string) => posix.join(folder, name),
     modifiedAt: async (path: string) => {
+      if (options.modifiedAt !== undefined) return options.modifiedAt(path);
       statted.push(path);
       return (options.existing ?? []).includes(path) ? MODIFIED : null;
     },
@@ -139,6 +142,27 @@ describe('US-042 AC-3: the rows of the dialog', () => {
     expect(dropdown.value).toBe('Proof');
   });
 
+  // Added at T2 (#176): grouped presets are drawn as the ribbon menu groups
+  // them, through the plugin's one preset dropdown (SCAR-017).
+  it('grouped presets: one optgroup per group, in order; the invalid one left out', async () => {
+    const {rows} = await rig({
+      active: 'Proof',
+      presets: [
+        {name: 'A5 print', valid: true, group: 'Print'},
+        {name: 'Proof', valid: true, group: 'Screen'},
+        {name: 'Broken', valid: false, group: 'Print'},
+        {name: 'Loose', valid: true, group: null},
+      ],
+    });
+    const dropdown = rows[0]?.controls[0] as FakeControl;
+    expect(dropdown.selectEl.groups).toEqual([
+      {label: 'Print', values: ['A5 print']},
+      {label: 'Screen', values: ['Proof']},
+      {label: 'Other', values: ['Loose']},
+    ]);
+    expect(dropdown.value).toBe('Proof');
+  });
+
   it('the destination row: the folder field, Choose folder…, then Export', async () => {
     const {rows} = await rig();
     expect(field(rows).value).toBe('/out/a5');
@@ -193,6 +217,27 @@ describe('US-042 AC-4, AC-5: the red and the grey line, live (SCAR-016)', () => 
       'Book.pdf exists (from 2026-11-17 14:02) and will be replaced.',
     );
     expect(button(rows, 'Export').disabled).toBe(false);
+  });
+
+  // Added at T2 (#176; SCAR-016, SCAR-023): the grey line follows the last
+  // change, even when an older folder's lookup answers after a newer one's.
+  it('a slow answer for an older folder does not overwrite the line of the newer one', async () => {
+    const pending = new Map<string, (d: Date | null) => void>();
+    const {dialog, rows} = await rig({
+      modifiedAt: (path) =>
+        path === '/out/a5/Book.pdf'
+          ? Promise.resolve(null)
+          : new Promise((resolve) => pending.set(path, resolve)),
+    });
+    await type(field(rows), '/slow');
+    await type(field(rows), '/fast');
+    pending.get('/fast/Book.pdf')?.(null);
+    await flush();
+    pending.get('/slow/Book.pdf')?.(MODIFIED);
+    await flush();
+    expect(byClass(dialog.contentEl, 'o2t-export-info').text).toBe(
+      'Book.pdf will be written.',
+    );
   });
 
   it('no remembered folder: the empty field is refused at once', async () => {

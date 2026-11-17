@@ -805,3 +805,11 @@ drawing tests red): 20 mutants, 15 caught first, three gaps closed by the tests 
 (a timer not cleared at the end: the end's own guard; the check before each compile: the check before writing). The
 whole suite after it: `npm test` 121 red (T2 to T6), integration 4 red (`build-output`, `us-007-composed-export`:
 T3 and later).
+
+**Ticket #176 (T2, 2026-11-17), green:** `us-042-export-dialog-rules` and `us-042-export-dialog` (21, two of them
+added at T2: grouped presets drawn as `optgroup`s through the plugin's one preset dropdown `addPresetDropdown`; a
+slow answer for an older folder does not overwrite the grey line of the newer one). `src/plugin/strings.ts` started
+with the dialog's texts (T6 moves the rest in), so the string check's "the table exists" is green early. Mutation
+round on the real code (three files, backup by path, checksums proven): 21 mutants, 19 caught first, one gap closed
+by the test above and then caught, one equivalent (Enter on a refused folder: `run()` refuses it too). The whole
+suite after it: `npm test` 101 red (T3 to T6), integration 4 red (T3 and later).

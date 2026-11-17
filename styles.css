@@ -272,3 +272,14 @@
 .o2t-dt a {
   color: inherit;
 }
+
+/* US-042 AC-4, AC-5: the export dialog's red and grey lines. */
+.o2t-export-error {
+  color: var(--color-red);
+  font-size: var(--font-ui-smaller);
+}
+
+.o2t-export-info {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
