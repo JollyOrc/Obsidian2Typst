@@ -57,6 +57,7 @@ async function rig() {
         return data;
       },
       setLastExportFolder: async () => undefined,
+      update: async () => undefined,
     },
   };
   return {vault, presets, deps};

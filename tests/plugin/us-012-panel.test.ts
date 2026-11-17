@@ -97,7 +97,8 @@ describe('US-012 AC-1 the command and the single panel', () => {
       'PANEL_LAYOUT',
       'coverRows',
       'rangeField',
-      'Refresh',
+      // US-042 AC-14 (amended): the button's text is in the string table.
+      'STRINGS.panel.refresh',
       'statusLine',
       'previewArea',
     ].map((name) => panel.indexOf(name));

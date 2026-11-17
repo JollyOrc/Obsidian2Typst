@@ -34,6 +34,7 @@ describe('US-038 AC-12 strict mode', () => {
     const host = fakeHost();
     let written = 0;
     const result = await finishExport({
+      pdfName: 'Note.pdf',
       warnings,
       source,
       exportDir: '/out',
@@ -45,7 +46,7 @@ describe('US-038 AC-12 strict mode', () => {
     expect(written).toBe(0);
     expect(host.files.size).toBe(0);
     expect(host.notices[0]).toMatch(
-      /^Export aborted: 2 warnings \(strict mode\)/,
+      /^❌ Export aborted: 2 warnings \(strict mode\)/,
     );
   });
 
@@ -53,6 +54,7 @@ describe('US-038 AC-12 strict mode', () => {
     const {warnings} = await runDetails(SOURCE);
     const host = fakeHost();
     const result = await finishExport({
+      pdfName: 'Note.pdf',
       warnings,
       source,
       exportDir: '/out',

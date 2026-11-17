@@ -114,10 +114,16 @@ async function rig(
             r.saved.push([preset, folder]);
             data.lastExportFolders[preset] = folder;
           },
+          update: async (patch) => {
+            data.activePreset = patch.activePreset;
+          },
         },
-        chooseFolder: async (initial) => {
-          r.chosen.push(initial);
-          return r.folderAnswer.value;
+        // US-042 AC-1 (amended): the dialog opens only when the active preset
+        // has no remembered folder; `chosen` records the folder it would show.
+        exportDialog: async (request) => {
+          r.chosen.push(data.lastExportFolders[request.preset] ?? null);
+          const folder = r.folderAnswer.value;
+          return folder === null ? null : {preset: request.preset, folder};
         },
         run: async (request) => {
           r.requests.push(request);
@@ -147,7 +153,7 @@ describe('US-008 AC-15 what the command refuses', () => {
     const r = await rig();
     r.openNote.path = null;
     expect(await r.command()).toEqual({status: 'no-note'});
-    expect(r.notices).toEqual(['Open a note to export it']);
+    expect(r.notices).toEqual(['Open a note to export it.']);
     expect(r.chosen).toEqual([]);
     expect(r.requests).toEqual([]);
   });
@@ -159,8 +165,8 @@ describe('US-008 AC-15 what the command refuses', () => {
       expect(await r.command()).toEqual({status: 'presets-note'});
     }
     expect(r.notices).toEqual([
-      'Presets are not exported',
-      'Presets are not exported',
+      'Presets are not exported.',
+      'Presets are not exported.',
     ]);
     expect(r.requests).toEqual([]);
 
@@ -176,7 +182,7 @@ describe('US-008 AC-15 what the command refuses', () => {
     });
     expect(await r.command()).toEqual({status: 'invalid-preset'});
     expect(r.notices).toEqual([
-      'Preset "A5 print" is invalid: Tabs are not allowed as indentation (line 4)',
+      'Preset "A5 print" is invalid: Tabs are not allowed as indentation (line 4).',
     ]);
     expect(r.data.activePreset).toBe('A5 print');
     expect(r.chosen).toEqual([]);
@@ -187,28 +193,28 @@ describe('US-008 AC-15 what the command refuses', () => {
     const r = await rig({});
     expect(await r.command()).toEqual({status: 'no-preset'});
     expect(r.notices).toEqual([
-      'There is no preset; create one in the settings of Obsidian2Typst',
+      'There is no preset; create one in the settings of Obsidian2Typst.',
     ]);
   });
 });
 
 describe('US-008 AC-15 folder, remembered per preset', () => {
-  it('US-007 AC-1: the command Obsidian2Typst: Export current note asks for a folder and remembers it per preset', async () => {
+  it('US-007 AC-1, US-042 AC-1 (amended): a remembered folder is used at once; a preset without one asks, and its folder is remembered', async () => {
     const r = await rig();
     r.data.lastExportFolders = {'A5 print': '/old'};
     r.folderAnswer.value = '/new';
     const result = await r.command();
     expect(result).toEqual({status: 'exported'});
-    expect(r.chosen).toEqual(['/old']);
-    expect(r.saved).toEqual([['A5 print', '/new']]);
-    expect(first(r).exportDir).toBe('/new');
+    expect(r.chosen).toEqual([]);
+    expect(r.saved).toEqual([]);
+    expect(first(r).exportDir).toBe('/old');
 
     r.data.activePreset = 'A4 digital';
     r.folderAnswer.value = '/digital';
     await r.command();
-    expect(r.chosen).toEqual(['/old', null]);
+    expect(r.chosen).toEqual([null]);
     expect(r.data.lastExportFolders).toEqual({
-      'A5 print': '/new',
+      'A5 print': '/old',
       'A4 digital': '/digital',
     });
   });
@@ -291,7 +297,7 @@ describe('US-008 AC-14 the Defaults and the note name reach the export', () => {
     };
     expect(await r.command()).toEqual({status: 'invalid-preset'});
     expect(r.notices).toEqual([
-      'Preset "A5 print" is invalid: Text block would be only 20 mm wide (minimum 30 mm)',
+      'Preset "A5 print" is invalid: Text block would be only 20 mm wide (minimum 30 mm).',
     ]);
     expect(r.requests).toEqual([]);
   });
@@ -504,7 +510,7 @@ describe('US-011 the cover reaches the export', () => {
     const r = await rig(coverPreset('  mode: front'));
     expect(await r.command()).toEqual({status: 'invalid-preset'});
     expect(r.notices).toEqual([
-      'Preset "A5 print" is invalid: cover.mode must be auto, file or none (line 4)',
+      'Preset "A5 print" is invalid: cover.mode must be auto, file or none (line 4).',
     ]);
     expect(r.requests).toEqual([]);
   });

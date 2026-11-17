@@ -37,6 +37,11 @@ export class FakeEl {
   fire(type: string): void {
     for (const listener of this.listeners.get(type) ?? []) listener();
   }
+  /** US-042: fires `type` with an event object (a key event's fields). */
+  dispatch(type: string, event: unknown): void {
+    for (const listener of this.listeners.get(type) ?? [])
+      (listener as (e: unknown) => void)(event);
+  }
   click(): void {
     this.fire('click');
   }
@@ -298,10 +303,14 @@ export class FakeModal {
   constructor(readonly app: unknown) {
     modals.push(this);
   }
+  /** US-042: how often the code closed the modal. */
+  closed = 0;
   open(): void {
     // Not drawn: a test that needs the dialog reads `modals`.
   }
-  close(): void {}
+  close(): void {
+    this.closed++;
+  }
 }
 export {FakeModal as Modal};
 

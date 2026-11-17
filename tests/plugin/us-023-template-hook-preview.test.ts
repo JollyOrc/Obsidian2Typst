@@ -75,6 +75,7 @@ async function rig(template: string | null, texts: Record<string, string>) {
         return data;
       },
       setLastExportFolder: async () => undefined,
+      update: async () => undefined,
     },
   };
   return {data, files, deps};

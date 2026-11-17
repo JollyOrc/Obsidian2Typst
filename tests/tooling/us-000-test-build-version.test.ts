@@ -39,7 +39,11 @@ describe('TICKET-026 version of a test build', () => {
 
   it('SCAR-012: the settings tab shows the version of the manifest it was loaded with', () => {
     expect(tab).toContain('manifest.version');
-    expect(tab).toContain('Obsidian2Typst ');
+    // US-042 AC-14 (amended): the line's text is in the string table.
+    expect(tab).toContain('STRINGS.tab.version(this.plugin.manifest.version)');
+    expect(readFileSync('src/plugin/strings.ts', 'utf8')).toContain(
+      'version: (v: string): string => `Obsidian2Typst ${v}`',
+    );
   });
 
   // #158 (SCAR-012, SCAR-023): the version the tester compares stands in the

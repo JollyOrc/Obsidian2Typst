@@ -400,8 +400,9 @@ describe('US-010 AC-7 the export command and the fonts', () => {
           return data;
         },
         setLastExportFolder: async () => undefined,
+        update: async () => undefined,
       },
-      chooseFolder: async () => '/out',
+      exportDialog: async (r) => ({preset: r.preset, folder: '/out'}),
       run: async (request) => {
         requests.push(request);
         return {status: 'exported'};
@@ -463,7 +464,7 @@ describe('US-010 AC-7 the export command and the fonts', () => {
     const r = await rig(preset('fonts:', '  heading:', '    size: 0'));
     expect(r.result).toEqual({status: 'invalid-preset'});
     expect(r.notices).toEqual([
-      'Preset "A5 print" is invalid: fonts.heading.size must be a number of pt greater than 0 and at most 200 (line 5)',
+      'Preset "A5 print" is invalid: fonts.heading.size must be a number of pt greater than 0 and at most 200 (line 5).',
     ]);
     expect(r.asked).toEqual([]);
     expect(r.requests).toEqual([]);

@@ -174,8 +174,9 @@ async function exportComposed(): Promise<{
         return data;
       },
       setLastExportFolder: async () => undefined,
+      update: async () => undefined,
     },
-    chooseFolder: async () => out,
+    exportDialog: async (r) => ({preset: r.preset, folder: out}),
     notice: (text) => notices.push(text),
     run: (request) =>
       runExport({

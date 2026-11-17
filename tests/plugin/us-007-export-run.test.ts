@@ -149,18 +149,18 @@ describe('US-007 AC-1: what an export writes', () => {
     expect(host.bytes.has('/out/run1/Rules.pdf')).toBe(true);
   });
 
-  it('US-007 AC-1: the order is .typ, assets, template, Compiling… notice, compile, PDF, report file, vault note', async () => {
+  it('US-007 AC-1, US-042 AC-11 (amended): the order is .typ, assets, template, compile, PDF, report file, vault note, the finished notice (no Compiling… notice)', async () => {
     const {host, options} = setup({template: 'T'});
     await runExport(options);
     expect(host.log).toEqual([
       'text:/out/run1/Rules.typ',
       'bytes:/out/run1/assets/crypt.png',
       'text:/out/run1/template.typ',
-      'notice:Compiling…',
       'compile',
       'bytes:/out/run1/Rules.pdf',
       'text:/out/run1/export-warnings.md',
       'vault:Rules export warnings.md',
+      'notice:✅ Exported Rules.pdf to /out/run1',
     ]);
   });
 
@@ -219,15 +219,14 @@ describe('US-007 AC-1: what an export writes', () => {
       'obsidian://obsidian2typst-goto',
     );
     expect(host.notices).toEqual([
-      'Compiling…',
-      'Exported with 2 warnings. Report: /out/run1/export-warnings.md',
+      '✅ Exported Rules.pdf to /out/run1, 2 warnings (see export-warnings.md)',
     ]);
   });
 
-  it('US-007 AC-1: without warnings only the Compiling… notice is shown', async () => {
+  it('US-007 AC-1, US-042 AC-11 (amended): without warnings only the finished notice is shown', async () => {
     const {host, options} = setup();
     await runExport(options);
-    expect(host.notices).toEqual(['Compiling…']);
+    expect(host.notices).toEqual(['✅ Exported Rules.pdf to /out/run1']);
   });
 });
 
@@ -277,8 +276,7 @@ describe('US-007 AC-4: a compile error', () => {
     expect(host.bytes.has('/out/run1/assets/crypt.png')).toBe(true);
     expect(host.text.get('/out/run1/template.typ')).toBe('T');
     expect(host.notices).toEqual([
-      'Compiling…',
-      'Typst error at Rules.typ:41:8: unknown variable: foo',
+      '❌ Export failed: Typst error at Rules.typ:41:8: unknown variable: foo',
     ]);
   });
 
@@ -309,8 +307,7 @@ describe('US-007 AC-4: a compile error', () => {
     expect(host.text.has('/out/run1/Rules.typ')).toBe(true);
     expect(host.text.has('/out/run1/export-warnings.md')).toBe(true);
     expect(host.notices).toEqual([
-      'Compiling…',
-      'Typst compiler failed: no memory',
+      '❌ Export failed: Typst compiler failed: no memory',
     ]);
   });
 });
@@ -326,8 +323,8 @@ describe('US-007 AC-3: one export at a time', () => {
     const second = setup({lock: first.lock});
     const result = await runExport(second.options);
     expect(result).toEqual({status: 'busy'});
-    expect(second.host.notices).toEqual(['An export is already running']);
-    expect(second.host.log).toEqual(['notice:An export is already running']);
+    expect(second.host.notices).toEqual(['An export is already running.']);
+    expect(second.host.log).toEqual(['notice:An export is already running.']);
     expect(second.compiler.requests).toHaveLength(0);
 
     release({ok: true, pdf: PDF});
@@ -443,7 +440,7 @@ describe('US-007 AC-4: strict mode', () => {
     expect(host.text.size + host.bytes.size + host.vault.size).toBe(0);
     expect(host.notices).toHaveLength(1);
     expect(host.notices[0]).toMatch(
-      /^Export aborted: 2 warnings \(strict mode\)/,
+      /^❌ Export aborted: 2 warnings \(strict mode\)/,
     );
   });
 
@@ -471,6 +468,7 @@ describe('US-007 AC-11: finishExport accepts a failed output', () => {
   it('US-007 AC-11: when writeOutput returns failed the report files are written, the success notice is left out and the result says failed', async () => {
     const h = host();
     const result = await finishExport({
+      pdfName: 'Note.pdf',
       warnings: TWO,
       source: {path: 'N/Rules.md', inVault: true},
       exportDir: '/out',
@@ -489,6 +487,7 @@ describe('US-007 AC-11: finishExport accepts a failed output', () => {
   it('US-007 AC-11: a writeOutput that returns nothing keeps the result of US-006 exactly', async () => {
     const h = host();
     const result = await finishExport({
+      pdfName: 'Note.pdf',
       warnings: TWO,
       source: {path: 'N/Rules.md', inVault: true},
       exportDir: '/out',

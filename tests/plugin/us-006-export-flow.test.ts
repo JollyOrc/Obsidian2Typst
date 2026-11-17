@@ -60,6 +60,7 @@ async function run(
     exportDir: 'Export/run1',
     settings,
     host,
+    pdfName: 'compiledtext.pdf',
     writeOutput: async () => {
       outputs.push('output');
       host.log.push('output');
@@ -101,7 +102,7 @@ describe('US-006 AC-4 strict mode', () => {
   it("US-006 AC-4: shows 'Export aborted: 2 warnings (strict mode)' with the first five warnings as 'line 412: LINK_UNRESOLVED'", async () => {
     const {host} = await run(TWO, strict);
     expect(host.notices).toEqual([
-      'Export aborted: 2 warnings (strict mode)\nline 412: LINK_UNRESOLVED\nline 977: ASSET_MISSING',
+      '❌ Export aborted: 2 warnings (strict mode)\nline 412: LINK_UNRESOLVED\nline 977: ASSET_MISSING',
     ]);
   });
 
@@ -138,6 +139,7 @@ describe('US-006 AC-2 / AC-2b / AC-3 what a finished export writes', () => {
   it('US-006 AC-2: accepts an export folder that ends with a slash', async () => {
     const host = new FakeHost();
     await finishExport({
+      pdfName: 'Note.pdf',
       warnings: TWO,
       source: SOURCE,
       exportDir: 'Export/run1/',
@@ -212,17 +214,19 @@ describe('US-006 AC-2 / AC-2b / AC-3 what a finished export writes', () => {
     expect(host.exportFiles.size).toBe(0);
   });
 
-  it("US-006 AC-3: shows 'Exported with 2 warnings' and, for one warning, '1 warning', with the report path", async () => {
+  it("US-006 AC-3, US-042 AC-11 (amended): the finished notice counts the warnings ('1 warning') and names the report", async () => {
     expect((await run(TWO)).host.notices).toEqual([
-      'Exported with 2 warnings. Report: Export/run1/export-warnings.md',
+      '✅ Exported compiledtext.pdf to Export/run1, 2 warnings (see export-warnings.md)',
     ]);
     expect((await run([TWO[0]!])).host.notices).toEqual([
-      'Exported with 1 warning. Report: Export/run1/export-warnings.md',
+      '✅ Exported compiledtext.pdf to Export/run1, 1 warning (see export-warnings.md)',
     ]);
   });
 
-  it('US-006 AC-3: shows no notice without warnings, and shows it last', async () => {
-    expect((await run([])).host.notices).toEqual([]);
+  it('US-006 AC-3, US-042 AC-11 (amended): without warnings the finished notice too, and the notice comes last', async () => {
+    expect((await run([])).host.notices).toEqual([
+      '✅ Exported compiledtext.pdf to Export/run1',
+    ]);
     const {host} = await run(TWO);
     expect(host.log).toEqual([
       'output',

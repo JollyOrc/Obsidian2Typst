@@ -113,7 +113,10 @@ async function rig(
     },
     presets: store,
     settings,
-    chooseFolder: async () => '/tmp/out',
+    exportDialog: async (r: {preset: string}) => ({
+      preset: r.preset,
+      folder: '/tmp/out',
+    }),
     run: async (request: {noteName: string; source: {path: string}}) => {
       log.push(`run:${request.source.path}:${request.noteName}`);
       return {ok: true};
@@ -170,15 +173,15 @@ describe('US-020 AC-2 export a note by its path', () => {
     await actions.exportNote();
     await actions.exportNote(`${FOLDER}/A5 print.md`);
     expect(notices).toEqual([
-      'Open a note to export it',
-      'Presets are not exported',
+      'Open a note to export it.',
+      'Presets are not exported.',
     ]);
     expect(log).toEqual([]);
     const empty = await rig({}, '');
     const none = (await load<ActionsModule>(ACTIONS)).createActions(empty.deps);
     await none.exportNote('Rules.md');
     expect(empty.notices).toEqual([
-      'There is no preset; create one in the settings of Obsidian2Typst',
+      'There is no preset; create one in the settings of Obsidian2Typst.',
     ]);
   });
 });
@@ -191,7 +194,7 @@ describe('US-020 AC-2 an export error', () => {
     };
     const actions = (await load<ActionsModule>(ACTIONS)).createActions(deps);
     await actions.exportNote('Glossary.md');
-    expect(notices).toEqual(['Export failed: disk full']);
+    expect(notices).toEqual(['❌ Export failed: disk full']);
   });
 });
 
@@ -209,7 +212,9 @@ describe('US-020 AC-3 the ribbon menu entries', () => {
         'A5 print',
       ),
     );
+    // US-042 AC-2 (amended): `Export…` comes first.
     expect(entries.map(withoutRun)).toEqual([
+      {title: 'Export…', icon: 'file-output'},
       {title: 'Export current note', icon: 'file-output'},
       {title: 'Open style panel', icon: 'panel-right'},
       {separator: true},
@@ -223,7 +228,7 @@ describe('US-020 AC-3 the ribbon menu entries', () => {
   it('US-020 AC-3, SCAR-019: no preset: the label and a disabled No preset yet', async () => {
     const {ribbonMenuEntries} = await load<MenusModule>(MENUS);
     const entries = ribbonMenuEntries(noActions, view([], ''));
-    expect(entries.slice(3).map(withoutRun)).toEqual([
+    expect(entries.slice(4).map(withoutRun)).toEqual([
       {title: 'Preset', label: true},
       {title: 'No preset yet', disabled: true},
     ]);
@@ -244,7 +249,7 @@ describe('US-020 AC-3 the ribbon menu entries', () => {
         'Gone',
       ),
     );
-    expect(missing.slice(4).map((e) => [e.title, e.checked])).toEqual([
+    expect(missing.slice(5).map((e) => [e.title, e.checked])).toEqual([
       ['Archive (invalid)', true],
       ['Book', false],
     ]);
@@ -259,13 +264,13 @@ describe('US-020 AC-3 the ribbon menu entries', () => {
         'Gone',
       ),
     );
-    expect(valid.slice(4).map((e) => [e.title, e.checked])).toEqual([
+    expect(valid.slice(5).map((e) => [e.title, e.checked])).toEqual([
       ['Book', true],
       ['Broken (invalid)', false],
     ]);
   });
 
-  it('US-020 AC-3: the first two entries run the export of the active note and open the panel', async () => {
+  it('US-020 AC-3: the two entries after Export… (US-042) run the export of the active note and open the panel', async () => {
     const {ribbonMenuEntries} = await load<MenusModule>(MENUS);
     const calls: string[] = [];
     const actions: Actions = {
@@ -275,8 +280,8 @@ describe('US-020 AC-3 the ribbon menu entries', () => {
     };
     const entries = ribbonMenuEntries(actions, view([['Book', true]], 'Book'));
     // no path: the action reads the active note itself
-    await entries[0]?.run?.();
     await entries[1]?.run?.();
+    await entries[2]?.run?.();
     expect(calls).toEqual(['export:undefined', 'preview:undefined']);
   });
 });

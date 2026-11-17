@@ -25,6 +25,7 @@ import {
   type RunExportOptions,
 } from '../../src/plugin/run-export';
 import {DEFAULT_WARNING_SETTINGS} from '../../src/plugin/warning-flow';
+import {stepHeading, type ExportProgress} from '../../src/core/export-progress';
 
 const PDF = (n: number) => new Uint8Array([37, 80, 68, 70, n]);
 const HINTS = '#let o2t-fit-hints = (:)\n#let o2t-fit-pinned = false';
@@ -98,8 +99,25 @@ function options(
     compiler,
     fonts: [],
     lock: createExportLock(),
+    // US-042 AC-7 (amended): the compiles are progress steps, no notices any
+    // more; their headings are recorded in `host.notices` for these tests.
+    progress: compileSteps(host),
     ...more,
   } as RunExportOptions;
+}
+
+/** A progress that records the heading of each compile step. */
+function compileSteps(host: FakeHost): ExportProgress {
+  return {
+    step: (step) => {
+      if (step.kind === 'compile') host.notices.push(stepHeading(step));
+    },
+    warnings: () => undefined,
+    end: () => undefined,
+    cancel: () => undefined,
+    cancelled: false,
+    onCancel: () => () => undefined,
+  };
 }
 
 const report = (host: FakeHost) =>
@@ -120,7 +138,7 @@ const fallbackNote = () => {
 };
 
 describe('US-028 AC-15 the export compiles until the layout settles', () => {
-  it('US-028 AC-15: a note that settles at compile 1 is compiled once; its text is written as converted; the notice is "Compiling…"', async () => {
+  it('US-028 AC-15: a note that settles at compile 1 is compiled once; its text is written as converted; the step is "Compiling" (US-042 AC-7, amended)', async () => {
     const host = new FakeHost();
     const {compiler, sources} = scripted([
       {settled: true, fitDecisions: [dec(1, 'full')]},
@@ -131,7 +149,7 @@ describe('US-028 AC-15 the export compiles until the layout settles', () => {
     expect(host.text.get('/out/run1/Rules.typ')).toBe(TYP);
     expect(host.bytes.get('/out/run1/Rules.pdf')).toEqual(PDF(1));
     expect(host.notices.filter((n) => n.startsWith('Compiling'))).toEqual([
-      'Compiling…',
+      'Compiling',
     ]);
     expect(report(host)).not.toContain('LAYOUT_NOT_SETTLED');
   });
@@ -155,9 +173,9 @@ describe('US-028 AC-15 the export compiles until the layout settles', () => {
     expect(host.text.get('/out/run1/Rules.typ')).toBe(sources[2]);
     expect(host.bytes.get('/out/run1/Rules.pdf')).toEqual(PDF(3));
     expect(host.notices.filter((n) => n.startsWith('Compiling'))).toEqual([
-      'Compiling…',
-      'Compiling… (2 of up to 8)',
-      'Compiling… (3 of up to 8)',
+      'Compiling',
+      'Compiling (2 of up to 8)',
+      'Compiling (3 of up to 8)',
     ]);
     // AC-5: the fit warnings are those of the result
     expect(report(host)).toContain('IMAGE_MOVED');
@@ -283,9 +301,9 @@ describe('US-028 AC-16 the fallback', () => {
     expect(sources).toHaveLength(3);
     expect(calls).toEqual([1]);
     expect(host.notices.filter((n) => n.startsWith('Compiling'))).toEqual([
-      'Compiling…',
-      'Compiling… (2 of up to 2)',
-      'Compiling…',
+      'Compiling',
+      'Compiling (2 of up to 2)',
+      'Compiling',
     ]);
   });
 

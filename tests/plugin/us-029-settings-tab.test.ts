@@ -99,6 +99,7 @@ async function rig(defaults: unknown = {}, notes?: Record<string, string>) {
           await settings.update({activePreset: name});
         },
         openDetails: (name: string) => void opened.push(name),
+        copyDebugInfo: async () => undefined,
       },
     );
   const tab = make();
@@ -172,7 +173,11 @@ beforeEach(() => resetFake());
 describe('US-029 AC-1 the sections of the tab, drawn', () => {
   it('US-029 AC-1: five collapsible sections after the version line, in order', async () => {
     const {root} = await rig();
-    expect(root.children[0]?.text).toBe('Obsidian2Typst 0.11.0-test');
+    // US-042 AC-12 (amended): the version is the first row's description.
+    const first = root.children[0] as FakeEl;
+    expect(made.find((s) => inside(s.parent, first))?.desc).toBe(
+      'Obsidian2Typst 0.11.0-test',
+    );
     expect(sectionsOf(root).map(sectionName)).toEqual([
       'Presets',
       'Page',
@@ -184,8 +189,15 @@ describe('US-029 AC-1 the sections of the tab, drawn', () => {
 
   it('US-029 AC-1: each section holds its feature rows and plain rows, in the order of the story', async () => {
     const {root} = await rig();
+    // US-042 AC-13: the section reset row ends Page, Text and Book (its own
+    // tests: us-042-settings-tab); left out here.
     const names = (name: string) =>
-      rowsIn(section(root, name)).map((s) => s.name);
+      rowsIn(section(root, name))
+        .filter(
+          (s) =>
+            !s.buttons.some((b) => b.text === 'Reset this section to defaults'),
+        )
+        .map((s) => s.name);
     expect(names('Page')).toEqual([
       'Page setup',
       'Page numbers',

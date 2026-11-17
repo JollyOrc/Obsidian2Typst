@@ -318,9 +318,10 @@ describe('US-021 AC-5 the ribbon menu', () => {
   it('US-021 AC-5: a separator and a label per group replace the Preset label', async () => {
     const {ribbonMenuEntries} = await load<MenusModule>(MENUS);
     const entries = ribbonMenuEntries({}, view);
+    // US-042 AC-2 (amended): Export…, Export current note, Open style panel.
     expect(
       entries
-        .slice(2)
+        .slice(3)
         .map((e) =>
           e.separator === true
             ? '---'
@@ -534,7 +535,11 @@ describe('US-021 AC-8, AC-9 where it opens and how it follows (SCAR-016)', () =>
   it('US-021 AC-8: the panel button is info / Details of the preset and reads the active preset at the click (text check)', () => {
     const panel = readFileSync('src/plugin/preview/panel.ts', 'utf8');
     expect(panel).toContain("setIcon('info')");
-    expect(panel).toContain("setTooltip('Details of the preset')");
+    // US-042 AC-14 (amended): the text comes from the string table.
+    expect(panel).toContain('setTooltip(STRINGS.panel.details)');
+    expect(readFileSync('src/plugin/strings.ts', 'utf8')).toContain(
+      "details: 'Details of the preset'",
+    );
     expect(panel).toMatch(
       /onClick\(\(\) =>\s*this\.deps\.openDetails\(this\.deps\.settings\.data\.activePreset\)/,
     );

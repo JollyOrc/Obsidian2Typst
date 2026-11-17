@@ -150,6 +150,7 @@ describe('US-006 AC-7 the source stays untouched (real files)', () => {
       },
     };
     const result = await finishExport({
+      pdfName: 'Note.pdf',
       warnings: out.warnings,
       source: {path: NOTE, inVault: true},
       exportDir,
@@ -178,7 +179,8 @@ describe('US-006 AC-7 the source stays untouched (real files)', () => {
     ).toContain('obsidian://obsidian2typst-goto?file=sample%2FBook.md&line=');
     expect(notices).toHaveLength(1);
     expect(notices[0]).toMatch(
-      /^Exported with \d+ warnings\. Report: Export\/run1\/export-warnings\.md$/,
+      // US-042 AC-11 (amended): the finished notice.
+      /^✅ Exported Note\.pdf to Export\/run1, \d+ warnings \(see export-warnings\.md\)$/,
     );
   });
 
@@ -192,6 +194,7 @@ describe('US-006 AC-7 the source stays untouched (real files)', () => {
     const notices: string[] = [];
     let called = false;
     const result = await finishExport({
+      pdfName: 'Note.pdf',
       warnings: out.warnings,
       source: {path: NOTE, inVault: true},
       exportDir: 'Export/run1',
@@ -205,7 +208,7 @@ describe('US-006 AC-7 the source stays untouched (real files)', () => {
     expect(called).toBe(false);
     expect(snapshot(vault)).toEqual(before);
     expect(notices[0]).toMatch(
-      /^Export aborted: \d+ warnings \(strict mode\)\n(line \d+: [A-Z_]+\n?){1,5}$/,
+      /^❌ Export aborted: \d+ warnings \(strict mode\)\n(line \d+: [A-Z_]+\n?){1,5}$/,
     );
   });
 });

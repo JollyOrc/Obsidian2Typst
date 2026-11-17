@@ -257,7 +257,7 @@ async function rig(
     },
     presets: store,
     settings,
-    chooseFolder: async () => null,
+    exportDialog: async () => null,
     run: async () => ({ok: true}),
     notice: (text: string) => void notices.push(text),
     showNote: async () => undefined,

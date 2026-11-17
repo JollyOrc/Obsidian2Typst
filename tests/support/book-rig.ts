@@ -102,6 +102,7 @@ export async function previewRig(presetText: string, source: string) {
         return data;
       },
       setLastExportFolder: async () => undefined,
+      update: async () => undefined,
     },
   };
   return {

@@ -80,6 +80,7 @@ async function rig(note = COMPOSED_NOTE, files: readonly string[] = FILES) {
         return data;
       },
       setLastExportFolder: async () => undefined,
+      update: async () => undefined,
     },
   };
   return {deps, vault, data, bytesRead, texts};
@@ -91,7 +92,7 @@ describe('US-012 AC-13 one preparation for the export and the preview', () => {
     const requests: ExportRequest[] = [];
     await exportCurrentNote({
       ...deps,
-      chooseFolder: async () => '/out',
+      exportDialog: async (r) => ({preset: r.preset, folder: '/out'}),
       run: async (request) => {
         requests.push(request);
         return {status: 'exported'};
@@ -134,10 +135,11 @@ describe('US-012 AC-13 one preparation for the export and the preview', () => {
     expect(source).toContain('selectPreset(');
     expect(source).toContain('convertNote(');
     expect(source).not.toMatch(/\bconvert\(/);
+    // US-042 AC-1 (amended): the folder question is the export dialog.
     expect(source.indexOf('selectPreset(')).toBeLessThan(
-      source.indexOf('deps.chooseFolder('),
+      source.indexOf('deps.exportDialog('),
     );
-    expect(source.indexOf('deps.chooseFolder(')).toBeLessThan(
+    expect(source.indexOf('deps.exportDialog(')).toBeLessThan(
       source.indexOf('convertNote('),
     );
   });
@@ -385,7 +387,7 @@ describe('US-012 AC-13 fonts, active preset and edge-case names at the new call 
     const exported: ExportRequest[] = [];
     await exportCurrentNote({
       ...deps,
-      chooseFolder: async () => '/out',
+      exportDialog: async (r) => ({preset: r.preset, folder: '/out'}),
       run: async (request) => {
         exported.push(request);
         return {status: 'exported'};

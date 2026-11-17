@@ -298,8 +298,9 @@ describe('US-037 AC-4 the export command hands over page.facingPages', () => {
           return data;
         },
         setLastExportFolder: async () => undefined,
+        update: async () => undefined,
       },
-      chooseFolder: async () => '/out',
+      exportDialog: async (r) => ({preset: r.preset, folder: '/out'}),
       run: async (request) => {
         requests.push(request);
         return {status: 'exported'};

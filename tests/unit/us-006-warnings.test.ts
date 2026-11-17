@@ -9,7 +9,7 @@ import {
   buildReport,
   escapeCell,
   gotoLink,
-  reportNotice,
+  finishedNotice,
   strictNotice,
   summarize,
   warningsNoteName,
@@ -277,24 +277,23 @@ describe('US-006 AC-8 the grouped summary', () => {
   });
 
   it('US-006 AC-8: keeps the notice as a single count', () => {
-    expect(reportNotice(many.length, 'E/export-warnings.md')).toBe(
-      'Exported with 10 warnings. Report: E/export-warnings.md',
-    );
+    expect(
+      finishedNotice({pdf: 'E.pdf', folder: 'E', warnings: many.length}),
+    ).toBe('✅ Exported E.pdf to E, 10 warnings (see export-warnings.md)');
   });
 });
 
 describe('US-006 AC-3 the notice', () => {
-  it("US-006 AC-3: shows 'Exported with 2 warnings' and, for one warning, '1 warning', with the report path", () => {
-    expect(reportNotice(2, 'Export/run1/export-warnings.md')).toBe(
-      'Exported with 2 warnings. Report: Export/run1/export-warnings.md',
+  // US-042 AC-11 (amends US-006 AC-3): the notice is `finishedNotice`; its
+  // cases are in tests/unit/us-042-notices.test.ts.
+  it("US-006 AC-3: counts the warnings, '1 warning' for one, and names the report", () => {
+    const at = {pdf: 'compiledtext.pdf', folder: 'Export/run1'};
+    expect(finishedNotice({...at, warnings: 2})).toBe(
+      '✅ Exported compiledtext.pdf to Export/run1, 2 warnings (see export-warnings.md)',
     );
-    expect(reportNotice(1, 'Export/run1/export-warnings.md')).toBe(
-      'Exported with 1 warning. Report: Export/run1/export-warnings.md',
+    expect(finishedNotice({...at, warnings: 1})).toBe(
+      '✅ Exported compiledtext.pdf to Export/run1, 1 warning (see export-warnings.md)',
     );
-  });
-
-  it('US-006 AC-3: shows no notice when there are no warnings', () => {
-    expect(reportNotice(0, 'Export/run1/export-warnings.md')).toBeNull();
   });
 });
 
@@ -306,17 +305,17 @@ describe('US-006 AC-4 the strict-mode notice', () => {
         w('ASSET_MISSING', 'y', 977),
       ]),
     ).toBe(
-      'Export aborted: 2 warnings (strict mode)\nline 412: LINK_UNRESOLVED\nline 977: ASSET_MISSING',
+      '❌ Export aborted: 2 warnings (strict mode)\nline 412: LINK_UNRESOLVED\nline 977: ASSET_MISSING',
     );
     expect(strictNotice([w('LINK_UNRESOLVED', 'x', 412)])).toBe(
-      'Export aborted: 1 warning (strict mode)\nline 412: LINK_UNRESOLVED',
+      '❌ Export aborted: 1 warning (strict mode)\nline 412: LINK_UNRESOLVED',
     );
   });
 
   it('US-006 AC-4: lists only the first five, with the total in the first line', () => {
     const seven = Array.from({length: 7}, (_, i) => w('C', 'c', i + 1));
     const lines = strictNotice(seven).split('\n');
-    expect(lines[0]).toBe('Export aborted: 7 warnings (strict mode)');
+    expect(lines[0]).toBe('❌ Export aborted: 7 warnings (strict mode)');
     expect(lines.slice(1)).toEqual([
       'line 1: C',
       'line 2: C',
@@ -328,7 +327,7 @@ describe('US-006 AC-4 the strict-mode notice', () => {
 
   it('US-006 AC-4: writes a warning without a line as the code alone', () => {
     expect(strictNotice([w('FONT_MISSING', 'f', 0)])).toBe(
-      'Export aborted: 1 warning (strict mode)\nFONT_MISSING',
+      '❌ Export aborted: 1 warning (strict mode)\nFONT_MISSING',
     );
   });
 });

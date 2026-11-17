@@ -743,3 +743,54 @@ by 0.75 mm) and a test was strengthened (the marks one gap from the name).
 
 
 **Ticket #172 (2026-11-16), green:** the 8 tests of `us-041-preview-band` (one G2 test helper fixed: it did not strip CSS comments); `us-035-preview` and `us-035-preview-cases` unchanged and green; mutation round: 12 of 12 caught; the whole suite: `npm test` 2627 passed, integration 692 passed.
+
+## US-042 — the UI standard: export dialog, direct exports, progress tab, debug info, section resets (G2, 2026-11-17)
+
+Titles start with `US-042 AC-n` in `tests/plugin/us-042-export-dialog-rules.test.ts`,
+`us-042-export-dialog.test.ts`, `us-042-direct-export.test.ts`, `us-042-progress.test.ts`,
+`us-042-export-run.test.ts`, `us-042-settings-tab.test.ts`, `us-042-wiring.test.ts`,
+`tests/unit/us-042-notices.test.ts` and `tests/tooling/us-042-string-table.test.ts`: **148 new tests** (147 counted on the
+reference, one added after the mutation round). The fake `obsidian` gained `FakeEl.dispatch(type, event)` (a key event's fields) and
+`FakeModal.closed`.
+
+**Amended old tests** (they pinned what the story changes): `us-008-export-command` (the folder question is the
+dialog, only without a remembered folder; refusals end with a full stop; the remembered-folder test rewritten for
+AC-1), `us-006-export-flow`, `us-006-warnings` (the finished notice replaces `reportNotice`; ❌ before strict mode),
+`us-007-export-run` (no `Compiling…` notice; ✅ / ❌ texts; the busy refusal), `us-028-settle-export` (the compiles
+read as progress steps), `us-020-actions-menus`, `us-021-groups-details` (`Export…` first in the ribbon menu; texts
+from the string table), `us-010-fonts-plugin`, `us-038-details-strict`, `us-012-panel`, `us-012-request`,
+`us-029-settings-tab` (the version line is the header row; the reset row left out of the row lists),
+`us-000-test-build-version`, `tests/integration/us-006-output-and-source`; and the rigs that passed `chooseFolder`
+(`exportDialog` with the same folder; settings stubs gain `update`): `us-010`, `us-012-request`, `us-016` to
+`us-019`, `us-020`, `us-022`, `us-023`, `us-037`, `tests/support/book-rig.ts`,
+`tests/integration/us-007-composed-export`.
+
+**Current state:** red by design on today's code: 151 unit/plugin tests (the new ones, the amended ones, and
+`us-028-settle-export` as a whole file, which imports the new `export-progress` module), 7 integration tests
+(`build-output`: the build's typecheck sees the tests' missing modules; `us-006-output-and-source`,
+`us-007-composed-export`; and `us-041-band-marks-pdf` once, which passed when run alone — not explained, recorded).
+**Proven against a throwaway reference** (14 sources and `styles.css` patched in place with a backup and a checksum
+list, 6 new modules; restored, 14 of 14 equal, `git status` clean): the whole suite green there — 2780 passed and
+1 todo, integration 692 passed; lint, prettier and the build clean. The reference is kept, git-ignored, in
+`spikes/us042-reference/ref/`. **Mutation round** over the reference, baseline green first (181 tests): 25 mutants,
+22 caught at once; one survivor was a gap (no tab after the end, tested only through the cleared timer) and got a
+test (a timer whose clear does nothing), then caught; two are equivalent (a cancel after the compile is also
+caught inside the compile loop; Enter on a refused folder is also refused by `run()`).
+
+| AC | Test |
+|---|---|
+| AC-1 | `US-042 AC-1` (direct export: a remembered folder at once, another preset's folder not taken, the dialog without one, the choice saved before converting, a closed dialog quiet); the amended `us-008` folder test |
+| AC-2 | `US-042 AC-2` (the ribbon menu starts with `Export…` and runs the dialog action; the note menus unchanged; the command `export-dialog`; the action's ❌ notice), `US-042 AC-2, AC-6` (Export… asks even with a remembered folder; no open note) |
+| AC-3 | `us-042-export-dialog-rules` (title, presets offered and grouped, a preset's folder), `us-042-export-dialog` (the rows in order, the dropdown, the destination row, More options, the preset change, Choose folder…) |
+| AC-4 | `US-042 AC-4` (absolute on the system's rule, trimming, roots, empty, relative), the red line while typing |
+| AC-5 | `US-042 AC-5` (the line with and without an existing PDF, padding), the grey line live |
+| AC-6 | `US-042 AC-6` (keys, IME; what is saved and when; P1); the dialog's one answer in `onClose`, Enter, More options |
+| AC-7 | `US-042 AC-7` (headings; the tab only after the delay, once, never after the end, at other delays; the progress started once the folder is known); the wiring text checks (2000 ms, the view, `active: false`, reuse) |
+| AC-8 | `US-042 AC-7, AC-8` (the conversion's warnings first, the run's after; the list drawn with code, message, line; the CSS border) |
+| AC-9 | `US-042 AC-9` (cancel ends the compile, nothing more written, the files before it kept, no compile when cancelled first; the listeners once; nothing after the end) |
+| AC-10 | `US-042 AC-10` (end headings, a run's status as an end, the button becomes Close, a second end changes nothing) |
+| AC-11 | `us-042-notices`, `US-042 AC-11` in the run and the command (✅ with and without warnings, singular, ❌ failed, cancelled, strict, refusals with a full stop, 5000 ms) |
+| AC-12 | `US-042 AC-12` (the text, sorted, no file; the header row's bug button; no heading); the wiring check (`debugInfo`, the clipboard) |
+| AC-13 | `US-042 AC-13` (the sections, their paths, `withoutPaths`, the question, the reset with Cancel and with nothing to remove, read at the run; the rows in the tab, Cancel first, Reset removes) |
+| AC-14 | `us-042-string-table` (no literal in a text sink outside `strings.ts`; the check finds each sink and quote and ignores non-literals) |
+| AC-15 | manual check (ticket) |
