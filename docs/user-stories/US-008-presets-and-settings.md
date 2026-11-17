@@ -231,9 +231,11 @@ by hand, and have them sync with the vault.
   confirmation dialog `Delete preset "<name>"?` with the text `The note moves to
   the trash, as set in Obsidian under "Deleted files".`, and, when the preset
   is the active one, the extra sentence `"<next>" becomes the active preset.`
-  (`<next>` is the one `planDelete` names). The buttons are `Delete` and
-  `Cancel`; the focus is on `Cancel` when the dialog opens, so Enter alone
-  cancels; Escape cancels. Nothing is trashed, and the active preset does not
+  (`<next>` is the one `planDelete` names). The buttons are `Cancel` and
+  `Delete`, **`Cancel` first** (amended 2026-11-17, #174: Obsidian focuses a
+  dialog's first focusable element after it opens, measured in M31, so
+  `Cancel` must come first in the DOM); the focus is on `Cancel` when the
+  dialog opens, so Enter alone cancels; Escape cancels. Nothing is trashed, and the active preset does not
   change, before `Delete` is chosen, nor after `Cancel` or Escape. The last
   remaining preset is refused at once with `The last preset cannot be deleted`
   and no dialog opens.
@@ -245,7 +247,7 @@ by hand, and have them sync with the vault.
   with the tooltip `Use the built-in value`, as the Fonts rows of US-010 AC-6.
   It asks before it removes a value: `Reset "<label>"?` with `The value "<v>"
   is removed from the Defaults. Presets that do not set this field use the
-  built-in value.` and the buttons `Reset` and `Cancel`; `<v>` is the value as
+  built-in value.` and the buttons `Cancel` and `Reset` (`Cancel` first, #174); `<v>` is the value as
   written (`10.5`, `#aa3300`, `A5`), for a switch `on` or `off`. Nothing
   changes on `Cancel`, and a row without a value asks nothing and changes
   nothing. After `Reset` the row shows the empty field (switch off). Emptying a

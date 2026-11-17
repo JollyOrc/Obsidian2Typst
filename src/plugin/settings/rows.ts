@@ -101,12 +101,14 @@ export class ConfirmModal extends Modal {
     for (const line of this.text.lines)
       this.contentEl.createEl('p', {text: line});
     const buttons = this.contentEl.createDiv({cls: 'modal-button-container'});
+    // #174 (F1, SCAR-014): Cancel first. Obsidian's `Modal.open()` focuses the first
+    // focusable element after `onOpen` (measured, M31), so it lands on Cancel.
+    const cancelButton = buttons.createEl('button', {
+      text: this.text.cancelLabel,
+    });
     const confirmButton = buttons.createEl('button', {
       text: this.text.confirmLabel,
       cls: 'mod-warning',
-    });
-    const cancelButton = buttons.createEl('button', {
-      text: this.text.cancelLabel,
     });
     confirmButton.addEventListener('click', () => this.finish(true));
     cancelButton.addEventListener('click', () => this.finish(false));

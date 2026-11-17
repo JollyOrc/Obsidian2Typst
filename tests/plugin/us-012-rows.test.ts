@@ -216,14 +216,15 @@ describe('US-012 AC-3 the trim rows', () => {
 
 describe('US-012 AC-3 the reset question (SCAR-014)', () => {
   /** Opens the question of the last dialog and presses the button `index`. */
-  const answer = (index: number): void => {
+  // #174 (F1): the buttons read Cancel, then the action; answered by name, not position.
+  const answer = (name: 'Cancel' | 'Reset'): void => {
     const modal = modals.at(-1) as unknown as {
       onOpen(): void;
       contentEl: FakeEl;
     };
     modal.onOpen();
     const buttons = modal.contentEl.children.at(-1)?.children ?? [];
-    buttons[index]?.click();
+    buttons.find((b) => b.text === name)?.click();
   };
 
   it('US-012 AC-3: the reset icon asks first; Reset removes the value and draws the host again, Cancel changes nothing', async () => {
@@ -234,13 +235,13 @@ describe('US-012 AC-3 the reset question (SCAR-014)', () => {
     await vi.waitFor(() => expect(modals).toHaveLength(1));
     // no answer yet: the value is still there
     expect(settings.data.defaults.page?.bleed).toBe(3);
-    answer(1); // Cancel
+    answer('Cancel');
     await first;
     expect(redrawn()).toBe(0);
     expect(settings.data.defaults.page?.bleed).toBe(3);
     const second = icon?.clicked?.();
     await vi.waitFor(() => expect(modals).toHaveLength(2));
-    answer(0); // Reset
+    answer('Reset');
     await second;
     await vi.waitFor(() =>
       expect(settings.data.defaults.page?.bleed).toBeUndefined(),
