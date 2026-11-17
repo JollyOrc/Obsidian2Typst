@@ -5,7 +5,6 @@ import {
   FIT_COMPILE_LIMIT,
   IMAGE_FIT_OFF_WARNING,
   LAYOUT_NOT_SETTLED_WARNING,
-  compilingNotice,
   exportNames,
   nextFitCompile,
   withFitHints,
@@ -13,6 +12,8 @@ import {
   type FitStep,
 } from '../core/compile';
 import type {AssetUse} from '../core/assets';
+import type {ExportProgress} from '../core/export-progress';
+import {CANCELLED_NOTICE, failedNotice} from '../core/report';
 import {
   entryPages,
   imageFacts,
@@ -119,6 +120,8 @@ export interface RunExportOptions {
    * written to open as spreads. Absent: as compiled.
    */
   facingPages?: boolean;
+  /** US-042 AC-7 to AC-9: the export's progress (steps, warnings, cancel). */
+  progress?: ExportProgress;
 }
 
 /** US-028 AC-16: the note converted again without image fit. */
@@ -130,14 +133,25 @@ export interface FallbackNote {
 
 /** How a run ended. */
 export interface ExportResult {
-  status: 'exported' | 'aborted' | 'busy' | 'compile-error' | 'compiler-failed';
+  status:
+    | 'exported'
+    | 'aborted'
+    | 'busy'
+    | 'compile-error'
+    | 'compiler-failed'
+    | 'cancelled';
 }
 
 /**
  * US-007 AC-1 to AC-4: runs an export. The lock is released however the run
  * ends; an error of the host or the compiler reaches the caller. US-028
  * AC-15, AC-16: the compile is repeated until the layout settles, else the
- * note at 100 (`fallback`) is compiled (`compileSettled`).
+ * note at 100 (`fallback`) is compiled (`compileSettled`). US-042 AC-7 to
+ * AC-11: with a `progress`, each step is announced and the warnings are
+ * passed on as they are known (the conversion's first); a cancel ends the
+ * running compile (`compiler.dispose()`), nothing is written after it (what
+ * was written before stays, P4), and the run ends `cancelled` with its
+ * notice. The run never ends the progress: the command does.
  */
 export async function runExport(
   options: RunExportOptions,
@@ -145,17 +159,25 @@ export async function runExport(
   const {host} = options;
   const release = options.lock.tryAcquire();
   if (release === null) {
-    host.notice('An export is already running');
+    host.notice('An export is already running.');
     return {status: 'busy'};
   }
+  const {progress} = options;
+  // US-042 AC-9: a cancel ends the running compile at once.
+  const stopListening =
+    progress?.onCancel(() => options.compiler.dispose()) ?? (() => undefined);
+  const cancelled = (): boolean => progress?.cancelled === true;
   try {
     const names = exportNames(options.noteName);
+    // US-042 AC-8: the conversion's warnings first.
+    progress?.warnings(options.warnings);
     const dir = options.exportDir.replace(/\/+$/, '');
     let status: ExportResult['status'] = 'exported';
 
     const writeOutput = async (): Promise<
-      void | {failed: true} | {warnings: Warning[]}
+      void | {failed: true} | {cancelled: true} | {warnings: Warning[]}
     > => {
+      if (cancelled()) return {cancelled: true};
       await host.writeExportFile(`${dir}/${names.typ}`, options.typ);
       const files: Record<string, Uint8Array> = {};
       await copyAssets(
@@ -189,7 +211,8 @@ export async function runExport(
             files,
             fonts: options.fonts,
           }),
-        notice: (text) => host.notice(text),
+        step: (n, limit) => progress?.step({kind: 'compile', n, limit}),
+        cancelled,
         // AC-16: the note at 100 uses the same images as compile 1 (image
         // fit changes no image list; a US-008 test pins it), so nothing more
         // is copied.
@@ -203,10 +226,11 @@ export async function runExport(
               },
         limit: options.fitCompileLimit ?? FIT_COMPILE_LIMIT,
       });
+      if (done === null || cancelled()) return {cancelled: true};
       const {result} = done;
       if (!result.ok) {
         status = result.kind === 'typst' ? 'compile-error' : 'compiler-failed';
-        host.notice(result.error);
+        host.notice(failedNotice(result.error));
         return {failed: true};
       }
       // US-028 AC-17: the .typ of the result, when it is not the one written.
@@ -219,6 +243,7 @@ export async function runExport(
       const spreads =
         options.facingPages === true ? withTwoPageRight(result.pdf) : null;
       const bookPdf = spreads?.pdf ?? result.pdf;
+      progress?.step({kind: 'write'});
       await host.writeExportBytes(`${dir}/${names.pdf}`, bookPdf);
       // US-028 AC-5: the image fit warnings of the result; AC-16: none after
       // the fallback, which reports IMAGE_FIT_OFF; AC-14: a layout that did
@@ -261,6 +286,7 @@ export async function runExport(
       // US-036 AC-5: the A4 encounter sheet, a second compile after the
       // book's with the same files and fonts; a failure never stops the book.
       if (options.sheetTyp !== undefined && options.sheetTyp !== null) {
+        progress?.step({kind: 'sheet'});
         await host.writeExportFile(
           `${dir}/${names.sheetTyp}`,
           options.sheetTyp,
@@ -271,6 +297,8 @@ export async function runExport(
           files,
           fonts: options.fonts,
         });
+        // US-042 AC-9: a cancel during the sheet writes nothing more.
+        if (cancelled()) return {cancelled: true};
         if (sheet.ok) {
           await host.writeExportBytes(`${dir}/${names.sheetPdf}`, sheet.pdf);
           warnings.push(...sheetWarnings((sheet.sheets ?? []) as SheetFact[]));
@@ -282,6 +310,7 @@ export async function runExport(
       // PDF, in a worker; export only, never stops it (decision 1).
       const maxWordGap = options.maxWordGap ?? ENTRY_BUILTINS.maxWordGap;
       if (maxWordGap > 0 && options.compiler.scanWordGaps !== undefined) {
+        progress?.step({kind: 'gaps'});
         warnings.push(
           ...(await options.compiler.scanWordGaps(bookPdf, {
             maxWordGap,
@@ -292,6 +321,10 @@ export async function runExport(
           })),
         );
       }
+      // US-042 AC-9: a cancel during the gap scan writes nothing more.
+      if (cancelled()) return {cancelled: true};
+      // US-042 AC-8: the run's own warnings, after it.
+      progress?.warnings(warnings);
       return {warnings};
     };
 
@@ -302,9 +335,15 @@ export async function runExport(
       settings: options.settings,
       host,
       writeOutput,
+      pdfName: names.pdf,
     });
+    if (flow.cancelled === true) {
+      host.notice(CANCELLED_NOTICE);
+      return {status: 'cancelled'};
+    }
     return {status: flow.aborted ? 'aborted' : status};
   } finally {
+    stopListening();
     release();
   }
 }
@@ -314,7 +353,10 @@ interface SettleOptions {
   /** The converted text; the hints lines make it loop (AC-15). */
   typ: string;
   compile: (source: string) => Promise<CompileResult>;
-  notice: (text: string) => void;
+  /** US-042 AC-7: announces compile `n` of up to `limit` (the progress). */
+  step: (n: number, limit: number) => void;
+  /** US-042 AC-9: true once the export was cancelled. */
+  cancelled: () => boolean;
   /** The text at 100, or null; none: keep the last compile. */
   fallback: (() => Promise<string | null>) | undefined;
   limit: number;
@@ -334,25 +376,29 @@ interface Settled {
  * `nextFitCompile` picks the result, the next compile (`withFitHints` on
  * `typ`) or `'stuck'`; at `'stuck'` or after `limit` compiles the fallback's
  * text is compiled once (`fellBack`), or, without one, the last compile is
- * kept. A failed compile ends the loop at once. Each compile is announced
- * by `compilingNotice`; the fallback's as `Compiling…` (a new compile, not
- * a further try). Assumes `limit` ≥ 1.
+ * kept. A failed compile ends the loop at once. US-042 AC-7, AC-9: each
+ * compile is announced as a step (`n` of up to `limit`; the fallback's as
+ * compile 1, a new compile, not a further try); a cancel seen before or
+ * after a compile ends the loop with null. Assumes `limit` ≥ 1.
  */
-async function compileSettled(options: SettleOptions): Promise<Settled> {
-  const {typ, compile, notice, fallback, limit} = options;
+async function compileSettled(options: SettleOptions): Promise<Settled | null> {
+  const {typ, compile, step: announce, fallback, limit, cancelled} = options;
   const looping = typ.includes(FIT_HINT_LINES);
   let step: FitStep = {mode: 'seeded', hints: []};
   let source = typ;
   for (let n = 1; ; n++) {
-    notice(compilingNotice(n, limit));
+    if (cancelled()) return null;
+    announce(n, limit);
     const result = await compile(source);
+    if (cancelled()) return null;
     if (!result.ok || !looping) return {result, source, fellBack: false};
     const next = nextFitCompile(step, result.settled, result.fitDecisions);
     if (next === null) return {result, source, fellBack: false};
     if (next === 'stuck' || n >= limit) {
       const at100 = fallback === undefined ? null : await fallback();
       if (at100 === null) return {result, source, fellBack: false};
-      notice(compilingNotice(1, limit));
+      if (cancelled()) return null;
+      announce(1, limit);
       return {result: await compile(at100), source: at100, fellBack: true};
     }
     step = next;

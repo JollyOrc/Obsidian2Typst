@@ -97,20 +97,39 @@ export function buildReport(
 const plural = (count: number): string =>
   `${count} warning${count === 1 ? '' : 's'}`;
 
-/** US-006 AC-3: the notice after an export; `null` without warnings. */
-export function reportNotice(count: number, reportPath: string): string | null {
-  return count === 0
-    ? null
-    : `Exported with ${plural(count)}. Report: ${reportPath}`;
+/**
+ * US-042 | AC-11 (amends US-006 AC-3): The notice after an export that wrote its
+ * PDF: the PDF and the folder, and with warnings their count and the report.
+ */
+export function finishedNotice(options: {
+  pdf: string;
+  folder: string;
+  warnings: number;
+}): string {
+  const head = `✅ Exported ${options.pdf} to ${options.folder}`;
+  return options.warnings === 0
+    ? head
+    : `${head}, ${plural(options.warnings)} (see export-warnings.md)`;
 }
 
-/** US-006 AC-4: the notice of a strict-mode abort, with the first five. */
+/** US-042 | AC-11: The notice of a failed export. */
+export function failedNotice(message: string): string {
+  return `❌ Export failed: ${message}`;
+}
+
+/** US-042 AC-11: the notice of a cancelled export. */
+export const CANCELLED_NOTICE = '❌ Export cancelled.';
+
+/**
+ * US-006 AC-4, US-042 AC-11: the notice of a strict-mode abort, with the
+ * first five.
+ */
 export function strictNotice(warnings: readonly Warning[]): string {
   const first = warnings
     .slice(0, 5)
     .map(({code, line}) => (line > 0 ? `line ${line}: ${code}` : code));
   return [
-    `Export aborted: ${plural(warnings.length)} (strict mode)`,
+    `❌ Export aborted: ${plural(warnings.length)} (strict mode)`,
     ...first,
   ].join('\n');
 }

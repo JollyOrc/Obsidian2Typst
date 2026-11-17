@@ -4,7 +4,7 @@
 import type {Warning} from '../core/emit';
 import {
   buildReport,
-  reportNotice,
+  finishedNotice,
   strictNotice,
   warningsNotePath,
 } from '../core/report';
@@ -52,8 +52,10 @@ export interface FinishExportOptions {
    * warnings); they join the report and the notice, never the strict check.
    */
   writeOutput: () => Promise<
-    void | {failed: true} | {warnings: readonly Warning[]}
+    void | {failed: true} | {cancelled: true} | {warnings: readonly Warning[]}
   >;
+  /** US-042 AC-11: the PDF's file name, named by the finished notice. */
+  pdfName: string;
 }
 
 /**
@@ -63,7 +65,7 @@ export interface FinishExportOptions {
  */
 export async function finishExport(
   options: FinishExportOptions,
-): Promise<{aborted: boolean; failed?: true}> {
+): Promise<{aborted: boolean; failed?: true; cancelled?: true}> {
   const {warnings, source, host, settings} = options;
   const notePath = warningsNotePath(source.path, settings.warningsNoteFolder);
   if (settings.strictMode && warnings.length > 0) {
@@ -71,6 +73,10 @@ export async function finishExport(
     return {aborted: true};
   }
   const output = await options.writeOutput();
+  // US-042 AC-9 (P4): after a cancel nothing more is written.
+  if (output !== undefined && 'cancelled' in output) {
+    return {aborted: false, cancelled: true};
+  }
   // US-028 AC-5 (decision 8): the compile's warnings after the strict check,
   // merged by line (stable: the conversion's first on a tie).
   const all =
@@ -85,8 +91,14 @@ export async function finishExport(
   );
   if (output !== undefined && 'failed' in output)
     return {aborted: false, failed: true};
-  const notice = reportNotice(all.length, reportPath);
-  if (notice !== null) host.notice(notice);
+  // US-042 AC-11: the finished notice, with or without warnings.
+  host.notice(
+    finishedNotice({
+      pdf: options.pdfName,
+      folder: options.exportDir.replace(/\/+$/, ''),
+      warnings: all.length,
+    }),
+  );
   return {aborted: false};
 }
 

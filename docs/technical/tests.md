@@ -794,3 +794,14 @@ caught inside the compile loop; Enter on a refused folder is also refused by `ru
 | AC-13 | `US-042 AC-13` (the sections, their paths, `withoutPaths`, the question, the reset with Cancel and with nothing to remove, read at the run; the rows in the tab, Cancel first, Reset removes) |
 | AC-14 | `us-042-string-table` (no literal in a text sink outside `strings.ts`; the check finds each sink and quote and ignores non-literals) |
 | AC-15 | manual check (ticket) |
+
+**Ticket #175 (T1, 2026-11-17), green:** `us-042-notices`, `us-042-export-run` (17, three of them added at T1:
+a cancel during the encounter sheet's compile — also when it succeeds — and during the word-gap scan writes nothing
+more; the finished notice names the folder without its trailing slash), the headings, delayed tab and cancel of
+`us-042-progress` (its five drawing tests wait for T4), and the amended `us-006-export-flow`, `us-006-warnings`,
+`us-007-export-run`, `us-028-settle-export`, `us-038-details-strict`, `tests/integration/us-006-output-and-source`.
+Mutation round on the real code (four files, backup by path, checksums proven after the round, baseline = the five
+drawing tests red): 20 mutants, 15 caught first, three gaps closed by the tests above and then caught, two equivalent
+(a timer not cleared at the end: the end's own guard; the check before each compile: the check before writing). The
+whole suite after it: `npm test` 121 red (T2 to T6), integration 4 red (`build-output`, `us-007-composed-export`:
+T3 and later).

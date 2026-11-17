@@ -224,6 +224,12 @@ describe('US-042 AC-11: the notices of a run', () => {
     ]);
   });
 
+  it('the folder without its trailing slash', async () => {
+    const s = setup({exportDir: '/out/a5/'});
+    await runExport(s.options);
+    expect(s.host.notices).toEqual(['✅ Exported Book.pdf to /out/a5']);
+  });
+
   it('one warning: singular', async () => {
     const s = setup({warnings: [w('A', 1)]});
     await runExport(s.options);
@@ -293,6 +299,43 @@ describe('US-042 AC-9: cancel during the compile (P4)', () => {
     await runExport(s.options);
     s.progress.cancel();
     expect(s.compiler.disposed).toBe(0);
+  });
+
+  // Found at T1 (#175; G2 gaps, SCAR-002, SCAR-023): a cancel after the book's
+  // PDF was written writes nothing more — during the encounter sheet's compile
+  // (even when that compile still succeeds) and during the word-gap scan.
+  it('a cancel during the encounter sheet: the book PDF stays, no sheet PDF, no report', async () => {
+    const s = setup({sheetTyp: '= Sheet\n'});
+    let n = 0;
+    const realCompile = s.compiler.compile.bind(s.compiler);
+    s.compiler.compile = (request) => {
+      n += 1;
+      if (n === 2) s.progress.cancel();
+      return realCompile(request);
+    };
+    expect(await runExport(s.options)).toEqual({status: 'cancelled'});
+    expect(s.host.written).toEqual([
+      '/out/a5/Book.typ',
+      '/out/a5/assets/crypt.png',
+      '/out/a5/Book.pdf',
+      '/out/a5/Book - Encounter Sheet.typ',
+    ]);
+    expect(s.host.notices).toEqual(['❌ Export cancelled.']);
+  });
+
+  it('a cancel during the word-gap scan: the book PDF stays, no report', async () => {
+    const s = setup({maxWordGap: 200});
+    s.compiler.scanWordGaps = async () => {
+      s.progress.cancel();
+      return [w('TEXT_GAP_WIDE', 4)];
+    };
+    expect(await runExport(s.options)).toEqual({status: 'cancelled'});
+    expect(s.host.written).toEqual([
+      '/out/a5/Book.typ',
+      '/out/a5/assets/crypt.png',
+      '/out/a5/Book.pdf',
+    ]);
+    expect(s.host.notices).toEqual(['❌ Export cancelled.']);
   });
 
   it('a cancel before the compile: no compile at all', async () => {

@@ -1,7 +1,10 @@
 # US-042 — The UI standard: an export dialog, exports at once, a progress tab and debug info
 
-**Status:** Draft (G1 2026-11-17; P1 to P7 decided; M32 done, accepted as is; **G2 2026-11-17: tests written, red by design, proven on a reference**)
+**Status:** Draft (G1 2026-11-17; P1 to P7 decided; M32 done, accepted as is; **G2 2026-11-17: tests written, red by design, proven on a reference; G3 2026-11-17: tickets #175 to #181**)
 **Introduced:** 0.16.0 (planned, P7)
+**Tickets:** #175 (T1 the run: progress, cancel, notices), #176 (T2 the export dialog), #177 (T3 direct exports and
+entries), #178 (T4 the progress tab), #179 (T5 debug info and section reset), #180 (T6 the string table), #181 (T7 test
+build and manual check M33), in this order (G3, 2026-11-17)
 **Follows:** the preferred UI standard of Obsidian Knowledge (`ui-standard.md`), the owner's decisions of
 2026-11-17 in the control project's alignment note (D1 to D10 for all plugins; O2T-1 to O2T-6 for this one):
 an export dialog beside the direct actions (D2, O2T-3), the ribbon menu kept with `Export…` first (D6), a
