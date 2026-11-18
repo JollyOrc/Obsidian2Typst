@@ -1,7 +1,9 @@
 # US-042 — The UI standard: an export dialog, exports at once, a progress tab and debug info
 
-**Status:** Draft (G1 2026-11-17; P1 to P7 decided; M32 done, accepted as is; **G2 2026-11-17: tests written, red by design, proven on a reference; G3 2026-11-17: tickets #175 to #181**)
-**Introduced:** 0.16.0 (planned, P7)
+**Status:** Done (0.16.0, 2026-11-18; M33 passed). Earlier: G1 2026-11-17 (P1 to P7 decided; M32 done, accepted as
+is); G2 2026-11-17 (tests written, red by design, proven on a reference); G3 2026-11-17 (tickets #175 to #181); AC-14
+widened at T6 by the owner (2026-11-18)
+**Introduced:** 0.16.0
 **Tickets:** #175 (T1 the run: progress, cancel, notices), #176 (T2 the export dialog), #177 (T3 direct exports and
 entries), #178 (T4 the progress tab), #179 (T5 debug info and section reset), #180 (T6 the string table), #181 (T7 test
 build and manual check M33), in this order (G3, 2026-11-17)

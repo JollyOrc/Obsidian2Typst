@@ -60,7 +60,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-039](US-039-statblock-typst-api.md) | The statblock as Typst for another plugin (`api.statblockTypst`, `api.compileFonts`) | Code done 2026-11-12; M29 and release 0.15.0 open | asked for by Game Card Creator US-004 |
 | [US-040](US-040-statblock-icon-numbering.md) | The icon files of the statblock answer are numbered by the preset's track order (one path, one file; release 0.15.1) | Ready 2026-11-12 (D1, D2 accepted) | #168, #169 (found by Game Card Creator US-004 G2) |
 | [US-041](US-041-statblock-band-marks.md) | The ◆ marks of the statblock band stand beside the name when it wraps (preview, PDF, website; release 0.15.2) | Done (0.15.2, 2026-11-16; M30 part A passed) | #170, #171 to #173 |
-| [US-042](US-042-ui-standard.md) | The UI standard: an export dialog, direct exports at once, a progress tab after 2 s, debug info, section resets (planned 0.16.0) | Draft (G3 2026-11-17: tickets written) | #175 to #181; control project D1 to D10, O2T-1 to O2T-6 |
+| [US-042](US-042-ui-standard.md) | The UI standard: an export dialog, direct exports at once, a progress tab after 2 s, debug info, section resets, one string table (release 0.16.0) | Done (0.16.0, 2026-11-18; M33 passed) | #175 to #181; control project D1 to D10, O2T-1 to O2T-6 |
 
 ### Backlog
 
