@@ -114,7 +114,11 @@ colour; a *gap* is the width of one space of that font and size. W<sub>name</sub
   because a mark wrapped alone (the last row of the table) now takes fewer, so the
   statblock is lower by the difference; the entry's text wraps around it and the
   pages follow (US-030 AC-16a). A chapter with such a name compiles to the same
-  bytes twice, and `<o2t-wrap>`'s facts follow the new height. Example: a statblock
+  bytes twice — apart from the PDF's creation and modification time and the
+  document ID derived from them, which Typst takes from the clock (*amended
+  2026-11-18, #182, ticket #183: measured, the two compiles of the test differed in those
+  bytes only when they fell on two sides of a second*) — and `<o2t-wrap>`'s
+  facts follow the new height. Example: a statblock
   beside a text, with `Pneumonoultramicroscopically` as its name: the statblock is
   two band lines lower than in 0.15.1 (the two lines that held only a mark); the
   text beside it moves up by as much.

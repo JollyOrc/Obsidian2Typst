@@ -735,7 +735,7 @@ by 0.75 mm) and a test was strengthened (the marks one gap from the name).
 | AC-4 | `US-041 AC-4` (a word of 67.4 mm: not broken, no mark, centred, wider than the band) |
 | AC-5 | `US-041 AC-5` (11.5 pt, 8 pt, 16 pt, DejaVu Sans Mono: the mark, gap and letter width read from a wide band; one line, wrapped, and a probe word between the two widths) |
 | AC-6 | `us-041-preview-band` (three parts in order, the text `◆ Fen Hare ◆`, one name element, the name as text, the API's `◆ — ◆`; the three CSS rules, each declaration); the look in Obsidian by hand: M30 (ticket) |
-| AC-7 | `US-041 AC-7` (a chapter: the statblock is as high as one with a short name when the marks no longer wrap alone, one band line higher for a wrapped name, the same bytes from two compiles) |
+| AC-7 | `US-041 AC-7` (a chapter: the statblock is as high as one with a short name when the marks no longer wrap alone, one band line higher for a wrapped name, the same bytes from two compiles, the clock's fields set aside by `withoutClock` — amended 2026-11-18, #182) |
 | AC-8 | `US-040 AC-5, AC-6` amended (the prelude with the band's piece cut out has the 0.15.0 hash; the whole prelude pinned anew); the other US-030, US-035 and US-039 tests unchanged and green |
 | AC-9 | release steps (tickets) |
 
@@ -875,3 +875,9 @@ literal with a word, and that `src/core/strings.ts` imports nothing and is `STRI
 string table; AC-9's pure builder holds). Mutation round (6 files, backup by path, checksums proven): 6 literals put
 back and 1 broken carry, all caught; every core table text changed in turn (13), all caught. The whole suite:
 `npm test` 2838 passed, 1 todo; integration 692 of 692.
+
+**Ticket #183 (US-041 AC-7 amended, 2026-11-18; found by #182):** the byte comparison of two compiles failed when
+they fell on two sides of a second — Typst writes the clock into the PDF (measured: 40 compiles, 37 differing in the
+dates and the document ID only). `tests/support/pdf-clock.ts` (`withoutClock`) blanks those seven fields and refuses
+a PDF without one; `us-041-band-marks-pdf` compiles twice 1.1 s apart (raw bytes unequal, equal through
+`withoutClock`); self-checks in `tests/tooling/pdf-clock.test.ts` (3). Mutation round: 6 mutants, all caught.

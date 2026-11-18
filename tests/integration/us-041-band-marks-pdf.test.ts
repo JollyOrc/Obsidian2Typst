@@ -22,6 +22,7 @@ import {pageRuns, type TextRun} from '../../src/core/pdf/text';
 import {BOOK_FONTS} from '../support/book';
 import {ENTRIES, entry} from '../support/entries';
 import {compileEntries, disposeEntriesCompiler} from '../support/entries-pdf';
+import {withoutClock} from '../support/pdf-clock';
 
 const LIMIT = 120_000;
 const PT = 72 / 25.4;
@@ -448,9 +449,15 @@ describe("US-041 AC-7: the band's height and what depends on it (a chapter)", ()
   it(
     "the same chapter compiles to the same bytes twice (the wrap reads the statblock's height, SCAR-021)",
     async () => {
+      // Amended 2026-11-18 (#182): the PDF holds the clock (the dates and the
+      // ID derived from them); the two compiles are 1.1 s apart, so they fall
+      // on two sides of a second every run, not by chance, and must be equal
+      // apart from those fields.
       const a = await compileEntries(chapter('Pneumonoultramicroscopically'));
+      await new Promise((resolve) => setTimeout(resolve, 1100));
       const b = await compileEntries(chapter('Pneumonoultramicroscopically'));
-      expect(Buffer.from(b.pdf).equals(Buffer.from(a.pdf))).toBe(true);
+      expect(Buffer.from(b.pdf).equals(Buffer.from(a.pdf))).toBe(false);
+      expect(withoutClock(b.pdf)).toBe(withoutClock(a.pdf));
     },
     LIMIT,
   );
