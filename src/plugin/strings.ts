@@ -11,6 +11,12 @@ export const STRINGS = {
     export: 'Export',
     moreOptions: 'More options',
   },
+  progress: {
+    tabTitle: 'Export',
+    cancel: 'Cancel',
+    close: 'Close',
+    line: (n: number): string => `line ${n}`,
+  },
   notices: {
     openNote: 'Open a note to export it.',
   },

@@ -320,3 +320,64 @@ describe('US-042 AC-7 to AC-10: the tab drawn', () => {
     expect(rule).toMatch(/border-left:\s*5px solid var\(--color-yellow\)/);
   });
 });
+
+// Added at T4 (#178; SCAR-023): the view had no test at G2 — the retitle of a
+// reused tab (P5), the state drawn when the view opens, Close.
+describe('US-042 AC-7, AC-10: the progress view', () => {
+  async function view() {
+    const {ExportProgressView} = await import('../../src/plugin/progress/view');
+    const calls: string[] = [];
+    const leaf = {
+      app: {},
+      detach: () => void calls.push('detach'),
+      updateHeader: () => void calls.push('header'),
+    };
+    const v = new ExportProgressView(leaf as never);
+    const content = (v as unknown as {contentEl: FakeEl}).contentEl;
+    return {v, calls, content};
+  }
+  const state = (title: string, running = true): ProgressState => ({
+    title,
+    heading: 'Compiling',
+    warnings: [],
+    running,
+  });
+
+  it("the title is the note's; the header is refreshed only when the title changes", async () => {
+    const {v, calls} = await view();
+    expect(v.getDisplayText()).toBe('Export');
+    v.show(state('Exporting Book'), () => undefined);
+    v.show(state('Exporting Book'), () => undefined);
+    expect(v.getDisplayText()).toBe('Exporting Book');
+    v.show(state('Exporting Fen Hare'), () => undefined);
+    expect(v.getDisplayText()).toBe('Exporting Fen Hare');
+    expect(calls).toEqual(['header', 'header']);
+  });
+
+  it('Cancel calls the cancel of the latest show; Close detaches the tab', async () => {
+    const {v, calls, content} = await view();
+    v.show(state('Exporting Book'), () => void calls.push('old'));
+    v.show(state('Exporting Book'), () => void calls.push('cancel'));
+    content
+      .descendants()
+      .find((e) => e.tag === 'button')
+      ?.click();
+    v.show(state('Exporting Book', false), () => undefined);
+    content
+      .descendants()
+      .find((e) => e.tag === 'button')
+      ?.click();
+    expect(calls.filter((c) => c !== 'header')).toEqual(['cancel', 'detach']);
+  });
+
+  it('a state shown before the view opened is drawn when it opens', async () => {
+    const {v, content} = await view();
+    v.show(state('Exporting Book'), () => undefined);
+    content.empty();
+    await v.onOpen();
+    expect(
+      content.descendants().find((e) => e.classes.has('o2t-progress-heading'))
+        ?.text,
+    ).toBe('Compiling');
+  });
+});

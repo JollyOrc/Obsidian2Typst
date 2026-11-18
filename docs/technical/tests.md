@@ -823,3 +823,12 @@ checksums proven): 18 valid mutants (one more was invalid — it called a functi
 counted), 16 caught first, two gaps closed by the tests above and then caught. The whole suite after it: `npm test`
 26 red (T4: the drawing and the tab's wiring; T5: the settings tab and its wiring; T6: the text checks and the
 string table), integration 1 red (`build-output`: the tests of T4 and T5 import modules not written yet).
+
+**Ticket #178 (T4, 2026-11-17), green:** the drawing tests of `us-042-progress` and three tests added at T4 for the
+view (the title and the header refreshed only when it changes, P5's reuse; Cancel of the latest show and Close
+detaching the tab; a state drawn when the view opens), and the progress checks of `us-042-wiring` (one tightened at
+T4: the open tab found is the one used). Mutation round on the real code (four files, backup by path, checksums
+proven): 15 mutants, 14 caught first, one gap closed by the tightened check and then caught. The whole suite after
+it: `npm test` 19 red (T5 and T6); integration: first run 5 red (`build-output`, and `us-006-output-and-source`,
+`us-031-grow-pdf`, `us-032-fit-pdf`, `us-033-openers-pdf` — 673 of 692 counted; the four passed alone, 43 of 43, and
+in a second full run only `build-output` was red, 691 passed): not explained, recorded.

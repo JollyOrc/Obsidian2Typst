@@ -28,6 +28,9 @@ describe('US-042: main.ts', () => {
     );
     expect(main).toMatch(
       /getLeavesOfType\(\s*VIEW_TYPE_EXPORT_PROGRESS\s*,?\s*\)/,
+    ); // Tightened at T4 (#178; SCAR-023): the open tab found is the one used.
+    expect(main).toMatch(
+      /const (\w+) = this\.app\.workspace\.getLeavesOfType\(\s*VIEW_TYPE_EXPORT_PROGRESS,?\s*\)\[0\];[\s\S]{0,80}\1 \?\? this\.app\.workspace\.getLeaf\('tab'\)/,
     );
   });
 

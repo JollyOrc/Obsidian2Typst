@@ -283,3 +283,23 @@
   color: var(--text-muted);
   font-size: var(--font-ui-smaller);
 }
+
+/* US-042 AC-7, AC-8: the progress tab. */
+.o2t-progress-bar {
+  width: 100%;
+}
+
+.o2t-progress-warnings {
+  list-style: none;
+  padding-left: 0;
+}
+
+.o2t-progress-warning {
+  border-left: 5px solid var(--color-yellow);
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.o2t-progress-warning strong {
+  display: block;
+}

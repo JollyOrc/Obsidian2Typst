@@ -65,6 +65,11 @@ import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
 import {ExportDialog} from './export-dialog/dialog';
 import {
+  createExportProgress,
+  type ProgressState,
+} from '../core/export-progress';
+import {ExportProgressView, VIEW_TYPE_EXPORT_PROGRESS} from './progress/view';
+import {
   createFontVault,
   createNoteSource,
   createVaultFiles,
@@ -265,6 +270,17 @@ export default class Obsidian2TypstPlugin extends Plugin {
         chooseFolder: chooseExportFolder,
         openSettings: () => this.openOwnSettings(),
       }).choose(),
+    // US-042 AC-7 (D3, O2T-6): the progress tab only after 2 s.
+    startProgress: (noteName) =>
+      createExportProgress({
+        noteName,
+        delayMs: 2000,
+        timers: {
+          set: (fn, ms) => window.setTimeout(fn, ms),
+          clear: (id) => window.clearTimeout(id),
+        },
+        openTab: (cancel) => this.openProgressTab(cancel),
+      }),
     // US-042 AC-11: notices last 5 s.
     notice: (text) => void new Notice(text, 5000),
     run: (request) => this.runExportRequest(request),
@@ -347,6 +363,11 @@ export default class Obsidian2TypstPlugin extends Plugin {
       name: 'Export current note',
       callback: () => void this.actions.exportNote(),
     });
+    // US-042 AC-7: the progress tab.
+    this.registerView(
+      VIEW_TYPE_EXPORT_PROGRESS,
+      (leaf) => new ExportProgressView(leaf),
+    );
     // US-042 AC-2: the export dialog from the palette.
     this.addCommand({
       id: 'export-dialog',
@@ -513,6 +534,41 @@ export default class Obsidian2TypstPlugin extends Plugin {
         if (run !== undefined) item.onClick(() => void run());
       });
     }
+  }
+
+  /**
+   * US-042 | AC-7, AC-10 (P5, M32): Opens the progress tab in the background
+   * (`active: false`, measured in M32: drawn at once, updated through the
+   * compile), or reuses an open one; shows the latest state once the view is
+   * there, so a state given while the tab was opening is not lost.
+   */
+  private openProgressTab(cancel: () => void): {
+    show(state: ProgressState): void;
+  } {
+    let latest: ProgressState | null = null;
+    let view: ExportProgressView | null = null;
+    void (async () => {
+      const existing = this.app.workspace.getLeavesOfType(
+        VIEW_TYPE_EXPORT_PROGRESS,
+      )[0];
+      const leaf = existing ?? this.app.workspace.getLeaf('tab');
+      if (existing === undefined) {
+        await leaf.setViewState({
+          type: VIEW_TYPE_EXPORT_PROGRESS,
+          active: false,
+        });
+      }
+      if (leaf.view instanceof ExportProgressView) {
+        view = leaf.view;
+        if (latest !== null) view.show(latest, cancel);
+      }
+    })();
+    return {
+      show: (state) => {
+        latest = state;
+        view?.show(state, cancel);
+      },
+    };
   }
 
   /**
