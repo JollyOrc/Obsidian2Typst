@@ -21,6 +21,13 @@ import {
 } from './rows';
 import {captureScroll, type ScrollNode} from './scroll';
 import {createSectionState} from './sections';
+import {STRINGS} from '../strings';
+import {ConfirmModal} from './rows';
+import {
+  RESETTABLE_SECTIONS,
+  resetSection,
+  type ResettableSection,
+} from './section-reset';
 
 export interface SettingsTabDeps {
   settings: SettingsStore;
@@ -31,6 +38,8 @@ export interface SettingsTabDeps {
   usePreset(name: string): Promise<void>;
   /** US-021 AC-8: opens the details pop-up of a preset. */
   openDetails(name: string): void;
+  /** US-042 AC-12: gathers and copies the debug info. */
+  copyDebugInfo(): Promise<void>;
 }
 
 export class Obsidian2TypstSettingTab extends PluginSettingTab {
@@ -64,13 +73,20 @@ export class Obsidian2TypstSettingTab extends PluginSettingTab {
     // US-008 AC-19: a redraw must not throw the user back to the top.
     this.restoreScroll = captureScroll(containerEl as unknown as ScrollNode);
     containerEl.empty();
-    containerEl.createEl('p', {
-      cls: 'setting-item-description',
-      text: `Obsidian2Typst ${this.plugin.manifest.version}`,
-    });
+    // US-042 AC-12: the version and Copy debug info in the first line.
+    const header = containerEl.createDiv({cls: 'o2t-tab-header'});
+    new Setting(header)
+      .setDesc(STRINGS.tab.version(this.plugin.manifest.version))
+      .addExtraButton((b) =>
+        b
+          .setIcon('bug')
+          .setTooltip(STRINGS.tab.copyDebugInfo)
+          .onClick(() => void this.deps.copyDebugInfo()),
+      );
     addLayoutSections(containerEl, this.rowsEnv(), TAB_LAYOUT, this.sections, {
       presets: (body) => this.showPresets(body),
       other: (body, item) => this.showGlobal(body, item),
+      sectionEnd: (body, name) => this.addSectionReset(body, name),
     });
     this.restoreScroll();
     requestAnimationFrame(() => this.restoreScroll());
@@ -81,6 +97,30 @@ export class Obsidian2TypstSettingTab extends PluginSettingTab {
     this.stopListening = null;
     this.stopActive?.();
     this.stopActive = null;
+  }
+
+  /**
+   * US-042 | AC-13 (P3): The reset row at the end of Page, Text and Book; the
+   * other sections get none. The question is the shared `ConfirmModal`
+   * (Cancel first, #174); the tab redraws after a reset (SCAR-016).
+   */
+  private addSectionReset(body: HTMLElement, name: string): void {
+    if (!(RESETTABLE_SECTIONS as readonly string[]).includes(name)) return;
+    new Setting(body).addButton((b) =>
+      b.setButtonText(STRINGS.tab.resetSection).onClick(async () => {
+        const reset = await resetSection(
+          {
+            settings: this.deps.settings,
+            confirm: (question) =>
+              new Promise<boolean>((resolve) =>
+                new ConfirmModal(this.app, question, resolve).open(),
+              ),
+          },
+          name as ResettableSection,
+        );
+        if (reset) this.display();
+      }),
+    );
   }
 
   private showPresets(root: HTMLElement): void {

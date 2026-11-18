@@ -540,13 +540,15 @@ export interface LayoutHooks {
   cover?(body: HTMLElement): void;
   /** A row that is no Defaults row: Strict mode, the folder rows. */
   other?(body: HTMLElement, item: LayoutSection['items'][number]): void;
+  /** US-042 AC-13: after a section's rows (the tab's section reset). */
+  sectionEnd?(body: HTMLElement, name: string): void;
 }
 
 /**
  * US-029 | AC-1, AC-7, AC-8: Draws `sections` into `root`, each as a
  * collapsible section (`addSection`, open as `state` says): feature rows by
  * `addFeatureRow`, plain Defaults rows by `addDefaultRows`, everything else by
- * the screen's `hooks`.
+ * the screen's `hooks`; `hooks.sectionEnd` last in each section (US-042 AC-13).
  */
 export function addLayoutSections(
   root: HTMLElement,
@@ -567,6 +569,7 @@ export function addLayoutSections(
       } else if (item.toggle === 'strictMode') hooks.other?.(body, item);
       else addFeatureRow(body, env, item);
     }
+    hooks.sectionEnd?.(body, section.name);
   }
 }
 

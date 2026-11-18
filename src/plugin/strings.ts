@@ -19,5 +19,17 @@ export const STRINGS = {
   },
   notices: {
     openNote: 'Open a note to export it.',
+    debugInfoCopied: 'Debug info copied.',
+  },
+  tab: {
+    version: (v: string): string => `Obsidian2Typst ${v}`,
+    copyDebugInfo: 'Copy debug info',
+    resetSection: 'Reset this section to defaults',
+  },
+  sectionReset: {
+    title: (name: string): string => `Reset "${name}" to its defaults?`,
+    line: 'Your values in this section will be removed; presets that do not set them use the built-in values.',
+    confirm: 'Reset',
+    cancel: 'Cancel',
   },
 } as const;

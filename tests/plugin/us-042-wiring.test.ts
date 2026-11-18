@@ -37,6 +37,14 @@ describe('US-042: main.ts', () => {
   it('AC-12: the debug info is gathered and copied, then a notice', () => {
     expect(main).toMatch(/copyDebugInfo:[\s\S]{0,600}debugInfo\(/);
     expect(main).toMatch(/navigator\.clipboard\.writeText\(/);
+    // Tightened at T5 (SCAR-023): the settings file is read, and the notice
+    // follows the copy.
+    expect(main).toMatch(
+      /settingsText:\s*\(await adapter\.exists\(file\)\)\s*\?\s*await adapter\.read\(file\)/,
+    );
+    expect(main).toMatch(
+      /navigator\.clipboard\.writeText\(text\);\s*new Notice\(STRINGS\.notices\.debugInfoCopied/,
+    );
   });
 });
 

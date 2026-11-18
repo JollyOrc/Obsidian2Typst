@@ -118,7 +118,7 @@ async function tab(defaults: unknown = {}) {
   );
   t.display();
   const root = (t as unknown as {containerEl: FakeEl}).containerEl;
-  return {root, settings, copied: () => copied};
+  return {root, settings, copied: () => copied, tab: t};
 }
 
 function inside(el: unknown, ancestor: FakeEl): boolean {
@@ -182,6 +182,9 @@ describe('US-042 AC-13: which values a section reset removes', () => {
     const text = sectionResetPaths('Text').map((p) => p.join('.'));
     expect(text).toContain('fonts.body.size');
     expect(text).toContain('linkPageNumbers');
+    // Added at T5 (SCAR-023): a plain row's path, not only feature rows'.
+    expect(text).toContain('headingNumbering');
+    expect(text).toContain('template');
     // No section's paths overlap another's.
     const all = [...page, ...book, ...text];
     expect(new Set(all).size).toBe(all.length);
@@ -297,6 +300,25 @@ describe('US-042 AC-13: the reset itself', () => {
     );
     expect(s.settings.data.defaults).toEqual({});
   });
+
+  // Added at T5 (SCAR-023, SCAR-016): the Defaults are read again after the
+  // question, so a value set while it was open is kept.
+  it('a value set while the question is open is kept (another section)', async () => {
+    const {resetSection} =
+      await import('../../src/plugin/settings/section-reset');
+    const s = await store({page: {bleed: 5}, toc: {depth: 2}});
+    await resetSection(
+      {
+        settings: s.settings,
+        confirm: async () => {
+          await s.settings.setDefaults({page: {bleed: 5}, toc: {depth: 3}});
+          return true;
+        },
+      },
+      'Page',
+    );
+    expect(s.settings.data.defaults).toEqual({toc: {depth: 3}});
+  });
 });
 
 describe('US-042 AC-13: the rows in the tab', () => {
@@ -336,5 +358,31 @@ describe('US-042 AC-13: the rows in the tab', () => {
     buttons[1]?.click();
     for (let i = 0; i < 10; i++) await Promise.resolve();
     expect(t.settings.data.defaults).toEqual({toc: {depth: 2}});
+  });
+
+  // Added at T5 (SCAR-023, SCAR-016): the tab redraws after a reset, not
+  // after Cancel, so the rows show the built-in values at once.
+  it('the tab redraws after Reset, not after Cancel', async () => {
+    for (const [answer, draws] of [
+      [0, 0],
+      [1, 1],
+    ] as const) {
+      resetFake();
+      const t = await tab({page: {bleed: 5}});
+      const display = vi.spyOn(t.tab, 'display');
+      void rowsIn(section(t.root, 'Page')).at(-1)?.buttons[0]?.clicked?.();
+      await Promise.resolve();
+      const modal = modals.at(-1) as unknown as {
+        contentEl: FakeEl;
+        onOpen(): void;
+      };
+      modal.onOpen();
+      const buttons = modal.contentEl
+        .descendants()
+        .filter((e) => e.tag === 'button');
+      buttons[answer]?.click();
+      for (let i = 0; i < 10; i++) await Promise.resolve();
+      expect(display).toHaveBeenCalledTimes(draws);
+    }
   });
 });

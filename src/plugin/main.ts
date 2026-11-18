@@ -7,6 +7,7 @@ import {
   Notice,
   Plugin,
   TFolder,
+  apiVersion,
   normalizePath,
   type MarkdownPostProcessorContext,
   type WorkspaceLeaf,
@@ -69,6 +70,8 @@ import {
   type ProgressState,
 } from '../core/export-progress';
 import {ExportProgressView, VIEW_TYPE_EXPORT_PROGRESS} from './progress/view';
+import {debugInfo} from './debug-info';
+import {STRINGS} from './strings';
 import {
   createFontVault,
   createNoteSource,
@@ -311,6 +314,33 @@ export default class Obsidian2TypstPlugin extends Plugin {
         fonts: this.fontSet,
         usePreset: (name) => this.actions.usePreset(name),
         openDetails: (name) => this.openDetails(name),
+        // US-042 AC-12: gathered at the click, copied, then a notice. The
+        // enabled plugins are private API: a structural type, no `any`.
+        copyDebugInfo: async () => {
+          const adapter = this.app.vault.adapter;
+          const file = normalizePath(`${this.manifest.dir ?? ''}/data.json`);
+          const plugins = (
+            this.app as unknown as {
+              plugins?: {
+                enabledPlugins?: Set<string>;
+                manifests?: Record<string, {version: string}>;
+              };
+            }
+          ).plugins;
+          const text = debugInfo({
+            pluginVersion: this.manifest.version,
+            obsidianVersion: apiVersion,
+            settingsText: (await adapter.exists(file))
+              ? await adapter.read(file)
+              : null,
+            plugins: [...(plugins?.enabledPlugins ?? [])].map((id) => ({
+              id,
+              version: plugins?.manifests?.[id]?.version ?? '?',
+            })),
+          });
+          await navigator.clipboard.writeText(text);
+          new Notice(STRINGS.notices.debugInfoCopied, 5000);
+        },
       }),
     );
     this.registerView(

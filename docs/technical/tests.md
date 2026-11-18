@@ -832,3 +832,13 @@ proven): 15 mutants, 14 caught first, one gap closed by the tightened check and 
 it: `npm test` 19 red (T5 and T6); integration: first run 5 red (`build-output`, and `us-006-output-and-source`,
 `us-031-grow-pdf`, `us-032-fit-pdf`, `us-033-openers-pdf` — 673 of 692 counted; the four passed alone, 43 of 43, and
 in a second full run only `build-output` was red, 691 passed): not explained, recorded.
+
+**Ticket #179 (T5, 2026-11-18), green:** `us-042-settings-tab` (the debug info text, the header row, the section
+reset's paths, question, reset and rows), the debug-info check of `us-042-wiring`, the amended `us-029-settings-tab`,
+and — early, through the header row's string — `us-000-test-build-version` (T6's). Added at T5: a plain row's path in
+*Text* (`headingNumbering`, `template`); a value set while the question is open is kept; the tab redraws after Reset,
+not after Cancel; the wiring check tightened (the settings file is read; the notice follows the copy). Mutation round
+on the real code (six files, backup by path, checksums proven): 24 mutants, 18 caught first, five gaps closed by the
+tests above and then caught, one equivalent (`strictMode` as a reset path: it is a toggle only in *Export*, which has
+no reset). The whole suite after it: `npm test` 3 red (T6: `us-012-panel`, `us-021-groups-details`, the string
+table); integration 692 of 692 in two full runs (logs kept, #182).
