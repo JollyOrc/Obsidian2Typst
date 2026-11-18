@@ -4,6 +4,7 @@
 import {readFileSync} from 'node:fs';
 import {describe, expect, it} from 'vitest';
 import {readCheck} from '../support/manual-checks';
+import {STRINGS} from '../../src/plugin/strings';
 
 const main = readFileSync('src/plugin/main.ts', 'utf8');
 const manual = readCheck('M1');
@@ -14,7 +15,9 @@ describe('US-007 wiring in src/plugin/main.ts', () => {
   });
 
   it('US-007 AC-9: the developer command Check compiler (developer) is registered', () => {
-    expect(main).toContain('Check compiler (developer)');
+    // US-042 AC-14 (amended at T6): the text is in the string table.
+    expect(main).toContain('name: STRINGS.commands.checkCompiler');
+    expect(STRINGS.commands.checkCompiler).toBe('Check compiler (developer)');
     expect(main).toMatch(/addCommand\(\{[^}]*id: 'check-compiler'/s);
   });
 

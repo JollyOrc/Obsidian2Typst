@@ -20,6 +20,7 @@ import {
   type PluginData,
   type SettingsStorage,
 } from '../../src/plugin/settings/data';
+import {STRINGS} from '../../src/plugin/strings';
 
 const read = (path: string) => readFileSync(path, 'utf8');
 
@@ -54,7 +55,9 @@ describe('US-012 AC-1 the command and the single panel', () => {
   it('US-012 AC-1: the command is registered as "Open style panel"', () => {
     const main = read('src/plugin/main.ts');
     expect(main).toContain("id: 'open-style-panel'");
-    expect(main).toContain("name: 'Open style panel'");
+    // US-042 AC-14 (amended at T6): the text is in the string table.
+    expect(main).toContain('name: STRINGS.commands.openPanel');
+    expect(STRINGS.commands.openPanel).toBe('Open style panel');
     expect(main).toContain('registerView(');
     expect(main).toContain('VIEW_TYPE_STYLE_PANEL');
   });

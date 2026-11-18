@@ -6,7 +6,11 @@ import {DEFAULT_ROWS, FONT_ROWS} from './row-data';
 import {TAB_LAYOUT} from './layout';
 
 /** US-042 AC-13 (P3): the sections with a reset. */
-export const RESETTABLE_SECTIONS = ['Page', 'Text', 'Book'] as const;
+export const RESETTABLE_SECTIONS = [
+  STRINGS.sections.page,
+  STRINGS.sections.text,
+  STRINGS.sections.book,
+] as const;
 export type ResettableSection = (typeof RESETTABLE_SECTIONS)[number];
 
 const pathOf = (label: string): readonly string[] | undefined =>

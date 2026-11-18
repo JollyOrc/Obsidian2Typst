@@ -14,6 +14,7 @@ import {failedNotice} from '../core/report';
 import type {VaultPort} from './presets/store';
 import {openStylePanel, type PanelWorkspace} from './preview/open';
 import type {DeleteConfirmation} from './settings/dialog';
+import {STRINGS} from './strings';
 
 /** What the actions need: the export command's deps plus the two UI steps. */
 export interface ActionDeps extends ExportCommandDeps {
@@ -70,17 +71,17 @@ async function imageRefusal(
   preset: string,
 ): Promise<string | null> {
   const name = path.slice(path.lastIndexOf('/') + 1);
-  const unchanged = `preset "${preset}" was not changed`;
+  const unchanged = STRINGS.presets.unchanged(preset);
   let head: Uint8Array;
   try {
     head = await deps.vault.readHead(path);
   } catch {
-    return `"${name}" no longer exists; ${unchanged}`;
+    return STRINGS.presets.imageGone(name, unchanged);
   }
   const extension = extensionOf(path);
   return sniffImage(extension, head)
     ? null
-    : `"${name}" is not a valid .${extension} image; ${unchanged}`;
+    : STRINGS.presets.imageInvalid(name, extension, unchanged);
 }
 
 /**
@@ -139,7 +140,7 @@ export function createActions(deps: ActionDeps): Actions {
     async previewNote(path) {
       if (path !== undefined) await deps.showNote(path);
       if (!(await deps.openPanel())) {
-        deps.notice('There is no room for the panel in the right sidebar');
+        deps.notice(STRINGS.notices.noRoom);
       }
     },
     async usePreset(name) {
@@ -160,10 +161,10 @@ export function createActions(deps: ActionDeps): Actions {
         }
       }
       const confirmed = await deps.confirm({
-        title: `Change preset "${preset}"`,
+        title: STRINGS.questions.changePresetTitle(preset),
         lines: [question],
-        confirmLabel: 'Change preset',
-        cancelLabel: 'Cancel',
+        confirmLabel: STRINGS.questions.changePresetConfirm,
+        cancelLabel: STRINGS.questions.cancel,
       });
       if (!confirmed) return;
       const entries = deps.presets.entries();
@@ -173,7 +174,7 @@ export function createActions(deps: ActionDeps): Actions {
       );
       const entry = deps.presets.get(preset);
       if (active !== preset || entry === undefined || !entry.valid) {
-        deps.notice('The active preset changed; nothing was written');
+        deps.notice(STRINGS.notices.presetChanged);
         return;
       }
       try {
@@ -187,11 +188,11 @@ export function createActions(deps: ActionDeps): Actions {
         deps.notice(
           error instanceof RefusedEdit
             ? message
-            : `Preset "${preset}" was not changed: ${message}`,
+            : STRINGS.presets.notChanged(preset, message),
         );
         return;
       }
-      deps.notice(`Preset "${preset}" changed`);
+      deps.notice(STRINGS.notices.presetEdited(preset));
     },
   };
 }

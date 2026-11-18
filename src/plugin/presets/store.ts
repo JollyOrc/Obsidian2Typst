@@ -17,6 +17,7 @@ import {
   type PresetError,
   type PresetFields,
 } from '../../core/presets';
+import {STRINGS} from '../strings';
 
 /** What the store needs from the vault. Paths are vault paths. */
 export interface VaultPort {
@@ -189,10 +190,12 @@ export function createPresetStore(options: PresetStoreOptions): PresetStore {
 
   function announce(r: Record_): void {
     if (!r.entry.valid && r.entry.error !== undefined) {
-      options.notify(`Preset "${r.name}": ${formatPresetError(r.entry.error)}`);
+      options.notify(
+        STRINGS.presets.problem(r.name, formatPresetError(r.entry.error)),
+      );
     }
     for (const notice of r.notices) {
-      options.notify(`Preset "${r.name}": ${notice}`);
+      options.notify(STRINGS.presets.problem(r.name, notice));
     }
   }
 
@@ -302,13 +305,13 @@ export function createPresetStore(options: PresetStoreOptions): PresetStore {
     use(name) {
       const record = byName(name);
       if (record === undefined) {
-        return {ok: false, error: `Preset "${name}" does not exist`};
+        return {ok: false, error: STRINGS.presets.missing(name)};
       }
       if (record.entry.preset === undefined) {
         const reason = formatPresetError(
-          record.entry.error ?? {message: 'unknown error', line: null},
+          record.entry.error ?? {message: STRINGS.tab.unknownError, line: null},
         );
-        return {ok: false, error: `Preset "${name}" is invalid: ${reason}`};
+        return {ok: false, error: STRINGS.presets.invalid(name, reason)};
       }
       return {ok: true, preset: record.entry.preset};
     },
@@ -320,7 +323,7 @@ export function createPresetStore(options: PresetStoreOptions): PresetStore {
       if (from !== undefined) {
         const source = byName(from);
         if (source === undefined) {
-          return {ok: false, error: `Preset "${from}" does not exist`};
+          return {ok: false, error: STRINGS.presets.missing(from)};
         }
         text = await vault.read(source.path);
       }
@@ -330,7 +333,7 @@ export function createPresetStore(options: PresetStoreOptions): PresetStore {
     async duplicate(name) {
       const source = byName(name);
       if (source === undefined) {
-        return {ok: false, error: `Preset "${name}" does not exist`};
+        return {ok: false, error: STRINGS.presets.missing(name)};
       }
       return add(copyName(name, names()), await vault.read(source.path));
     },
@@ -338,7 +341,7 @@ export function createPresetStore(options: PresetStoreOptions): PresetStore {
     async rename(name, newName) {
       const record = byName(name);
       if (record === undefined) {
-        return {ok: false, error: `Preset "${name}" does not exist`};
+        return {ok: false, error: STRINGS.presets.missing(name)};
       }
       const checked = validatePresetName(newName, names(), name);
       if (!checked.ok) return checked;
@@ -354,7 +357,7 @@ export function createPresetStore(options: PresetStoreOptions): PresetStore {
 
     canRemove(name, active) {
       if (byName(name) === undefined) {
-        return {ok: false, error: `Preset "${name}" does not exist`};
+        return {ok: false, error: STRINGS.presets.missing(name)};
       }
       return planDelete(names(), name, active);
     },
@@ -362,7 +365,7 @@ export function createPresetStore(options: PresetStoreOptions): PresetStore {
     async remove(name, active) {
       const record = byName(name);
       if (record === undefined) {
-        return {ok: false, error: `Preset "${name}" does not exist`};
+        return {ok: false, error: STRINGS.presets.missing(name)};
       }
       const plan = planDelete(names(), name, active);
       if (!plan.ok) return plan;

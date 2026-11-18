@@ -8,6 +8,7 @@ import {
   type CompileRequest,
   type CompileResult,
 } from '../../core/compile';
+import {STRINGS} from '../strings';
 
 /** The part of a Web Worker the service uses. */
 export interface WorkerLike {
@@ -75,7 +76,8 @@ export interface TypstCompilerOptions {
   compilerWasm: () => Promise<Uint8Array>;
 }
 
-const failureText = (text: string): string => `Typst compiler failed: ${text}`;
+const failureText = (text: string): string =>
+  `${STRINGS.compiler.failedPrefix}${text}`;
 
 const failure = (text: string): CompileResult => ({
   ok: false,
@@ -131,7 +133,7 @@ export function createTypstCompiler(
       finish(failure(reason));
       end();
     };
-    const abort = cancel('the plugin was unloaded');
+    const abort = cancel(STRINGS.compiler.unloaded);
     aborts.add(abort);
 
     const work = async (): Promise<Result> => {
@@ -140,7 +142,7 @@ export function createTypstCompiler(
         if (answered) return await done;
         worker = options.createWorker();
         worker.onerror = (event) =>
-          finish(failure(event.message ?? 'unknown error'));
+          finish(failure(event.message ?? STRINGS.compiler.unknownError));
         const current = worker;
         worker.onmessage = ({data}) => {
           const message = data as {
@@ -217,7 +219,7 @@ export function createTypstCompiler(
               error: formatCompileError(message.message ?? ''),
             });
           } else if (message.type === 'failed') {
-            finish(failure(message.message ?? 'unknown error'));
+            finish(failure(message.message ?? STRINGS.compiler.unknownError));
           }
         };
         worker.postMessage({
@@ -236,7 +238,7 @@ export function createTypstCompiler(
     };
     return {
       result: work() as Promise<K extends 'pdf' ? CompileResult : VectorResult>,
-      cancel: cancel('the compile was cancelled'),
+      cancel: cancel(STRINGS.compiler.cancelled),
     };
   }
 
@@ -257,7 +259,11 @@ export function createTypstCompiler(
           worker = options.createWorker();
           const current = worker;
           current.onerror = (event) =>
-            reject(new Error(failureText(event.message ?? 'unknown error')));
+            reject(
+              new Error(
+                failureText(event.message ?? STRINGS.compiler.unknownError),
+              ),
+            );
           current.onmessage = ({data}) => {
             const message = data as {
               type?: string;
@@ -276,7 +282,9 @@ export function createTypstCompiler(
               resolve(message.faces ?? []);
             } else if (message.type === 'failed') {
               reject(
-                new Error(failureText(message.message ?? 'unknown error')),
+                new Error(
+                  failureText(message.message ?? STRINGS.compiler.unknownError),
+                ),
               );
             }
           };
@@ -290,7 +298,7 @@ export function createTypstCompiler(
       } catch (error) {
         if (
           error instanceof Error &&
-          error.message.startsWith('Typst compiler failed: ')
+          error.message.startsWith(STRINGS.compiler.failedPrefix)
         ) {
           throw error;
         }
@@ -314,7 +322,7 @@ export function createTypstCompiler(
       const failed = (text: string): Warning[] => [
         {
           code: 'TEXT_GAP_SCAN_FAILED',
-          message: `The word-gap scan could not read the PDF (${text}); no line was checked`,
+          message: STRINGS.compiler.gapScanFailed(text),
           line: 0,
         },
       ];
@@ -323,7 +331,7 @@ export function createTypstCompiler(
           worker = options.createWorker();
           const current = worker;
           current.onerror = (event) =>
-            resolve(failed(event.message ?? 'unknown error'));
+            resolve(failed(event.message ?? STRINGS.compiler.unknownError));
           current.onmessage = ({data}) => {
             const message = data as {
               type?: string;
@@ -334,7 +342,7 @@ export function createTypstCompiler(
             if (message.id !== id) return;
             if (message.type === 'scan-result') resolve(message.warnings ?? []);
             else if (message.type === 'failed')
-              resolve(failed(message.message ?? 'unknown error'));
+              resolve(failed(message.message ?? STRINGS.compiler.unknownError));
           };
           current.postMessage({
             type: 'scan',

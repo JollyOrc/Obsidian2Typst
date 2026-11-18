@@ -5,6 +5,7 @@
 import {BUNDLED_CODE_FAMILY, BUNDLED_DEFAULT_FAMILY} from '../../core/fonts';
 import {BREAK_LEVELS, BREAK_RULES} from '../../core/layout/page-setup';
 import type {FieldPath} from '../../core/presets';
+import {STRINGS} from '../strings';
 
 /** US-010 AC-6: one row of the Fonts section. */
 export interface FontRow {
@@ -18,65 +19,65 @@ export interface FontRow {
   hint?: string;
 }
 
-const SIZE_HINT = 'pt, greater than 0 and at most 200';
+const SIZE_HINT = STRINGS.hints.size;
 
 export const FONT_ROWS: readonly FontRow[] = [
   {
-    label: 'Font folder',
+    label: STRINGS.labels.fontFolder,
     path: ['fonts', 'folder'],
     kind: 'folder',
-    hint: 'vault folder with .ttf and .otf files',
+    hint: STRINGS.hints.fontFolder,
   },
   {
-    label: 'Default font',
+    label: STRINGS.labels.defaultFont,
     path: ['fonts', 'default'],
     kind: 'family',
     builtin: BUNDLED_DEFAULT_FAMILY,
   },
   {
-    label: 'Body font',
+    label: STRINGS.labels.bodyFont,
     path: ['fonts', 'body', 'family'],
     kind: 'family',
     unset: true,
   },
   {
-    label: 'Body size (pt)',
+    label: STRINGS.labels.bodySize,
     path: ['fonts', 'body', 'size'],
     kind: 'size',
     hint: SIZE_HINT,
   },
   {
-    label: 'Heading font',
+    label: STRINGS.labels.headingFont,
     path: ['fonts', 'heading', 'family'],
     kind: 'family',
     unset: true,
   },
   {
-    label: 'Heading size (pt)',
+    label: STRINGS.labels.headingSize,
     path: ['fonts', 'heading', 'size'],
     kind: 'size',
     hint: SIZE_HINT,
   },
   {
-    label: 'Caption font',
+    label: STRINGS.labels.captionFont,
     path: ['fonts', 'caption', 'family'],
     kind: 'family',
     unset: true,
   },
   {
-    label: 'Caption size (pt)',
+    label: STRINGS.labels.captionSize,
     path: ['fonts', 'caption', 'size'],
     kind: 'size',
     hint: SIZE_HINT,
   },
   {
-    label: 'Code font',
+    label: STRINGS.labels.codeFont,
     path: ['fonts', 'code', 'family'],
     kind: 'family',
     builtin: BUNDLED_CODE_FAMILY,
   },
   {
-    label: 'Code size (pt)',
+    label: STRINGS.labels.codeSize,
     path: ['fonts', 'code', 'size'],
     kind: 'size',
     hint: SIZE_HINT,
@@ -95,82 +96,107 @@ export interface FieldRow {
 
 export const DEFAULT_ROWS: readonly FieldRow[] = [
   {
-    label: 'Highlight colour',
+    label: STRINGS.labels.highlightColour,
     path: ['highlightColor'],
     kind: 'text',
-    hint: '#rrggbb',
+    hint: STRINGS.hints.highlightColour,
   },
   {
-    label: 'Heading numbering',
+    label: STRINGS.labels.headingNumbering,
     path: ['headingNumbering'],
     kind: 'text',
-    hint: '1.1, a.1, (1.1) or none',
+    hint: STRINGS.hints.headingNumbering,
   },
   {
-    label: 'Footnotes for external links',
+    label: STRINGS.labels.footnotesForExternalLinks,
     path: ['externalLinkFootnotes'],
     kind: 'toggle',
   },
   {
-    label: 'Template file',
+    label: STRINGS.labels.templateFile,
     path: ['template'],
     kind: 'text',
-    hint: 'path of a .typ file in the vault',
+    hint: STRINGS.hints.templateFile,
   },
   {
-    label: 'Trim size',
+    label: STRINGS.labels.trimSize,
     path: ['page', 'trimSize'],
     kind: 'text',
-    hint: 'A4, A5, A6 or US Letter',
+    hint: STRINGS.hints.trimSize,
   },
-  {label: 'Trim width (mm)', path: ['page', 'trimWidth'], kind: 'number'},
-  {label: 'Trim height (mm)', path: ['page', 'trimHeight'], kind: 'number'},
-  {label: 'Top margin (mm)', path: ['page', 'margins', 'top'], kind: 'number'},
   {
-    label: 'Bottom margin (mm)',
+    label: STRINGS.labels.trimWidth,
+    path: ['page', 'trimWidth'],
+    kind: 'number',
+  },
+  {
+    label: STRINGS.labels.trimHeight,
+    path: ['page', 'trimHeight'],
+    kind: 'number',
+  },
+  {
+    label: STRINGS.labels.topMargin,
+    path: ['page', 'margins', 'top'],
+    kind: 'number',
+  },
+  {
+    label: STRINGS.labels.bottomMargin,
     path: ['page', 'margins', 'bottom'],
     kind: 'number',
   },
   {
-    label: 'Inside margin (mm)',
+    label: STRINGS.labels.insideMargin,
     path: ['page', 'margins', 'inside'],
     kind: 'number',
   },
   {
-    label: 'Outside margin (mm)',
+    label: STRINGS.labels.outsideMargin,
     path: ['page', 'margins', 'outside'],
     kind: 'number',
   },
-  {label: 'Bleed (mm)', path: ['page', 'bleed'], kind: 'number'},
-  {label: 'Slug (mm)', path: ['page', 'slug'], kind: 'number'},
-  {label: 'Facing pages', path: ['page', 'facingPages'], kind: 'toggle'},
-  {label: 'Gutter (mm)', path: ['page', 'gutter'], kind: 'number'},
-  // US-019 AC-2: the page furniture, through the same row paths as above.
-  {label: 'Page numbers', path: ['page', 'folios'], kind: 'toggle'},
-  {label: 'Running header', path: ['page', 'runningHeader'], kind: 'toggle'},
+  {label: STRINGS.labels.bleed, path: ['page', 'bleed'], kind: 'number'},
+  {label: STRINGS.labels.slug, path: ['page', 'slug'], kind: 'number'},
   {
-    label: 'Running header level',
+    label: STRINGS.labels.facingPages,
+    path: ['page', 'facingPages'],
+    kind: 'toggle',
+  },
+  {label: STRINGS.labels.gutter, path: ['page', 'gutter'], kind: 'number'},
+  // US-019 AC-2: the page furniture, through the same row paths as above.
+  {label: STRINGS.labels.pageNumbers, path: ['page', 'folios'], kind: 'toggle'},
+  {
+    label: STRINGS.labels.runningHeader,
+    path: ['page', 'runningHeader'],
+    kind: 'toggle',
+  },
+  {
+    label: STRINGS.labels.runningHeaderLevel,
     path: ['page', 'runningHeaderLevel'],
     kind: 'number',
-    hint: '1 to 6',
+    hint: STRINGS.hints.runningHeaderLevel,
   },
   // US-018 AC-8: page numbers after internal links (they need the folios).
   {
-    label: 'Page numbers in links',
+    label: STRINGS.labels.pageNumbersInLinks,
     path: ['linkPageNumbers'],
     kind: 'toggle',
   },
   {
-    label: 'Link page level',
+    label: STRINGS.labels.linkPageLevel,
     path: ['linkPageLevel'],
     kind: 'number',
-    hint: '1 to 6',
+    hint: STRINGS.hints.linkPageLevel,
   },
-  {label: 'Link page word', path: ['linkPageWord'], kind: 'text', hint: 'p.'},
+  {
+    label: STRINGS.labels.linkPageWord,
+    path: ['linkPageWord'],
+    kind: 'text',
+    hint: STRINGS.hints.linkPageWord,
+  },
   // US-025 AC-7: the break rule per heading level (after the link rows: the
   // US-018 and US-019 tests pin the rows that follow the furniture rows).
   ...BREAK_LEVELS.map((level, i): FieldRow => ({
-    label: `Break before H${i + 1}`,
+    label: STRINGS.labels.breakBefore(i + 1),
     path: ['page', 'breakBefore', level],
     kind: 'dropdown',
     options: BREAK_RULES,
@@ -178,30 +204,30 @@ export const DEFAULT_ROWS: readonly FieldRow[] = [
   // US-026 AC-9: the book fields, after the break rows (the US-025 test slices
   // the six break rows). The signature's whole numbers are saved as numbers.
   {
-    label: 'Pages per signature',
+    label: STRINGS.labels.pagesPerSignature,
     path: ['book', 'signature'],
     kind: 'dropdown',
     options: ['0', '4', '8', '16', '32'],
   },
   {
-    label: 'Roman folios in the front matter',
+    label: STRINGS.labels.romanFoliosInTheFrontMatter,
     path: ['book', 'romanFrontMatter'],
     kind: 'toggle',
   },
   {
-    label: 'First chapter',
+    label: STRINGS.labels.firstChapter,
     path: ['book', 'firstChapter'],
     kind: 'dropdown',
     options: ['left', 'right'],
   },
   {
-    label: 'Colophon heading',
+    label: STRINGS.labels.colophonHeading,
     path: ['book', 'colophonHeading'],
     kind: 'dropdown',
     options: ['hidden', 'printed'],
   },
   {
-    label: 'Back notes heading',
+    label: STRINGS.labels.backNotesHeading,
     path: ['book', 'backNotesHeading'],
     kind: 'dropdown',
     options: ['hidden', 'printed'],
@@ -210,19 +236,19 @@ export const DEFAULT_ROWS: readonly FieldRow[] = [
   // slices the five book rows). The depth is saved as a number; the labels
   // say `Contents` (`Page numbers` is the folio switch of US-019).
   {
-    label: 'Contents depth',
+    label: STRINGS.labels.contentsDepth,
     path: ['toc', 'depth'],
     kind: 'dropdown',
     options: ['0', '1', '2', '3', '4', '5', '6'],
   },
-  {label: 'Contents title', path: ['toc', 'title'], kind: 'text'},
+  {label: STRINGS.labels.contentsTitle, path: ['toc', 'title'], kind: 'text'},
   {
-    label: 'Contents page numbers',
+    label: STRINGS.labels.contentsPageNumbers,
     path: ['toc', 'pageNumbers'],
     kind: 'toggle',
   },
   {
-    label: 'Contents dot leaders',
+    label: STRINGS.labels.contentsDotLeaders,
     path: ['toc', 'dotLeaders'],
     kind: 'toggle',
   },
@@ -230,16 +256,16 @@ export const DEFAULT_ROWS: readonly FieldRow[] = [
   // US-027 test slices four rows from `Contents depth`). Saved as a number;
   // the AC-1 check refuses a value outside 10 to 100.
   {
-    label: 'Smallest image size',
+    label: STRINGS.labels.smallestImageSize,
     path: ['images', 'minScale'],
     kind: 'number',
-    hint: '%, 10 to 100',
+    hint: STRINGS.hints.smallestImageSize,
   },
   // US-034 AC-1: the print resolution check; 0 turns it off.
   {
-    label: 'Minimum print resolution',
+    label: STRINGS.labels.minimumPrintResolution,
     path: ['images', 'minDpi'],
     kind: 'number',
-    hint: 'dpi, 0 to 2400',
+    hint: STRINGS.hints.minimumPrintResolution,
   },
 ];

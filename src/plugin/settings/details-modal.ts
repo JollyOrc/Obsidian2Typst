@@ -7,6 +7,7 @@ import {Modal, Setting, type App} from 'obsidian';
 import type {PresetStore} from '../presets/store';
 import type {SettingsStore} from './data';
 import {detailsView, type DetailsView} from './details';
+import {STRINGS} from '../strings';
 
 /** What the pop-up reads and calls. */
 export interface DetailsModalDeps {
@@ -77,7 +78,7 @@ export class PresetDetailsModal extends Modal {
     if (view.rows !== undefined) {
       const table = contentEl.createEl('table', {cls: 'o2t-preset-details'});
       const head = table.createEl('tr');
-      for (const title of ['Setting', 'In this preset', 'Used']) {
+      for (const title of STRINGS.details.columns) {
         head.createEl('th', {text: title});
       }
       for (const row of view.rows) {
@@ -85,7 +86,13 @@ export class PresetDetailsModal extends Modal {
         line.createEl('td', {text: row.label});
         line.createEl('td', {text: row.own});
         line.createEl('td', {
-          text: row.source === null ? row.used : `${row.used} (${row.source})`,
+          text:
+            row.source === null
+              ? row.used
+              : STRINGS.details.usedFrom(
+                  row.used,
+                  STRINGS.details.sources[row.source],
+                ),
         });
       }
     }

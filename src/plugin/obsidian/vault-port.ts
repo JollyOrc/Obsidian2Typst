@@ -10,12 +10,13 @@ import {
   type TAbstractFile,
 } from 'obsidian';
 import type {VaultEvent, VaultPort} from '../presets/store';
+import {STRINGS} from '../strings';
 
 export function createVaultPort(app: App): VaultPort {
   const {vault} = app;
   const file = (path: string): TFile => {
     const found = vault.getFileByPath(path);
-    if (found === null) throw new Error(`No such note: ${path}`);
+    if (found === null) throw new Error(STRINGS.vault.noNote(path));
     return found;
   };
   return {

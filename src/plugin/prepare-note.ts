@@ -20,6 +20,7 @@ import {
 } from '../core/template';
 import type {ExportCommandDeps} from './export-command';
 import type {UseResult} from './presets/store';
+import {STRINGS} from './strings';
 
 /** A preset that is valid (the result of `PresetStore.use`). */
 type Preset = Extract<UseResult, {ok: true}>['preset'];
@@ -91,7 +92,7 @@ export function selectPreset(
     return {
       ok: false,
       status: 'presets-note',
-      message: 'Presets are not exported',
+      message: STRINGS.exportRefusals.presetNote,
     };
   }
   const names = deps.presets.entries().map((entry) => entry.name);
@@ -100,8 +101,7 @@ export function selectPreset(
     return {
       ok: false,
       status: 'no-preset',
-      message:
-        'There is no preset; create one in the settings of Obsidian2Typst',
+      message: STRINGS.exportRefusals.noPreset,
     };
   }
   const used = deps.presets.use(active);
@@ -142,7 +142,10 @@ export async function convertNote(
     return {
       ok: false,
       status: 'invalid-preset',
-      message: `Preset "${active}" is invalid: ${formatPresetError(effective.error)}`,
+      message: STRINGS.presets.invalid(
+        active,
+        formatPresetError(effective.error),
+      ),
     };
   }
   const fontSet =

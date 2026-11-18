@@ -1,9 +1,13 @@
 // US-042 AC-14: the one string table of the plugin's screens, menus and notices.
 // Every text a control or a notice shows comes from here (a tooling test checks
 // `src/plugin`); texts built from values are functions. Started at T2 (#176)
-// with the export dialog's texts; T6 (#180) moves the rest in.
+// with the export dialog's texts; T6 (#180) moved the rest in.
+
+import {CORE_STRINGS} from '../core/strings';
 
 export const STRINGS = {
+  /** The core's notice texts (`src/core/strings.ts`), carried here. */
+  core: CORE_STRINGS,
   empty: '',
   dialog: {
     folderPlaceholder: '/path/to/export folder',
@@ -20,16 +24,281 @@ export const STRINGS = {
   notices: {
     openNote: 'Open a note to export it.',
     debugInfoCopied: 'Debug info copied.',
+    compiling: 'Compiling…',
+    busy: 'An export is already running.',
+    noRoom: 'There is no room for the panel in the right sidebar',
+    presetChanged: 'The active preset changed; nothing was written',
+    presetEdited: (name: string): string => `Preset "${name}" changed`,
   },
   tab: {
     version: (v: string): string => `Obsidian2Typst ${v}`,
     copyDebugInfo: 'Copy debug info',
     resetSection: 'Reset this section to defaults',
+    active: 'Active',
+    invalidPreset: (error: string): string => `invalid: ${error}`,
+    unknownError: 'unknown error',
+    presetTooltip: (name: string): string => `Preset "${name}"`,
+    newPreset: 'New preset',
+    presetsIntro:
+      'A preset is a note in the presets folder. Edit its values in the note itself; they apply to the next export.',
+    presetsFolder: 'Presets folder',
+    presetsFolderDesc:
+      'Vault folder of the preset notes. Created with two presets when it does not exist.',
+    warningsFolder: 'Warnings note folder',
+    warningsFolderDesc:
+      'Vault folder of the warnings note; empty is the vault root.',
+  },
+  rows: {
+    fontsUnlisted: (text: string): string =>
+      `The fonts cannot be listed: ${text}`,
+    onlyCustomTrim: 'Used only with a custom trim size',
+    onlyFacingPages: 'Used only with facing pages',
+    trimTogether: 'Enter width and height; they are saved together',
+    pagesPlaceholder: 'all',
+    builtinTrim: '(built-in)',
+    customTrim: 'Custom',
+    useBuiltin: 'Use the built-in value',
+    featureSettings: (name: string): string => `Settings of ${name}`,
+    preset: 'Preset',
+    pages: 'Pages',
+    pagesDesc: 'all, a page such as 4, or a range such as 3-5',
+  },
+  nameModal: {name: 'Name', ok: 'OK'},
+  panel: {
+    details: 'Details of the preset',
+    refresh: 'Refresh',
+    ownedRows: (name: string, labels: string): string =>
+      `Set by preset "${name}": ${labels}.`,
   },
   sectionReset: {
     title: (name: string): string => `Reset "${name}" to its defaults?`,
     line: 'Your values in this section will be removed; presets that do not set them use the built-in values.',
     confirm: 'Reset',
     cancel: 'Cancel',
+  },
+  // The rows' labels (row-data.ts); also the keys the layout and the details
+  // table find the rows by, so a label is written once, here.
+  labels: {
+    fontFolder: 'Font folder',
+    defaultFont: 'Default font',
+    bodyFont: 'Body font',
+    bodySize: 'Body size (pt)',
+    headingFont: 'Heading font',
+    headingSize: 'Heading size (pt)',
+    captionFont: 'Caption font',
+    captionSize: 'Caption size (pt)',
+    codeFont: 'Code font',
+    codeSize: 'Code size (pt)',
+    highlightColour: 'Highlight colour',
+    headingNumbering: 'Heading numbering',
+    footnotesForExternalLinks: 'Footnotes for external links',
+    templateFile: 'Template file',
+    trimSize: 'Trim size',
+    trimWidth: 'Trim width (mm)',
+    trimHeight: 'Trim height (mm)',
+    topMargin: 'Top margin (mm)',
+    bottomMargin: 'Bottom margin (mm)',
+    insideMargin: 'Inside margin (mm)',
+    outsideMargin: 'Outside margin (mm)',
+    bleed: 'Bleed (mm)',
+    slug: 'Slug (mm)',
+    facingPages: 'Facing pages',
+    gutter: 'Gutter (mm)',
+    pageNumbers: 'Page numbers',
+    runningHeader: 'Running header',
+    runningHeaderLevel: 'Running header level',
+    pageNumbersInLinks: 'Page numbers in links',
+    linkPageLevel: 'Link page level',
+    linkPageWord: 'Link page word',
+    pagesPerSignature: 'Pages per signature',
+    romanFoliosInTheFrontMatter: 'Roman folios in the front matter',
+    firstChapter: 'First chapter',
+    colophonHeading: 'Colophon heading',
+    backNotesHeading: 'Back notes heading',
+    contentsDepth: 'Contents depth',
+    contentsTitle: 'Contents title',
+    contentsPageNumbers: 'Contents page numbers',
+    contentsDotLeaders: 'Contents dot leaders',
+    smallestImageSize: 'Smallest image size',
+    minimumPrintResolution: 'Minimum print resolution',
+    breakBefore: (level: number): string => `Break before H${level}`,
+  },
+  hints: {
+    size: 'pt, greater than 0 and at most 200',
+    fontFolder: 'vault folder with .ttf and .otf files',
+    highlightColour: '#rrggbb',
+    headingNumbering: '1.1, a.1, (1.1) or none',
+    templateFile: 'path of a .typ file in the vault',
+    trimSize: 'A4, A5, A6 or US Letter',
+    runningHeaderLevel: '1 to 6',
+    linkPageLevel: '1 to 6',
+    linkPageWord: 'p.',
+    smallestImageSize: '%, 10 to 100',
+    minimumPrintResolution: 'dpi, 0 to 2400',
+  },
+  // The layout of the tab and the panel (layout.ts): sections, features.
+  sections: {
+    page: 'Page',
+    text: 'Text',
+    book: 'Book',
+    presets: 'Presets',
+    export: 'Export',
+    cover: 'Cover',
+  },
+  features: {
+    pageSetup: 'Page setup',
+    pageBreaks: 'Page breaks',
+    fonts: 'Fonts',
+    bookParts: 'Book parts',
+    signatures: 'Signatures',
+    contents: 'Contents',
+    imageFit: 'Image fit',
+    printResolution: 'Print resolution',
+    strictMode: 'Strict mode',
+  },
+  featureDescs: {
+    pageSetup: 'Trim size, margins, bleed and facing pages.',
+    pageNumbers: 'A page number at the foot of every body page.',
+    runningHeader: 'The chapter title at the head of the page.',
+    pageBreaks: 'A new page or spread before headings, by level.',
+    fonts: 'The font folder, families and sizes.',
+    pageNumbersInLinks: '(p. 42) after internal links.',
+    footnotesForExternalLinks: 'The address of an external link as a footnote.',
+    bookParts: 'Colophon, back notes and where the first chapter starts.',
+    romanFoliosInTheFrontMatter: 'i, ii, iii before the first chapter.',
+    signatures: 'Blank pages at the end to fill a signature.',
+    contents: 'A table of contents; off while its depth is 0.',
+    imageFit: 'Images shrink to stay with their text; off at 100 %.',
+    printResolution: 'Warns about images below this dpi; off at 0.',
+    strictMode: 'Conversion warnings abort the export.',
+  },
+  commands: {
+    openPanel: 'Open style panel',
+    exportNote: 'Export current note',
+    exportDialog: 'Export…',
+    checkCompiler: 'Check compiler (developer)',
+    ribbon: 'Obsidian2Typst',
+  },
+  menus: {
+    exportDialog: 'Export…',
+    exportNote: 'Export current note',
+    openPanel: 'Open style panel',
+    presetHeading: 'Preset',
+    noPreset: 'No preset yet',
+    invalidPreset: (name: string): string => `${name} (invalid)`,
+    exportPdf: 'Export to PDF',
+    preview: 'Preview',
+    withoutPreset: (title: string): string => `${title} (no preset)`,
+    withInvalidPreset: (title: string, name: string): string =>
+      `${title} (preset "${name}" is invalid)`,
+    glossary: 'Use as glossary section',
+    contentsPlace: (side: string): string =>
+      `Table of contents ${side} this heading`,
+    coverOf: (name: string): string => `Use "${name}" as cover`,
+    cover: 'Use as cover',
+  },
+  questions: {
+    cancel: 'Cancel',
+    changePresetTitle: (preset: string): string => `Change preset "${preset}"`,
+    changePresetConfirm: 'Change preset',
+    deletePresetTitle: (name: string): string => `Delete preset "${name}"?`,
+    deletePresetTrash:
+      'The note moves to the trash, as set in Obsidian under "Deleted files".',
+    deletePresetNext: (next: string): string =>
+      `"${next}" becomes the active preset.`,
+    deletePresetConfirm: 'Delete',
+    resetFieldTitle: (label: string): string => `Reset "${label}"?`,
+    resetFieldLine: (value: string): string =>
+      `The value "${value}" is removed from the Defaults. Presets that do not set this field use the built-in value.`,
+    resetFieldConfirm: 'Reset',
+    removeTrimTitle: 'Remove the custom trim size?',
+    removeTrimLine: (width: string, height: string, use: string): string =>
+      `The values "${width} × ${height} mm" are removed from the Defaults. Presets that do not set them use ${use}.`,
+    removeTrimBuiltin: 'the built-in trim size',
+    removeTrimNamed: (choice: string): string => `the trim size "${choice}"`,
+    removeTrimConfirm: 'Remove',
+    renamePreset: 'Rename preset',
+  },
+  details: {
+    title: (name: string): string => `Preset "${name}"`,
+    close: 'Close',
+    use: 'Use',
+    inUse: 'In use',
+    openNote: 'Open the note',
+    duplicate: 'Duplicate',
+    rename: 'Rename',
+    delete: 'Delete',
+    invalid: 'The preset is invalid',
+    columns: ['Setting', 'In this preset', 'Used'],
+    cover: 'Cover',
+    calloutStyles: 'Callout styles',
+    headingRules: 'Heading rules',
+    contentsPlace: 'Contents place',
+    sources: {preset: 'preset', Defaults: 'Defaults', 'built-in': 'built-in'},
+    usedFrom: (used: string, source: string): string => `${used} (${source})`,
+  },
+  presets: {
+    missing: (name: string): string => `Preset "${name}" does not exist`,
+    invalid: (name: string, reason: string): string =>
+      `Preset "${name}" is invalid: ${reason}`,
+    problem: (name: string, text: string): string =>
+      `Preset "${name}": ${text}`,
+    notChanged: (preset: string, message: string): string =>
+      `Preset "${preset}" was not changed: ${message}`,
+    unchanged: (preset: string): string => `preset "${preset}" was not changed`,
+    imageGone: (name: string, unchanged: string): string =>
+      `"${name}" no longer exists; ${unchanged}`,
+    imageInvalid: (
+      name: string,
+      extension: string,
+      unchanged: string,
+    ): string => `"${name}" is not a valid .${extension} image; ${unchanged}`,
+    unreadable: (why: string): string => `The preset could not be read: ${why}`,
+    settingsReset: 'Some settings were reset',
+  },
+  exportRefusals: {
+    presetNote: 'Presets are not exported',
+    noPreset:
+      'There is no preset; create one in the settings of Obsidian2Typst',
+  },
+  exportDialogText: {
+    title: (noteName: string): string => `Export ${noteName}`,
+    chooseFolder: 'Choose an export folder.',
+    notAbsolute: (folder: string): string =>
+      `Export folder "${folder}" is not an absolute path.`,
+    willWrite: (pdfName: string): string => `${pdfName} will be written.`,
+    willReplace: (pdfName: string, when: string): string =>
+      `${pdfName} exists (from ${when}) and will be replaced.`,
+    folderDialogTitle: 'Export folder',
+    noFolderDialog: 'The folder dialog is not available',
+  },
+  compiler: {
+    failedPrefix: 'Typst compiler failed: ',
+    unknownError: 'unknown error',
+    unloaded: 'the plugin was unloaded',
+    cancelled: 'the compile was cancelled',
+    gapScanFailed: (text: string): string =>
+      `The word-gap scan could not read the PDF (${text}); no line was checked`,
+  },
+  vault: {
+    noNote: (path: string): string => `No such note: ${path}`,
+    noFile: (path: string): string => `No such file: ${path}`,
+  },
+  preview: {
+    title: 'Style preview',
+    openNote: 'Open a note to preview it',
+    noteChanged: 'Note changed; press Refresh',
+    failed: (text: string): string => `Preview failed: ${text}`,
+    noPages: 'The document has no pages',
+    stopped: (count: number): string =>
+      `Preview stopped: ${count} ${count === 1 ? 'warning' : 'warnings'} (strict mode)`,
+    cover: 'Cover',
+    coverImage: 'Cover image',
+    blankAfterCover: 'Blank page after cover',
+    cropWarning: 'Crop warning (%)',
+    setByPreset: (shown: string, name: string): string =>
+      `${shown}; set by preset "${name}"; change it in the preset note`,
+    builtinValue: (shown: string): string =>
+      `${shown}; built-in value; set it in a preset note`,
   },
 } as const;

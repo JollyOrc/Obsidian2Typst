@@ -6,6 +6,7 @@
 // Transforms used (shared-utility register): typstString (the hint keys).
 import {FIT_HINT_LINES, type Warning} from '../emit';
 import {typstString} from '../emit/typst-string';
+import {CORE_STRINGS} from '../strings';
 
 /** US-028 AC-15 (decision F): the most compiles before the fallback. */
 export const FIT_COMPILE_LIMIT = 8;
@@ -168,5 +169,7 @@ export const IMAGE_FIT_OFF_WARNING: Warning = Object.freeze({
  * `Compiling…` for the first, `Compiling… (n of up to limit)` after it.
  */
 export function compilingNotice(n: number, limit: number): string {
-  return n <= 1 ? 'Compiling…' : `Compiling… (${n} of up to ${limit})`;
+  return n <= 1
+    ? CORE_STRINGS.compile.first
+    : CORE_STRINGS.compile.again(n, limit);
 }

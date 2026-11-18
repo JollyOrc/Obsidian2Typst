@@ -361,7 +361,7 @@ export default class Obsidian2TypstPlugin extends Plugin {
     );
     this.addCommand({
       id: 'open-style-panel',
-      name: 'Open style panel',
+      name: STRINGS.commands.openPanel,
       callback: () => void this.actions.previewNote(),
     });
     this.app.workspace.onLayoutReady(() => void this.presets.load());
@@ -390,7 +390,7 @@ export default class Obsidian2TypstPlugin extends Plugin {
     );
     this.addCommand({
       id: 'export-current-note',
-      name: 'Export current note',
+      name: STRINGS.commands.exportNote,
       callback: () => void this.actions.exportNote(),
     });
     // US-042 AC-7: the progress tab.
@@ -401,16 +401,16 @@ export default class Obsidian2TypstPlugin extends Plugin {
     // US-042 AC-2: the export dialog from the palette.
     this.addCommand({
       id: 'export-dialog',
-      name: 'Export…',
+      name: STRINGS.commands.exportDialog,
       callback: () => void this.actions.exportWithDialog(),
     });
     this.addCommand({
       id: 'check-compiler',
-      name: 'Check compiler (developer)',
+      name: STRINGS.commands.checkCompiler,
       callback: () => void this.checkCompiler(),
     });
     // US-020 AC-3: the ribbon menu, built anew at each click (SCAR-016).
-    this.addRibbonIcon('printer', 'Obsidian2Typst', (evt) => {
+    this.addRibbonIcon('printer', STRINGS.commands.ribbon, (evt) => {
       const menu = new Menu();
       this.showEntries(
         menu,
@@ -693,7 +693,7 @@ export default class Obsidian2TypstPlugin extends Plugin {
       const document = await this.pageRenderer.open(vector.vector);
       if (document.pageCount === 0) {
         document.dispose();
-        return {ok: false, error: 'The document has no pages'};
+        return {ok: false, error: STRINGS.preview.noPages};
       }
       return {
         ok: true,
@@ -736,7 +736,7 @@ export default class Obsidian2TypstPlugin extends Plugin {
    * event-loop turns on the main thread.
    */
   private async checkCompiler(): Promise<void> {
-    new Notice('Compiling…');
+    new Notice(STRINGS.notices.compiling);
     let last = performance.now();
     let longestGap = 0;
     const timer = window.setInterval(() => {

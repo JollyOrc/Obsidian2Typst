@@ -28,12 +28,14 @@ import {saveDefaultsField} from './save-field';
 import {resetDefaultField, type DeleteConfirmation} from './dialog';
 import {DEFAULT_ROWS, FONT_ROWS, type FieldRow} from './row-data';
 import {
+  CUSTOM_CHOICE,
   TRIM_CHOICES,
   gutterEnabled,
   planTrimChoice,
   planTrimSizes,
   trimChoiceOf,
 } from './page-fields';
+import {STRINGS} from '../strings';
 
 /** What the rows need of their host (the tab or the panel). */
 export interface RowsEnv {
@@ -171,7 +173,7 @@ export function addResetButton(
   setting.addExtraButton((b) =>
     b
       .setIcon('reset')
-      .setTooltip('Use the built-in value')
+      .setTooltip(STRINGS.rows.useBuiltin)
       .onClick(async () => {
         const done = await resetDefaultField(
           {
@@ -214,7 +216,9 @@ export function addTrimDropdown(
   setting.setDesc(owner ?? '');
   setting.addDropdown((d) => {
     for (const choice of TRIM_CHOICES) d.addOption(choice, choice);
-    d.setValue(custom ? 'Custom' : trimChoiceOf(settings.data.defaults.page));
+    d.setValue(
+      custom ? CUSTOM_CHOICE : trimChoiceOf(settings.data.defaults.page),
+    );
     if (owner !== null) d.setDisabled(true);
     d.onChange(async (choice) => {
       const plan = planTrimChoice(settings.data.defaults.page, choice);
@@ -227,7 +231,7 @@ export function addTrimDropdown(
           return;
         }
       }
-      env.trim.custom = choice === 'Custom';
+      env.trim.custom = choice === CUSTOM_CHOICE;
       const page = Object.keys(plan.page).length === 0 ? undefined : plan.page;
       const result = await saveDefaultsField(env, ['page'], page);
       if (!result.ok) {
@@ -256,7 +260,9 @@ export function addTrimSizeRow(
   const owner = env.ownerNote(row.path);
   const setting = new Setting(root).setName(row.label);
   env.trim.rows.push(setting);
-  setting.setDesc(owner ?? (custom ? '' : 'Used only with a custom trim size'));
+  setting.setDesc(
+    owner ?? (custom ? STRINGS.empty : STRINGS.rows.onlyCustomTrim),
+  );
   const draft = env.trim.draft;
   setting.addText((t) => {
     t.setValue(isWidth ? draft.width : draft.height);
@@ -285,7 +291,7 @@ export function addTrimSizeRow(
           return;
         }
         for (const r of rows) {
-          r.setDesc('');
+          r.setDesc(STRINGS.empty);
           r.descEl.removeClass('mod-warning');
         }
         for (const notice of result.notices) new Notice(notice);
@@ -325,7 +331,7 @@ export function addDefaultRows(
 function startTrim(env: RowsEnv): boolean {
   const page = env.settings.data.defaults.page;
   const stored = trimChoiceOf(page);
-  const custom = stored === 'Custom' || env.trim.custom;
+  const custom = stored === CUSTOM_CHOICE || env.trim.custom;
   env.trim.draft = {
     width: page?.trimWidth === undefined ? '' : String(page.trimWidth),
     height: page?.trimHeight === undefined ? '' : String(page.trimHeight),
@@ -402,7 +408,7 @@ function addDefaultRow(
       if (key === 'page.gutter') {
         const enabled = gutterEnabled(settings.data.defaults.page);
         t.setDisabled(!enabled || owner !== null);
-        if (!enabled) setting.setDesc(owner ?? 'Used only with facing pages');
+        if (!enabled) setting.setDesc(owner ?? STRINGS.rows.onlyFacingPages);
       }
       commitOnChange(
         t.inputEl,
@@ -443,7 +449,7 @@ export async function addFontRows(
     const text = error instanceof Error ? error.message : String(error);
     holder.createEl('p', {
       cls: 'setting-item-description mod-warning',
-      text: `The fonts cannot be listed: ${text}`,
+      text: STRINGS.rows.fontsUnlisted(text),
     });
     return;
   }
@@ -604,7 +610,7 @@ export function addFeatureRow(
   setting.addExtraButton((b) =>
     b
       .setIcon('settings')
-      .setTooltip(`Settings of ${item.name}`)
+      .setTooltip(STRINGS.rows.featureSettings(item.name))
       .onClick(() => new FeatureModal(env.app, env, item).open()),
   );
 }
@@ -700,7 +706,7 @@ export function addPresetDropdown(
   }[],
   choose: (name: string) => void,
 ): Setting {
-  const setting = new Setting(root).setName('Preset');
+  const setting = new Setting(root).setName(STRINGS.rows.preset);
   const choices = groups.flatMap((group) => group.choices);
   setting.addDropdown((d) => {
     for (const group of groups) {
@@ -740,11 +746,11 @@ export function addRangeInput(
   value: string,
 ): {setting: Setting; input: HTMLInputElement} {
   const setting = new Setting(root)
-    .setName('Pages')
-    .setDesc('all, a page such as 4, or a range such as 3-5');
+    .setName(STRINGS.rows.pages)
+    .setDesc(STRINGS.rows.pagesDesc);
   let input: HTMLInputElement | null = null;
   setting.addText((t) => {
-    t.setPlaceholder('all').setValue(value);
+    t.setPlaceholder(STRINGS.rows.pagesPlaceholder).setValue(value);
     input = t.inputEl;
   });
   if (input === null) throw new Error('The range field was not made');

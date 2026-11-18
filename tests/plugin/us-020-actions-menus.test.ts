@@ -17,6 +17,7 @@ import {
 } from '../../src/plugin/settings/data';
 import {standIn} from '../support/convert';
 import {FakeVault} from '../support/fake-vault';
+import {STRINGS} from '../../src/plugin/strings';
 
 vi.mock('obsidian', async () => await import('../support/fake-obsidian'));
 
@@ -545,14 +546,17 @@ describe('US-020 AC-1, AC-9 every entry point goes through the actions (SCAR-017
       /\s+/g,
       ' ',
     );
-    for (const [id, name] of [
-      ['open-style-panel', 'Open style panel'],
-      ['export-current-note', 'Export current note'],
-      ['check-compiler', 'Check compiler (developer)'],
-    ]) {
-      expect(main).toContain(`id: '${id}', name: '${name}'`);
+    // US-042 AC-14 (amended at T6): the names are in the string table.
+    for (const [id, key, name] of [
+      ['open-style-panel', 'openPanel', 'Open style panel'],
+      ['export-current-note', 'exportNote', 'Export current note'],
+      ['check-compiler', 'checkCompiler', 'Check compiler (developer)'],
+    ] as const) {
+      expect(main).toContain(`id: '${id}', name: STRINGS.commands.${key}`);
+      expect(STRINGS.commands[key]).toBe(name);
     }
-    expect(main).toContain("addRibbonIcon('printer', 'Obsidian2Typst'");
+    expect(main).toContain("addRibbonIcon('printer', STRINGS.commands.ribbon");
+    expect(STRINGS.commands.ribbon).toBe('Obsidian2Typst');
     expect(main).toContain('actions.exportNote(');
     expect(main).toContain('actions.previewNote(');
   });

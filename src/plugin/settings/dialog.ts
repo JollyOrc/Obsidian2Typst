@@ -1,6 +1,7 @@
 // US-008 AC-17 (SCAR-013, SCAR-014): how the dialogs of the settings tab are
 // operated, as plain functions without Obsidian so that tests can run them.
 import type {PresetStore} from '../presets/store';
+import {STRINGS} from '../strings';
 
 /** The parts of a keyboard event that decide whether Enter confirms. */
 export interface KeyLike {
@@ -37,17 +38,15 @@ export function deleteConfirmation(options: {
   isActive: boolean;
   next: string;
 }): DeleteConfirmation {
-  const lines = [
-    'The note moves to the trash, as set in Obsidian under "Deleted files".',
-  ];
+  const lines: string[] = [STRINGS.questions.deletePresetTrash];
   if (options.isActive) {
-    lines.push(`"${options.next}" becomes the active preset.`);
+    lines.push(STRINGS.questions.deletePresetNext(options.next));
   }
   return {
-    title: `Delete preset "${options.name}"?`,
+    title: STRINGS.questions.deletePresetTitle(options.name),
     lines,
-    confirmLabel: 'Delete',
-    cancelLabel: 'Cancel',
+    confirmLabel: STRINGS.questions.deletePresetConfirm,
+    cancelLabel: STRINGS.questions.cancel,
   };
 }
 
@@ -101,12 +100,10 @@ export function resetConfirmation(options: {
   value: string | number | boolean;
 }): DeleteConfirmation {
   return {
-    title: `Reset "${options.label}"?`,
-    lines: [
-      `The value "${valueText(options.value)}" is removed from the Defaults. Presets that do not set this field use the built-in value.`,
-    ],
-    confirmLabel: 'Reset',
-    cancelLabel: 'Cancel',
+    title: STRINGS.questions.resetFieldTitle(options.label),
+    lines: [STRINGS.questions.resetFieldLine(valueText(options.value))],
+    confirmLabel: STRINGS.questions.resetFieldConfirm,
+    cancelLabel: STRINGS.questions.cancel,
   };
 }
 

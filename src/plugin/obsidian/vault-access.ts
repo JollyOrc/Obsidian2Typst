@@ -3,6 +3,7 @@
 import {TFile, type App} from 'obsidian';
 import type {ExportCommandDeps} from '../export-command';
 import type {FontSetDeps} from '../fonts';
+import {STRINGS} from '../strings';
 
 /** The open Markdown note. */
 export function createNoteSource(app: App): ExportCommandDeps['notes'] {
@@ -16,7 +17,7 @@ export function createNoteSource(app: App): ExportCommandDeps['notes'] {
     read(path) {
       const file = app.vault.getFileByPath(path);
       if (file === null)
-        return Promise.reject(new Error(`No such note: ${path}`));
+        return Promise.reject(new Error(STRINGS.vault.noNote(path)));
       return app.vault.read(file);
     },
   };
@@ -26,7 +27,7 @@ export function createNoteSource(app: App): ExportCommandDeps['notes'] {
 export function createVaultFiles(app: App): ExportCommandDeps['vault'] {
   const file = (path: string): TFile => {
     const found = app.vault.getFileByPath(path);
-    if (found === null) throw new Error(`No such file: ${path}`);
+    if (found === null) throw new Error(STRINGS.vault.noFile(path));
     return found;
   };
   const bytes = async (path: string): Promise<Uint8Array> =>

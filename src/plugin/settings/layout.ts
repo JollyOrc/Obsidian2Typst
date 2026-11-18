@@ -5,6 +5,7 @@
 // order (AC-9), the tests read it.
 import {ownerNote} from '../../core/presets/owner';
 import {DEFAULT_ROWS, FONT_ROWS} from './row-data';
+import {STRINGS} from '../strings';
 
 /** A feature row: a toggle when `toggle` names a field, a gear when `rows` is not empty. */
 export interface FeatureItem {
@@ -31,144 +32,148 @@ export interface LayoutSection {
 }
 
 const PAGE: LayoutSection = {
-  name: 'Page',
+  name: STRINGS.sections.page,
   items: [
     {
       kind: 'feature',
-      name: 'Page setup',
-      desc: 'Trim size, margins, bleed and facing pages.',
+      name: STRINGS.features.pageSetup,
+      desc: STRINGS.featureDescs.pageSetup,
       rows: [
-        'Trim size',
-        'Trim width (mm)',
-        'Trim height (mm)',
-        'Top margin (mm)',
-        'Bottom margin (mm)',
-        'Inside margin (mm)',
-        'Outside margin (mm)',
-        'Bleed (mm)',
-        'Slug (mm)',
-        'Facing pages',
-        'Gutter (mm)',
+        STRINGS.labels.trimSize,
+        STRINGS.labels.trimWidth,
+        STRINGS.labels.trimHeight,
+        STRINGS.labels.topMargin,
+        STRINGS.labels.bottomMargin,
+        STRINGS.labels.insideMargin,
+        STRINGS.labels.outsideMargin,
+        STRINGS.labels.bleed,
+        STRINGS.labels.slug,
+        STRINGS.labels.facingPages,
+        STRINGS.labels.gutter,
       ],
     },
     {
       kind: 'feature',
-      name: 'Page numbers',
-      desc: 'A page number at the foot of every body page.',
+      name: STRINGS.labels.pageNumbers,
+      desc: STRINGS.featureDescs.pageNumbers,
       toggle: 'page.folios',
       rows: [],
     },
     {
       kind: 'feature',
-      name: 'Running header',
-      desc: 'The chapter title at the head of the page.',
+      name: STRINGS.labels.runningHeader,
+      desc: STRINGS.featureDescs.runningHeader,
       toggle: 'page.runningHeader',
-      rows: ['Running header level'],
+      rows: [STRINGS.labels.runningHeaderLevel],
     },
     {
       kind: 'feature',
-      name: 'Page breaks',
-      desc: 'A new page or spread before headings, by level.',
-      rows: [1, 2, 3, 4, 5, 6].map((n) => `Break before H${n}`),
+      name: STRINGS.features.pageBreaks,
+      desc: STRINGS.featureDescs.pageBreaks,
+      rows: [1, 2, 3, 4, 5, 6].map((n) => STRINGS.labels.breakBefore(n)),
     },
   ],
 };
 
 const TEXT: LayoutSection = {
-  name: 'Text',
+  name: STRINGS.sections.text,
   items: [
     {
       kind: 'feature',
-      name: 'Fonts',
-      desc: 'The font folder, families and sizes.',
+      name: STRINGS.features.fonts,
+      desc: STRINGS.featureDescs.fonts,
       rows: FONT_ROWS.map((row) => row.label),
     },
-    {kind: 'plain', label: 'Heading numbering'},
-    {kind: 'plain', label: 'Highlight colour'},
+    {kind: 'plain', label: STRINGS.labels.headingNumbering},
+    {kind: 'plain', label: STRINGS.labels.highlightColour},
     {
       kind: 'feature',
-      name: 'Page numbers in links',
-      desc: '(p. 42) after internal links.',
+      name: STRINGS.labels.pageNumbersInLinks,
+      desc: STRINGS.featureDescs.pageNumbersInLinks,
       toggle: 'linkPageNumbers',
-      rows: ['Link page level', 'Link page word'],
+      rows: [STRINGS.labels.linkPageLevel, STRINGS.labels.linkPageWord],
     },
     {
       kind: 'feature',
-      name: 'Footnotes for external links',
-      desc: 'The address of an external link as a footnote.',
+      name: STRINGS.labels.footnotesForExternalLinks,
+      desc: STRINGS.featureDescs.footnotesForExternalLinks,
       toggle: 'externalLinkFootnotes',
       rows: [],
     },
-    {kind: 'plain', label: 'Template file'},
+    {kind: 'plain', label: STRINGS.labels.templateFile},
   ],
 };
 
 const BOOK: LayoutSection = {
-  name: 'Book',
+  name: STRINGS.sections.book,
   items: [
     {
       kind: 'feature',
-      name: 'Book parts',
-      desc: 'Colophon, back notes and where the first chapter starts.',
-      rows: ['First chapter', 'Colophon heading', 'Back notes heading'],
+      name: STRINGS.features.bookParts,
+      desc: STRINGS.featureDescs.bookParts,
+      rows: [
+        STRINGS.labels.firstChapter,
+        STRINGS.labels.colophonHeading,
+        STRINGS.labels.backNotesHeading,
+      ],
     },
     {
       kind: 'feature',
-      name: 'Roman folios in the front matter',
-      desc: 'i, ii, iii before the first chapter.',
+      name: STRINGS.labels.romanFoliosInTheFrontMatter,
+      desc: STRINGS.featureDescs.romanFoliosInTheFrontMatter,
       toggle: 'book.romanFrontMatter',
       rows: [],
     },
     {
       kind: 'feature',
-      name: 'Signatures',
-      desc: 'Blank pages at the end to fill a signature.',
-      rows: ['Pages per signature'],
+      name: STRINGS.features.signatures,
+      desc: STRINGS.featureDescs.signatures,
+      rows: [STRINGS.labels.pagesPerSignature],
     },
     {
       kind: 'feature',
-      name: 'Contents',
-      desc: 'A table of contents; off while its depth is 0.',
+      name: STRINGS.features.contents,
+      desc: STRINGS.featureDescs.contents,
       rows: [
-        'Contents depth',
-        'Contents title',
-        'Contents page numbers',
-        'Contents dot leaders',
+        STRINGS.labels.contentsDepth,
+        STRINGS.labels.contentsTitle,
+        STRINGS.labels.contentsPageNumbers,
+        STRINGS.labels.contentsDotLeaders,
       ],
     },
     {
       kind: 'feature',
-      name: 'Image fit',
-      desc: 'Images shrink to stay with their text; off at 100 %.',
-      rows: ['Smallest image size'],
+      name: STRINGS.features.imageFit,
+      desc: STRINGS.featureDescs.imageFit,
+      rows: [STRINGS.labels.smallestImageSize],
     },
     {
       kind: 'feature',
-      name: 'Print resolution',
-      desc: 'Warns about images below this dpi; off at 0.',
-      rows: ['Minimum print resolution'],
+      name: STRINGS.features.printResolution,
+      desc: STRINGS.featureDescs.printResolution,
+      rows: [STRINGS.labels.minimumPrintResolution],
     },
   ],
 };
 
 /** US-029 | AC-1, AC-2, AC-4: the five sections of the settings tab. */
 export const TAB_LAYOUT: readonly LayoutSection[] = [
-  {name: 'Presets', items: [{kind: 'presets'}]},
+  {name: STRINGS.sections.presets, items: [{kind: 'presets'}]},
   PAGE,
   TEXT,
   BOOK,
   {
-    name: 'Export',
+    name: STRINGS.sections.export,
     items: [
       {
         kind: 'feature',
-        name: 'Strict mode',
-        desc: 'Conversion warnings abort the export.',
+        name: STRINGS.features.strictMode,
+        desc: STRINGS.featureDescs.strictMode,
         toggle: 'strictMode',
         rows: [],
       },
-      {kind: 'plain', label: 'Presets folder'},
-      {kind: 'plain', label: 'Warnings note folder'},
+      {kind: 'plain', label: STRINGS.tab.presetsFolder},
+      {kind: 'plain', label: STRINGS.tab.warningsFolder},
     ],
   },
 ];
@@ -178,7 +183,7 @@ export const PANEL_LAYOUT: readonly LayoutSection[] = [
   PAGE,
   TEXT,
   BOOK,
-  {name: 'Cover', items: [{kind: 'cover'}]},
+  {name: STRINGS.sections.cover, items: [{kind: 'cover'}]},
 ];
 
 /** The path of the Defaults or font row with this label, if there is one. */
@@ -209,7 +214,7 @@ export function ownedRowsNote(
   });
   return owned.length === 0
     ? null
-    : `Set by preset "${presetName}": ${owned.join(', ')}.`;
+    : STRINGS.panel.ownedRows(presetName, owned.join(', '));
 }
 
 /**

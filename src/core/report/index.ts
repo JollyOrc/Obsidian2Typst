@@ -2,6 +2,7 @@
 // report files. Pure: no Obsidian, Node, or I/O imports. The warning record
 // itself is the `Warning` of `core/emit` (ordered by line by `EmitContext`).
 import type {Warning} from '../emit';
+import {CORE_STRINGS} from '../strings';
 
 /** One row of the summary table (US-006 AC-8). */
 export interface CodeCount {
@@ -94,8 +95,7 @@ export function buildReport(
   return `${lines.join('\n')}\n`;
 }
 
-const plural = (count: number): string =>
-  `${count} warning${count === 1 ? '' : 's'}`;
+const plural = (count: number): string => CORE_STRINGS.report.warnings(count);
 
 /**
  * US-042 | AC-11 (amends US-006 AC-3): The notice after an export that wrote its
@@ -106,19 +106,19 @@ export function finishedNotice(options: {
   folder: string;
   warnings: number;
 }): string {
-  const head = `✅ Exported ${options.pdf} to ${options.folder}`;
+  const head = CORE_STRINGS.report.exported(options.pdf, options.folder);
   return options.warnings === 0
     ? head
-    : `${head}, ${plural(options.warnings)} (see export-warnings.md)`;
+    : CORE_STRINGS.report.withWarnings(head, plural(options.warnings));
 }
 
 /** US-042 | AC-11: The notice of a failed export. */
 export function failedNotice(message: string): string {
-  return `❌ Export failed: ${message}`;
+  return CORE_STRINGS.report.failed(message);
 }
 
 /** US-042 AC-11: the notice of a cancelled export. */
-export const CANCELLED_NOTICE = '❌ Export cancelled.';
+export const CANCELLED_NOTICE = CORE_STRINGS.report.cancelled;
 
 /**
  * US-006 AC-4, US-042 AC-11: the notice of a strict-mode abort, with the
@@ -127,11 +127,12 @@ export const CANCELLED_NOTICE = '❌ Export cancelled.';
 export function strictNotice(warnings: readonly Warning[]): string {
   const first = warnings
     .slice(0, 5)
-    .map(({code, line}) => (line > 0 ? `line ${line}: ${code}` : code));
-  return [
-    `❌ Export aborted: ${plural(warnings.length)} (strict mode)`,
-    ...first,
-  ].join('\n');
+    .map(({code, line}) =>
+      line > 0 ? CORE_STRINGS.report.line(line, code) : code,
+    );
+  return [CORE_STRINGS.report.aborted(plural(warnings.length)), ...first].join(
+    '\n',
+  );
 }
 
 /** US-006 AC-2b: `Book export warnings.md` for `Sample/Book.md`. */

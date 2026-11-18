@@ -1,6 +1,7 @@
 // US-008 AC-15: the folder dialog of the desktop app. Obsidian is an Electron
 // app; the dialog comes from the remote module that the app provides. The
 // export needs the file system, so the plugin is desktop only (US-007 AC-8).
+import {STRINGS} from '../strings';
 
 interface OpenDialog {
   showOpenDialog(options: {
@@ -40,9 +41,9 @@ export async function chooseExportFolder(
   initial: string | null,
 ): Promise<string | null> {
   const dialog = findDialog();
-  if (dialog === null) throw new Error('The folder dialog is not available');
+  if (dialog === null) throw new Error(STRINGS.exportDialogText.noFolderDialog);
   const result = await dialog.showOpenDialog({
-    title: 'Export folder',
+    title: STRINGS.exportDialogText.folderDialogTitle,
     ...(initial === null ? {} : {defaultPath: initial}),
     properties: ['openDirectory', 'createDirectory'],
   });

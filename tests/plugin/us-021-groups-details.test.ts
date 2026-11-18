@@ -12,6 +12,7 @@ import {
   createSettingsStore,
 } from '../../src/plugin/settings/data';
 import {FakeVault} from '../support/fake-vault';
+import {STRINGS} from '../../src/plugin/strings';
 
 vi.mock('obsidian', async () => await import('../support/fake-obsidian'));
 // The panel restores its scroll in the next frame (US-008 AC-19); run it at once.
@@ -298,7 +299,14 @@ describe('US-021 AC-4 the settings tab’s list (text checks)', () => {
   // US-029 AC-6 (G2): the Details button became the row's gear, which opens
   // the same pop-up; the drawn row is tested in us-029-settings-tab.
   it('US-021 AC-4: each row opens the pop-up of that preset after Use', () => {
-    const use = tab.indexOf("isActive ? 'In use' : 'Use'");
+    // US-042 AC-14 (amended at T6): the texts are in the string table.
+    const use = tab.indexOf(
+      'isActive ? STRINGS.details.inUse : STRINGS.details.use',
+    );
+    expect([STRINGS.details.inUse, STRINGS.details.use]).toEqual([
+      'In use',
+      'Use',
+    ]);
     const open = tab.indexOf('openDetails(entry.name)');
     expect(use).toBeGreaterThan(0);
     expect(open).toBeGreaterThan(use);

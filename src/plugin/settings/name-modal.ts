@@ -4,6 +4,7 @@
 // composing); Escape closes it without a change.
 import {Modal, Setting, type App} from 'obsidian';
 import {isConfirmKey} from './dialog';
+import {STRINGS} from '../strings';
 
 /**
  * A small dialog that asks for a preset name and shows why one is refused.
@@ -32,7 +33,7 @@ export class NameModal extends Modal {
       else message.setText(error);
     };
     new Setting(this.contentEl)
-      .setName('Name')
+      .setName(STRINGS.nameModal.name)
       .addText((text) => {
         text.setValue(name).onChange((value) => (name = value));
         text.inputEl.addEventListener('keydown', (event) => {
@@ -44,7 +45,7 @@ export class NameModal extends Modal {
       })
       .addButton((button) =>
         button
-          .setButtonText('OK')
+          .setButtonText(STRINGS.nameModal.ok)
           .setCta()
           .onClick(() => void confirm()),
       );

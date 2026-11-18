@@ -8,9 +8,10 @@
 import {NAMED_SIZES} from '../../core/layout/page-setup';
 import type {PagePresetFields} from '../../core/presets/schema';
 import type {DeleteConfirmation} from './dialog';
+import {STRINGS} from '../strings';
 
-export const BUILTIN_CHOICE = '(built-in)';
-export const CUSTOM_CHOICE = 'Custom';
+export const BUILTIN_CHOICE = STRINGS.rows.builtinTrim;
+export const CUSTOM_CHOICE = STRINGS.rows.customTrim;
 
 /** The entries of the dropdown, in this order. */
 export const TRIM_CHOICES = [
@@ -51,17 +52,17 @@ export function planTrimChoice(page: Page, choice: string): TrimPlan {
   const height = page?.trimHeight ?? '–';
   const use =
     choice === BUILTIN_CHOICE
-      ? 'the built-in trim size'
-      : `the trim size "${choice}"`;
+      ? STRINGS.questions.removeTrimBuiltin
+      : STRINGS.questions.removeTrimNamed(choice);
   return {
     page: next,
     confirm: {
-      title: 'Remove the custom trim size?',
+      title: STRINGS.questions.removeTrimTitle,
       lines: [
-        `The values "${width} × ${height} mm" are removed from the Defaults. Presets that do not set them use ${use}.`,
+        STRINGS.questions.removeTrimLine(String(width), String(height), use),
       ],
-      confirmLabel: 'Remove',
-      cancelLabel: 'Cancel',
+      confirmLabel: STRINGS.questions.removeTrimConfirm,
+      cancelLabel: STRINGS.questions.cancel,
     },
   };
 }
@@ -73,8 +74,7 @@ export interface TrimSizesPlan {
   hint: string | null;
 }
 
-export const TRIM_SIZES_HINT =
-  'Enter width and height; they are saved together';
+export const TRIM_SIZES_HINT = STRINGS.rows.trimTogether;
 
 /**
  * US-009 AC-12: the width and the height are saved together, never one alone

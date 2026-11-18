@@ -17,6 +17,7 @@ import {
   type PresetFields,
 } from '../core/presets';
 import type {Actions} from './actions';
+import {STRINGS} from './strings';
 
 /** One line of a menu: an item, a label, or a separator. */
 export interface MenuEntry {
@@ -75,17 +76,17 @@ export function ribbonMenuEntries(
   const entries: MenuEntry[] = [
     // US-042 AC-2 (D6): the dialog first.
     {
-      title: 'Export…',
+      title: STRINGS.menus.exportDialog,
       icon: 'file-output',
       run: () => actions.exportWithDialog(),
     },
     {
-      title: 'Export current note',
+      title: STRINGS.menus.exportNote,
       icon: 'file-output',
       run: () => actions.exportNote(),
     },
     {
-      title: 'Open style panel',
+      title: STRINGS.menus.openPanel,
       icon: 'panel-right',
       run: () => actions.previewNote(),
     },
@@ -93,8 +94,8 @@ export function ribbonMenuEntries(
   if (presets.names.length === 0) {
     entries.push(
       {separator: true},
-      {title: 'Preset', label: true},
-      {title: 'No preset yet', disabled: true},
+      {title: STRINGS.menus.presetHeading, label: true},
+      {title: STRINGS.menus.noPreset, disabled: true},
     );
     return entries;
   }
@@ -108,7 +109,7 @@ export function ribbonMenuEntries(
   for (const group of groups) {
     entries.push(
       {separator: true},
-      {title: group.heading ?? 'Preset', label: true},
+      {title: group.heading ?? STRINGS.menus.presetHeading, label: true},
     );
     for (const {name, valid} of group.entries) {
       entries.push(
@@ -119,7 +120,7 @@ export function ribbonMenuEntries(
               run: () => actions.usePreset(name),
             }
           : {
-              title: `${name} (invalid)`,
+              title: STRINGS.menus.invalidPreset(name),
               checked: name === active,
               disabled: true,
             },
@@ -151,12 +152,12 @@ export function noteMenuEntries(
   }
   return [
     {
-      title: 'Export to PDF',
+      title: STRINGS.menus.exportPdf,
       icon: 'file-output',
       run: () => actions.exportNote(file.path),
     },
     {
-      title: 'Preview',
+      title: STRINGS.menus.preview,
       icon: 'panel-right',
       run: () => actions.previewNote(file.path),
     },
@@ -225,11 +226,11 @@ function presetEntry(
 ): MenuEntry {
   const {name} = active;
   if (name === null) {
-    return {title: `${title} (no preset)`, icon, disabled: true};
+    return {title: STRINGS.menus.withoutPreset(title), icon, disabled: true};
   }
   if (!active.valid) {
     return {
-      title: `${title} (preset "${name}" is invalid)`,
+      title: STRINGS.menus.withInvalidPreset(title, name),
       icon,
       disabled: true,
     };
@@ -261,7 +262,7 @@ export function presetEditEntries(
   const {heading, images} = context;
   if (heading !== null) {
     entries.push(
-      presetEntry(actions, active, 'list', 'Use as glossary section', () =>
+      presetEntry(actions, active, 'list', STRINGS.menus.glossary, () =>
         headingRuleAction(active.fields, heading.text, active.name ?? ''),
       ),
     );
@@ -276,7 +277,7 @@ export function presetEditEntries(
             actions,
             active,
             'list-ordered',
-            `Table of contents ${side} this heading`,
+            STRINGS.menus.contentsPlace(side),
             () =>
               contentsAction(
                 active.fields,
@@ -298,7 +299,7 @@ export function presetEditEntries(
         actions,
         active,
         'image',
-        several ? `Use "${name}" as cover` : 'Use as cover',
+        several ? STRINGS.menus.coverOf(name) : STRINGS.menus.cover,
         () => coverAction(active.fields, path, active.name ?? '', several),
       ),
     );
@@ -319,7 +320,7 @@ export function imageFileEntries(
 ): MenuEntry[] {
   if (!SUPPORTED_IMAGE_EXTENSIONS.includes(extensionOf(path))) return [];
   return [
-    presetEntry(actions, active, 'image', 'Use as cover', () =>
+    presetEntry(actions, active, 'image', STRINGS.menus.cover, () =>
       coverAction(active.fields, path, active.name ?? '', false),
     ),
   ];

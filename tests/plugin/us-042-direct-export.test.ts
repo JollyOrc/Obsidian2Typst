@@ -23,6 +23,7 @@ import {
 import type {ExportResult} from '../../src/plugin/run-export';
 import {COMPOSED_NOTE, standIn} from '../support/convert';
 import {FakeVault} from '../support/fake-vault';
+import {STRINGS} from '../../src/plugin/strings';
 
 vi.mock('obsidian', async () => await import('../support/fake-obsidian'));
 
@@ -369,7 +370,9 @@ describe('US-042 AC-2: the entries', () => {
       main,
     )?.[0];
     expect(block).toBeDefined();
-    expect(block).toContain("name: 'Export…'");
+    // Amended at T6 (AC-14): the name is in the string table.
+    expect(block).toContain('name: STRINGS.commands.exportDialog');
+    expect(STRINGS.commands.exportDialog).toBe('Export…');
     expect(block).toContain('this.actions.exportWithDialog()');
   });
 

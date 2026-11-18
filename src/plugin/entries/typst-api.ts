@@ -21,6 +21,7 @@ import {flattenLinks, type ColorMode} from '../../core/markers';
 import type {EntriesSettings} from '../../core/markers/entries';
 import {parseInline} from '../../core/parse';
 import {NO_SETTINGS, NO_STATS, iconCache} from './processor';
+import {STRINGS} from '../strings';
 
 /** What the answer reads, each time it is asked (US-039 AC-10). */
 export interface TypstApiDeps {
@@ -192,7 +193,7 @@ export function createStatblockTypstApi(deps: TypstApiDeps): StatblockTypstApi {
         return {
           ok: false,
           reason: 'no-settings',
-          message: `The preset could not be read: ${why}`,
+          message: STRINGS.presets.unreadable(why),
         };
       }
     },

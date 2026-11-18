@@ -50,6 +50,7 @@ import {
   type ExportSource,
   type WarningSettings,
 } from './warning-flow';
+import {STRINGS} from './strings';
 
 /** What a run needs from the plugin: the host of US-006 plus byte output. */
 export interface RunExportHost extends ExportHost {
@@ -159,7 +160,7 @@ export async function runExport(
   const {host} = options;
   const release = options.lock.tryAcquire();
   if (release === null) {
-    host.notice('An export is already running.');
+    host.notice(STRINGS.notices.busy);
     return {status: 'busy'};
   }
   const {progress} = options;

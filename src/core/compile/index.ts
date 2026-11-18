@@ -2,6 +2,8 @@
 // exported files, the text of a compile error, and the request/result types.
 // No Obsidian, Node or I/O imports.
 
+import {CORE_STRINGS} from '../strings';
+
 export {
   FIT_COMPILE_LIMIT,
   IMAGE_FIT_OFF_WARNING,
@@ -108,7 +110,14 @@ export function formatCompileError(raw: string): string {
     if (match === null) continue;
     const [, path, row, column, text] = match;
     const shown = (path as string).replace(/^\//, '');
-    return `Typst error at ${shown}:${row}:${column}: ${text}`;
+    return CORE_STRINGS.compile.errorAt(
+      shown,
+      row as string,
+      column as string,
+      text as string,
+    );
   }
-  return `Typst error: ${lines[0] ?? 'unknown error'}`;
+  return CORE_STRINGS.compile.error(
+    lines[0] ?? CORE_STRINGS.compile.unknownError,
+  );
 }

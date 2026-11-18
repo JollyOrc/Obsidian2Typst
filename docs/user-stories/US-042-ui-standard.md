@@ -116,7 +116,18 @@ the synthetic sample book (SCAR-035).
 - **AC-14 (one string table).** Every user-facing text of the dialog, the tab, the progress tab and the
   notices comes from one module `src/plugin/strings.ts`, including the core's texts handed to notices; a
   text check finds no other string literal passed to `setName`, `setDesc`, `setButtonText`, `setTooltip`,
-  `setText` or a notice in `src/plugin` (SCAR-017).
+  `setText` or a notice in `src/plugin` (SCAR-017). *Amended 2026-11-18 (owner, at T6: "widen T6 now",
+  "screens + notices"):* the check also reads `setTitle`, `setPlaceholder`, the ribbon icon's title and the
+  shown fields (`title`, `text`, `label`, `name`, `desc`, `hint`, `confirmLabel`, `cancelLabel`, a
+  question's `lines`, a feature's `rows`); and a second check finds no sentence-like literal in
+  `src/plugin` outside the table but a named list of exemptions, each with its reason (programming faults,
+  console diagnostics, the developer command, the debug info's format, key names, a type tag, the default
+  folder). The statblock and details processors draw the book's content and are not read. *Amended
+  2026-11-18 (owner, "notices only, own core table"):* the core's texts that become notices (the export's
+  ✅/❌ notices and the strict-mode abort in `core/report`, the compile notices and the compile error, the
+  heading-numbering notice) come from `src/core/strings.ts`, which imports nothing and which the plugin's
+  table carries as `STRINGS.core`; preset validation messages and conversion warnings stay with the core
+  code that finds them.
 - **AC-15 (checked in Obsidian).** A manual check on the scratch vault with the tab and the dialog that
   stay open: every entry point (command, ribbon, both note menus, with and without a remembered folder),
   the dialog's keys (Enter, Escape, IME not checked unless an IME is at hand), the red and grey lines while
@@ -217,7 +228,8 @@ Pure modules (no Obsidian import, SCAR-031); the drawn screens and `main.ts` onl
   copy without those keys; an object left empty is removed); `resetSectionQuestion(name)`; `resetSection({settings,
   confirm}, name)` (asks, then `setDefaults` once; `false` without a change on Cancel or with nothing to remove).
   The tab ends each of those sections with the row `Reset this section to defaults`.
-- `src/plugin/strings.ts` (AC-14): the texts; a tooling test reads `src/plugin`.
+- `src/plugin/strings.ts` (AC-14): the texts, in groups by screen; the row labels (`labels`) are also the keys
+  the layout and the details table find the rows by. A tooling test (`us-042-string-table`) reads `src/plugin`.
 
 ## Not covered
 

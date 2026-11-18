@@ -51,7 +51,7 @@ export class Obsidian2TypstSettingTab extends PluginSettingTab {
   /** US-009 AC-12: what the trim size rows keep between two draws. */
   private readonly trim = createTrimState();
   /** US-029 AC-7 (decision 2): Presets open at first, kept for the session. */
-  private readonly sections = createSectionState(['Presets']);
+  private readonly sections = createSectionState([STRINGS.sections.presets]);
 
   constructor(
     app: App,
@@ -127,7 +127,7 @@ export class Obsidian2TypstSettingTab extends PluginSettingTab {
     const {presets, settings} = this.deps;
     root.createEl('p', {
       cls: 'setting-item-description',
-      text: 'A preset is a note in the presets folder. Edit its values in the note itself; they apply to the next export.',
+      text: STRINGS.tab.presetsIntro,
     });
     const active = settings.data.activePreset;
     for (const group of groupPresets(presets.entries())) {
@@ -139,16 +139,22 @@ export class Obsidian2TypstSettingTab extends PluginSettingTab {
         const row = new Setting(root).setName(entry.name);
         const isActive = entry.name === active;
         if (entry.valid) {
-          row.setDesc(isActive ? 'Active' : '');
+          row.setDesc(isActive ? STRINGS.tab.active : STRINGS.empty);
         } else {
           row.setDesc(
-            `invalid: ${formatPresetError(entry.error ?? {message: 'unknown error', line: null})}`,
+            STRINGS.tab.invalidPreset(
+              formatPresetError(
+                entry.error ?? {message: STRINGS.tab.unknownError, line: null},
+              ),
+            ),
           );
           row.descEl.addClass('mod-warning');
         }
         row.addButton((b) =>
           b
-            .setButtonText(isActive ? 'In use' : 'Use')
+            .setButtonText(
+              isActive ? STRINGS.details.inUse : STRINGS.details.use,
+            )
             .setDisabled(!entry.valid || isActive)
             .onClick(async () => {
               await this.deps.usePreset(entry.name);
@@ -160,17 +166,17 @@ export class Obsidian2TypstSettingTab extends PluginSettingTab {
         row.addExtraButton((b) =>
           b
             .setIcon('settings')
-            .setTooltip(`Preset "${entry.name}"`)
+            .setTooltip(STRINGS.tab.presetTooltip(entry.name))
             .onClick(() => this.deps.openDetails(entry.name)),
         );
       }
     }
     new Setting(root).addButton((b) =>
       b
-        .setButtonText('New preset')
+        .setButtonText(STRINGS.tab.newPreset)
         .setCta()
         .onClick(() =>
-          new NameModal(this.app, 'New preset', '', async (name) => {
+          new NameModal(this.app, STRINGS.tab.newPreset, '', async (name) => {
             const result = await presets.create(name);
             return result.ok ? null : result.error;
           }).open(),
@@ -213,18 +219,17 @@ export class Obsidian2TypstSettingTab extends PluginSettingTab {
       return;
     }
     if (item.kind !== 'plain') return;
-    if (item.label === 'Presets folder') this.showPresetsFolder(root);
-    if (item.label === 'Warnings note folder') this.showWarningsFolder(root);
+    if (item.label === STRINGS.tab.presetsFolder) this.showPresetsFolder(root);
+    if (item.label === STRINGS.tab.warningsFolder)
+      this.showWarningsFolder(root);
   }
 
   /** US-008 AC-4: the vault folder of the preset notes. */
   private showPresetsFolder(root: HTMLElement): void {
     const {settings, presets} = this.deps;
     new Setting(root)
-      .setName('Presets folder')
-      .setDesc(
-        'Vault folder of the preset notes. Created with two presets when it does not exist.',
-      )
+      .setName(STRINGS.tab.presetsFolder)
+      .setDesc(STRINGS.tab.presetsFolderDesc)
       .addText((t) => {
         t.setValue(settings.data.presetsFolder);
         commitOnChange(
@@ -244,8 +249,8 @@ export class Obsidian2TypstSettingTab extends PluginSettingTab {
   private showWarningsFolder(root: HTMLElement): void {
     const {settings} = this.deps;
     new Setting(root)
-      .setName('Warnings note folder')
-      .setDesc('Vault folder of the warnings note; empty is the vault root.')
+      .setName(STRINGS.tab.warningsFolder)
+      .setDesc(STRINGS.tab.warningsFolderDesc)
       .addText((t) => {
         t.setValue(settings.data.warningsNoteFolder);
         commitOnChange(

@@ -842,3 +842,36 @@ on the real code (six files, backup by path, checksums proven): 24 mutants, 18 c
 tests above and then caught, one equivalent (`strictMode` as a reset path: it is a toggle only in *Export*, which has
 no reset). The whole suite after it: `npm test` 3 red (T6: `us-012-panel`, `us-021-groups-details`, the string
 table); integration 692 of 692 in two full runs (logs kept, #182).
+
+**Ticket #180 (T6, 2026-11-18), green:** `us-042-string-table` (no literal reaches a text sink outside `strings.ts`),
+the amended `us-012-panel` and `us-021-groups-details`; `us-000-test-build-version` was already green since T5. The
+22 literals found by the check in seven files moved into the table, and one the check cannot see (`'Active'`, behind a
+conditional). Added at T6: the moved texts keep their wording (eleven texts no test read before). Mutation round on
+the real code (eight files, backup by path, checksums proven): 31 mutants — 7 put a literal back, one per file, all
+caught; 24 changed a wording in the table, 11 caught first, the 13 others caught after the added test. A script also
+compared every literal gone from the seven files with the table: all equal. The whole suite after it: `npm test` 3485
+passed, 1 todo; integration 692 of 692 (`build-output` included); the branch is green.
+
+**Ticket #180 widened (T6, 2026-11-18, owner: "widen T6 now", "screens + notices"):** the check of
+`us-042-string-table` reads more sinks and the shown fields, and a second check reads every sentence-like literal of
+`src/plugin` against a named exemption list (30 entries, each with its reason; a stale entry fails too). About 200
+more texts moved (row labels and hints, the layout's names and descriptions, menus and commands, the questions, the
+details screen, the panel and preview texts, the dialog's rules, the preset store's and the export refusals'
+messages, the compiler's shown messages); a script compared every literal gone from the sources with the table: all
+equal. 13 old text checks amended to look for the table entry and pin its text (`us-007-plugin-wiring`,
+`us-008-wiring` ×3, `us-009-settings-page` ×5, `us-012-panel`, `us-020-actions-menus`, `us-021-groups-details`,
+`us-042-direct-export`). Mutation round (28 source files, backup by path, checksums proven): 11 literals put back
+in each kind of place and 1 stale exemption, all caught; every text of the table changed in turn (224 mutants), 189
+caught, 35 read by no test — pinned by an added test, then all 35 caught. The whole suite: `npm test` 2829 passed,
+1 todo; integration 692 of 692. One full `vitest run` before it had `us-041-band-marks-pdf` red once (the
+determinism test, "the same chapter compiles to the same bytes twice"); it passed alone (16/16) and in the next full
+run; its output was not kept (#182).
+
+**Ticket #180, the core's notice texts (T6, 2026-11-18, owner: "notices only, own core table"):** a check in
+`us-042-string-table` reads the declarations that build the core's notices (`finishedNotice`, `failedNotice`,
+`CANCELLED_NOTICE`, `strictNotice`, `plural`, `compilingNotice`, `formatCompileError`, `NUMBERING_NOTICE`) for any
+literal with a word, and that `src/core/strings.ts` imports nothing and is `STRINGS.core` — 9 red first, then green.
+12 core texts moved, equal to `HEAD` by script. Amended: `us-006-export-flow` (`core/report` may import the core
+string table; AC-9's pure builder holds). Mutation round (6 files, backup by path, checksums proven): 6 literals put
+back and 1 broken carry, all caught; every core table text changed in turn (13), all caught. The whole suite:
+`npm test` 2838 passed, 1 todo; integration 692 of 692.

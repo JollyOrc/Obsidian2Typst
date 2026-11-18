@@ -25,6 +25,7 @@ import {
 } from '../../core/preview/range';
 import type {StatusState} from '../../core/preview/status';
 import type {PreviewChecks} from './request';
+import {STRINGS} from '../strings';
 
 /** US-012 AC-5: the delay after the last style change. */
 export const PREVIEW_DELAY_MS = 500;
@@ -201,7 +202,7 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
     } catch (error) {
       if (mine !== counter) return;
       const text = error instanceof Error ? error.message : String(error);
-      fail(`Preview failed: ${text}`);
+      fail(STRINGS.preview.failed(text));
       return;
     }
     if (mine !== counter) return;
@@ -218,7 +219,7 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
       if (running === job) running = null;
       if (mine !== counter) return;
       const text = error instanceof Error ? error.message : String(error);
-      fail(`Preview failed: ${text}`);
+      fail(STRINGS.preview.failed(text));
       return;
     }
     if (running === job) running = null;
@@ -317,7 +318,7 @@ export function createPreviewController(deps: PreviewDeps): PreviewController {
       emit({
         note: path,
         noteName: nameOf(path),
-        hint: 'Note changed; press Refresh',
+        hint: STRINGS.preview.noteChanged,
         greyed: state.pages !== null,
       });
     },

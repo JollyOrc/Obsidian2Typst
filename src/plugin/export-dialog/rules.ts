@@ -2,10 +2,11 @@
 // check, the destination line, the presets offered, a preset's folder, the keys
 // and what is saved when Export runs. No Obsidian import: the dialog draws them.
 import {groupPresets} from '../../core/presets/groups';
+import {STRINGS} from '../strings';
 
 /** US-042 | AC-3: The dialog's title. */
 export function dialogTitle(noteName: string): string {
-  return `Export ${noteName}`;
+  return STRINGS.exportDialogText.title(noteName);
 }
 
 /**
@@ -21,11 +22,12 @@ export function checkExportFolder(
   path: {isAbsolute(p: string): boolean},
 ): {ok: true; folder: string} | {ok: false; message: string} {
   const trimmed = text.trim();
-  if (trimmed === '') return {ok: false, message: 'Choose an export folder.'};
+  if (trimmed === '')
+    return {ok: false, message: STRINGS.exportDialogText.chooseFolder};
   if (!path.isAbsolute(trimmed)) {
     return {
       ok: false,
-      message: `Export folder "${trimmed}" is not an absolute path.`,
+      message: STRINGS.exportDialogText.notAbsolute(trimmed),
     };
   }
   const stripped = trimmed.replace(/[\\/]+$/, '');
@@ -43,11 +45,11 @@ export function destinationLine(
   pdfName: string,
   modified: Date | null,
 ): string {
-  if (modified === null) return `${pdfName} will be written.`;
+  if (modified === null) return STRINGS.exportDialogText.willWrite(pdfName);
   const when =
     `${modified.getFullYear()}-${pad(modified.getMonth() + 1)}-${pad(modified.getDate())} ` +
     `${pad(modified.getHours())}:${pad(modified.getMinutes())}`;
-  return `${pdfName} exists (from ${when}) and will be replaced.`;
+  return STRINGS.exportDialogText.willReplace(pdfName, when);
 }
 
 /** One entry of the preset list. */

@@ -329,8 +329,13 @@ describe('US-006 AC-9 the report builder and the flow stay free of the host', ()
       (m) => m[1]!,
     );
 
-  it('US-006 AC-9: core/report imports only the warning type of core/emit', () => {
-    expect(imports('src/core/report/index.ts')).toEqual(['../emit']);
+  // US-042 AC-14 (amended at T6): the notice texts come from the core's string
+  // table, which imports nothing (us-042-string-table); the builder stays pure.
+  it('US-006 AC-9: core/report imports only the warning type of core/emit and the core string table', () => {
+    expect(imports('src/core/report/index.ts')).toEqual([
+      '../emit',
+      '../strings',
+    ]);
   });
 
   it('US-006 AC-9: the flow imports no Obsidian or Node module', () => {

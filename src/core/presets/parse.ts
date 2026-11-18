@@ -39,6 +39,7 @@ import {
   type PagePresetFields,
   type PresetFields,
 } from './schema';
+import {CORE_STRINGS} from '../strings';
 
 /** An error of a preset note; `line` counts in the note, the first fence is 1. */
 export interface PresetError {
@@ -62,7 +63,7 @@ export type ValidateResult =
   | {ok: true; fields: PresetFields; notices: string[]}
   | {ok: false; error: PresetError};
 
-export const NUMBERING_NOTICE = 'Invalid heading numbering; "1.1" is used';
+export const NUMBERING_NOTICE = CORE_STRINGS.presets.numbering;
 const NOT_A_MAPPING =
   'Frontmatter must contain settings written as name: value';
 const FENCE = /^---[ \t]*$/;

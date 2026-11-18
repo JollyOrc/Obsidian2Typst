@@ -7,6 +7,7 @@ import {exportNames, type CompileRequest} from '../../core/compile';
 import type {ImageFact} from '../../core/emit';
 import {compileFonts} from '../compile-fonts';
 import {noteNameOf, prepareNote, type PrepareDeps} from '../prepare-note';
+import {STRINGS} from '../strings';
 
 /** US-012 AC-12: the image types that are made smaller in the preview (not WebP). */
 const SHRINKABLE = new Set(['png', 'jpg', 'jpeg']);
@@ -109,7 +110,7 @@ export async function preparePreview(
   if (deps.settings.data.strictMode && count > 0) {
     return {
       ok: false,
-      error: `Preview stopped: ${count} ${count === 1 ? 'warning' : 'warnings'} (strict mode)`,
+      error: STRINGS.preview.stopped(count),
     };
   }
   const widths: Record<string, number> = {};

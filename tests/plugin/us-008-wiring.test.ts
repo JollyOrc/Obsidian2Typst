@@ -6,6 +6,7 @@ import {readFileSync} from 'node:fs';
 import {describe, expect, it} from 'vitest';
 import {readCheck} from '../support/manual-checks';
 import {settingsSource} from '../support/settings-source';
+import {STRINGS} from '../../src/plugin/strings';
 
 const main = readFileSync('src/plugin/main.ts', 'utf8');
 const port = readFileSync('src/plugin/obsidian/vault-port.ts', 'utf8');
@@ -20,7 +21,9 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
 describe('US-008 AC-15 wiring in src/plugin/main.ts', () => {
   it('US-007 AC-1: registers the command Export current note with the id export-current-note', () => {
     expect(main).toMatch(/addCommand\(\{[^}]*id: 'export-current-note'/s);
-    expect(main).toContain("name: 'Export current note'");
+    // US-042 AC-14 (amended at T6): the text is in the string table.
+    expect(main).toContain('name: STRINGS.commands.exportNote');
+    expect(STRINGS.commands.exportNote).toBe('Export current note');
   });
 
   it('US-008 AC-8: loads and saves plugin data and adds the settings tab', () => {
@@ -65,19 +68,40 @@ describe('US-008 AC-1 the settings tab', () => {
   // are spread over Page, Text and Book (us-029-settings-tab tests the drawn
   // sections), so `Defaults` left this list.
   it('US-008 AC-1: has sections for the presets, the presets folder, strict mode and the warnings folder', () => {
-    for (const text of [
-      'Presets',
-      'Presets folder',
-      'Strict mode',
-      'Warnings note folder',
+    // US-042 AC-14 (amended at T6): the texts are in the string table.
+    for (const [entry, text] of [
+      [STRINGS.sections.presets, 'Presets'],
+      [STRINGS.tab.presetsFolder, 'Presets folder'],
+      [STRINGS.features.strictMode, 'Strict mode'],
+      [STRINGS.tab.warningsFolder, 'Warnings note folder'],
     ]) {
-      expect(tab, text).toContain(`'${text}'`);
+      expect(entry).toBe(text);
+    }
+    for (const entry of [
+      'STRINGS.sections.presets',
+      'STRINGS.tab.presetsFolder',
+      'STRINGS.features.strictMode',
+      'STRINGS.tab.warningsFolder',
+    ]) {
+      expect(tab, entry).toContain(entry);
     }
   });
 
   it('US-008 AC-5: offers create, duplicate, rename and delete of a preset, and shows the error of an invalid one', () => {
-    for (const text of ['New preset', 'Duplicate', 'Rename', 'Delete']) {
-      expect(tab, text).toContain(`'${text}'`);
+    // US-042 AC-14 (amended at T6): the texts are in the string table.
+    for (const [entry, text] of [
+      ['STRINGS.tab.newPreset', 'New preset'],
+      ['STRINGS.details.duplicate', 'Duplicate'],
+      ['STRINGS.details.rename', 'Rename'],
+      ['STRINGS.details.delete', 'Delete'],
+    ] as const) {
+      expect(tab, entry).toContain(entry);
+      const [, group, key] = entry.split('.');
+      expect(
+        (STRINGS as unknown as Record<string, Record<string, string>>)[group!]![
+          key!
+        ],
+      ).toBe(text);
     }
     expect(tab).toContain('formatPresetError');
   });

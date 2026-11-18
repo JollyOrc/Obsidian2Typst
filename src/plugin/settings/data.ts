@@ -2,12 +2,13 @@
 // an old or damaged file does, and the store that keeps it. The file is read and
 // written through `SettingsStorage` (Obsidian's `loadData` and `saveData`).
 import {validateFields, type PresetFields} from '../../core/presets';
+import {STRINGS} from '../strings';
 
 /** The version of `data.json` that this plugin writes and reads. */
 export const DATA_SCHEMA_VERSION = 1;
 
 /** The notice shown when `data.json` held values that were replaced. */
-export const RESET_NOTICE = 'Some settings were reset';
+export const RESET_NOTICE = STRINGS.presets.settingsReset;
 
 export interface PluginData {
   schemaVersion: 1;

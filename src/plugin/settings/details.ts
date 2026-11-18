@@ -10,6 +10,7 @@ import {builtinValue, ownerNote, shownValue} from '../../core/presets/owner';
 import type {PresetStore} from '../presets/store';
 import {layoutRowOrder} from './layout';
 import {DEFAULT_ROWS, FONT_ROWS} from './row-data';
+import {STRINGS} from '../strings';
 
 /** Where the used value comes from (AC-6); null for a row with no value. */
 export type DetailSource = 'preset' | 'Defaults' | 'built-in';
@@ -160,10 +161,14 @@ export function detailRows(fields: unknown, defaults: unknown): DetailRow[] {
       ? null
       : `${own.toc.position ?? 'before'} "${own.toc.heading}"`;
   rows.push(
-    summaryRow('Cover', cover, DEFAULT_COVER.mode),
-    summaryRow('Callout styles', callouts, '—'),
-    summaryRow('Heading rules', rules, pairs(BUILTIN_HEADING_RULES)),
-    summaryRow('Contents place', place, 'default'),
+    summaryRow(STRINGS.details.cover, cover, DEFAULT_COVER.mode),
+    summaryRow(STRINGS.details.calloutStyles, callouts, '—'),
+    summaryRow(
+      STRINGS.details.headingRules,
+      rules,
+      pairs(BUILTIN_HEADING_RULES),
+    ),
+    summaryRow(STRINGS.details.contentsPlace, place, 'default'),
     ...entryRows(own),
   );
   return rows;
@@ -252,9 +257,9 @@ function entryRows(own: PresetFields): DetailRow[] {
  * confirmed delete).
  */
 export function detailsView(deps: DetailsDeps, name: string): DetailsView {
-  const title = `Preset "${name}"`;
+  const title = STRINGS.details.title(name);
   const close: DetailButton = {
-    text: 'Close',
+    text: STRINGS.details.close,
     disabled: false,
     run: () => deps.close(),
   };
@@ -262,18 +267,25 @@ export function detailsView(deps: DetailsDeps, name: string): DetailsView {
   if (entry === undefined) {
     return {
       title,
-      error: `Preset "${name}" does not exist`,
+      error: STRINGS.presets.missing(name),
       buttons: [close],
-      focus: 'Close',
+      focus: STRINGS.details.close,
     };
   }
   const active = deps.settings.data.activePreset === name;
   const use: DetailButton =
     entry.valid && !active
-      ? {text: 'Use', disabled: false, run: () => deps.usePreset(name)}
-      : {text: active ? 'In use' : 'Use', disabled: true};
+      ? {
+          text: STRINGS.details.use,
+          disabled: false,
+          run: () => deps.usePreset(name),
+        }
+      : {
+          text: active ? STRINGS.details.inUse : STRINGS.details.use,
+          disabled: true,
+        };
   const open: DetailButton = {
-    text: 'Open the note',
+    text: STRINGS.details.openNote,
     disabled: false,
     run: async () => {
       await deps.openNote(entry.path);
@@ -281,14 +293,18 @@ export function detailsView(deps: DetailsDeps, name: string): DetailsView {
     },
   };
   const manage: DetailButton[] = [
-    {text: 'Duplicate', disabled: false, run: () => deps.duplicate(name)},
     {
-      text: 'Rename',
+      text: STRINGS.details.duplicate,
+      disabled: false,
+      run: () => deps.duplicate(name),
+    },
+    {
+      text: STRINGS.details.rename,
       disabled: false,
       run: async () => void (await deps.rename(name)),
     },
     {
-      text: 'Delete',
+      text: STRINGS.details.delete,
       disabled: false,
       run: async () => {
         if (await deps.remove(name)) deps.close();
@@ -299,14 +315,14 @@ export function detailsView(deps: DetailsDeps, name: string): DetailsView {
   if (!entry.valid || entry.preset === undefined) {
     const error =
       entry.error === undefined
-        ? 'The preset is invalid'
+        ? STRINGS.details.invalid
         : formatPresetError(entry.error);
-    return {title, error, buttons, focus: 'Close'};
+    return {title, error, buttons, focus: STRINGS.details.close};
   }
   return {
     title,
     rows: detailRows(entry.preset.fields, deps.settings.data.defaults),
     buttons,
-    focus: 'Close',
+    focus: STRINGS.details.close,
   };
 }

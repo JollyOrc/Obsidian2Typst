@@ -31,6 +31,7 @@ import {
   previewStatus,
 } from './open';
 import type {RenderedDocument} from './renderer';
+import {STRINGS} from '../strings';
 
 /** What the panel needs from the plugin. */
 export interface StylePanelDeps {
@@ -87,7 +88,7 @@ export class StylePanelView extends ItemView {
   }
 
   getDisplayText(): string {
-    return 'Style preview';
+    return STRINGS.preview.title;
   }
 
   override getIcon(): string {
@@ -180,7 +181,7 @@ export class StylePanelView extends ItemView {
       // US-021 AC-8: the active preset of the moment of the click (SCAR-016).
       b
         .setIcon('info')
-        .setTooltip('Details of the preset')
+        .setTooltip(STRINGS.panel.details)
         .onClick(() =>
           this.deps.openDetails(this.deps.settings.data.activePreset),
         ),
@@ -198,16 +199,16 @@ export class StylePanelView extends ItemView {
       ['cover'] as FieldPath,
     ) as Record<string, unknown> | undefined;
     const rows: [string, string, unknown, unknown][] = [
-      ['Cover', 'mode', set?.['mode'], 'auto'],
-      ['Cover image', 'file', set?.['file'], 'none'],
+      [STRINGS.preview.cover, 'mode', set?.['mode'], 'auto'],
+      [STRINGS.preview.coverImage, 'file', set?.['file'], 'none'],
       [
-        'Blank page after cover',
+        STRINGS.preview.blankAfterCover,
         'blankPageAfter',
         set?.['blankPageAfter'],
         false,
       ],
       [
-        'Crop warning (%)',
+        STRINGS.preview.cropWarning,
         'cropWarningPercent',
         set?.['cropWarningPercent'],
         5,
@@ -220,8 +221,8 @@ export class StylePanelView extends ItemView {
         .setName(label)
         .setDesc(
           owned && active !== null
-            ? `${shown}; set by preset "${active.name}"; change it in the preset note`
-            : `${shown}; built-in value; set it in a preset note`,
+            ? STRINGS.preview.setByPreset(shown, active.name)
+            : STRINGS.preview.builtinValue(shown),
         );
     }
   }
@@ -244,7 +245,9 @@ export class StylePanelView extends ItemView {
     );
     this.messageEl = root.createDiv({cls: 'o2t-range-message'});
     new Setting(root).addButton((b) =>
-      b.setButtonText('Refresh').onClick(() => this.deps.controller.refresh()),
+      b
+        .setButtonText(STRINGS.panel.refresh)
+        .onClick(() => this.deps.controller.refresh()),
     );
     const statusLine = root.createDiv({cls: 'o2t-status'});
     this.lineEl = statusLine;
@@ -328,7 +331,7 @@ export class StylePanelView extends ItemView {
       if (state.status === 'no-note') {
         area.createEl('p', {
           cls: 'setting-item-description',
-          text: 'Open a note to preview it',
+          text: STRINGS.preview.openNote,
         });
       }
       return;

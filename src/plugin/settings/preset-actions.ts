@@ -4,6 +4,7 @@
 import type {PresetStore} from '../presets/store';
 import type {SettingsStore} from './data';
 import {deletePreset, type DeleteConfirmation} from './dialog';
+import {STRINGS} from '../strings';
 
 /** What the actions read and call. */
 export interface PresetActionDeps {
@@ -47,7 +48,7 @@ export function presetScreenActions(deps: PresetActionDeps): PresetActions {
     },
     async rename(name) {
       let renamed: string | null = null;
-      await deps.askName('Rename preset', name, async (to) => {
+      await deps.askName(STRINGS.questions.renamePreset, name, async (to) => {
         const result = await presets.rename(name, to);
         if (!result.ok) return result.error;
         if (settings.data.activePreset === name) {

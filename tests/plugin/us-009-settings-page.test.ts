@@ -13,6 +13,7 @@ import {
   trimChoiceOf,
 } from '../../src/plugin/settings/page-fields';
 import {settingsSource} from '../support/settings-source';
+import {STRINGS} from '../../src/plugin/strings';
 
 describe('US-009 AC-12 what the dropdown shows', () => {
   it('US-009 AC-12: offers (built-in), the four names and Custom, in this order', () => {
@@ -170,7 +171,9 @@ describe('US-009 AC-12, AC-13 wiring of the settings tab (text check)', () => {
   });
 
   it('US-009 AC-12: the width and height rows are only built for Custom', () => {
-    expect(tab).toMatch(/=== 'Custom'/);
+    // US-042 AC-14 (amended at T6): the text is in the string table.
+    expect(tab).toMatch(/=== CUSTOM_CHOICE/);
+    expect(STRINGS.rows.customTrim).toBe('Custom');
   });
 
   it('US-009 AC-13: the gutter row is disabled by gutterEnabled and the tab is drawn again when Facing pages changes (SCAR-016)', () => {
@@ -181,24 +184,29 @@ describe('US-009 AC-12, AC-13 wiring of the settings tab (text check)', () => {
 
   it('US-009 AC-13: the gutter field is disabled with the result of gutterEnabled, not a constant', () => {
     expect(tab).toContain('t.setDisabled(!enabled || owner !== null)');
-    expect(tab).toContain('Used only with facing pages');
+    expect(tab).toContain('STRINGS.rows.onlyFacingPages');
+    expect(STRINGS.rows.onlyFacingPages).toBe('Used only with facing pages');
   });
 
   it('US-009 AC-12: choosing Custom is remembered so that the width and height rows appear before a size is stored', () => {
-    expect(tab).toContain("env.trim.custom = choice === 'Custom'");
-    expect(tab).toMatch(/stored === 'Custom' \|\| env\.trim\.custom/);
+    // US-042 AC-14 (amended at T6): the text is in the string table.
+    expect(tab).toContain('env.trim.custom = choice === CUSTOM_CHOICE');
+    expect(tab).toMatch(/stored === CUSTOM_CHOICE \|\| env\.trim\.custom/);
   });
 
   it('US-009 AC-12: the width and height rows are always built, disabled unless Custom, saved with planTrimSizes and have no reset icon', () => {
     expect(tab).not.toContain('!custom && (key');
     expect(tab).toContain('addTrimSizeRow(');
     expect(tab).toContain('planTrimSizes(');
-    expect(tab).toContain('Used only with a custom trim size');
+    expect(tab).toContain('STRINGS.rows.onlyCustomTrim');
+    expect(STRINGS.rows.onlyCustomTrim).toBe(
+      'Used only with a custom trim size',
+    );
   });
 
   it('US-009 AC-13: the gutter row stands directly under the Facing pages row', () => {
     expect(tab).toMatch(
-      /label: 'Facing pages'[^}]*\},\s*\{label: 'Gutter \(mm\)'/,
+      /label: STRINGS\.labels\.facingPages[^}]*\},\s*\{label: STRINGS\.labels\.gutter\b/,
     );
   });
 
