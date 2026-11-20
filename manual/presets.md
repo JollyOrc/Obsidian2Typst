@@ -112,7 +112,8 @@ the info icon of the style panel):
   The window then shows the preset under its new name; an active preset
   stays active.
 - **Delete** asks `Delete preset "<name>"?` and moves the note to the trash as
-  set in Obsidian. **Cancel** is the default button. If you delete the active
+  set in Obsidian. **Cancel** is the first button and has the focus, so
+  Enter alone deletes nothing. If you delete the active
   preset, the dialog names the preset that becomes active. The last preset
   cannot be deleted.
 

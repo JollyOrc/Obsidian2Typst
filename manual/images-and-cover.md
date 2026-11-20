@@ -99,7 +99,8 @@ either, and the gap stays.
 Each image's choice moves everything after it, so in a long book Typst may
 not finish placing the images in one compile. The export then compiles the
 note again, starting from the choices of the compile before, until the
-layout settles — at most 8 times; the notice shows `Compiling… (2 of up to
+layout settles — at most 8 times; the
+[progress tab](manual.md#while-an-export-runs) shows `Compiling (2 of up to
 8)`. A note that settles at once is compiled once, as before. The `.typ` in
 the export folder is always the one the PDF came from, so it compiles to the
 same pages on its own. If 8 compiles are not enough, the export compiles the

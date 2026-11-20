@@ -45,7 +45,9 @@ panel never writes a preset note.
 - When you switch to another note, the panel shows
   `Note changed; press Refresh` and keeps the old pages, greyed, until you
   press Refresh.
-- While an export runs, the preview waits.
+- While an export runs, the preview waits. The export's progress is shown in
+  its own tab, not in the panel (see
+  [While an export runs](manual.md#while-an-export-runs)).
 
 ## The page range
 

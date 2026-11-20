@@ -11,9 +11,11 @@ the line in your note.
 
 After each export:
 
-- A notice shows the count, for example
-  `Exported with 2 warnings. Report: Export/export-warnings.md`. With no
-  warnings there is no notice.
+- The notice adds the count, for example
+  `✅ Exported Book.pdf to /Users/me/Print, 2 warnings (see export-warnings.md)`.
+- If the export ran long enough to open the
+  [progress tab](manual.md#while-an-export-runs), the tab lists each warning
+  as it is found: the code, the message and the line.
 - `export-warnings.md` is written to the export folder.
 - The same report is written as a vault note, `<note name> export
   warnings.md`, in the **Warnings note folder** (settings tab, section
@@ -52,7 +54,7 @@ anything is written; the export folder stays as it was. The notice lists the
 first five:
 
 ```text
-Export aborted: 2 warnings (strict mode)
+❌ Export aborted: 2 warnings (strict mode)
 line 412: LINK_UNRESOLVED
 FONT_MISSING
 ```
@@ -77,7 +79,7 @@ a strict export.
 
 A Typst error is not a warning: the PDF is not written. The notice shows the
 first error with file, line and column, for example
-`Typst error at Book.typ:41:8: unknown variable: foo`. The `.typ` file and the
+`❌ Export failed: Typst error at Book.typ:41:8: unknown variable: foo`. The `.typ` file and the
 report are still written. Errors usually come from a
 [template](templates.md).
 

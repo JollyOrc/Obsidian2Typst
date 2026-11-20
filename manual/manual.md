@@ -6,13 +6,15 @@ Obsidian. You write in Obsidian as usual; the plugin sets the page size,
 margins, fonts, page numbers, cover, callout boxes, glossary and book
 structure from **presets** that you keep as notes in your vault.
 
-This manual describes version 0.12.0.
+This manual describes version 0.16.0.
 
 ## Contents
 
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [Ways to run the plugin](#ways-to-run-the-plugin)
+- [The export dialog](#the-export-dialog)
+- [While an export runs](#while-an-export-runs)
 - [What an export produces](#what-an-export-produces)
 - [Presets in short](#presets-in-short)
 - [The settings tab](#the-settings-tab)
@@ -39,13 +41,18 @@ is created, so presets you deleted do not come back.
 ## Quick start
 
 1.  Open the note you want to print.
-2.  Click the printer icon in the left ribbon and choose **Export current
-    note**, or run **Obsidian2Typst: Export current note** from the command
-    palette.
-3.  Pick a folder for the export in the system dialog. The plugin remembers
-    the folder for each preset and opens the dialog there next time.
-4.  The plugin converts and compiles the note. The PDF and the Typst file are
-    written to the chosen folder.
+2.  Click the printer icon in the left ribbon and choose **Export…**, or run
+    **Obsidian2Typst: Export…** from the command palette.
+3.  In the [export dialog](#the-export-dialog), pick the preset and the
+    export folder (type an absolute path, or use **Choose folder…**), then
+    press **Export** or Enter.
+4.  The plugin converts and compiles the note and writes the PDF and the
+    Typst file to that folder. A notice confirms it, for example
+    `✅ Exported Book.pdf to /Users/me/Print`.
+
+The plugin remembers the folder for each preset. From then on, **Export
+current note** (and **O2T: Export to PDF** in a note's menu) exports at once
+into that folder, without a dialog.
 
 To see the result before you export, open the
 [style panel](preview-panel.md): it shows the pages of the current note and
@@ -62,7 +69,8 @@ Open the command palette (`Ctrl/Cmd + P`) and type `Obsidian2Typst`.
 
 | Command | What it does |
 | --- | --- |
-| Export current note | Exports the active note with the active preset. |
+| Export… | Opens the [export dialog](#the-export-dialog) for the active note. |
+| Export current note | Exports the active note with the active preset at once, into that preset's remembered folder. Without a remembered folder it opens the export dialog. |
 | Open style panel | Opens the style panel with the preview in the right sidebar. |
 | Check compiler (developer) | Compiles a test page and appends the result and timing to `o2t-check.md` at the vault root. Only for troubleshooting. |
 
@@ -70,7 +78,8 @@ Open the command palette (`Ctrl/Cmd + P`) and type `Obsidian2Typst`.
 
 The printer icon (**Obsidian2Typst**) in the left ribbon opens a menu with:
 
-- **Export current note** and **Open style panel**, as the commands.
+- **Export…**, **Export current note** and **Open style panel**, as the
+  commands.
 - **Preset**: every preset, with a check mark at the active one. Click a
   preset to make it active. An invalid preset is shown as `<name> (invalid)`
   and cannot be chosen. If you use [preset groups](presets.md#groups), the
@@ -84,7 +93,9 @@ starts with **O2T:**, so you can tell it from Obsidian's own items and those
 of other plugins (the ribbon menu belongs to the plugin and has no prefix).
 
 - **O2T: Export to PDF**: exports that note (it does not have to be the
-  active one).
+  active one) at once, as **Export current note** does: into the active
+  preset's remembered folder, or through the export dialog when there is
+  none.
 - **O2T: Preview**: shows that note in the style panel.
 
 Preset notes do not get these items; presets are never exported.
@@ -101,11 +112,71 @@ line the cursor is on:
 In the file explorer, an image file gets **O2T: Use as cover**, too.
 
 Each of these items asks first, naming the preset and the exact change
-(**Change preset** or **Cancel**; Cancel is the default). Only the one setting
+(**Cancel** or **Change preset**; Cancel comes first and has the focus). Only the one setting
 is written; comments and the rest of the preset note stay as they are.
 
 > **Note:** A right-click does not move the cursor in Obsidian. Click into
 > the heading or image line first, then right-click.
+
+## The export dialog
+
+**Export…** opens a dialog titled `Export <note name>`. From top to bottom:
+
+1.  **Preset**: a dropdown of the valid presets (grouped as in the ribbon
+    menu), with the active one chosen. Invalid presets are not offered.
+    Choosing a preset puts its remembered folder into the folder field
+    (empty if it has none).
+2.  **The export folder**: a full-width field, **Choose folder…** (the
+    system's folder dialog) and **Export**. A folder that does not exist is
+    created by the export. Under the field:
+    - a red line when the folder cannot be used: `Choose an export folder.`
+      (empty) or `Export folder "out" is not an absolute path.` **Export**
+      is disabled while this line shows.
+    - a grey line saying what will happen: `Book.pdf will be written.` or
+      `Book.pdf exists (from 2026-11-17 14:02) and will be replaced.`
+3.  **More options**: the gear opens the plugin's settings tab.
+
+**Enter** exports (when **Export** is enabled). **Escape**, the close button
+or a click outside close the dialog and save nothing. The folder and the
+preset are saved only when **Export** runs: the folder becomes that preset's
+remembered folder, and the preset becomes the active preset.
+
+An export replaces the files of an earlier export in the same folder without
+asking; the grey line tells you beforehand.
+
+## While an export runs
+
+A short export just ends with a notice. An export that is still running
+after about 2 seconds opens a tab `Exporting <note name>` next to your tabs,
+without taking the focus from your note. The tab shows:
+
+- the current step: `Converting`, `Compiling`, `Compiling (2 of up to 8)`
+  (see [Images and the cover](images-and-cover.md#keeping-images-with-their-text)),
+  `Writing files`, `Compiling the encounter sheet`, `Checking word gaps`;
+- a progress bar;
+- the warnings as they are found: the code in bold, the message and the line
+  of your note;
+- **Cancel**.
+
+**Cancel** stops the export at once, also during the compile. No PDF is
+written; files that were already written (the `.typ`, the template, the
+images) stay. At the end the tab reads `Exported`, `Export failed`,
+`Export cancelled` or `Export aborted (strict mode)`, and **Cancel** becomes
+**Close**. The tab stays until you close it; the next long export uses it
+again.
+
+Only one export runs at a time; a second one is refused with
+`An export is already running.` While an export runs, the
+[style panel](preview-panel.md) waits.
+
+The notices (they stay about 5 seconds):
+
+| Notice | When |
+| --- | --- |
+| `✅ Exported Book.pdf to /Users/me/Print` | The PDF was written. With warnings it adds `, 3 warnings (see export-warnings.md)`. |
+| `❌ Export cancelled.` | You pressed **Cancel**. |
+| `❌ Export failed: <message>` | Typst reported an error, or the export could not finish. |
+| `❌ Export aborted: 3 warnings (strict mode)` | [Strict mode](warnings.md#strict-mode) stopped the export; the first five warnings follow. |
 
 ## What an export produces
 
@@ -130,7 +201,11 @@ of your note. See [Warnings and strict mode](warnings.md).
 
 If Typst reports an error, no PDF is written, but the `.typ` file and the
 assets are, so you can look at the problem. The notice names the file, line
-and column, for example `Typst error at Book.typ:41:8: unknown variable: foo`.
+and column, for example
+`❌ Export failed: Typst error at Book.typ:41:8: unknown variable: foo`.
+
+With facing pages on, the PDF asks a PDF viewer to open as spreads (see
+[Page layout](page-layout.md#facing-pages)).
 
 The plugin never changes your note, your images or your preset notes during
 an export or a preview.
@@ -170,7 +245,10 @@ The full description and a reference of every field are in
 ## The settings tab
 
 Open **Settings → Obsidian2Typst**. The first line shows the installed
-version. Below it are five sections: **Presets**, **Page**, **Text**,
+version and, at its right, a bug icon, **Copy debug info**: it copies the
+plugin's and Obsidian's versions, your enabled plugins with their versions
+and the plugin's settings file as plain text, for a bug report (the notice
+`Debug info copied.`). Nothing is sent anywhere. Below it are five sections: **Presets**, **Page**, **Text**,
 **Book** and **Export**. Click a section's heading (or press Enter or Space
 on it) to open or close it; Presets is open when you first open the tab, and
 a section stays open or closed until you close Obsidian.
@@ -200,7 +278,7 @@ opens from the info icon next to the preset dropdown in the
 | Open the note | Opens the preset note in the editor. |
 | Duplicate | Copies the note as `<name> copy`. |
 | Rename | Renames the note; links to it are updated. An active preset stays active. |
-| Delete | Asks first, then moves the note to the trash as set in Obsidian under **Files and links → Deleted files**. The last preset cannot be deleted. |
+| Delete | Asks first (**Cancel** is the first button and has the focus), then moves the note to the trash as set in Obsidian under **Files and links → Deleted files**. The last preset cannot be deleted. |
 | Close | Closes the window (it has the focus, so Enter alone changes nothing). |
 
 The window also shows a table of every setting: what the preset sets and
@@ -217,6 +295,14 @@ when its note does not set them. Leave a field empty, or set a dropdown to
 `—`, to use the built-in value. Each row has a reset icon (**Use the
 built-in value**) that asks before it removes a value. A switch shows the
 value an export would use, also when the Defaults leave it unset.
+
+Each of the three sections ends with **Reset this section to defaults**. It
+asks `Reset "Page" to its defaults?` (**Cancel** first) and then removes
+your Defaults values of that section only, as if you had used every row's
+reset icon; the other sections and your presets stay as they are.
+
+In every question of the plugin (delete, reset, change preset), **Cancel**
+is the first button and has the focus, so Enter alone changes nothing.
 
 Text and number fields are saved when you leave the field or press Enter;
 switches and dropdowns are saved at once. A value that is not allowed shows
@@ -296,6 +382,9 @@ These three settings belong to the plugin, not to a preset.
 | Row | Default | Meaning |
 | --- | --- | --- |
 | Strict mode | off | A switch: any conversion warning stops the export before anything is written (the warnings found after the compile never do). |
+
+The export folder is not a setting of this tab: it is remembered per preset
+when you export (see [The export dialog](#the-export-dialog)).
 | Presets folder | `Obsidian2Typst/presets` | Vault folder of the preset notes. If it does not exist, it is created with the two built-in presets. |
 | Warnings note folder | empty (vault root) | Where the `<note> export warnings.md` note is written. |
 

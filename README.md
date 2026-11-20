@@ -40,7 +40,8 @@ manual/            user manual (start with manual/manual.md)
 src/
   core/            pure conversion: parse, assets, markers, layout, emit, presets
   plugin/          Obsidian shell: commands, menus, settings tab, style panel,
-                   export, the Typst compiler in a Web Worker
+                   export dialog, progress tab, the Typst compiler in a Web
+                   Worker; strings.ts holds every user-facing text
 assets/fonts/      bundled fonts (Libertinus Serif, DejaVu Sans Mono)
 build/             build and install scripts used by esbuild and npm
 tests/
@@ -56,6 +57,7 @@ docs/
   tickets/         archive of TICKET-001 to 097 (tickets are GitHub issues now)
   technical/       dependencies, quality gates, AC-to-test map, warning codes,
                    manual checks
+  process/         SCAR review checklist, release steps
 releases/          release notes and history
 ```
 
@@ -83,36 +85,48 @@ Every piece of work follows the loop defined in `CLAUDE.md`:
 0. SCAR review before writing anything
 1. User story with concrete acceptance criteria
 2. Tests for every acceptance criterion
-3. Tickets, as [GitHub issues](https://github.com/JollyOrc/Obsidian2Typst/issues?q=label%3Aticket)
-4. Implementation, with a fully green test suite before release
+3. Tickets, as [GitHub issu## Status
 
-## Status
-
-Version 0.10.0 (desktop Obsidian 1.5.0 or later). Release notes:
+Version 0.16.0 (desktop Obsidian 1.5.0 or later). Release notes:
 [`releases/RELEASES.md`](releases/RELEASES.md).
 
-Working today (user stories US-001 to US-028, all done):
+Working today (user stories US-001 to US-042, all done):
 
 - Conversion of one note to Typst: text formatting, numbered headings,
   lists, task lists, quotes, code, tables, footnotes, internal links and
   wikilinks, web links with address footnotes, images with Obsidian sizes.
 - PDF export and a live page preview inside Obsidian with the bundled Typst
   compiler; no Typst installation and no network needed.
+- Exporting: an export dialog (preset, folder, what will be written), direct
+  exports into the folder remembered per preset, a progress tab with Cancel
+  for long exports, and ✅ / ❌ notices.
 - Presets as vault notes on top of Defaults and built-in values, with groups
-  and a details pop-up.
-- Page setup (trim size, margins, gutter, bleed, slug, facing pages), fonts
-  from a vault folder with a glyph check, a cover page.
+  and a details window; a reset per settings section; Copy debug info.
+- Page setup (trim size, margins, gutter, bleed, slug, facing pages; the PDF
+  opens as spreads), fonts from a vault folder with a glyph check, a cover
+  page.
 - Callouts as styled boxes, glossary sections, page numbers and running
   headers, page numbers after internal links.
 - Book structure: page breaks by heading level, colophon and back notes,
   roman front matter, signature padding, a table of contents, images that
   shrink or float to stay with their text.
+- Entries: statblocks from `o2t-entry` blocks, entries chapters with page and
+  spread layouts, a quick reference, an encounter sheet, and print checks for
+  image resolution and wide word gaps.
+- Detail rows: icon badges under a heading from `o2t-details` blocks.
+- Statblocks and detail rows drawn in Obsidian's reading view, and an API for
+  other plugins (`renderStatblock`, `renderDetails`, `statblockTypst`,
+  `compileFonts`).
 - Typst templates that style the whole document.
 - A warning report with clickable source lines, and an optional strict mode.
 
 Not yet done (see the
 [backlog issues](https://github.com/JollyOrc/Obsidian2Typst/issues?q=label%3Abacklog)):
-math, crop marks, a back cover, decorations, an index, a command that wraps
+math, embedded notes, crop marks, a back cover, decorations, an index, a
+command that wraps selected text, and mapping Typst errors back to the note's
+lines.
+
+crop marks, a back cover, decorations, an index, a command that wraps
 selected text, and mapping Typst errors back to the note's lines.
 
 ## Bugs and feature requests
