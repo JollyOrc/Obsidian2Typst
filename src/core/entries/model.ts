@@ -7,6 +7,7 @@ import {
   lowerKeys,
   readEntryValues,
   type EntriesSettings,
+  type StatblockSettings,
   type TrackCell,
 } from '../markers';
 
@@ -123,6 +124,43 @@ export function recolourSvg(svg: string, colour: string): string {
 }
 
 /**
+ * US-030 | AC-13; US-043 | AC-5: the cells of the state track for one
+ * block's values (`lists` as `readEntryValues` reads them): the `trackKey`
+ * value, else `trackDefault` (else every cell); `none` → no cell; cells in
+ * `track` order; a label not in `track` is left out with
+ * `ENTRY_TRACK_UNKNOWN` pushed to `checks`. Labels compare without case.
+ * One function for the statblock and the encounter row (SCAR-017).
+ */
+export function trackCells(
+  sb: StatblockSettings,
+  lists: ReadonlyMap<string, readonly string[]>,
+  checks: StatblockCheck[],
+): TrackCell[] {
+  const lower = (key: string): string => key.toLowerCase();
+  const track = sb.track ?? [];
+  if (track.length === 0) return [];
+  const key = sb.trackKey === undefined ? null : lower(sb.trackKey);
+  const asked = key === null ? undefined : lists.get(key);
+  let wanted: readonly string[];
+  if (asked === undefined) {
+    wanted = [...(sb.trackDefault ?? track.map((c) => c.label))];
+  } else if (asked.length === 1 && lower(asked[0] ?? '') === 'none') {
+    wanted = [];
+  } else {
+    wanted = asked;
+    for (const label of asked) {
+      if (!track.some((c) => lower(c.label) === lower(label)))
+        checks.push({code: 'ENTRY_TRACK_UNKNOWN', detail: label});
+    }
+  }
+  const set = new Set(wanted.map(lower));
+  return track.filter((c) => set.has(lower(c.label)));
+}
+
+/** US-030 AC-18; US-043 AC-5: a number written plainly (`20`, `"20"`, `-3`, `2.5`). */
+export const plainNumber = (value: unknown): number | null => asNumber(value);
+
+/**
  * US-030 | AC-10 to AC-14, AC-18, US-035 | AC-1, AC-2, AC-4: the statblock
  * of one block's data under the `entries` settings, or null when there is
  * none (no stat fields in the settings, G0-C1; or no stat and no attack
@@ -171,27 +209,8 @@ export function statblockModel(
   const rows = Math.ceil(boxes / BOXES_PER_ROW);
 
   // AC-13: the state track.
-  const track = sb.track ?? [];
-  let cells: TrackCell[] = [];
-  if (track.length > 0) {
-    const key = sb.trackKey === undefined ? null : lower(sb.trackKey);
-    const asked = key === null ? undefined : lists.get(key);
-    let wanted: string[];
-    if (asked === undefined) {
-      wanted = [...(sb.trackDefault ?? track.map((c) => c.label))];
-    } else if (asked.length === 1 && lower(asked[0] ?? '') === 'none') {
-      wanted = [];
-    } else {
-      wanted = asked;
-      for (const label of asked) {
-        if (!track.some((c) => lower(c.label) === lower(label)))
-          checks.push({code: 'ENTRY_TRACK_UNKNOWN', detail: label});
-      }
-    }
-    const set = new Set(wanted.map(lower));
-    cells = track.filter((c) => set.has(lower(c.label)));
-    if (cells.length > 0) parts.push('track');
-  }
+  const cells = trackCells(sb, lists, checks);
+  if (cells.length > 0) parts.push('track');
 
   // AC-10: the attributes and traits lines (the box value is not repeated).
   const line = (

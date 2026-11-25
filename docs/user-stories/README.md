@@ -61,6 +61,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-040](US-040-statblock-icon-numbering.md) | The icon files of the statblock answer are numbered by the preset's track order (one path, one file; release 0.15.1) | Ready 2026-11-12 (D1, D2 accepted) | #168, #169 (found by Game Card Creator US-004 G2) |
 | [US-041](US-041-statblock-band-marks.md) | The ◆ marks of the statblock band stand beside the name when it wraps (preview, PDF, website; release 0.15.2) | Done (0.15.2, 2026-11-16; M30 part A passed) | #170, #171 to #173 |
 | [US-042](US-042-ui-standard.md) | The UI standard: an export dialog, direct exports at once, a progress tab after 2 s, debug info, section resets, one string table (release 0.16.0) | Done (0.16.0, 2026-11-18; M33 passed) | #175 to #181; control project D1 to D10, O2T-1 to O2T-6 |
+| [US-043](US-043-prefilled-encounter-rows.md) | Prefilled encounter rows from the `o2t-encounter` block the Vault Compiler writes (release 0.17.0) | Ready (G1 2026-11-25; D1, D2 decided) | #184, #185, #186; control project ES-1 to ES-17; Vault Compiler US-9.6 |
 
 ### Backlog
 

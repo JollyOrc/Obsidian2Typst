@@ -493,6 +493,9 @@ describe('US-016 AC-11 names the plugin defines (template)', () => {
       'o2t-continued',
       'o2t-detail-icon',
       'o2t-details',
+      // US-043 (#185): the encounter rows.
+      'o2t-encounter',
+      'o2t-encounter-row',
       'o2t-entries',
       'o2t-entry-end',
       'o2t-entry-mark',

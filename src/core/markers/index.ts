@@ -85,3 +85,14 @@ export {
   type DetailsSettings,
   type FoundDetailsBlock,
 } from './details';
+export {
+  ENCOUNTER_BLOCK_LANG,
+  encounterInContainer,
+  readEncounterBlock,
+  scanEncounterBlocks,
+  type EncounterBlockScan,
+  type EncounterLine,
+  type EncounterRead,
+  type EncounterWarning,
+  type FoundEncounterBlock,
+} from './encounter';

@@ -32,6 +32,13 @@ fixed by the story that owns the code.
 | `DETAIL_BLOCK_IN_CONTAINER` | US-038 AC-3 | `o2t-details block inside a quote or callout; not read and not printed` (any depth) | active |
 | `DETAIL_IN_GLOSSARY` | US-038 AC-3 | `"Reed"`: an `o2t-details` block under a glossary term or inside a term is not read and not printed (at the block's line) | active |
 | `DETAIL_BLOCK_WITH_ENTRY` | US-038 AC-3 | `"Fen Hare"`: the heading also has an `o2t-entry` block; the entry is read, the details block is dropped (at the block's line) | active |
+| `ENCOUNTER_YAML_INVALID` | US-043 AC-1 | `The o2t-encounter block is not a map with a list of rows: <reason>`; also `A row has no name` / `A row is not a map` (at the block's line) | active |
+| `ENCOUNTER_KEY_UNKNOWN` | US-043 AC-1 | `Unknown keys in the o2t-encounter block: colour, size` (once per block) | active |
+| `ENCOUNTER_COUNT_INVALID` | US-043 AC-2 | `"Fen Hare": two` — no rows for that line | active |
+| `ENCOUNTER_COUNT_CAPPED` | US-043 AC-2 | `"Fen Hare": 3d100 → 99` | active |
+| `ENCOUNTER_BOXES_CAPPED` | US-043 AC-5 | `"Bog Wight": 46 → 45` | active |
+| `ENCOUNTER_IN_CONTAINER` | US-043 AC-9 | `An o2t-encounter block inside a quote, callout, list item or glossary term is left out` | active |
+| `ENCOUNTER_NO_STATBLOCK` | US-043 AC-9 | `The preset has no entries.statblock; the encounter rows are blank` (once per note) | active |
 | `DETAIL_VALUE_NOT_TEXT` | US-038 AC-4 | `"Reed Weaving": kind`: the value of a key an item names is a list or a map; left out, once per key | active |
 | `DETAIL_VALUE_UNMAPPED` | US-038 AC-4 | `"Reed Weaving": pace: soon`: the value is not in the item's `labels` or `icons` (and the item has no single `label` or `icon`); printed as written, once per item | active |
 | `ENCOUNTER_SHEET_EMPTY` | US-036 AC-2 | `entries.encounterSheet` or `.encounterSheetFile` is on but the preset has neither `entries.statblock.track` nor `.boxes`; no sheet is made; once per export | active |

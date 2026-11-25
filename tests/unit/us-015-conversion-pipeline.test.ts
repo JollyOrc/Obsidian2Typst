@@ -178,6 +178,7 @@ describe('US-015 AC-2 skeleton and fixed order', () => {
       ['entries', 88],
       // US-038 (#154): the detail row helpers.
       ['details', 89],
+      ['encounter', 89.5], // US-043 (#185)
       ['cover', 90],
     ]);
   });

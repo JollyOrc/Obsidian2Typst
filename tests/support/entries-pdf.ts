@@ -13,6 +13,7 @@
 //   <o2t-details>    each detail row drawn (US-038): the page it starts on and
 //                    its badge count
 // Source of truth: docs/user-stories/US-030-…, US-031-….
+import {type EncounterFact, type EncounterRowFact} from './encounter';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {TypstSnippet} from '@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs';
@@ -137,6 +138,9 @@ export interface CompiledEntries {
   /** US-038: the detail rows, in document order. */
   details: DetailsFact[];
   images: {file: string; widthMm: number}[];
+  /** US-043: the `<o2t-encounter-row>` and `<o2t-encounter>` facts (G2, 2026-11-25). */
+  encounterRows: EncounterRowFact[];
+  encounters: EncounterFact[];
   /** US-036 AC-3, AC-6 (G4 #135): the sheet pages' `<o2t-sheet>` facts. */
   sheets: {form: string; rows: number; columns: number; boxMm: number}[];
   diagnostics: string[];
@@ -229,6 +233,8 @@ export async function compileEntries(
     sheetFacts,
     wraps,
     rows,
+    encounterRows,
+    encounters,
   ] = await compiler.runWithWorld({mainFilePath: path}, async (w) => [
     (await w.compile({diagnostics: 'unix'})).diagnostics ?? [],
     await w.query({selector: '<o2t-statblock>', field: 'value'}),
@@ -239,6 +245,8 @@ export async function compileEntries(
     await w.query({selector: '<o2t-sheet>', field: 'value'}),
     await w.query({selector: '<o2t-wrap>', field: 'value'}),
     await w.query({selector: '<o2t-details>', field: 'value'}),
+    await w.query({selector: '<o2t-encounter-row>', field: 'value'}),
+    await w.query({selector: '<o2t-encounter>', field: 'value'}),
   ]);
   return {
     pdf,
@@ -250,6 +258,8 @@ export async function compileEntries(
     sections: parse<SectionPlace>(sections),
     wraps: parse<WrapFact>(wraps),
     details: parse<DetailsFact>(rows),
+    encounterRows: parse<EncounterRowFact>(encounterRows),
+    encounters: parse<EncounterFact>(encounters),
     images: parse<{file: string; widthMm: number}>(drawn),
     sheets: parse<{form: string; rows: number; columns: number; boxMm: number}>(
       sheetFacts,

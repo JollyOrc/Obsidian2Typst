@@ -69,6 +69,13 @@ import {
   sheetSettings,
 } from '../entries/sheet';
 import {ENTRY_MARKS_DEF, WRAP_HELPER_DEF} from '../emit/entry';
+import {ENCOUNTER_HELPER_DEF, encounterCall} from '../emit/encounter';
+import {encounterModel} from '../encounter/model';
+import {
+  encounterInContainer,
+  readEncounterBlock,
+  scanEncounterBlocks,
+} from '../markers';
 import {coverNames, planCover, resolveCover} from './cover';
 import {
   arrangeParts,
@@ -429,7 +436,10 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
   // other step reads it; they are data, never printed.
   // US-038 AC-1: the details blocks leave the tree first (an entry block next
   // to one does not move its place), then the entry blocks.
-  const detailsScan = scanDetailsBlocks(parsed.root);
+  // US-043 AC-1 (SCAR-034): the encounter blocks are emptied first; their
+  // markers keep the place where the rows are drawn.
+  const encounterScan = scanEncounterBlocks(parsed.root);
+  const detailsScan = scanDetailsBlocks(encounterScan.root);
   const detailReads = detailsScan.found.map(readDetailsBlock);
   const scan = scanEntryBlocks(detailsScan.root);
   const reads = scan.found.map((found) =>
@@ -455,8 +465,8 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     input.assets,
     new Set([
       ...referencedImageNames(root),
-      // US-030 AC-13: the track icons of the preset.
-      ...(reads.length === 0
+      // US-030 AC-13: the track icons of the preset (US-043: also for rows).
+      ...(reads.length === 0 && encounterScan.found.length === 0
         ? []
         : (input.settings.entries?.statblock?.track ?? []).map((cell) =>
             cell.icon.slice(cell.icon.lastIndexOf('/') + 1).normalize('NFC'),
@@ -775,6 +785,49 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
       return label === undefined ? [] : [label];
     }),
   );
+  // US-043 AC-1 to AC-9: the call of each encounter block at its marker;
+  // inside a glossary term, dropped (AC-9); without a statblock, blank rows
+  // and one warning.
+  for (const w of encounterScan.warnings) ctx.warn(w.code, w.message, w.line);
+  const encounters = new Map<BlockNode, string>();
+  const encounterEntries = input.settings.entries;
+  const encounterTrack = encounterEntries?.statblock?.track ?? [];
+  let encounterNoStatblock = false;
+  encounterScan.found.forEach((found, id) => {
+    if (found.owner !== null && glossary.roles.has(found.owner)) {
+      const w = encounterInContainer(found.block.line);
+      ctx.warn(w.code, w.message, w.line);
+      return;
+    }
+    if (encounterEntries?.statblock === undefined && !encounterNoStatblock) {
+      encounterNoStatblock = true;
+      ctx.warn(
+        'ENCOUNTER_NO_STATBLOCK',
+        'The preset has no entries.statblock; the encounter rows are blank',
+        found.block.line,
+      );
+    }
+    const model = encounterModel(readEncounterBlock(found), encounterEntries, {
+      blankBoxes: encounterEntries?.encounterSheetBoxes ?? SHEET_BUILTINS.boxes,
+    });
+    for (const w of model.warnings) ctx.warn(w.code, w.message, w.line);
+    const boxKey = encounterEntries?.statblock?.boxes?.toLowerCase();
+    encounters.set(
+      found.marker,
+      encounterCall(
+        id,
+        model,
+        statblockLook(encounterEntries, input.settings.colorMode),
+        (encounterEntries?.statblock?.stats ?? [])
+          .filter((f) => f.key.toLowerCase() !== boxKey)
+          .map((f) => f.label),
+        (label) => {
+          const cell = encounterTrack.find((c) => c.label === label);
+          return cell === undefined ? null : iconPath(cell.icon);
+        },
+      ),
+    );
+  });
   const body = emitBlocks(arranged.blocks, ctx, {
     hidden: arranged.hidden,
     gone,
@@ -793,6 +846,7 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
     fit: imageFit(input.settings, arranged, placed.bodies),
     statblocks,
     details,
+    encounters: encounters.size === 0 ? undefined : encounters,
     entryLayout,
   });
   // US-010 AC-5: characters of the source that their family lacks.
@@ -871,6 +925,11 @@ export async function convert(input: ConvertInput): Promise<ConvertResult> {
           : null,
       // US-038: the detail row helpers, only when a row is drawn.
       details: detailsWritten > 0 ? DETAILS_HELPER_DEF : null,
+      // US-043: the encounter helpers with the shared marks, only with a block.
+      encounter:
+        encounters.size > 0
+          ? `${ENTRY_MARKS_DEF}\n${ENCOUNTER_HELPER_DEF}`
+          : null,
       // US-031: the entry layout, only when a chapter places an entry.
       entries:
         entryLayout === undefined

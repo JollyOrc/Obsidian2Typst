@@ -16,6 +16,7 @@ import type {DetailsModel} from '../details/model';
 import type {StatblockModel} from '../entries/model';
 import {
   EMPTY_GLOSSARY_PLAN,
+  ENCOUNTER_BLOCK_LANG,
   findCallout,
   flattenLinks,
   keepLinks,
@@ -99,6 +100,8 @@ interface BlockEnv {
   statblocks: StatblockEnv | undefined;
   /** US-038: the detail rows of the headings; undefined without any. */
   details: DetailsEnv | undefined;
+  /** US-043: the call of each encounter block's marker; undefined without any. */
+  encounters: ReadonlyMap<BlockNode, string> | undefined;
   /** US-031: the entry layout; undefined when no chapter places an entry. */
   entryLayout: EntryLayoutEnv | undefined;
   /** US-031 AC-11, AC-12: the heading of the chapter entry being written. */
@@ -1284,6 +1287,14 @@ function renderPieces(
         return {text: marked(env, block.line, text), kind: 'other'};
       }
       case 'code':
+        // US-043 AC-1, AC-5: an encounter marker draws its rows (or nothing: dropped).
+        if (block.lang === ENCOUNTER_BLOCK_LANG) {
+          const call = env.encounters?.get(block) ?? '';
+          return {
+            text: call === '' ? '' : marked(env, block.line, call),
+            kind: 'other',
+          };
+        }
         return {
           text: marked(env, block.line, rawBlock(block.value, block.lang)),
           kind: 'other',
@@ -1563,6 +1574,8 @@ export interface BlockOptions {
   statblocks?: StatblockEnv;
   /** US-038 AC-7: the detail rows of the headings. Default: none. */
   details?: DetailsEnv;
+  /** US-043 AC-1, AC-5: the call drawn at each encounter marker. Default: none. */
+  encounters?: ReadonlyMap<BlockNode, string>;
   /** US-031: the entry layout of the entries chapters. Default: none. */
   entryLayout?: EntryLayoutEnv;
   /**
@@ -1615,6 +1628,7 @@ export function emitBlocks(
     unlistNested: options.unlistNested ?? false,
     statblocks: options.statblocks,
     details: options.details,
+    encounters: options.encounters,
     entryLayout: options.entryLayout,
     entryHeading: null,
   };

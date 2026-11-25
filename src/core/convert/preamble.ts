@@ -49,6 +49,8 @@ export interface PreambleContext {
   entries?: string | null;
   /** US-038: the detail row helpers; null when no row is drawn. */
   details?: string | null;
+  /** US-043: the encounter row helpers; null when no block is drawn. */
+  encounter?: string | null;
 }
 
 /** One rule of the preamble; `render` returns null when it writes nothing. */
@@ -163,6 +165,12 @@ export const PREAMBLE_RULES: readonly PreambleRule[] = [
     id: 'details',
     order: 89,
     render: ({details}) => details ?? null,
+  },
+  {
+    // US-043: after the detail rows, before the cover; only when a block is drawn.
+    id: 'encounter',
+    order: 89.5,
+    render: ({encounter}) => encounter ?? null,
   },
   {
     // US-011 AC-4: after everything that sets up the document, with a blank

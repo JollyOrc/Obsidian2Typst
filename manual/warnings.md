@@ -137,6 +137,13 @@ report are still written. Errors usually come from a
 | `ENTRY_VALUE_NOT_TEXT` | A value of an entry is neither text, a number nor a list of them; it is left out. |
 | `ENTRY_IN_GLOSSARY` | A block under a glossary term is not an entry and is not printed. |
 | `DETAIL_YAML_INVALID` | An `o2t-details` block is not valid YAML or not a list of keys; no row. |
+| `ENCOUNTER_YAML_INVALID` | An `o2t-encounter` block is not a map with a list of rows, or a row has no name; that block or row is left out. |
+| `ENCOUNTER_KEY_UNKNOWN` | An `o2t-encounter` block has keys the reader does not know; they are ignored. |
+| `ENCOUNTER_COUNT_INVALID` | A row's count is neither a number nor dice (`2`, `1d4`); that line gives no rows. |
+| `ENCOUNTER_COUNT_CAPPED` | A count gives more than 99 rows; 99 are drawn. |
+| `ENCOUNTER_BOXES_CAPPED` | A creature's box value is over 45; 45 boxes are drawn. |
+| `ENCOUNTER_IN_CONTAINER` | An `o2t-encounter` block inside a quote, callout, list item or glossary term; not drawn. |
+| `ENCOUNTER_NO_STATBLOCK` | The preset has no `entries.statblock`; the encounter rows are blank. |
 | `DETAIL_ORPHAN_BLOCK` | An `o2t-details` block does not stand directly under a heading. |
 | `DETAIL_BLOCK_TWICE` | A heading has two `o2t-details` blocks; the first is used. |
 | `DETAIL_BLOCK_IN_CONTAINER` | An `o2t-details` block sits in a quote or callout; it is not read. |
