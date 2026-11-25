@@ -2,6 +2,7 @@
 
 | Version | Release Notes | Download |
 |---------|---------------|----------|
+| v0.17.0 | [release notes](v0.17.0.md) | [⬇ GitHub release 0.17.0](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.17.0) |
 | v0.16.0 | [release notes](v0.16.0.md) | [⬇ GitHub release 0.16.0](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.16.0) |
 | v0.15.3 | [release notes](v0.15.3.md) | [⬇ GitHub release 0.15.3](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.15.3) |
 | v0.15.2 | [release notes](v0.15.2.md) | [⬇ GitHub release 0.15.2](https://github.com/JollyOrc/Obsidian2Typst/releases/tag/0.15.2) |

@@ -1,6 +1,6 @@
 # The `o2t-encounter` block
 
-**Draft** (2026-11-25), owned by [US-043](../user-stories/US-043-prefilled-encounter-rows.md).
+**Released** in 0.17.0 (2026-11-25), owned by [US-043](../user-stories/US-043-prefilled-encounter-rows.md).
 This page is the one contract between the block's writer and its reader
 (SCAR-040):
 

@@ -1,6 +1,6 @@
 # US-043 — Prefilled encounter rows
 
-**Status:** Code done (#184, #185, 2026-11-25); manual check #186 open. Before: Ready (G1 2026-11-25; D1, D2 decided by the user 2026-11-25)
+**Status:** Done (released in 0.17.0, 2026-11-25; M34 passed). Before: Ready (G1 2026-11-25; D1, D2 decided by the user 2026-11-25)
 **Introduced:** v0.17.0 (planned)
 **Implemented:** —
 **Supersedes:** —

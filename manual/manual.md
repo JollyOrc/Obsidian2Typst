@@ -6,7 +6,7 @@ Obsidian. You write in Obsidian as usual; the plugin sets the page size,
 margins, fonts, page numbers, cover, callout boxes, glossary and book
 structure from **presets** that you keep as notes in your vault.
 
-This manual describes version 0.16.0.
+This manual describes version 0.17.0.
 
 ## Contents
 
