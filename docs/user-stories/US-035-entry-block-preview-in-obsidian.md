@@ -54,7 +54,9 @@ Examples use US-030's preset and `Fen Hare` block, with that preset active
   there is none (decision 3: a single note `Fen Hare.md` with the block at
   its top shows `◆ Fen Hare ◆`; **amended 2026-11-16, US-041 AC-6:** the
   band is the left mark, the name and the right mark in a row, the marks level
-  with the middle of a wrapped name). Example: the
+  with the middle of a wrapped name; **amended 2026-11-26, US-044 AC-6:** with
+  `bandFill` the band is filled to the frame, the name and marks in
+  `bandColor`, no rule under it). Example: the
   `Fen Hare` block shows `◆ Fen Hare ◆`, 11 boxes in one row, four cells
   `Fine Hurt Down Gone` (as icons with these labels as `aria-label`),
   `Might 4 · Wits 2 · Speed 5`, two attacks, `Skills: Quick Step, Keen Nose`,

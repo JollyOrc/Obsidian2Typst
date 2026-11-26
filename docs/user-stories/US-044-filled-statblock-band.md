@@ -1,8 +1,8 @@
 # US-044 — A filled name band on the statblock
 
-**Status:** Ready (G1 2026-11-26; G2 tests written 2026-11-26)
+**Status:** Done (0.18.0, 2026-11-26; M35 passed, step 6 corrected)
 **Introduced:** 0.18.0
-**Implemented:** —
+**Implemented:** 0.18.0
 **Amends:** US-030 AC-8 (the look keys), AC-10 item 1 (the title band), AC-15 (the look, greyscale); US-035 AC-1 (the band in the preview)
 **Control project:** `spec/Name Band Questions.md` (NB-1 to NB-8, answered 2026-11-26), TP-1 (b) of `spec/Tapestry Palette Questions.md`
 

@@ -87,10 +87,10 @@ Every piece of work follows the loop defined in `CLAUDE.md`:
 2. Tests for every acceptance criterion
 3. Tickets, as [GitHub issu## Status
 
-Version 0.17.0 (desktop Obsidian 1.5.0 or later). Release notes:
+Version 0.18.0 (desktop Obsidian 1.5.0 or later). Release notes:
 [`releases/RELEASES.md`](releases/RELEASES.md).
 
-Working today (user stories US-001 to US-043, all done):
+Working today (user stories US-001 to US-044, all done):
 
 - Conversion of one note to Typst: text formatting, numbered headings,
   lists, task lists, quotes, code, tables, footnotes, internal links and
@@ -116,6 +116,8 @@ Working today (user stories US-001 to US-043, all done):
 - Detail rows: icon badges under a heading from `o2t-details` blocks.
 - Encounter rows: prefilled rows per creature from `o2t-encounter` blocks (the
   Obsidian Vault Compiler writes them from room notes), ready to print.
+- A filled name band on statblocks (`bandFill`, `bandColor`), in the PDF, the
+  preview and on cards drawn through the API.
 - Statblocks and detail rows drawn in Obsidian's reading view, and an API for
   other plugins (`renderStatblock`, `renderDetails`, `statblockTypst`,
   `compileFonts`).

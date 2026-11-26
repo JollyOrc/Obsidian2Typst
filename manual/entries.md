@@ -115,12 +115,22 @@ The look: `fill`, `frame` (`{color, width}`), `rules`, `boxFill`, `fonts`
 `entries.statblock`. `colorMode: grayscale` draws the statblock in gray for
 black-and-white printing.
 
+A **filled name band**: `bandFill` puts the band on a colour that reaches
+the frame, with a little room below the name and no rule under it;
+`bandColor` is the colour of the name and its ◆ marks on it (without it, the
+frame colour). Without `bandFill`, or with `bandFill: none`, the band is as
+before. In grayscale a filled band is dark gray with white text. Example:
+`bandFill: "#8A4A2A"`, `bandColor: "#F3EEE3"` (an umber band with parchment
+text). The statblock is then 0.4 mm taller.
+
 | Field | Built-in |
 | --- | --- |
 | `fill` | `none` |
 | `frame` | `#000000`, 0.75 pt |
 | `rules` | `#000000`, 0.4 pt |
 | `boxFill` | `#ffffff` |
+| `bandFill` | none (the band is not filled) |
+| `bandColor` | the frame colour |
 | `sizes` | band 11.5, value 11, label 5.5, text 7, attacks 7.5, skills 9 |
 
 The statblock is never split across pages. The entry's text **wraps around

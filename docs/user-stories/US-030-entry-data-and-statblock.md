@@ -237,6 +237,9 @@ They gather at dusk.
      not fit on one line with its marks, the marks stand at the left and right
      ends of the band, level with the middle of the name, which wraps between
      them; a word that cannot fit beside the marks removes both marks.
+     **Amended 2026-11-26 (US-044):** with `bandFill` the band is filled to the
+     frame and has no rule under it; AC-8 gets the keys `bandFill` and
+     `bandColor`, AC-15 their greyscale values.
   2. **box row** (AC-12) and **state track** (AC-13);
   3. **attributes line:** each stat of `entries.statblock.stats` that is set,
      as `<label> <value>`, joined with ` · `, centred (`Might 4 · Wits 2 ·
