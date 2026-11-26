@@ -87,10 +87,10 @@ Every piece of work follows the loop defined in `CLAUDE.md`:
 2. Tests for every acceptance criterion
 3. Tickets, as [GitHub issu## Status
 
-Version 0.18.0 (desktop Obsidian 1.5.0 or later). Release notes:
+Version 0.19.0 (desktop Obsidian 1.5.0 or later). Release notes:
 [`releases/RELEASES.md`](releases/RELEASES.md).
 
-Working today (user stories US-001 to US-044, all done):
+Working today (user stories US-001 to US-045, all done):
 
 - Conversion of one note to Typst: text formatting, numbered headings,
   lists, task lists, quotes, code, tables, footnotes, internal links and
@@ -118,6 +118,7 @@ Working today (user stories US-001 to US-044, all done):
   Obsidian Vault Compiler writes them from room notes), ready to print.
 - A filled name band on statblocks (`bandFill`, `bandColor`), in the PDF, the
   preview and on cards drawn through the API.
+- A preset for one note: the property `typst-preset`, set from the note menu.
 - Statblocks and detail rows drawn in Obsidian's reading view, and an API for
   other plugins (`renderStatblock`, `renderDetails`, `statblockTypst`,
   `compileFonts`).

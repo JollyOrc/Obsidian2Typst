@@ -103,7 +103,7 @@ See [Images and the cover](images-and-cover.md) and
 
 | In the note | What happens |
 | --- | --- |
-| Frontmatter (properties) | left out |
+| Frontmatter (properties) | left out; `typst-preset` chooses the preset ([Presets](presets.md#a-preset-for-one-note)) |
 | HTML comments `<!-- -->` | left out, with one `COMMENT_DROPPED` warning |
 | Other HTML tags | the tag is dropped, the text kept (`HTML_UNSUPPORTED`) |
 | `![[Other note]]` | not included; the note's name is printed (`EMBED_NOTE_UNEXPANDED`) |

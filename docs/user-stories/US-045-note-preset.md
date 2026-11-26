@@ -1,8 +1,8 @@
 # US-045 — A note names its preset (`typst-preset`)
 
-**Status:** Ready (G1 2026-11-26, D8 confirmed by the author 2026-11-26: "Yes, go"; G2 tests written 2026-11-26)
+**Status:** Done (0.19.0, 2026-11-26; M36 passed with the Vault Compiler's M25)
 **Introduced:** 0.19.0
-**Implemented:** —
+**Implemented:** 0.19.0
 **Amends:** US-008 (the active preset), US-012 (the preview panel's preset), US-042 (the export dialog's choices), US-014 AC (frontmatter is left out: one key is read)
 **Control project:** `spec/Note Settings Questions.md` (NS-1 to NS-9, answered 2026-11-26: "Yes, all proposals")
 **Partner:** Obsidian Vault Compiler US-7.5 writes the key into the compiled note (its reader is this story, SCAR-040).

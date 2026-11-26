@@ -6,7 +6,7 @@ Obsidian. You write in Obsidian as usual; the plugin sets the page size,
 margins, fonts, page numbers, cover, callout boxes, glossary and book
 structure from **presets** that you keep as notes in your vault.
 
-This manual describes version 0.18.0.
+This manual describes version 0.19.0.
 
 ## Contents
 
@@ -97,6 +97,9 @@ of other plugins (the ribbon menu belongs to the plugin and has no prefix).
   preset's remembered folder, or through the export dialog when there is
   none.
 - **O2T: Preview**: shows that note in the style panel.
+- **O2T: Preset for this note…**: chooses the preset this note is exported
+  and previewed with (the property `typst-preset`), or the active preset; see
+  [A preset for one note](presets.md#a-preset-for-one-note).
 
 Preset notes do not get these items; presets are never exported.
 

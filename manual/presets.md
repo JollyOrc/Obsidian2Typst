@@ -12,6 +12,7 @@ can edit them by hand.
 - [A preset is a note](#a-preset-is-a-note)
 - [Where a value comes from](#where-a-value-comes-from)
 - [Choosing the active preset](#choosing-the-active-preset)
+- [A preset for one note](#a-preset-for-one-note)
 - [Creating, renaming and deleting presets](#creating-renaming-and-deleting-presets)
 - [Editing a preset](#editing-a-preset)
 - [Invalid presets](#invalid-presets)
@@ -98,6 +99,35 @@ any of these places; they all show the same choice:
 
 An invalid preset cannot be chosen. If the active preset is deleted or
 renamed outside the plugin, the first preset by name becomes active.
+
+## A preset for one note
+
+A note can name its own preset in the property `typst-preset`:
+
+```yaml
+---
+typst-preset: A4 Encounter Sheets
+---
+```
+
+Exporting or previewing that note then uses `A4 Encounter Sheets`, and the
+active preset stays as it is. The name is compared as the preset list
+compares names (case does not matter). In the export dialog the note's preset
+is the first choice; choosing another one there exports with it once, and
+neither the note nor the active preset changes. While the style panel shows
+such a note, its preset list shows the note's preset and cannot be changed.
+
+Set or remove the property with **O2T: Preset for this note…** in the note
+menu: a list with **Active preset (no property)** first, then your presets;
+the current choice is marked. Only this one property is written; the note's
+other properties and text stay as they are.
+
+If the name is not a preset, or the preset is invalid, the export and the
+preview refuse with a message naming the property (for example `Preset "Gone
+Sheets" (from this note's properties) does not exist.`); the export dialog
+opens on the active preset and shows that message. The Obsidian Vault
+Compiler (0.27.0 or newer) copies `typst-preset` from its starting note into
+the compiled note, so a compiled book or sheet keeps its preset.
 
 ## Creating, renaming and deleting presets
 
