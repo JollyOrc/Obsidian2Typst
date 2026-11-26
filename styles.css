@@ -124,6 +124,28 @@
   flex: none;
 }
 
+/* US-044 AC-6: a filled band (the processor adds .o2t-sb-filled and the two
+   colours). It reaches the frame: its margins undo the statblock's padding,
+   which needs the band at the statblock's font size; the name and the marks
+   take the band size instead, and the gap stays 0.25 of it (US-041 AC-6). The
+   band's lower edge divides, so the part below it has no rule. */
+.o2t-sb-filled > .o2t-sb-band {
+  margin: -0.4em -0.6em 0;
+  padding: 0.4em 0.6em 0.35em;
+  background: var(--o2t-sb-band-fill);
+  color: var(--o2t-sb-band-color);
+  font-size: inherit;
+  column-gap: calc(0.25 * var(--o2t-sb-size-band, 1.1em));
+}
+
+.o2t-sb-filled > .o2t-sb-band > * {
+  font-size: var(--o2t-sb-size-band, 1.1em);
+}
+
+.o2t-sb-filled > .o2t-sb-band + * {
+  border-top: none;
+}
+
 /* US-035 AC-12: minmax(0, 1fr) columns and no margins, so the box row
    shrinks with the statblock and never runs past its frame */
 .o2t-sb-boxrow {

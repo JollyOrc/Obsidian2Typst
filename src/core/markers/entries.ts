@@ -70,6 +70,10 @@ export interface StatblockSettings {
   frame?: LineStyle;
   rules?: LineStyle;
   boxFill?: string;
+  /** US-044 AC-1: the band's fill (`#rrggbb` or `none`); no built-in value. */
+  bandFill?: string;
+  /** US-044 AC-1: the band's text and marks on a fill (`#rrggbb`). */
+  bandColor?: string;
   fonts?: Partial<Record<(typeof STATBLOCK_FONT_ROLES)[number], string>>;
   sizes?: Partial<Record<(typeof STATBLOCK_SIZE_ROLES)[number], number>>;
 }

@@ -205,8 +205,16 @@ export const STATBLOCK_HELPER_DEF = `#let o2t-sb-box(d) = {
   let rule = line(length: 100%, stroke: lk.rules.width + lk.rules.color)
   let pieces = ()
   let parts = ("band",)
-  pieces.push(layout(size => {
-    let tx(body) = fonted("band", text(size: lk.sizes.band, fill: lk.accent, body))
+  // US-044 AC-2: a filled band sits on a rectangle of \`band-fill\` that reaches the
+  // inner edge of the frame (outset, so the band's width and US-041's rules hold)
+  // and ends 1.6 mm below the name; the name and the marks are in \`band-color\`.
+  let band-fill = lk.at("band-fill", default: none)
+  let on-band(body) = if band-fill == none { body } else {
+    let reach = 2mm - lk.frame.width / 2
+    block(width: 100%, fill: band-fill, outset: (left: reach, right: reach, top: reach), inset: (bottom: 1.6mm), body)
+  }
+  pieces.push(on-band(layout(size => {
+    let tx(body) = fonted("band", text(size: lk.sizes.band, fill: lk.at("band-color", default: lk.accent), body))
     let mark = tx[◆]
     let gap = measure(tx[a b]).width - measure(tx[ab]).width
     let wm = measure(mark).width
@@ -221,7 +229,7 @@ export const STATBLOCK_HELPER_DEF = `#let o2t-sb-box(d) = {
         grid(columns: (wm, 1fr, wm), column-gutter: gap, align: horizon, mark, align(center, name), mark)
       }
     }
-  }))
+  })))
   let count = 0
   let rows = 0
   if d.boxes != none {
@@ -251,7 +259,9 @@ export const STATBLOCK_HELPER_DEF = `#let o2t-sb-box(d) = {
   if d.tags != none { parts.push("tags"); pieces.push(align(center, fonted("tags", text(size: lk.sizes.text, fill: lk.accent, d.tags)))) }
   [#metadata((band: d.band, boxes: count, rows: rows, cells: if d.track == none { () } else { d.track.cells.map(c => c.label) }, parts: parts)) <o2t-statblock>]
   block(width: 100%, breakable: false, fill: lk.fill, stroke: lk.frame.width + lk.frame.color, inset: 2mm,
-    stack(spacing: 1.2mm, ..pieces.intersperse(rule)))
+    // US-044 AC-3: no rule under a filled band (its edge divides).
+    if band-fill == none { stack(spacing: 1.2mm, ..pieces.intersperse(rule)) }
+    else { stack(spacing: 1.2mm, pieces.first(), ..pieces.slice(1).intersperse(rule)) })
 }
 // US-034 AC-6 (decision 2): the column beside the statblock (100 % less the
 // statblock's ${L.width} and the gutter) is under ${NARROW_COLUMN_SHARE} % of the width.
@@ -278,6 +288,10 @@ export interface StatblockLookValues {
   accent: string;
   /** The colour the track icons are recoloured to. */
   icon: string;
+  /** US-044 AC-1, AC-5: the band's fill, `none` without one. */
+  bandFill: string;
+  /** US-044: the band's text and marks on a fill; unset without a fill. */
+  bandColor?: string;
   /** Font families by role, as the preset names them. */
   fonts: Record<string, string>;
   /** Sizes in pt by role. */
@@ -302,7 +316,19 @@ export function statblockLookValues(
     color: gray ? L.gray : (sb.frame?.color ?? B.frame.color),
     width: sb.frame?.width ?? B.frame.width,
   };
+  // US-044 AC-1, AC-5: a filled band stays filled in greyscale (#4d4d4d, white
+  // text); without `bandFill` (or `none`) there is no band colour at all.
+  const filled = sb.bandFill !== undefined && sb.bandFill !== 'none';
+  const band = !filled
+    ? {bandFill: 'none'}
+    : gray
+      ? {bandFill: L.gray, bandColor: '#ffffff'}
+      : {
+          bandFill: sb.bandFill as string,
+          bandColor: sb.bandColor ?? frame.color,
+        };
   return {
+    ...band,
     fill: gray ? 'none' : (sb.fill ?? B.fill),
     frame,
     rules: {
@@ -336,6 +362,13 @@ export function statblockLook(
     `box-fill: ${colourOr(v.boxFill)}`,
     `accent: ${rgb(v.accent)}`,
     `icon: ${typstString(v.icon)}`,
+    // US-044 AC-1: only a filled band adds its colours (else 0.17.0's text).
+    ...(v.bandFill === 'none'
+      ? []
+      : [
+          `band-fill: ${rgb(v.bandFill)}`,
+          `band-color: ${rgb(v.bandColor ?? v.accent)}`,
+        ]),
     `fonts: (${fonts === '' ? ':' : fonts})`,
     `sizes: (${Object.entries(v.sizes)
       .map(([role, size]) => `${role}: ${pt(size)}`)

@@ -171,6 +171,11 @@ function lookProps(look: StatblockLookValues): Record<string, string> {
     '--o2t-sb-box-fill': look.boxFill === 'none' ? 'transparent' : look.boxFill,
     '--o2t-sb-accent': look.accent,
   };
+  // US-044 AC-6: the band's colours, only with a fill (else 0.17.0's props).
+  if (look.bandFill !== 'none') {
+    props['--o2t-sb-band-fill'] = look.bandFill;
+    props['--o2t-sb-band-color'] = look.bandColor ?? look.accent;
+  }
   for (const [role, size] of Object.entries(look.sizes))
     props[`--o2t-sb-size-${role}`] = em(size);
   for (const [role, family] of Object.entries(look.fonts))
@@ -209,7 +214,10 @@ async function draw(
   look: StatblockLookValues,
   icon: (path: string) => Promise<string | null>,
 ): Promise<{boxes: DrawEl[]; cells: DrawEl[]}> {
-  const root = el.createDiv({cls: 'o2t-sb'});
+  // US-044 AC-6: a filled band marks the statblock (the stylesheet paints it).
+  const root = el.createDiv({
+    cls: look.bandFill === 'none' ? 'o2t-sb' : 'o2t-sb o2t-sb-filled',
+  });
   root.setCssProps(lookProps(look));
   // US-041 AC-6: the band is a row of three parts: the left mark, the name, the
   // right mark. The name is text (never markup) and wraps between the marks; the

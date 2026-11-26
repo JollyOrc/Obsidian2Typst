@@ -479,11 +479,24 @@ const withoutBand = (prelude: string): string => {
     '$1<band>$2',
   );
 };
-/** US-041: the 0.15.0 prelude with its band piece cut out; the whole 0.15.2 prelude. */
-const PRELUDE_WITHOUT_BAND_SHA_0_15_0 =
-  '5a3f3d4e50810131c7d87efe07741b62488a8e982643455019aca4580435dea0';
-const PRELUDE_SHA_0_15_2 =
-  'a4c5969151f67cd74038efabd96fc3986b7b0579c6810c53cca3dc33151a1a69';
+// US-041 pinned the 0.15.0 prelude with its band piece cut out (5a3f3d4e…) and the
+// whole 0.15.2 prelude (a4c59691…); US-044 replaces both pins (below).
+/**
+ * US-044 AC-8 (G4, 2026-11-26): the helper changes in the band's piece and the
+ * final stack only: with both cut out the prelude is 0.17.0's cut the same way
+ * (computed from a clean checkout of 0.17.0's commit `299671b`); the whole
+ * prelude is the 0.18.0 text (it replaces the 0.15.2 pin, which 0.17.0 still met).
+ */
+const withoutBandAndStack = (prelude: string): string => {
+  const stack =
+    /(\n {4})(?:\/\/ US-044[^\n]*\n {4})?(?:if band-fill == none \{ )?stack\(spacing: 1\.2mm[\s\S]*?\n\}/;
+  expect(stack.exec(prelude), 'the final stack is found').not.toBeNull();
+  return withoutBand(prelude).replace(stack, '$1<stack>\n}');
+};
+const PRELUDE_WITHOUT_BAND_AND_STACK_SHA_0_17_0 =
+  '76cc7d1bb2a276e0b3a4ba7b279f224a8fdf225afa814ef11eae5dcb8d1bc2c3';
+const PRELUDE_SHA_0_18_0 =
+  '3c75092149af26bce5bda0b465d7dc6975e90272de944c9d6c0b3d86ec7f7eb9';
 // (US-040 AC-5 pinned the whole 0.15.0 prelude by its hash; US-041 AC-8 changes the band's piece.)
 const ICON_NAMES = ['fine', 'hurt', 'down', 'gone'] as const;
 const pathsOf = (a: Answer) => a.files.map((f) => f.path);
@@ -686,8 +699,11 @@ describe('US-040 AC-5, AC-6: nothing else changes; the preset is read at each ca
     // cut out the prelude is the 0.15.0 prelude (its hash), and the whole prelude is
     // the 0.15.2 text (pinned at G2 from the reference drawing; re-pinned at G4 with
     // the reason in the ledger if the text is written differently).
-    expect(sha(withoutBand(a.prelude))).toBe(PRELUDE_WITHOUT_BAND_SHA_0_15_0);
-    expect(sha(a.prelude)).toBe(PRELUDE_SHA_0_15_2);
+    // US-044 AC-8 amends these two: the band piece and the final stack.
+    expect(sha(withoutBandAndStack(a.prelude))).toBe(
+      PRELUDE_WITHOUT_BAND_AND_STACK_SHA_0_17_0,
+    );
+    expect(sha(a.prelude)).toBe(PRELUDE_SHA_0_18_0);
     expect(a.credit).toBeNull();
     expect(a.warnings).toEqual([]);
     expect(Object.keys(a).sort()).toEqual([

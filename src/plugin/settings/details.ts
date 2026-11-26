@@ -189,6 +189,8 @@ const ENTRY_ROW_PATHS: readonly (readonly string[])[] = [
     'frame',
     'rules',
     'boxFill',
+    'bandFill',
+    'bandColor',
     'fonts',
     'sizes',
   ].map((key) => ['entries', 'statblock', key]),

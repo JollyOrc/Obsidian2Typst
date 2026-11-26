@@ -956,6 +956,23 @@ function readStatblock(value: Group, problems: Problem[]): StatblockSettings {
   if (rules !== undefined) out.rules = rules;
   const boxFill = readColour(value, 'boxFill', true, `${at}.boxFill`, problems);
   if (boxFill !== undefined) out.boxFill = boxFill;
+  // US-044 AC-1: the band's colours, read as `boxFill` (no built-in value).
+  const bandFill = readColour(
+    value,
+    'bandFill',
+    true,
+    `${at}.bandFill`,
+    problems,
+  );
+  if (bandFill !== undefined) out.bandFill = bandFill;
+  const bandColor = readColour(
+    value,
+    'bandColor',
+    false,
+    `${at}.bandColor`,
+    problems,
+  );
+  if (bandColor !== undefined) out.bandColor = bandColor;
   const fonts = readSubgroup(value, 'fonts', `${at}.fonts`, problems);
   if (fonts !== undefined) {
     out.fonts = {};
