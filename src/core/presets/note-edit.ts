@@ -5,7 +5,7 @@
 // and their comments; its re-spacing (blanks before a comment, a blank line
 // before a final comment, flow maps, quoting) was measured and accepted by the
 // user (2026-10-21).
-import {isMap, parseDocument, type Document} from 'yaml';
+import {Document, isMap, parseDocument} from 'yaml';
 import {headingRuleKey, headingRuleTable, type HeadingRule} from '../markers';
 import {frontmatterSpan} from './parse';
 import type {PresetFields} from './schema';
@@ -242,5 +242,69 @@ export function contentsAction(
         : {kind: 'toc', heading: text, position: side},
     question:
       depth === 0 ? `${place} and show headings down to level 2?` : `${place}?`,
+  };
+}
+
+/** US-045 AC-7: the closing `---` line at `at` with its line end. */
+const CLOSING_FENCE = /^---[ \t]*(?:\r\n|\n|$)/;
+
+/**
+ * US-045 | AC-7: sets (`value`) or removes (`null`) one top-level key of a
+ * note's frontmatter. Only that key changes: the `yaml` Document API keeps the
+ * other keys, their order, values and comments, and with
+ * `flowCollectionPadding: false` their bytes (measured 2026-11-26, yaml 2.9.1:
+ * lists, maps, dates, quoted strings, a leading comment); a value YAML would
+ * read otherwise is quoted. Every byte outside the frontmatter stays. A note
+ * without frontmatter gets one at its top (its own line ends); a frontmatter
+ * left empty is removed with its two `---` lines; removing a key from a note
+ * without frontmatter changes nothing. An unclosed frontmatter, or one that is
+ * not a mapping or not YAML, is not changed: the result says why.
+ */
+export function editNoteProperty(
+  text: string,
+  key: string,
+  value: string | null,
+): {ok: true; text: string} | {ok: false; error: string} {
+  const span = frontmatterSpan(text);
+  if (span === null) {
+    if (value === null) return {ok: true, text};
+    const bom = text.charCodeAt(0) === 0xfeff ? '﻿' : '';
+    const rest = text.slice(bom.length);
+    const eol = /\r\n/.test(text) ? '\r\n' : '\n';
+    const doc = new Document({[key]: value});
+    const yaml = doc
+      .toString({flowCollectionPadding: false})
+      .replace(/\n/g, eol);
+    return {ok: true, text: `${bom}---${eol}${yaml}---${eol}${rest}`};
+  }
+  if ('unclosed' in span) {
+    return {ok: false, error: 'the frontmatter is not closed'};
+  }
+  const doc = parseDocument(span.yaml, {prettyErrors: false});
+  const error = doc.errors[0];
+  if (error !== undefined) return {ok: false, error: error.message};
+  if (doc.contents !== null && !isMap(doc.contents)) {
+    return {ok: false, error: 'the frontmatter is not a group of properties'};
+  }
+  if (value === null) {
+    if (!doc.has(key)) return {ok: true, text};
+    doc.delete(key);
+  } else {
+    doc.set(key, value);
+  }
+  const map = doc.contents;
+  if (!isMap(map) || map.items.length === 0) {
+    // the block goes, with its opening and closing lines
+    const opening = text.lastIndexOf('---', span.start);
+    const closing = CLOSING_FENCE.exec(text.slice(span.end));
+    const after = span.end + (closing?.[0].length ?? 0);
+    return {ok: true, text: text.slice(0, opening) + text.slice(after)};
+  }
+  const yaml = doc
+    .toString({flowCollectionPadding: false})
+    .replace(/\n/g, span.eol);
+  return {
+    ok: true,
+    text: text.slice(0, span.start) + yaml + text.slice(span.end),
   };
 }

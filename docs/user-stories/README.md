@@ -63,6 +63,7 @@ Update the index table below whenever a story is added or its status changes.
 | [US-042](US-042-ui-standard.md) | The UI standard: an export dialog, direct exports at once, a progress tab after 2 s, debug info, section resets, one string table (release 0.16.0) | Done (0.16.0, 2026-11-18; M33 passed) | #175 to #181; control project D1 to D10, O2T-1 to O2T-6 |
 | [US-043](US-043-prefilled-encounter-rows.md) | Prefilled encounter rows from the `o2t-encounter` block the Vault Compiler writes (release 0.17.0) | Done (0.17.0, 2026-11-25; M34 passed) | #184, #185, #186; control project ES-1 to ES-17; Vault Compiler US-9.6 |
 | [US-044](US-044-filled-statblock-band.md) | A filled name band on the statblock: `bandFill`, `bandColor`; PDF, preview, greyscale (release 0.18.0) | Done (0.18.0, 2026-11-26; M35 passed) | #187, #188, #189, #190; control project NB-1 to NB-8 |
+| [US-045](US-045-note-preset.md) | A note names its preset (`typst-preset`): export, dialog, preview; a menu to set it (release 0.19.0) | Ready (G2 2026-11-26) | control project NS-1 to NS-9; Vault Compiler US-7.5 |
 
 ### Backlog
 

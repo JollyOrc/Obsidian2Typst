@@ -164,8 +164,11 @@ describe('US-042 AC-1: a direct export goes at once into the remembered folder',
     expect(r.asked).toEqual([{noteName: 'Rules', preset: 'A5 print'}]);
     expect(r.requests[0]?.exportDir).toBe('/out/a5');
     expect(r.data.lastExportFolders['A5 print']).toBe('/out/a5');
+    // Amended 2026-11-26 (US-045 AC-2, SCAR-027): the note is now read once
+    // for its \`typst-preset\` key before the dialog; P1 is about the
+    // conversion, so the save comes before the conversion's read (the last).
     expect(r.log.indexOf('save folder A5 print /out/a5')).toBeLessThan(
-      r.log.indexOf('read'),
+      r.log.lastIndexOf('read'),
     );
   });
 
@@ -346,7 +349,13 @@ describe('US-042 AC-2: the entries', () => {
       {path: NOTE, folder: false},
       FOLDER,
     );
-    expect(entries.map((e) => e.title)).toEqual(['Export to PDF', 'Preview']);
+    // Amended 2026-11-26 (US-045 AC-6): P2 is about these two, which stay
+    // first and unchanged; US-045 adds "Preset for this note…" after them.
+    expect(entries.map((e) => e.title).slice(0, 2)).toEqual([
+      'Export to PDF',
+      'Preview',
+    ]);
+    expect(entries.map((e) => e.title)).not.toContain('Export…');
     calls.length = 0;
     await entries[0]?.run?.();
     expect(calls).toEqual([`export ${NOTE}`]);

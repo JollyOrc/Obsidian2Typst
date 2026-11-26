@@ -19,6 +19,8 @@ export interface ExportDialogModel {
   noteName: string;
   presets: readonly PresetEntry[];
   activePreset: string;
+  /** US-045 AC-4: why the note's own preset is not used (shown in red). */
+  problem?: string;
   lastExportFolders: Readonly<Record<string, string>>;
   pathApi: {isAbsolute(p: string): boolean};
   join(folder: string, name: string): string;
@@ -124,6 +126,11 @@ export class ExportDialog extends Modal {
           .setCta()
           .onClick(() => this.run());
       });
+    // US-045 AC-4: the note's key names nothing usable: said once, in red,
+    // above the folder's own line (which `refresh` rewrites).
+    if (this.model.problem !== undefined) {
+      contentEl.createDiv({cls: 'o2t-export-error', text: this.model.problem});
+    }
     this.errorEl = contentEl.createDiv({cls: 'o2t-export-error'});
     this.infoEl = contentEl.createDiv({cls: 'o2t-export-info'});
     new Setting(contentEl)

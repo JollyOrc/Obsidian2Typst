@@ -31,6 +31,8 @@ import {
   previewStatus,
 } from './open';
 import type {RenderedDocument} from './renderer';
+import {selectNotePreset, type PrepareDeps} from '../prepare-note';
+import {previewPresetControl} from './preset-control';
 import {STRINGS} from '../strings';
 
 /** What the panel needs from the plugin. */
@@ -173,11 +175,21 @@ export class StylePanelView extends ItemView {
       error:
         entry.error === undefined ? undefined : formatPresetError(entry.error),
     }));
-    addPresetDropdown(
+    // US-045 AC-5: the shown note's own preset is shown, locked, with a hint.
+    const control = previewPresetControl({
+      active: settings.data.activePreset,
+      notePreset: this.notePreset,
+    });
+    const dropdown = addPresetDropdown(
       root,
-      presetDropdownGroups(entries, settings.data.activePreset),
+      presetDropdownGroups(entries, control.value),
       (name) => void this.deps.usePreset(name),
-    ).addExtraButton((b) =>
+    );
+    if (control.locked) {
+      dropdown.setDisabled(true);
+      if (control.hint !== null) dropdown.setDesc(control.hint);
+    }
+    dropdown.addExtraButton((b) =>
       // US-021 AC-8: the active preset of the moment of the click (SCAR-016).
       b
         .setIcon('info')
@@ -313,6 +325,34 @@ export class StylePanelView extends ItemView {
     const file = this.app.workspace.getActiveFile();
     if (file instanceof TFile && file.extension.toLowerCase() === 'md') {
       this.deps.controller.setNote(file.path);
+      void this.readNotePreset(file);
+    }
+  }
+
+  /** The shown note's own preset, if it names a usable one (US-045 AC-5). */
+  private notePreset: string | null = null;
+
+  /**
+   * US-045 | AC-5: Reads the note's key from the file (not the metadata
+   * cache, SCAR-022) through the one decision of the export (SCAR-017) and
+   * redraws the list when what it shows changes.
+   */
+  private async readNotePreset(file: TFile): Promise<void> {
+    const selected = await selectNotePreset(
+      {
+        notes: {
+          activePath: () => file.path,
+          read: async () => this.app.vault.read(file),
+        },
+        presets: this.deps.presets,
+        settings: this.deps.settings,
+      } as unknown as PrepareDeps,
+      file.path,
+    );
+    const next = selected.ok && selected.noteKey ? selected.active : null;
+    if (next !== this.notePreset) {
+      this.notePreset = next;
+      this.drawControls();
     }
   }
 

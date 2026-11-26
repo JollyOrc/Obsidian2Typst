@@ -4,7 +4,13 @@
 import type {AssetUse} from '../core/assets';
 import type {ImageFact, Warning} from '../core/emit';
 import type {FontSet} from './fonts';
-import {convertNote, noteNameOf, selectPreset} from './prepare-note';
+import {
+  convertNote,
+  noteNameOf,
+  selectNotePreset,
+  selectPreset,
+  type SelectedPreset,
+} from './prepare-note';
 import type {PresetStore} from './presets/store';
 import type {ExportResult, FallbackNote} from './run-export';
 import type {PluginData} from './settings/data';
@@ -47,7 +53,12 @@ export interface ExportRequest {
 
 /** How the command ended when no export was run. */
 export type CommandStatus =
-  'no-note' | 'presets-note' | 'no-preset' | 'invalid-preset' | 'cancelled';
+  | 'no-note'
+  | 'presets-note'
+  | 'no-preset'
+  | 'invalid-preset'
+  | 'note-preset'
+  | 'cancelled';
 
 export interface ExportCommandDeps {
   notes: {
@@ -76,6 +87,8 @@ export interface ExportCommandDeps {
   exportDialog(request: {
     noteName: string;
     preset: string;
+    /** US-045 AC-4: the line the dialog shows when the note's key names nothing usable. */
+    problem?: string;
   }): Promise<{preset: string; folder: string} | null>;
   /** US-042 AC-7: starts the progress of an export (optional). */
   startProgress?(noteName: string): ExportProgress;
@@ -135,10 +148,24 @@ async function exportWith(
     notice(STRINGS.notices.openNote);
     return {status: 'no-note'};
   }
-  let selected = selectPreset(deps, path);
-  if (!selected.ok) {
-    notice(sentence(selected.message));
-    return {status: selected.status};
+  // US-045 AC-2: the note's preset when its key names one, else the active.
+  const first = await selectNotePreset(deps, path);
+  const keyed = first.ok ? first.noteKey : first.status === 'note-preset';
+  // US-045 AC-4: a key that names nothing usable: the direct export refuses;
+  // the dialog opens on the active preset and shows the line.
+  if (!first.ok && !(ask && first.status === 'note-preset')) {
+    notice(sentence(first.message));
+    return {status: first.status};
+  }
+  let selected: SelectedPreset | ReturnType<typeof selectPreset>;
+  if (first.ok) {
+    selected = first;
+  } else {
+    selected = selectPreset(deps, path);
+    if (!selected.ok) {
+      notice(sentence(selected.message));
+      return {status: selected.status};
+    }
   }
   const noteName = noteNameOf(path);
   const remembered = deps.settings.data.lastExportFolders[selected.active];
@@ -149,14 +176,25 @@ async function exportWith(
     const choice = await deps.exportDialog({
       noteName,
       preset: selected.active,
+      ...(first.ok ? {} : {problem: first.message}),
     });
     if (choice === null) return {status: 'cancelled'};
-    await saveExportChoices(deps.settings, choice);
+    // US-045 AC-3: for a note with the key the active preset stays.
+    await saveExportChoices(deps.settings, choice, {keepActive: keyed});
     folder = choice.folder;
-    selected = selectPreset(deps, path);
-    if (!selected.ok) {
-      notice(sentence(selected.message));
-      return {status: selected.status};
+    if (keyed) {
+      const used = deps.presets.use(choice.preset);
+      if (!used.ok) {
+        notice(sentence(used.error));
+        return {status: 'invalid-preset'};
+      }
+      selected = {ok: true, active: choice.preset, preset: used.preset};
+    } else {
+      selected = selectPreset(deps, path);
+      if (!selected.ok) {
+        notice(sentence(selected.message));
+        return {status: selected.status};
+      }
     }
   }
   const {active} = selected;
@@ -192,7 +230,10 @@ function runPrepared(
   deps: ExportCommandDeps,
   job: {
     path: string;
-    selected: Extract<ReturnType<typeof selectPreset>, {ok: true}>;
+    selected: {
+      active: string;
+      preset: Extract<ReturnType<typeof selectPreset>, {ok: true}>['preset'];
+    };
     prepared: Extract<Awaited<ReturnType<typeof convertNote>>, {ok: true}>;
     folder: string;
     progress: ExportProgress | undefined;

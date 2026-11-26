@@ -412,9 +412,11 @@ describe('US-020 AC-4 an open settings tab follows a preset chosen elsewhere (SC
 });
 
 describe('US-020 AC-6, AC-7 the note menus', () => {
+  // Amended 2026-11-26 (US-045 AC-6): a note gets a third item, "Preset for
+  // this note…" (2 before).
   const cases: [string, boolean, number][] = [
-    ['Glossary.md', false, 2],
-    ['Notes/Upper.MD', false, 2],
+    ['Glossary.md', false, 3],
+    ['Notes/Upper.MD', false, 3],
     ['Notes', true, 0],
     ['Archive.md', true, 0],
     ['Sample/assets/cover.png', false, 0],
@@ -429,14 +431,16 @@ describe('US-020 AC-6, AC-7 the note menus', () => {
     });
   }
 
-  it('US-020 AC-6: the two items, their icons, and what they run for the clicked note', async () => {
+  // Amended 2026-11-26 (US-045 AC-6): the third item and its action.
+  it('US-020 AC-6: the items, their icons, and what they run for the clicked note', async () => {
     const {noteMenuEntries} = await load<MenusModule>(MENUS);
     const calls: string[] = [];
-    const actions: Actions = {
-      exportNote: async (p) => void calls.push(`export:${p}`),
-      previewNote: async (p) => void calls.push(`preview:${p}`),
+    const actions = {
+      exportNote: async (p?: string) => void calls.push(`export:${p}`),
+      previewNote: async (p?: string) => void calls.push(`preview:${p}`),
       usePreset: async () => undefined,
-    };
+      chooseNotePreset: async (p: string) => void calls.push(`preset:${p}`),
+    } as unknown as Actions;
     const entries = noteMenuEntries(
       actions,
       {path: 'Glossary.md', folder: false},
@@ -445,9 +449,14 @@ describe('US-020 AC-6, AC-7 the note menus', () => {
     expect(entries.map(withoutRun)).toEqual([
       {title: 'Export to PDF', icon: 'file-output'},
       {title: 'Preview', icon: 'panel-right'},
+      {title: 'Preset for this note…', icon: 'list-checks'},
     ]);
     for (const entry of entries) await entry.run?.();
-    expect(calls).toEqual(['export:Glossary.md', 'preview:Glossary.md']);
+    expect(calls).toEqual([
+      'export:Glossary.md',
+      'preview:Glossary.md',
+      'preset:Glossary.md',
+    ]);
   });
 
   it('US-020 AC-6, AC-7: main.ts registers file-menu and editor-menu (the editor menu for info.file), not files-menu', () => {

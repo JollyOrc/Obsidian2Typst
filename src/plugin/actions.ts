@@ -11,6 +11,15 @@ import {
   type ExportCommandDeps,
 } from './export-command';
 import {failedNotice} from '../core/report';
+import {
+  editNoteProperty,
+  NOTE_PRESET_KEY,
+  notePresetChoices,
+  readNotePreset,
+  type NotePresetChoice,
+} from '../core/presets';
+import {frontmatterSpan} from '../core/presets/parse';
+import {noteNameOf} from './prepare-note';
 import type {VaultPort} from './presets/store';
 import {openStylePanel, type PanelWorkspace} from './preview/open';
 import type {DeleteConfirmation} from './settings/dialog';
@@ -29,6 +38,8 @@ export interface ActionDeps extends ExportCommandDeps {
   presetNotes: Pick<VaultPort, 'process'>;
   /** US-022 AC-5: asks the question; true for `Change preset` only. */
   confirm(question: DeleteConfirmation): Promise<boolean>;
+  /** US-045 AC-6: shows the chooser; the chosen line, or null. */
+  pickNotePreset(choices: NotePresetChoice[]): Promise<NotePresetChoice | null>;
 }
 
 /** US-022 AC-5: one change of a preset, as a menu item asks for it. */
@@ -52,6 +63,8 @@ export interface Actions {
   usePreset(name: string): Promise<void>;
   /** US-022: asks, then changes one key of the active preset's note. */
   changePreset(request: PresetChangeRequest): Promise<void>;
+  /** US-045 AC-6: chooses, then writes the note's `typst-preset` key. */
+  chooseNotePreset(path: string): Promise<void>;
 }
 
 /** US-022 AC-7: thrown inside `process` so that a refused edit writes nothing. */
@@ -116,6 +129,39 @@ export function panelOpener(workspace: PanelWorkspace): () => Promise<boolean> {
  */
 export function createActions(deps: ActionDeps): Actions {
   return {
+    /**
+     * US-045 | AC-6, AC-7: The note's key, read from the file when the chooser
+     * opens (SCAR-016, SCAR-022); the choice written in one `process`, which
+     * changes only the key (`editNoteProperty`); a refused edit writes
+     * nothing and says why.
+     */
+    async chooseNotePreset(path) {
+      const span = frontmatterSpan(await deps.notes.read(path));
+      const read = readNotePreset(
+        span === null || 'unclosed' in span ? null : span.yaml,
+      );
+      const choices = notePresetChoices(
+        deps.presets.entries(),
+        read.kind === 'name' ? read.name : null,
+      );
+      const choice = await deps.pickNotePreset(choices);
+      if (choice === null) return;
+      let refused: string | null = null;
+      await deps.presetNotes.process(path, (text) => {
+        const edit = editNoteProperty(text, NOTE_PRESET_KEY, choice.value);
+        if (edit.ok) return edit.text;
+        refused = edit.error;
+        return text;
+      });
+      const note = noteNameOf(path);
+      deps.notice(
+        refused !== null
+          ? STRINGS.notePreset.failed(refused)
+          : choice.value === null
+            ? STRINGS.notePreset.cleared(note)
+            : STRINGS.notePreset.set(note, choice.value),
+      );
+    },
     async exportNote(path) {
       try {
         return await exportNoteAt(deps, path ?? deps.notes.activePath());

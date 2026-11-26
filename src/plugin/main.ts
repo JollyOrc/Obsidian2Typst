@@ -71,6 +71,7 @@ import {
 } from '../core/export-progress';
 import {ExportProgressView, VIEW_TYPE_EXPORT_PROGRESS} from './progress/view';
 import {debugInfo} from './debug-info';
+import {pickNotePreset} from './note-preset-chooser';
 import {STRINGS} from './strings';
 import {
   createFontVault,
@@ -260,6 +261,7 @@ export default class Obsidian2TypstPlugin extends Plugin {
         noteName: request.noteName,
         presets: this.presets.entries(),
         activePreset: request.preset,
+        ...(request.problem === undefined ? {} : {problem: request.problem}),
         lastExportFolders: this.pluginSettings.data.lastExportFolders,
         pathApi: {isAbsolute},
         join,
@@ -295,6 +297,8 @@ export default class Obsidian2TypstPlugin extends Plugin {
         this.app.workspace.revealLeaf(leaf as WorkspaceLeaf),
     }),
     presetNotes: this.presetNotes,
+    // US-045 AC-6
+    pickNotePreset: (choices) => pickNotePreset(this.app, choices),
     confirm: (question) =>
       new Promise((resolve) =>
         new ConfirmModal(this.app, question, resolve).open(),

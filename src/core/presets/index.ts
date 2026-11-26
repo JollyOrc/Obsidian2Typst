@@ -23,11 +23,20 @@ export {
 export {
   contentsAction,
   coverAction,
+  editNoteProperty,
   editPresetField,
   headingRuleAction,
   type PresetChange,
   type PresetChangePlan,
 } from './note-edit';
+export {
+  ACTIVE_PRESET_CHOICE,
+  NOTE_PRESET_KEY,
+  notePresetChoices,
+  readNotePreset,
+  type NotePresetChoice,
+  type NotePresetRead,
+} from './note-preset';
 export {COUNTING_SYMBOLS, isValidNumbering} from './numbering';
 export {
   NUMBERING_NOTICE,

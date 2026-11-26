@@ -116,9 +116,14 @@ export interface ExportChoiceStore {
 export async function saveExportChoices(
   settings: ExportChoiceStore,
   choice: {preset: string; folder: string},
+  // US-045 AC-3: for a note that names its preset the active preset stays.
+  options: {keepActive?: boolean} = {},
 ): Promise<void> {
   await settings.setLastExportFolder(choice.preset, choice.folder);
-  if (settings.data.activePreset !== choice.preset) {
+  if (
+    options.keepActive !== true &&
+    settings.data.activePreset !== choice.preset
+  ) {
     await settings.update({activePreset: choice.preset});
   }
 }

@@ -69,6 +69,9 @@ export const STRINGS = {
     refresh: 'Refresh',
     ownedRows: (name: string, labels: string): string =>
       `Set by preset "${name}": ${labels}.`,
+    // US-045 AC-5: the list is locked while the shown note names its preset.
+    notePreset: (menuItem: string): string =>
+      `Set by this note's properties (${menuItem})`,
   },
   sectionReset: {
     title: (name: string): string => `Reset "${name}" to its defaults?`,
@@ -179,6 +182,16 @@ export const STRINGS = {
     checkCompiler: 'Check compiler (developer)',
     ribbon: 'Obsidian2Typst',
   },
+  // US-045 AC-6: the chooser and its notices.
+  notePreset: {
+    placeholder: 'Choose the preset for this note',
+    current: (label: string): string => `${label} (current)`,
+    set: (note: string, preset: string): string =>
+      `✅ Preset for "${note}": ${preset}`,
+    cleared: (note: string): string =>
+      `✅ Preset for "${note}": the active preset`,
+    failed: (reason: string): string => `Could not set the preset: ${reason}`,
+  },
   menus: {
     exportDialog: 'Export…',
     exportNote: 'Export current note',
@@ -188,6 +201,8 @@ export const STRINGS = {
     invalidPreset: (name: string): string => `${name} (invalid)`,
     exportPdf: 'Export to PDF',
     preview: 'Preview',
+    // US-045 AC-6
+    notePreset: 'Preset for this note…',
     withoutPreset: (title: string): string => `${title} (no preset)`,
     withInvalidPreset: (title: string, name: string): string =>
       `${title} (preset "${name}" is invalid)`,
@@ -260,6 +275,12 @@ export const STRINGS = {
     presetNote: 'Presets are not exported',
     noPreset:
       'There is no preset; create one in the settings of Obsidian2Typst',
+    // US-045 AC-1, AC-4: the note's `typst-preset` names nothing usable.
+    noteMissing: (name: string): string =>
+      `Preset "${name}" (from this note's properties) does not exist`,
+    noteInvalid: (name: string, reason: string): string =>
+      `Preset "${name}" (from this note's properties) is invalid: ${reason}`,
+    noteBad: (text: string): string => `This note's preset: ${text}`,
   },
   exportDialogText: {
     title: (noteName: string): string => `Export ${noteName}`,

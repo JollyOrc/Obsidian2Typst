@@ -161,6 +161,12 @@ export function noteMenuEntries(
       icon: 'panel-right',
       run: () => actions.previewNote(file.path),
     },
+    // US-045 AC-6
+    {
+      title: STRINGS.menus.notePreset,
+      icon: 'list-checks',
+      run: () => actions.chooseNotePreset(file.path),
+    },
   ];
 }
 
